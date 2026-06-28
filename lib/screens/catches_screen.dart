@@ -78,8 +78,20 @@ class CatchesScreenState extends State<CatchesScreen> {
     if (_loading) {
       return const Center(child: CircularProgressIndicator());
     }
-    if (_catches.isEmpty) {
-      return Center(
+    return Column(
+      children: [
+        // Green accent bar
+        Container(
+          height: 3,
+          decoration: const BoxDecoration(
+            gradient: LinearGradient(
+              colors: [Colors.green, Colors.greenAccent],
+            ),
+          ),
+        ),
+        Expanded(
+          child: _catches.isEmpty
+              ? Center(
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
@@ -95,22 +107,24 @@ class CatchesScreenState extends State<CatchesScreen> {
                 style: TextStyle(color: Colors.grey.shade400)),
           ],
         ),
-      );
-    }
-    return RefreshIndicator(
-      onRefresh: loadCatches,
-      child: ListView.builder(
-        padding: const EdgeInsets.all(12),
-        itemCount: _catches.length,
-        itemBuilder: (context, index) {
-          final c = _catches[index];
-          return _CatchCard(
-            catch_: c,
-            onTap: () => _editCatch(c),
-            onDelete: () => _deleteCatch(c),
-          );
-        },
-      ),
+      )
+              : RefreshIndicator(
+                onRefresh: loadCatches,
+                child: ListView.builder(
+                  padding: const EdgeInsets.all(12),
+                  itemCount: _catches.length,
+                  itemBuilder: (context, index) {
+                    final c = _catches[index];
+                    return _CatchCard(
+                      catch_: c,
+                      onTap: () => _editCatch(c),
+                      onDelete: () => _deleteCatch(c),
+                    );
+                  },
+                ),
+              ),
+        ),
+      ],
     );
   }
 }

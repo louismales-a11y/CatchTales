@@ -88,6 +88,15 @@ class _CounterScreenState extends State<CounterScreen> {
 
     return Column(
       children: [
+        // Cyan accent bar
+        Container(
+          height: 3,
+          decoration: const BoxDecoration(
+            gradient: LinearGradient(
+              colors: [Colors.cyan, Colors.cyanAccent],
+            ),
+          ),
+        ),
         // Header row
         Padding(
           padding: const EdgeInsets.fromLTRB(16, 12, 16, 0),

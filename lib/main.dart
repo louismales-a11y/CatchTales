@@ -269,16 +269,13 @@ class _HomeScreenState extends State<HomeScreen> {
       appBar: AppBar(
         title: Row(
           children: [
-            Container(
-              width: 30,
-              height: 30,
-              decoration: BoxDecoration(
-                borderRadius: BorderRadius.circular(7),
-                color: AppColors.primary.withValues(alpha: 0.2),
-              ),
-              child: const Center(
-                child:
-                    Icon(Icons.set_meal, size: 18, color: AppColors.primary),
+            ClipRRect(
+              borderRadius: BorderRadius.circular(7),
+              child: Image.asset(
+                'assets/logo.png',
+                width: 30,
+                height: 30,
+                fit: BoxFit.cover,
               ),
             ),
             const SizedBox(width: 10),
@@ -332,20 +329,26 @@ class _HomeScreenState extends State<HomeScreen> {
             _mapKey.currentState?.loadCatches();
           }
         },
-        destinations: const [
+        destinations: [
           NavigationDestination(
-            icon: Icon(Icons.set_meal_outlined),
-            selectedIcon: Icon(Icons.set_meal),
+            icon: Icon(Icons.set_meal_outlined,
+                color: _selectedIndex == 0 ? Colors.green : null),
+            selectedIcon:
+                Icon(Icons.set_meal, color: Colors.green),
             label: 'Catches',
           ),
           NavigationDestination(
-            icon: Icon(Icons.people_outline),
-            selectedIcon: Icon(Icons.people),
+            icon: Icon(Icons.people_outline,
+                color: _selectedIndex == 1 ? Colors.cyan : null),
+            selectedIcon:
+                Icon(Icons.people, color: Colors.cyan),
             label: 'Counter',
           ),
           NavigationDestination(
-            icon: Icon(Icons.map_outlined),
-            selectedIcon: Icon(Icons.map),
+            icon: Icon(Icons.map_outlined,
+                color: _selectedIndex == 2 ? AppColors.primary : null),
+            selectedIcon:
+                Icon(Icons.map, color: AppColors.primary),
             label: 'Map',
           ),
         ],

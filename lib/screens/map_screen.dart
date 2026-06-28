@@ -51,27 +51,55 @@ class MapScreenState extends State<MapScreen> {
     }
 
     if (_catchesWithLocation.isEmpty) {
-      return Center(
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Icon(Icons.map_outlined, size: 64, color: Colors.grey.shade300),
-            const SizedBox(height: 16),
-            Text('No catches with GPS locations yet',
-                style:
-                    TextStyle(fontSize: 18, color: Colors.grey.shade500)),
-            const SizedBox(height: 8),
-            Text('Add a catch with a GPS location to see it here',
-                style: TextStyle(color: Colors.grey.shade400)),
-            const SizedBox(height: 4),
-            Text('$_totalCatches total catches in database',
-                style: TextStyle(fontSize: 12, color: Colors.grey.shade500)),
-          ],
-        ),
+      return Column(
+        children: [
+          Container(
+            height: 3,
+            decoration: const BoxDecoration(
+              gradient: LinearGradient(
+                colors: [Color(0xFF00E5FF), Color(0xFF00B0FF)],
+              ),
+            ),
+          ),
+          Expanded(
+            child: Center(
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Icon(Icons.map_outlined,
+                      size: 64, color: Colors.grey.shade300),
+                  const SizedBox(height: 16),
+                  Text('No catches with GPS locations yet',
+                      style: TextStyle(
+                          fontSize: 18, color: Colors.grey.shade500)),
+                  const SizedBox(height: 8),
+                  Text('Add a catch with a GPS location to see it here',
+                      style: TextStyle(color: Colors.grey.shade400)),
+                  const SizedBox(height: 4),
+                  Text('$_totalCatches total catches in database',
+                      style: TextStyle(
+                          fontSize: 12, color: Colors.grey.shade500)),
+                ],
+              ),
+            ),
+          ),
+        ],
       );
     }
 
-    return FlutterMap(
+    return Column(
+      children: [
+        // Teal accent bar
+        Container(
+          height: 3,
+          decoration: const BoxDecoration(
+            gradient: LinearGradient(
+              colors: [Color(0xFF00E5FF), Color(0xFF00B0FF)],
+            ),
+          ),
+        ),
+        Expanded(
+          child: FlutterMap(
       options: MapOptions(
         initialCenter: LatLng(
           _catchesWithLocation.first.latitude!,
@@ -153,6 +181,9 @@ class MapScreenState extends State<MapScreen> {
           }).toList(),
         ),
       ],
-    );
+      ),
+    ),
+  ],
+);
   }
 }
