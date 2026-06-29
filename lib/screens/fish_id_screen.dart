@@ -175,13 +175,85 @@ class _FishIdScreenState extends State<FishIdScreen>
 
 // ─── Fish Card ────────────────────────────────────────────────────────────
 
-class _FishCard extends StatelessWidget {
+class _FishCard extends StatefulWidget {
   final FishSpecies fish;
   const _FishCard({required this.fish});
 
   @override
+  State<_FishCard> createState() => _FishCardState();
+}
+
+class _FishCardState extends State<_FishCard> {
+  String? _imageUrl;
+  bool _loading = true;
+
+  @override
+  void initState() {
+    super.initState();
+    _loadImage();
+  }
+
+  Future<void> _loadImage() async {
+    final url = await FishImageService.getImageUrl(
+      commonName: widget.fish.name,
+      scientificName: widget.fish.scientificName,
+    );
+    if (mounted) {
+      setState(() {
+        _imageUrl = url;
+        _loading = false;
+      });
+    }
+  }
+
+  Widget _buildThumbnail() {
+    final fish = widget.fish;
+    if (_loading) {
+      return Container(
+        width: 60,
+        height: 60,
+        decoration: BoxDecoration(
+          color: fish.color.withValues(alpha: 0.12),
+          borderRadius: BorderRadius.circular(12),
+        ),
+        child: Icon(Icons.set_meal, color: fish.color, size: 32),
+      );
+    }
+    if (_imageUrl != null) {
+      return ClipRRect(
+        borderRadius: BorderRadius.circular(12),
+        child: Image.network(
+          _imageUrl!,
+          width: 60,
+          height: 60,
+          fit: BoxFit.cover,
+          errorBuilder: (ctx, err, stack) => _iconThumb(fish),
+          loadingBuilder: (ctx, child, progress) {
+            if (progress == null) return child;
+            return _iconThumb(fish);
+          },
+        ),
+      );
+    }
+    return _iconThumb(fish);
+  }
+
+  Widget _iconThumb(FishSpecies fish) {
+    return Container(
+      width: 60,
+      height: 60,
+      decoration: BoxDecoration(
+        color: fish.color.withValues(alpha: 0.12),
+        borderRadius: BorderRadius.circular(12),
+      ),
+      child: Icon(Icons.set_meal, color: fish.color, size: 32),
+    );
+  }
+
+  @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
+    final fish = widget.fish;
     return Card(
       margin: const EdgeInsets.only(top: 8),
       child: InkWell(
@@ -195,16 +267,7 @@ class _FishCard extends StatelessWidget {
           padding: const EdgeInsets.all(12),
           child: Row(
             children: [
-              Container(
-                width: 60,
-                height: 60,
-                decoration: BoxDecoration(
-                  color: fish.color.withValues(alpha: 0.12),
-                  borderRadius: BorderRadius.circular(12),
-                ),
-                child:
-                    Icon(Icons.set_meal, color: fish.color, size: 32),
-              ),
+              _buildThumbnail(),
               const SizedBox(width: 12),
               Expanded(
                 child: Column(
