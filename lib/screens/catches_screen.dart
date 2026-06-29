@@ -183,7 +183,7 @@ class _CatchCard extends StatelessWidget {
                         child: Image.file(
                           File(catch_.primaryPhoto!),
                           fit: BoxFit.cover,
-                          errorBuilder: (_, __, ___) => _speciesIcon(theme),
+                          errorBuilder: (_, _, _) => _speciesIcon(theme),
                         ),
                       ),
                     )

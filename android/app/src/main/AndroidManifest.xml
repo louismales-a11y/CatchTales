@@ -33,6 +33,9 @@
         <meta-data
             android:name="flutterEmbedding"
             android:value="2" />
+
+        <!-- Map now uses flutter_map with OSM tiles (no Google Maps SDK). -->
+        <!-- Google Places API key is passed via dart-define at build time. -->
     </application>
     <!-- Required to query activities that can process text, see:
          https://developer.android.com/training/package-visibility and

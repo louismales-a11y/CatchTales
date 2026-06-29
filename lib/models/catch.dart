@@ -66,7 +66,7 @@ class Catch {
         'species': species,
         'location': location,
         'lure': lure,
-        'photo_paths': photoPaths != null ? photoPaths!.join('|') : null,
+        'photo_paths': photoPaths?.join('|'),
         'weight': weight,
         'weight_unit': weightUnit,
         'length': length,

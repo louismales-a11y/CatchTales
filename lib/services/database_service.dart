@@ -2,6 +2,7 @@ import 'package:sqflite/sqflite.dart';
 import 'package:path/path.dart' as p;
 import '../models/catch.dart';
 import '../models/counter.dart';
+import '../models/favorite_spot.dart';
 
 class DatabaseService {
   static Database? _db;
@@ -21,7 +22,7 @@ class DatabaseService {
 
     return await openDatabase(
       path,
-      version: 2,
+      version: 3,
       onCreate: (db, version) async {
         await db.execute('''
           CREATE TABLE catches (
@@ -52,10 +53,36 @@ class DatabaseService {
             count INTEGER DEFAULT 0
           )
         ''');
+        await db.execute('''
+          CREATE TABLE favorite_spots (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            name TEXT NOT NULL,
+            latitude REAL NOT NULL,
+            longitude REAL NOT NULL,
+            notes TEXT,
+            best_species TEXT,
+            photo_path TEXT,
+            created_at TEXT NOT NULL
+          )
+        ''');
       },
       onUpgrade: (db, oldVersion, newVersion) async {
         if (oldVersion < 2) {
           await db.execute('ALTER TABLE catches ADD COLUMN photo_paths TEXT');
+        }
+        if (oldVersion < 3) {
+          await db.execute('''
+            CREATE TABLE favorite_spots (
+              id INTEGER PRIMARY KEY AUTOINCREMENT,
+              name TEXT NOT NULL,
+              latitude REAL NOT NULL,
+              longitude REAL NOT NULL,
+              notes TEXT,
+              best_species TEXT,
+              photo_path TEXT,
+              created_at TEXT NOT NULL
+            )
+          ''');
         }
       },
     );
@@ -93,6 +120,35 @@ class DatabaseService {
   Future<int> deleteCatch(int id) async {
     final db = await database;
     return await db.delete('catches', where: 'id = ?', whereArgs: [id]);
+  }
+
+  // ---- Favorite Spots ----
+
+  Future<List<FavoriteSpot>> getSpots() async {
+    final db = await database;
+    final maps = await db.query('favorite_spots', orderBy: 'name ASC');
+    return maps.map((m) => FavoriteSpot.fromMap(m)).toList();
+  }
+
+  Future<int> addSpot(FavoriteSpot spot) async {
+    final db = await database;
+    return await db.insert('favorite_spots', spot.toMap());
+  }
+
+  Future<int> updateSpot(FavoriteSpot spot) async {
+    final db = await database;
+    return await db.update(
+      'favorite_spots',
+      spot.toMap(),
+      where: 'id = ?',
+      whereArgs: [spot.id],
+    );
+  }
+
+  Future<int> deleteSpot(int id) async {
+    final db = await database;
+    return await db.delete('favorite_spots',
+        where: 'id = ?', whereArgs: [id]);
   }
 
   // ---- Counters ----

@@ -7,7 +7,9 @@ import 'screens/catches_screen.dart';
 import 'screens/counter_screen.dart';
 import 'screens/map_screen.dart';
 import 'screens/stats_screen.dart';
-import 'services/database_service.dart';
+import 'screens/forecast_screen.dart';
+import 'screens/gallery_screen.dart';
+import 'screens/solunar_screen.dart';
 import 'services/theme_provider.dart';
 
 void main() {
@@ -20,33 +22,69 @@ void main() {
   );
 }
 
-class AppColors {
-  AppColors._();
-  static const Color primary = Color(0xFF00E5FF);
-  static const Color primaryDark = Color(0xFF00B0FF);
-  static const Color secondary = Color(0xFFE040FB);
-  static const Color tertiary = Color(0xFF76FF03);
+// ─── 5 Color Schemes ──────────────────────────────────────────────────────
+
+class _ThemeDef {
+  final Color primary;
+  final Color secondary;
+  final Color tertiary;
+  const _ThemeDef({
+    required this.primary,
+    required this.secondary,
+    required this.tertiary,
+  });
 }
+
+const _themes = <String, _ThemeDef>{
+  'Ocean Blue': _ThemeDef(
+    primary: Color(0xFF00BCD4),
+    secondary: Color(0xFFE040FB),
+    tertiary: Color(0xFF76FF03),
+  ),
+  'Forest Green': _ThemeDef(
+    primary: Color(0xFF4CAF50),
+    secondary: Color(0xFF8BC34A),
+    tertiary: Color(0xFF795548),
+  ),
+  'Sunset Orange': _ThemeDef(
+    primary: Color(0xFFFF9800),
+    secondary: Color(0xFFFF5722),
+    tertiary: Color(0xFFFFC107),
+  ),
+  'Midnight': _ThemeDef(
+    primary: Color(0xFF7C4DFF),
+    secondary: Color(0xFFE040FB),
+    tertiary: Color(0xFF00E5FF),
+  ),
+  'Lakeside': _ThemeDef(
+    primary: Color(0xFF26C6DA),
+    secondary: Color(0xFF42A5F5),
+    tertiary: Color(0xFF66BB6A),
+  ),
+};
 
 class BestFishBuddyApp extends StatelessWidget {
   const BestFishBuddyApp({super.key});
 
   @override
   Widget build(BuildContext context) {
-    final themeProvider = context.watch<ThemeProvider>();
+    final tp = context.watch<ThemeProvider>();
     return MaterialApp(
       title: 'Best Fish Buddy',
       debugShowCheckedModeBanner: false,
-      theme: _buildTheme(Brightness.light),
-      darkTheme: _buildTheme(Brightness.dark),
-      themeMode: themeProvider.themeMode,
+      theme: _buildTheme(tp.themeName, Brightness.light),
+      darkTheme: _buildTheme(tp.themeName, Brightness.dark),
+      themeMode: tp.themeMode,
       home: const SplashScreen(),
     );
   }
 
-  ThemeData _buildTheme(Brightness brightness) {
+  ThemeData _buildTheme(String themeName, Brightness brightness) {
+    final def = _themes[themeName] ?? _themes.values.first;
     final dark = brightness == Brightness.dark;
-    final scaffoldBg = dark ? const Color(0xFF060A14) : const Color(0xFFF0F4FF);
+
+    final scaffoldBg =
+        dark ? const Color(0xFF060A14) : const Color(0xFFF0F4FF);
     final cardBg = dark
         ? const Color(0xFF0E1422).withValues(alpha: 0.85)
         : Colors.white.withValues(alpha: 0.85);
@@ -54,8 +92,9 @@ class BestFishBuddyApp extends StatelessWidget {
     final navBg = dark ? const Color(0xFF0A0E1A) : Colors.white;
     final onSurface =
         dark ? const Color(0xFFE0E6F0) : const Color(0xFF0A0E1A);
-    final prim = dark ? AppColors.primary : AppColors.primaryDark;
-    final onPrim = dark ? const Color(0xFF003544) : Colors.white;
+
+    final prim = dark ? _lighten(def.primary) : def.primary;
+    final onPrim = dark ? def.primary.darken() : Colors.white;
 
     return ThemeData(
       useMaterial3: true,
@@ -64,9 +103,10 @@ class BestFishBuddyApp extends StatelessWidget {
         brightness: brightness,
         primary: prim,
         onPrimary: onPrim,
-        secondary: dark ? AppColors.secondary : AppColors.secondary,
-        onSecondary: dark ? const Color(0xFF4A0072) : Colors.white,
-        tertiary: dark ? AppColors.tertiary : AppColors.tertiary,
+        secondary: def.secondary,
+        onSecondary:
+            dark ? const Color(0xFF4A0072) : Colors.white,
+        tertiary: def.tertiary,
         onTertiary: Colors.black,
         error: dark ? const Color(0xFFFF5252) : const Color(0xFFFF1744),
         onError: dark ? const Color(0xFF3E0014) : Colors.white,
@@ -90,7 +130,8 @@ class BestFishBuddyApp extends StatelessWidget {
       cardTheme: CardThemeData(
         elevation: 1,
         shadowColor: Colors.black.withValues(alpha: dark ? 0.2 : 0.08),
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+        shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(16)),
         clipBehavior: Clip.antiAlias,
         color: cardBg,
         surfaceTintColor: Colors.transparent,
@@ -100,9 +141,25 @@ class BestFishBuddyApp extends StatelessWidget {
         elevation: dark ? 8 : 0,
         backgroundColor: navBg,
         indicatorColor:
-            AppColors.primary.withValues(alpha: dark ? 0.12 : 0.08),
+            prim.withValues(alpha: dark ? 0.12 : 0.08),
       ),
     );
+  }
+
+  /// Lighten a color for dark-mode primary.
+  Color _lighten(Color c) {
+    final hsl = HSLColor.fromColor(c);
+    return hsl.withLightness((hsl.lightness + 0.3).clamp(0.0, 1.0)).toColor();
+  }
+}
+
+// Small extension to darken a color for onPrimary in dark mode.
+extension on Color {
+  Color darken() {
+    final hsl = HSLColor.fromColor(this);
+    return hsl
+        .withLightness((hsl.lightness - 0.4).clamp(0.0, 1.0))
+        .toColor();
   }
 }
 
@@ -155,7 +212,6 @@ class _SplashScreenState extends State<SplashScreen> {
           child: Column(
             children: [
               const Spacer(flex: 2),
-              // Logo
               Container(
                 width: 110,
                 height: 110,
@@ -164,8 +220,8 @@ class _SplashScreenState extends State<SplashScreen> {
                   boxShadow: [
                     BoxShadow(
                         color: tp.isDark
-                            ? AppColors.primary.withValues(alpha: 0.4)
-                            : AppColors.primaryDark.withValues(alpha: 0.4),
+                            ? tp.themeInfo.accent.withValues(alpha: 0.4)
+                            : tp.themeInfo.accent.withValues(alpha: 0.4),
                         blurRadius: 30),
                   ],
                 ),
@@ -192,12 +248,10 @@ class _SplashScreenState extends State<SplashScreen> {
                     letterSpacing: 3,
                   )),
               const Spacer(),
-              // Version
               Text(_version.isNotEmpty ? 'v$_version' : '',
                   style: const TextStyle(
                       fontSize: 13, color: Colors.grey, letterSpacing: 1)),
               const SizedBox(height: 10),
-              // Continue button
               Padding(
                 padding: const EdgeInsets.symmetric(horizontal: 40),
                 child: SizedBox(
@@ -207,9 +261,9 @@ class _SplashScreenState extends State<SplashScreen> {
                     onPressed: () {
                       Navigator.of(context).pushReplacement(
                         PageRouteBuilder(
-                          pageBuilder: (_, __, ___) => const HomeScreen(),
+                          pageBuilder: (_, _, _) => const HomeScreen(),
                           transitionsBuilder:
-                              (_, animation, __, child) =>
+                              (_, animation, _, child) =>
                                   FadeTransition(
                                       opacity: animation, child: child),
                           transitionDuration:
@@ -220,10 +274,11 @@ class _SplashScreenState extends State<SplashScreen> {
                     icon: const Icon(Icons.arrow_forward, size: 18),
                     label: const Text('CONTINUE'),
                     style: ElevatedButton.styleFrom(
-                      backgroundColor: AppColors.primary,
+                      backgroundColor: tp.themeInfo.accent,
                       foregroundColor: const Color(0xFF003544),
                       elevation: 8,
-                      shadowColor: AppColors.primary.withValues(alpha: 0.4),
+                      shadowColor:
+                          tp.themeInfo.accent.withValues(alpha: 0.4),
                       shape: RoundedRectangleBorder(
                           borderRadius: BorderRadius.circular(14)),
                       textStyle: const TextStyle(
@@ -262,9 +317,97 @@ class _HomeScreenState extends State<HomeScreen> {
     MapScreen(key: _mapKey),
   ];
 
+  void _showThemePicker(BuildContext context, ThemeProvider tp) {
+    showModalBottomSheet(
+      context: context,
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+      ),
+      builder: (ctx) {
+        final theme = Theme.of(ctx);
+        return SafeArea(
+          child: Padding(
+            padding: const EdgeInsets.fromLTRB(20, 12, 20, 24),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Center(
+                  child: Container(
+                    width: 40,
+                    height: 4,
+                    margin: const EdgeInsets.only(bottom: 16),
+                    decoration: BoxDecoration(
+                      color: Colors.grey.shade300,
+                      borderRadius: BorderRadius.circular(2),
+                    ),
+                  ),
+                ),
+                Text('Choose Theme',
+                    style: theme.textTheme.titleMedium?.copyWith(
+                  fontWeight: FontWeight.w700,
+                )),
+                const SizedBox(height: 12),
+                // Theme tiles
+                ...ThemeProvider.themes.map((t) {
+                  final active = tp.themeName == t.name;
+                  return ListTile(
+                    leading: CircleAvatar(
+                      backgroundColor: t.accent,
+                      radius: 18,
+                      child: active
+                          ? const Icon(Icons.check,
+                              color: Colors.white, size: 20)
+                          : Icon(t.icon,
+                              color: Colors.white, size: 20),
+                    ),
+                    title: Text(t.name,
+                        style: TextStyle(
+                          fontWeight:
+                              active ? FontWeight.w700 : FontWeight.w400,
+                          color: active
+                              ? t.accent
+                              : theme.colorScheme.onSurface,
+                        )),
+                    trailing: active
+                        ? Icon(Icons.check_circle,
+                            color: t.accent, size: 22)
+                        : null,
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(12),
+                    ),
+                    onTap: () {
+                      tp.setTheme(t.name);
+                      Navigator.pop(ctx);
+                    },
+                  );
+                }),
+                const Divider(height: 4),
+                // Dark mode toggle
+                SwitchListTile(
+                  title: const Text('Dark mode'),
+                  secondary: Icon(
+                    tp.isDark ? Icons.dark_mode : Icons.light_mode,
+                    color: theme.colorScheme.primary,
+                  ),
+                  value: tp.isDark,
+                  onChanged: (_) {
+                    tp.toggleDark();
+                    Navigator.pop(ctx);
+                  },
+                ),
+              ],
+            ),
+          ),
+        );
+      },
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     final tp = context.watch<ThemeProvider>();
+    final accent = tp.themeInfo.accent;
     return Scaffold(
       appBar: AppBar(
         title: Row(
@@ -283,7 +426,7 @@ class _HomeScreenState extends State<HomeScreen> {
           ],
         ),
         actions: [
-          // Stats
+          // Stats (always visible)
           IconButton(
             icon: const Icon(Icons.bar_chart, size: 20),
             onPressed: () => Navigator.push(
@@ -292,16 +435,65 @@ class _HomeScreenState extends State<HomeScreen> {
             ),
             tooltip: 'Statistics',
           ),
-          // Dark/light toggle
+          // Weather (always visible)
           IconButton(
-            icon: AnimatedSwitcher(
-              duration: const Duration(milliseconds: 300),
-              child: tp.isDark
-                  ? const Icon(Icons.light_mode, key: ValueKey('light'))
-                  : const Icon(Icons.dark_mode, key: ValueKey('dark')),
+            icon: const Icon(Icons.wb_sunny, size: 20),
+            onPressed: () => Navigator.push(
+              context,
+              MaterialPageRoute(
+                  builder: (_) => const ForecastScreen()),
             ),
-            onPressed: tp.toggle,
-            tooltip: tp.isDark ? 'Switch to light' : 'Switch to dark',
+            tooltip: 'Weather',
+          ),
+          // 3-dot menu with the rest
+          PopupMenuButton<String>(
+            icon: Icon(Icons.more_vert, color: accent),
+            onSelected: (value) {
+              switch (value) {
+                case 'solunar':
+                  Navigator.push(context,
+                      MaterialPageRoute(
+                          builder: (_) => const SolunarScreen()));
+                  break;
+                case 'gallery':
+                  Navigator.push(context,
+                      MaterialPageRoute(
+                          builder: (_) => const GalleryScreen()));
+                  break;
+                case 'theme':
+                  _showThemePicker(context, tp);
+                  break;
+              }
+            },
+            itemBuilder: (ctx) => [
+              const PopupMenuItem(
+                value: 'solunar',
+                child: ListTile(
+                  leading: Icon(Icons.nights_stay),
+                  title: Text('Best Fishing Times'),
+                  dense: true,
+                  contentPadding: EdgeInsets.zero,
+                ),
+              ),
+              const PopupMenuItem(
+                value: 'gallery',
+                child: ListTile(
+                  leading: Icon(Icons.photo_library),
+                  title: Text('Photo Gallery'),
+                  dense: true,
+                  contentPadding: EdgeInsets.zero,
+                ),
+              ),
+              PopupMenuItem(
+                value: 'theme',
+                child: ListTile(
+                  leading: Icon(Icons.palette_outlined, color: accent),
+                  title: Text('Theme'),
+                  dense: true,
+                  contentPadding: EdgeInsets.zero,
+                ),
+              ),
+            ],
           ),
         ],
       ),
@@ -332,23 +524,23 @@ class _HomeScreenState extends State<HomeScreen> {
         destinations: [
           NavigationDestination(
             icon: Icon(Icons.set_meal_outlined,
-                color: _selectedIndex == 0 ? Colors.green : null),
+                color: _selectedIndex == 0 ? accent : null),
             selectedIcon:
-                Icon(Icons.set_meal, color: Colors.green),
+                Icon(Icons.set_meal, color: accent),
             label: 'Catches',
           ),
           NavigationDestination(
-            icon: Icon(Icons.people_outline,
-                color: _selectedIndex == 1 ? Colors.cyan : null),
+            icon: Icon(Icons.people_outlined,
+                color: _selectedIndex == 1 ? accent : null),
             selectedIcon:
-                Icon(Icons.people, color: Colors.cyan),
+                Icon(Icons.people, color: accent),
             label: 'Counter',
           ),
           NavigationDestination(
             icon: Icon(Icons.map_outlined,
-                color: _selectedIndex == 2 ? AppColors.primary : null),
+                color: _selectedIndex == 2 ? accent : null),
             selectedIcon:
-                Icon(Icons.map, color: AppColors.primary),
+                Icon(Icons.map, color: accent),
             label: 'Map',
           ),
         ],
