@@ -63,10 +63,12 @@ class _FishIdScreenState extends State<FishIdScreen>
     super.dispose();
   }
 
+  String _sortBy = 'name';
+
   List<FishSpecies> get _filtered {
     final query = _searchQuery.toLowerCase().trim();
     final allFish = [...fishDatabase, ..._customFish];
-    return allFish.where((f) {
+    var results = allFish.where((f) {
       final regionMatch =
           _selectedRegion == 'All' || f.regions.contains(_selectedRegion);
       if (!regionMatch) return false;
@@ -75,6 +77,76 @@ class _FishIdScreenState extends State<FishIdScreen>
           f.scientificName.toLowerCase().contains(query) ||
           f.regions.any((r) => r.toLowerCase().contains(query));
     }).toList();
+
+    // Sort
+    switch (_sortBy) {
+      case 'name_desc':
+        results.sort((a, b) => b.name.compareTo(a.name));
+        break;
+      case 'caught':
+        results.sort((a, b) {
+          final aC = _statusMap[a.name]?.caughtCount ?? 0;
+          final bC = _statusMap[b.name]?.caughtCount ?? 0;
+          if (bC != aC) return bC.compareTo(aC);
+          return a.name.compareTo(b.name);
+        });
+        break;
+      case 'master':
+        results.sort((a, b) {
+          final aM = _statusMap[a.name]?.isMaster ?? false;
+          final bM = _statusMap[b.name]?.isMaster ?? false;
+          if (aM != bM) return aM ? -1 : 1;
+          return a.name.compareTo(b.name);
+        });
+        break;
+      default: // 'name' ASC
+        results.sort((a, b) => a.name.compareTo(b.name));
+    }
+
+    return results;
+  }
+
+  void _showSortMenu() {
+    final popups = <String, String>{
+      'name': 'Name (A-Z)',
+      'name_desc': 'Name (Z-A)',
+      'caught': 'Caught first',
+      'master': 'Master first',
+    };
+
+    showModalBottomSheet(
+      context: context,
+      builder: (ctx) => SafeArea(
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            const Padding(
+              padding: EdgeInsets.fromLTRB(16, 16, 16, 8),
+              child: Text('Sort by',
+                  style: TextStyle(
+                      fontSize: 16, fontWeight: FontWeight.w700)),
+            ),
+            const Divider(),
+            ...popups.entries.map((e) => ListTile(
+                  leading: Icon(
+                    _sortBy == e.key
+                        ? Icons.radio_button_checked
+                        : Icons.radio_button_unchecked,
+                    color: _sortBy == e.key
+                        ? Theme.of(context).colorScheme.primary
+                        : null,
+                  ),
+                  title: Text(e.value),
+                  onTap: () {
+                    Navigator.pop(ctx);
+                    setState(() => _sortBy = e.key);
+                  },
+                )),
+            const SizedBox(height: 8),
+          ],
+        ),
+      ),
+    );
   }
 
   Future<void> _openAddFish() async {
@@ -96,6 +168,11 @@ class _FishIdScreenState extends State<FishIdScreen>
       appBar: AppBar(
         title: const Text('Fish ID'),
         actions: [
+          IconButton(
+            icon: const Icon(Icons.sort),
+            tooltip: 'Sort',
+            onPressed: _showSortMenu,
+          ),
           IconButton(
             icon: const Icon(Icons.add_circle_outline),
             tooltip: 'Add a fish',
@@ -429,7 +506,9 @@ class _FishDetailScreenState extends State<_FishDetailScreen> {
     return Scaffold(
       appBar: AppBar(title: Text(fish.name)),
       body: ListView(
-        padding: const EdgeInsets.all(16),
+        padding: EdgeInsets.fromLTRB(
+          16, 16, 16, 16 + MediaQuery.of(context).padding.bottom + 80,
+        ),
         children: [
           // Hero header — loads image from Wikipedia
           FutureBuilder<String?>(
