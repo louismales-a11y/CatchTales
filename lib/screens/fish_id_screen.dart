@@ -1,4 +1,6 @@
+import 'dart:async';
 import 'package:flutter/material.dart';
+import '../services/fish_image_service.dart';
 
 class FishIdScreen extends StatefulWidget {
   const FishIdScreen({super.key});
@@ -262,36 +264,80 @@ class _FishCard extends StatelessWidget {
 
 // ─── Detail Screen ────────────────────────────────────────────────────────
 
-class _FishDetailScreen extends StatelessWidget {
+class _FishDetailScreen extends StatefulWidget {
   final FishSpecies fish;
   const _FishDetailScreen({required this.fish});
 
   @override
+  State<_FishDetailScreen> createState() => _FishDetailScreenState();
+}
+
+class _FishDetailScreenState extends State<_FishDetailScreen> {
+  Future<String?>? _imageUrlFuture;
+
+  @override
+  void initState() {
+    super.initState();
+    _imageUrlFuture = FishImageService.getImageUrl(
+      commonName: widget.fish.name,
+      scientificName: widget.fish.scientificName,
+    );
+  }
+
+  @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
+    final fish = widget.fish;
     return Scaffold(
       appBar: AppBar(title: Text(fish.name)),
       body: ListView(
         padding: const EdgeInsets.all(16),
         children: [
-          // Hero header
-          Container(
-            height: 180,
-            decoration: BoxDecoration(
-              gradient: LinearGradient(
-                colors: [
-                  fish.color.withValues(alpha: 0.2),
-                  fish.color.withValues(alpha: 0.05),
-                ],
-                begin: Alignment.topLeft,
-                end: Alignment.bottomRight,
-              ),
-              borderRadius: BorderRadius.circular(20),
-            ),
-            child: Center(
-              child: Icon(Icons.set_meal,
-                  size: 80, color: fish.color.withValues(alpha: 0.6)),
-            ),
+          // Hero header — loads image from Wikipedia
+          FutureBuilder<String?>(
+            future: _imageUrlFuture,
+            builder: (context, snapshot) {
+              final url = snapshot.data;
+              if (snapshot.connectionState == ConnectionState.waiting) {
+                return Container(
+                  height: 180,
+                  decoration: BoxDecoration(
+                    color: fish.color.withValues(alpha: 0.08),
+                    borderRadius: BorderRadius.circular(20),
+                  ),
+                  child: Center(
+                    child: CircularProgressIndicator(
+                      color: fish.color,
+                    ),
+                  ),
+                );
+              }
+              if (url != null && url.isNotEmpty) {
+                return ClipRRect(
+                  borderRadius: BorderRadius.circular(20),
+                  child: Image.network(
+                    url,
+                    height: 180,
+                    width: double.infinity,
+                    fit: BoxFit.cover,
+                    loadingBuilder: (ctx, child, progress) {
+                      if (progress == null) return child;
+                      return Container(
+                        height: 180,
+                        color: fish.color.withValues(alpha: 0.08),
+                        child: Center(
+                          child: CircularProgressIndicator(
+                            color: fish.color,
+                          ),
+                        ),
+                      );
+                    },
+                    errorBuilder: (ctx, err, stack) => _imageFallback(fish),
+                  ),
+                );
+              }
+              return _imageFallback(fish);
+            },
           ),
           const SizedBox(height: 20),
 
@@ -407,6 +453,28 @@ class _FishDetailScreen extends StatelessWidget {
       ),
     );
   }
+}
+
+/// Fallback widget when no Wikipedia image is available.
+Widget _imageFallback(FishSpecies fish) {
+  return Container(
+    height: 180,
+    decoration: BoxDecoration(
+      gradient: LinearGradient(
+        colors: [
+          fish.color.withValues(alpha: 0.2),
+          fish.color.withValues(alpha: 0.05),
+        ],
+        begin: Alignment.topLeft,
+        end: Alignment.bottomRight,
+      ),
+      borderRadius: BorderRadius.circular(20),
+    ),
+    child: Center(
+      child: Icon(Icons.set_meal,
+          size: 80, color: fish.color.withValues(alpha: 0.6)),
+    ),
+  );
 }
 
 // ─── Data Model ───────────────────────────────────────────────────────────
