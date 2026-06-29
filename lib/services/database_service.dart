@@ -6,6 +6,7 @@ import '../models/counter.dart';
 import '../models/favorite_spot.dart';
 import '../models/fish_status.dart';
 import '../models/fish_data.dart';
+import '../data/fish_database.dart';
 
 class DatabaseService {
   static Database? _db;

@@ -1,9 +1,11 @@
 import 'dart:async';
+import 'dart:io';
 import 'package:flutter/material.dart';
 import '../services/fish_image_service.dart';
 import '../services/database_service.dart';
 import '../models/fish_data.dart';
 import '../models/fish_status.dart';
+import '../data/fish_database.dart';
 import 'add_fish_screen.dart';
 
 class FishIdScreen extends StatefulWidget {
@@ -338,7 +340,7 @@ class _FishCard extends StatefulWidget {
 }
 
 class _FishCardState extends State<_FishCard> {
-  String? _imageUrl;
+  String? _imagePath;
   bool _loading = true;
 
   @override
@@ -348,13 +350,13 @@ class _FishCardState extends State<_FishCard> {
   }
 
   Future<void> _loadImage() async {
-    final url = await FishImageService.getImageUrl(
+    final path = await FishImageService.getImagePath(
       commonName: widget.fish.name,
       scientificName: widget.fish.scientificName,
     );
     if (mounted) {
       setState(() {
-        _imageUrl = url;
+        _imagePath = path;
         _loading = false;
       });
     }
@@ -373,23 +375,39 @@ class _FishCardState extends State<_FishCard> {
         child: Icon(Icons.set_meal, color: fish.color, size: 32),
       );
     }
-    if (_imageUrl != null) {
+    if (_imagePath != null) {
       return ClipRRect(
         borderRadius: BorderRadius.circular(12),
-        child: Image.network(
-          _imageUrl!,
-          width: 60,
-          height: 60,
-          fit: BoxFit.cover,
-          errorBuilder: (ctx, err, stack) => _iconThumb(fish),
-          loadingBuilder: (ctx, child, progress) {
-            if (progress == null) return child;
-            return _iconThumb(fish);
-          },
-        ),
+        child: _buildImage(fish),
       );
     }
     return _iconThumb(fish);
+  }
+
+  /// Shows the image from local file or falls back to Image.network
+  /// if the path is actually a URL (caching failed).
+  Widget _buildImage(FishSpecies fish) {
+    final path = _imagePath!;
+    if (path.startsWith('http://') || path.startsWith('https://')) {
+      return Image.network(
+        path,
+        width: 60,
+        height: 60,
+        fit: BoxFit.cover,
+        errorBuilder: (ctx, err, stack) => _iconThumb(fish),
+        loadingBuilder: (ctx, child, progress) {
+          if (progress == null) return child;
+          return _iconThumb(fish);
+        },
+      );
+    }
+    return Image.file(
+      File(path),
+      width: 60,
+      height: 60,
+      fit: BoxFit.cover,
+      errorBuilder: (a, b, c) => _iconThumb(fish),
+    );
   }
 
   Widget _iconThumb(FishSpecies fish) {
@@ -561,12 +579,12 @@ class _FishDetailScreen extends StatefulWidget {
 }
 
 class _FishDetailScreenState extends State<_FishDetailScreen> {
-  Future<String?>? _imageUrlFuture;
+  Future<String?>? _imagePathFuture;
 
   @override
   void initState() {
     super.initState();
-    _imageUrlFuture = FishImageService.getImageUrl(
+    _imagePathFuture = FishImageService.getImagePath(
       commonName: widget.fish.name,
       scientificName: widget.fish.scientificName,
     );
@@ -583,11 +601,11 @@ class _FishDetailScreenState extends State<_FishDetailScreen> {
           16, 16, 16, 16 + MediaQuery.of(context).padding.bottom + 80,
         ),
         children: [
-          // Hero header — loads image from Wikipedia
+          // Hero header — loads fish image (cached locally or from Wikipedia)
           FutureBuilder<String?>(
-            future: _imageUrlFuture,
+            future: _imagePathFuture,
             builder: (context, snapshot) {
-              final url = snapshot.data;
+              final path = snapshot.data;
               if (snapshot.connectionState == ConnectionState.waiting) {
                 return Container(
                   height: 180,
@@ -602,28 +620,10 @@ class _FishDetailScreenState extends State<_FishDetailScreen> {
                   ),
                 );
               }
-              if (url != null && url.isNotEmpty) {
+              if (path != null && path.isNotEmpty) {
                 return ClipRRect(
                   borderRadius: BorderRadius.circular(20),
-                  child: Image.network(
-                    url,
-                    height: 180,
-                    width: double.infinity,
-                    fit: BoxFit.cover,
-                    loadingBuilder: (ctx, child, progress) {
-                      if (progress == null) return child;
-                      return Container(
-                        height: 180,
-                        color: fish.color.withValues(alpha: 0.08),
-                        child: Center(
-                          child: CircularProgressIndicator(
-                            color: fish.color,
-                          ),
-                        ),
-                      );
-                    },
-                    errorBuilder: (ctx, err, stack) => _imageFallback(fish),
-                  ),
+                  child: _buildHeroImage(fish, path),
                 );
               }
               return _imageFallback(fish);
@@ -799,6 +799,36 @@ class _FishDetailScreenState extends State<_FishDetailScreen> {
     if (mounted) {
       Navigator.pop(context, true);
     }
+  }
+
+  /// Renders the hero image from a local file path or Wikipedia URL.
+  Widget _buildHeroImage(FishSpecies fish, String path) {
+    if (path.startsWith('http://') || path.startsWith('https://')) {
+      return Image.network(
+        path,
+        height: 180,
+        width: double.infinity,
+        fit: BoxFit.cover,
+        loadingBuilder: (ctx, child, progress) {
+          if (progress == null) return child;
+          return Container(
+            height: 180,
+            color: fish.color.withValues(alpha: 0.08),
+            child: Center(
+              child: CircularProgressIndicator(color: fish.color),
+            ),
+          );
+        },
+        errorBuilder: (ctx, err, stack) => _imageFallback(fish),
+      );
+    }
+    return Image.file(
+      File(path),
+      height: 180,
+      width: double.infinity,
+      fit: BoxFit.cover,
+      errorBuilder: (a, b, c) => _imageFallback(fish),
+    );
   }
 
   Widget _detailRow(

@@ -22,11 +22,13 @@ echo "   New:     version: $NEW_VERSION"
 
 sed -i "s/^version: .*/version: $NEW_VERSION/" pubspec.yaml
 
-# ─── 2. Read API key ──────────────────────────────────────────────────────
-# Set GOOGLE_MAPS_API_KEY env var or create a .env file:
+# ─── 2. Read API keys ────────────────────────────────────────────────────
+# Set env vars or create a .env file:
 #   GOOGLE_MAPS_API_KEY=AIzaSy...
-if [ -z "$GOOGLE_MAPS_API_KEY" ] && [ -f .env ]; then
-  GOOGLE_MAPS_API_KEY=$(grep '^GOOGLE_MAPS_API_KEY=' .env | cut -d= -f2-)
+#   OPENWEATHER_API_KEY=your_key...
+if [ -f .env ]; then
+  GOOGLE_MAPS_API_KEY=${GOOGLE_MAPS_API_KEY:-$(grep '^GOOGLE_MAPS_API_KEY=' .env | cut -d= -f2-)}
+  OPENWEATHER_API_KEY=${OPENWEATHER_API_KEY:-$(grep '^OPENWEATHER_API_KEY=' .env | cut -d= -f2-)}
 fi
 
 DART_DEFINES=""
@@ -36,6 +38,11 @@ if [ -n "$GOOGLE_MAPS_API_KEY" ]; then
 else
   echo "⚠️  GOOGLE_MAPS_API_KEY not set. Place search won't work."
   echo "   Set it as an env var or create a .env file."
+fi
+
+if [ -n "$OPENWEATHER_API_KEY" ]; then
+  echo "🌤️  OpenWeatherMap API key found"
+  DART_DEFINES="$DART_DEFINES --dart-define=OPENWEATHER_API_KEY=$OPENWEATHER_API_KEY"
 fi
 
 # ─── 3. Build APK ─────────────────────────────────────────────────────────
