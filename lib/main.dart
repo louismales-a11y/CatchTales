@@ -448,6 +448,19 @@ class _HomeScreenState extends State<HomeScreen> {
             ),
             tooltip: 'Weather',
           ),
+          // Dark mode toggle
+          IconButton(
+            icon: AnimatedSwitcher(
+              duration: const Duration(milliseconds: 300),
+              child: Icon(
+                tp.isDark ? Icons.light_mode : Icons.dark_mode,
+                key: ValueKey(tp.isDark),
+                size: 20,
+              ),
+            ),
+            onPressed: tp.toggleDark,
+            tooltip: tp.isDark ? 'Light mode' : 'Dark mode',
+          ),
           // 3-dot menu with the rest
           PopupMenuButton<String>(
             icon: Icon(Icons.more_vert, color: accent),
