@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import '../models/catch.dart';
 import '../services/database_service.dart';
+import '../services/widget_service.dart';
 import 'add_catch_screen.dart';
 
 class CatchesScreen extends StatefulWidget {
@@ -69,6 +70,7 @@ class CatchesScreenState extends State<CatchesScreen> {
     );
     if (confirm == true) {
       await DatabaseService.instance.deleteCatch(c.id!);
+      WidgetService.updateWidget();
       await loadCatches();
     }
   }

@@ -7,6 +7,7 @@ import 'package:path_provider/path_provider.dart';
 import '../models/catch.dart';
 import '../services/database_service.dart';
 import '../services/weather_service.dart';
+import '../services/widget_service.dart';
 
 class AddCatchScreen extends StatefulWidget {
   final Catch? existingCatch;
@@ -218,6 +219,7 @@ class _AddCatchScreenState extends State<AddCatchScreen> {
       } else {
         await DatabaseService.instance.addCatch(catchItem);
       }
+      WidgetService.updateWidget();
       if (mounted) Navigator.pop(context, true);
     } catch (e) {
       if (mounted) {

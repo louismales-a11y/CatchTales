@@ -11,6 +11,7 @@ import 'screens/forecast_screen.dart';
 import 'screens/gallery_screen.dart';
 import 'screens/solunar_screen.dart';
 import 'services/theme_provider.dart';
+import 'services/widget_service.dart';
 
 void main() {
   WidgetsFlutterBinding.ensureInitialized();
@@ -187,6 +188,8 @@ class _SplashScreenState extends State<SplashScreen> {
     } catch (_) {
       if (mounted) setState(() => _version = '1.0.0');
     }
+    // Update home screen widget with latest data
+    WidgetService.updateWidget();
   }
 
   @override
