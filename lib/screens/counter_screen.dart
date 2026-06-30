@@ -26,7 +26,6 @@ class _CounterScreenState extends State<CounterScreen> {
     _speech = stt.SpeechToText();
     Future.microtask(() async {
       await _load();
-      _initPermanentSession();
     });
   }
 
@@ -35,26 +34,6 @@ class _CounterScreenState extends State<CounterScreen> {
     _nameCtrl.dispose();
     _speech.stop();
     super.dispose();
-  }
-
-  Future<void> _initPermanentSession() async {
-    if (_isListening) return;
-    final available = await _speech.initialize(
-      onError: (_) => setState(() => _isListening = false),
-      onStatus: (status) {
-        // Only restart if the system forces the session to end
-        if (!mounted) return;
-        if (status == 'done' || status == 'notListening') {
-          setState(() => _isListening = false);
-          // Quietly restart — only happens if system kills the session
-          Future.delayed(const Duration(seconds: 3), () {
-            if (mounted) _initPermanentSession();
-          });
-        }
-      },
-    );
-    if (!available) return;
-    _startPermanentSession();
   }
 
   Future<void> _load() async {
@@ -135,16 +114,23 @@ class _CounterScreenState extends State<CounterScreen> {
 
   // ── Voice Command ──────────────────────────────────────────────────
 
+  /// Tap mic to toggle on/off. Starts a single session — no auto-restart.
   Future<void> _toggleListening() async {
     if (_isListening) {
-      _stopListening();
-    } else {
-      await _initPermanentSession();
+      _speech.stop();
+      setState(() => _isListening = false);
+      return;
     }
-  }
-
-  void _startPermanentSession() {
-    if (_isListening) return;
+    final available = await _speech.initialize(
+      onError: (_) => setState(() => _isListening = false),
+      onStatus: (status) {
+        // When session ends naturally, just update state — don't restart
+        if (status == 'done' || status == 'notListening') {
+          setState(() => _isListening = false);
+        }
+      },
+    );
+    if (!available) return;
     setState(() => _isListening = true);
     _speech.listen(
       onResult: (result) {
@@ -156,17 +142,11 @@ class _CounterScreenState extends State<CounterScreen> {
         }
       },
       listenFor: const Duration(minutes: 10),
-      pauseFor: const Duration(seconds: 2),
       listenOptions: stt.SpeechListenOptions(
         partialResults: true,
         cancelOnError: true,
       ),
     );
-  }
-
-  void _stopListening() {
-    _speech.stop();
-    setState(() => _isListening = false);
   }
 
   /// Parse voice commands:
