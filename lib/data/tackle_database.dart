@@ -7,6 +7,12 @@ class TackleTypeInfo {
   final String tips;
   final String icon; // emoji fallback
 
+  /// Best seasons for this lure (spring, summer, fall, winter).
+  final List<String> bestSeasons;
+
+  /// Best times of day (dawn, day, dusk, night).
+  final List<String> bestTimeOfDay;
+
   const TackleTypeInfo({
     required this.name,
     required this.category,
@@ -14,6 +20,8 @@ class TackleTypeInfo {
     required this.targetSpecies,
     required this.tips,
     this.icon = '🎣',
+    this.bestSeasons = const ['spring', 'summer', 'fall', 'winter'],
+    this.bestTimeOfDay = const ['dawn', 'day', 'dusk', 'night'],
   });
 }
 
@@ -45,7 +53,8 @@ const tackleTypeDatabase = <TackleTypeInfo>[
         'Colors: White/chartreuse for stained water, black/blue for dark water, natural shad for clear water.\n\n'
         'Gear: 7\' medium-heavy rod, 12-17 lb fluorocarbon or 30-40 lb braid. A trailer hook adds hook-ups on short-striking fish.\n\n'
         'Best locations: Weed lines, lily pad edges, submerged timber, docks, and riprap banks.',
-    icon: '🔄',
+bestSeasons: ['spring', 'summer', 'fall'],
+        icon: '🔄',
   ),
   TackleTypeInfo(
     name: 'Buzzbait',
@@ -69,7 +78,9 @@ const tackleTypeDatabase = <TackleTypeInfo>[
         'Gear: 7\' to 7\'6" medium-heavy rod, 17-20 lb fluorocarbon or 30-40 lb braid. '
         'The longer rod helps with hook sets and casting distance.\n\n'
         'Best locations: Weed flats, lily pads, shallow shorelines, and around boat docks.',
-    icon: '💨',
+bestSeasons: ['spring', 'summer', 'fall'],
+    bestTimeOfDay: ['dawn', 'dusk', 'night'],
+        icon: '💨',
   ),
 
   // ═════════════════════════════════════════════════════════════════════
@@ -102,7 +113,8 @@ const tackleTypeDatabase = <TackleTypeInfo>[
         'Shad patterns (silver/white/chartreuse) for open water. Firetiger for stained water.\n\n'
         'Gear: 7\' to 7\'6" medium-action rod for casting, 12-17 lb fluorocarbon line '
         '(fluoro sinks and helps crankbaits dive deeper). Use a moderate-action rod that loads up on the hook set.',
-    icon: '🏊',
+bestSeasons: ['spring', 'summer', 'fall'],
+        icon: '🏊',
   ),
   TackleTypeInfo(
     name: 'Lipless Crankbait',
@@ -130,7 +142,8 @@ const tackleTypeDatabase = <TackleTypeInfo>[
         'Colors: Chrome/blue, gold/black, and red crawfish are staples. Match the local baitfish.\n\n'
         'Gear: 7\' medium-heavy rod, 12-17 lb fluorocarbon. Casting allows precise depth control. '
         'Braided line with a fluorocarbon leader works well for feeling the vibration.',
-    icon: '📳',
+bestSeasons: ['spring', 'fall'],
+        icon: '📳',
   ),
 
   // ═════════════════════════════════════════════════════════════════════
@@ -192,7 +205,8 @@ const tackleTypeDatabase = <TackleTypeInfo>[
         'Colors: Brown/purple or green pumpkin for clear water. Black/blue for stained water.\n\n'
         'Gear: 7\'2" to 7\'6" heavy-action rod, 15-20 lb fluorocarbon line. '
         'The heavy rod is needed for solid hook sets through the jig\'s thick head.',
-    icon: '⚽',
+bestSeasons: ['spring', 'fall'],
+        icon: '⚽',
   ),
   TackleTypeInfo(
     name: 'Finesse Jig',
@@ -216,7 +230,8 @@ const tackleTypeDatabase = <TackleTypeInfo>[
         'Gear: 6\'6" to 7\' medium-light rod, 8-12 lb fluorocarbon line. '
         'Light line lets the jig fall more naturally and fits through lighter cover. '
         'A sensitive rod is crucial for detecting subtle bites.',
-    icon: '🪶',
+bestSeasons: ['summer', 'fall', 'winter'],
+        icon: '🪶',
   ),
 
   // ═════════════════════════════════════════════════════════════════════
@@ -274,7 +289,8 @@ const tackleTypeDatabase = <TackleTypeInfo>[
         'and natural shad patterns. In saltwater, white is the universal colour.\n\n'
         'Gear: 6\'6" to 7\' medium rod, 10-15 lb fluorocarbon or braid. '
         'The rod should have a moderate tip for casting lighter jig heads.',
-    icon: '🐟',
+bestSeasons: ['spring', 'summer', 'fall'],
+        icon: '🐟',
   ),
   TackleTypeInfo(
     name: 'Creature Bait',
@@ -300,7 +316,8 @@ const tackleTypeDatabase = <TackleTypeInfo>[
         'Colors: Green pumpkin, brown/purple, black/blue. Red accents (claws) are a plus in spring.\n\n'
         'Gear: 7\' to 7\'6" heavy-action rod, 15-20 lb fluorocarbon or 40-50 lb braid. '
         'Heavy gear is needed for solid hook sets through the thick plastic and cover.',
-    icon: '🦎',
+bestSeasons: ['spring', 'summer'],
+        icon: '🦎',
   ),
   TackleTypeInfo(
     name: 'Drop Shot Rig',
@@ -334,7 +351,8 @@ const tackleTypeDatabase = <TackleTypeInfo>[
         'Gear: 6\'8" to 7\'2" medium-light spinning rod, 6-10 lb fluorocarbon line. '
         'A sensitive rod tip is critical for feeling subtle drop shot bites. '
         'Use a #1 or #2 hook for finesse worms.',
-    icon: '📏',
+bestSeasons: ['summer'],
+        icon: '📏',
   ),
   TackleTypeInfo(
     name: 'Ned Rig',
@@ -392,7 +410,9 @@ const tackleTypeDatabase = <TackleTypeInfo>[
         'Colors: Bone or white (universal), black (night fishing), frog patterns (vegetation).\n\n'
         'Gear: 6\'6" to 7\' medium rod, 12-17 lb fluorocarbon or monofilament '
         '(mono floats and helps topwater action). A moderate-fast action rod helps prevent tearing the hooks out.',
-    icon: '💥',
+bestSeasons: ['spring', 'summer', 'fall'],
+    bestTimeOfDay: ['dawn', 'dusk'],
+        icon: '💥',
   ),
   TackleTypeInfo(
     name: 'Walking Bait',
@@ -421,7 +441,8 @@ const tackleTypeDatabase = <TackleTypeInfo>[
         'Colors: Bone/silver, bright chartreuse, or black for night.\n\n'
         'Gear: 7\' medium-heavy rod with a moderate-fast action, '
         '14-17 lb monofilament (mono floats and aids the walking action). Braid also works but requires rod-tip adjustments.',
-    icon: '🚶',
+bestSeasons: ['summer', 'fall'],
+        icon: '🚶',
   ),
   TackleTypeInfo(
     name: 'Frog',
@@ -451,7 +472,9 @@ const tackleTypeDatabase = <TackleTypeInfo>[
         'Gear: 7\'6" to 8\' heavy-action rod, 50-65 lb braided line. '
         'You need heavy braid to cut through vegetation and haul fish out of cover. '
         'A stiff rod is needed for long hook sets through the soft frog body.',
-    icon: '🐸',
+bestSeasons: ['summer'],
+    bestTimeOfDay: ['dawn', 'dusk', 'night'],
+        icon: '🐸',
   ),
   TackleTypeInfo(
     name: 'Prop Bait',
@@ -476,7 +499,9 @@ const tackleTypeDatabase = <TackleTypeInfo>[
         'Colors: Silver/black, frog patterns, and bright chartreuse.\n\n'
         'Gear: 6\'6" to 7\' medium rod, 12-17 lb monofilament. Mono floats and dampens '
         'the action for a more natural presentation.',
-    icon: '🛩️',
+bestSeasons: ['summer'],
+    bestTimeOfDay: ['dusk', 'night'],
+        icon: '🛩️',
   ),
 
   // ═════════════════════════════════════════════════════════════════════
@@ -511,7 +536,8 @@ const tackleTypeDatabase = <TackleTypeInfo>[
         'and copper (deep water). Half-and-half (silver/gold) is versatile.\n\n'
         'Gear: 6\'6" to 7\' medium-heavy rod, 12-20 lb fluorocarbon or braid. '
         'For pike and muskie, use a steel or titanium leader to prevent cut-offs.',
-    icon: '🥄',
+bestSeasons: ['spring', 'summer', 'fall'],
+        icon: '🥄',
   ),
   TackleTypeInfo(
     name: 'Jigging Spoon',
@@ -542,7 +568,8 @@ const tackleTypeDatabase = <TackleTypeInfo>[
         'Gear: 6\'6" to 7\' medium-heavy to heavy rod, 15-30 lb braid. '
         'Braid eliminates stretch for better sensitivity and hook sets at depth. '
         'A high-speed reel (6:1+) helps quickly regain line.',
-    icon: '⬇️',
+bestSeasons: ['summer', 'winter'],
+        icon: '⬇️',
   ),
 
   // ═════════════════════════════════════════════════════════════════════
@@ -610,7 +637,8 @@ const tackleTypeDatabase = <TackleTypeInfo>[
         'Green pumpkin and watermelon are staple colours.\n\n'
         'Gear: 7\' to 7\'6" medium-heavy rod, 12-17 lb fluorocarbon main line, '
         '10-15 lb fluorocarbon leader. A longer rod helps with casting heavy weights.',
-    icon: '🔗',
+bestSeasons: ['spring', 'summer', 'fall'],
+        icon: '🔗',
   ),
 
   // ═════════════════════════════════════════════════════════════════════
@@ -644,7 +672,8 @@ const tackleTypeDatabase = <TackleTypeInfo>[
         'you can see your jig and the fish\'s reaction in real-time.\n\n'
         'Gear: 24-32" ultra-light ice rod, 2-4 lb monofilament or fluorocarbon. '
         'A spring bobber on the rod tip is essential for detecting light bites.',
-    icon: '🧊',
+bestSeasons: ['winter'],
+        icon: '🧊',
   ),
   TackleTypeInfo(
     name: 'Tip-Up Rig',
@@ -674,7 +703,8 @@ const tackleTypeDatabase = <TackleTypeInfo>[
         'Gear: Standard tip-up with 30-50 lb Dacron line on the spool, '
         '12-18" leader of 30-50 lb fluorocarbon or wire (for pike). '
         'Use a quick-strike rig for pike and a single hook for walleye.',
-    icon: '🚩',
+bestSeasons: ['winter'],
+        icon: '🚩',
   ),
 
   // ═════════════════════════════════════════════════════════════════════
@@ -708,7 +738,9 @@ const tackleTypeDatabase = <TackleTypeInfo>[
         'Set the hook gently with a sideways sweep when you see the rise.\n\n'
         'Gear: 8\'6" to 9\' 4-6 weight fly rod, weight-forward floating line. '
         'A 9-12 ft 4X-6X leader tapers to a fine tippet for delicate presentations.',
-    icon: '🪰',
+bestSeasons: ['spring', 'summer', 'fall'],
+    bestTimeOfDay: ['dawn', 'day', 'dusk'],
+        icon: '🪰',
   ),
   TackleTypeInfo(
     name: 'Nymph',
@@ -769,7 +801,8 @@ const tackleTypeDatabase = <TackleTypeInfo>[
         'and articulated streamers (6-8") for pike and muskie.\n\n'
         'Gear: 8\'6" to 9\' 6-8 weight fly rod, intermediate or sinking tip line. '
         'For pike/muskie: 9-10" 8-10 wt rod, wire leader, heavy-duty reel.',
-    icon: '🐟',
+bestSeasons: ['spring', 'fall'],
+        icon: '🐟',
   ),
 
   // ═════════════════════════════════════════════════════════════════════
@@ -802,7 +835,8 @@ const tackleTypeDatabase = <TackleTypeInfo>[
         'Use a 1/4 oz cork for shallow water (1-3 ft), 3/8-1/2 oz for deeper.\n\n'
         'Gear: 7\' medium-heavy spinning rod, 15-20 lb braided main line, '
         '20-30 lb fluorocarbon leader. A high-speed reel helps pick up line quickly.',
-    icon: '🪸',
+bestSeasons: ['spring', 'summer', 'fall'],
+        icon: '🪸',
   ),
   TackleTypeInfo(
     name: 'Bucktail Jig',
@@ -865,6 +899,7 @@ const tackleTypeDatabase = <TackleTypeInfo>[
         'and green/blue combinations for clear tropical water.\n\n'
         'Gear: Trolling rod (7-8\') with conventional reel, 30-50 lb braid. '
         'Use a wind-on leader for tuna. Heavy-duty outrigger clips for multiple lines.',
-    icon: '🚤',
+bestSeasons: ['spring', 'summer', 'fall'],
+        icon: '🚤',
   ),
 ];

@@ -13,6 +13,7 @@ import 'screens/solunar_screen.dart';
 import 'screens/calendar_screen.dart';
 import 'screens/fish_id_screen.dart';
 import 'screens/tackle_box_screen.dart';
+import 'screens/todays_pick_screen.dart';
 import 'services/theme_provider.dart';
 import 'services/widget_service.dart';
 
@@ -464,6 +465,11 @@ class _HomeScreenState extends State<HomeScreen> {
                       MaterialPageRoute(
                           builder: (_) => const ForecastScreen()));
                   break;
+                case 'todays_pick':
+                  Navigator.push(context,
+                      MaterialPageRoute(
+                          builder: (_) => const TodaysPickScreen()));
+                  break;
                 case 'solunar':
                   Navigator.push(context,
                       MaterialPageRoute(
@@ -500,6 +506,15 @@ class _HomeScreenState extends State<HomeScreen> {
                 child: ListTile(
                   leading: Icon(Icons.wb_sunny),
                   title: Text('Weather'),
+                  dense: true,
+                  contentPadding: EdgeInsets.zero,
+                ),
+              ),
+              const PopupMenuItem(
+                value: 'todays_pick',
+                child: ListTile(
+                  leading: Icon(Icons.auto_awesome),
+                  title: Text("Today's Pick"),
                   dense: true,
                   contentPadding: EdgeInsets.zero,
                 ),
