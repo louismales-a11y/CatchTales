@@ -53,10 +53,10 @@ class _CounterScreenState extends State<CounterScreen> {
           _parseCommand(text);
         }
       },
-      listenFor: const Duration(minutes: 10),
       listenOptions: stt.SpeechListenOptions(
         partialResults: true,
         cancelOnError: true,
+        listenFor: const Duration(minutes: 10),
       ),
     );
   }
@@ -84,13 +84,16 @@ class _CounterScreenState extends State<CounterScreen> {
     }
   }
 
-  Future<void> _addAngler() async {
-    final name = _nameCtrl.text.trim();
+  Future<void> _addAngler({String? voiceName}) async {
+    final name = voiceName ?? _nameCtrl.text.trim();
     if (name.isEmpty) return;
     _nameCtrl.clear();
     await DatabaseService.instance.addCounter(name);
     if (!mounted) return;
     await _load();
+    if (voiceName != null) {
+      _showVoiceFeedback('✅ Added angler: $name — now say "fish buddy $name caught a pike"');
+    }
   }
 
   Future<void> _resetAll() async {
@@ -161,6 +164,10 @@ class _CounterScreenState extends State<CounterScreen> {
   ///   "fish buddy Louis caught a 9 inch perch"
   ///   "fish buddy Mary caught 3 walleye"
   ///   "fish buddy John caught a 36 inch pike"
+  ///   "fish buddy add Louis"
+  ///   "fish buddy remove Louis"
+  ///   "fish buddy reset"
+  ///   "fish buddy help"
   void _parseCommand(String text) {
     String cmd = text;
     for (final prefix in ['fish buddy', 'fishbuddy', 'hey fish buddy', 'ok fish buddy']) {
@@ -168,6 +175,49 @@ class _CounterScreenState extends State<CounterScreen> {
         cmd = cmd.substring(prefix.length).trim();
         break;
       }
+    }
+
+    // ── Admin commands (no angler needed) ──
+    if (cmd.startsWith('help') || cmd == 'what can i say' || cmd == 'commands') {
+      _showVoiceFeedback('Say "fish buddy [name] caught [species]" or "add [name]" to add angler, "reset" for new trip, "remove [name]" to delete');
+      return;
+    }
+    if (cmd.startsWith('reset') || cmd.startsWith('new trip')) {
+      _resetAll();
+      return;
+    }
+    if (cmd.startsWith('add ')) {
+      final name = cmd.substring(4).trim();
+      if (name.isEmpty) return;
+      if (RegExp(r'^(angler|angler named|a new angler|a new person|a new fisherman) (.+)$').hasMatch(name)) {
+        final m = RegExp(r'^(angler|angler named|a new angler|a new person|a new fisherman) (.+)$').firstMatch(name);
+        _addAngler(voiceName: m!.group(2)!.trim());
+      } else {
+        _addAngler(voiceName: name);
+      }
+      return;
+    }
+    if (cmd.startsWith('remove ')) {
+      final name = cmd.substring(7).trim();
+      if (name.isEmpty) return;
+      final match = _findAngler(name);
+      if (match != null) {
+        _deleteAngler(match);
+      } else {
+        _showVoiceFeedback('No angler found matching "$name"');
+      }
+      return;
+    }
+    if (cmd.startsWith('delete ')) {
+      final name = cmd.substring(7).trim();
+      if (name.isEmpty) return;
+      final match = _findAngler(name);
+      if (match != null) {
+        _deleteAngler(match);
+      } else {
+        _showVoiceFeedback('No angler found matching "$name"');
+      }
+      return;
     }
 
     // Extract number of fish (default 1)
@@ -356,13 +406,91 @@ class _CounterScreenState extends State<CounterScreen> {
     return inf[b.length];
   }
 
+  Widget _voicePromptText(ThemeData theme) {
+    final hasAnglers = _breakdown.isNotEmpty;
+
+    if (_isListening) {
+      if (hasAnglers) {
+        return Text(
+          '🎤 Mic active — say "fish buddy [name] caught a [species]"',
+          style: TextStyle(
+            fontSize: 12,
+            color: theme.colorScheme.primary,
+            fontStyle: FontStyle.italic,
+          ),
+          overflow: TextOverflow.ellipsis,
+        );
+      } else {
+        return Text(
+          '🎤 Mic active — add an angler first, then say "fish buddy [name] caught a [species]"',
+          style: TextStyle(
+            fontSize: 12,
+            color: theme.colorScheme.primary,
+            fontStyle: FontStyle.italic,
+          ),
+          overflow: TextOverflow.ellipsis,
+        );
+      }
+    }
+
+    // Not listening
+    if (_lastCommand.isNotEmpty) {
+      return Row(
+        children: [
+          Flexible(
+            child: Text(
+              '🗣️ "$_lastCommand"',
+              style: TextStyle(
+                fontSize: 12,
+                color: theme.colorScheme.onSurface.withValues(alpha: 0.5),
+                fontStyle: FontStyle.italic,
+              ),
+              overflow: TextOverflow.ellipsis,
+            ),
+          ),
+          const SizedBox(width: 6),
+          Text(
+            '— tap mic to speak',
+            style: TextStyle(
+              fontSize: 11,
+              color: theme.colorScheme.onSurface.withValues(alpha: 0.35),
+              fontStyle: FontStyle.italic,
+            ),
+          ),
+        ],
+      );
+    }
+
+    if (hasAnglers) {
+      return Text(
+        '🎤 Say "fish buddy [name] caught [species]" — tap mic to start',
+        style: TextStyle(
+          fontSize: 12,
+          color: theme.colorScheme.onSurface.withValues(alpha: 0.5),
+          fontStyle: FontStyle.italic,
+        ),
+        overflow: TextOverflow.ellipsis,
+      );
+    }
+
+    return Text(
+      '🎤 Tap mic, add anglers with "fish buddy add [name]", then record catches!',
+      style: TextStyle(
+        fontSize: 12,
+        color: theme.colorScheme.onSurface.withValues(alpha: 0.5),
+        fontStyle: FontStyle.italic,
+      ),
+      overflow: TextOverflow.ellipsis,
+    );
+  }
+
   void _showVoiceFeedback(String msg) {
     if (!mounted) return;
     ScaffoldMessenger.of(context).clearSnackBars();
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
         content: Text(msg),
-        duration: const Duration(seconds: 3),
+        duration: const Duration(seconds: 4),
         behavior: SnackBarBehavior.floating,
       ),
     );
@@ -497,47 +625,30 @@ class _CounterScreenState extends State<CounterScreen> {
               ),
               const SizedBox(height: 8),
               const Divider(height: 1),
-              // Voice command bar
-              if (_breakdown.isNotEmpty)
-                Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-                  child: Row(
-                    children: [
-                      Expanded(
-                        child: Text(
-                          _isListening
-                              ? '🎤 Mic active — say "fish buddy [name] caught a [species]"'
-                              : _lastCommand.isNotEmpty
-                                  ? '🗣️ "$_lastCommand"'
-                                  : '🎤 Say "fish buddy…"',
-                          style: TextStyle(
-                            fontSize: 12,
-                            color: _isListening
-                                ? theme.colorScheme.primary
-                                : theme.colorScheme.onSurface
-                                    .withValues(alpha: 0.5),
-                            fontStyle: FontStyle.italic,
-                          ),
-                          overflow: TextOverflow.ellipsis,
-                        ),
+              // Voice command bar — always visible
+              Container(
+                padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                child: Row(
+                  children: [
+                    Expanded(
+                      child: _voicePromptText(theme),
+                    ),
+                    IconButton(
+                      icon: Icon(
+                        _isListening ? Icons.mic : Icons.mic_none,
+                        color: _isListening
+                            ? Colors.red
+                            : theme.colorScheme.primary,
                       ),
-                      IconButton(
-                        icon: Icon(
-                          _isListening ? Icons.mic : Icons.mic_none,
-                          color: _isListening
-                              ? Colors.red
-                              : theme.colorScheme.primary,
-                        ),
-                        onPressed:
-                            _toggleListening,
-                        tooltip: _isListening
-                            ? 'Mute mic'
-                            : 'Unmute mic',
-                        visualDensity: VisualDensity.compact,
-                      ),
-                    ],
-                  ),
+                      onPressed: _toggleListening,
+                      tooltip: _isListening
+                          ? 'Mute mic'
+                          : 'Unmute mic',
+                      visualDensity: VisualDensity.compact,
+                    ),
+                  ],
                 ),
+              ),
               const Divider(height: 1),
               // List
               Expanded(
@@ -556,6 +667,11 @@ class _CounterScreenState extends State<CounterScreen> {
                             const SizedBox(height: 8),
                             Text('Type a name above and tap Add',
                                 style: TextStyle(
+                                    color: Colors.grey.shade400)),
+                            const SizedBox(height: 4),
+                            Text('or say "fish buddy add [name]" via voice',
+                                style: TextStyle(
+                                    fontSize: 12,
                                     color: Colors.grey.shade400)),
                           ],
                         ),
