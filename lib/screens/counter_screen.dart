@@ -18,6 +18,7 @@ class _CounterScreenState extends State<CounterScreen> {
   // Voice
   late stt.SpeechToText _speech;
   bool _isListening = false;
+  bool _commandCooldown = false;
   String _lastCommand = '';
 
   @override
@@ -89,6 +90,27 @@ class _CounterScreenState extends State<CounterScreen> {
     }
   }
 
+  Future<void> _decrementSpecies(String angler, String species) async {
+    final db = await DatabaseService.instance.database;
+    final rows = await db.query('species_tallies',
+        where: 'angler = ? AND species = ?',
+        whereArgs: [angler, species]);
+    if (rows.isEmpty) return;
+    final id = rows.first['id'] as int;
+    final count = rows.first['count'] as int;
+    if (count <= 1) {
+      await db.delete('species_tallies',
+          where: 'id = ?', whereArgs: [id]);
+    } else {
+      await db.rawUpdate(
+        'UPDATE species_tallies SET count = count - 1 WHERE id = ?',
+        [id],
+      );
+    }
+    if (!mounted) return;
+    await _load();
+  }
+
   // ── Voice Command ──────────────────────────────────────────────────
 
   Future<void> _startListening() async {
@@ -110,13 +132,21 @@ class _CounterScreenState extends State<CounterScreen> {
       return;
     }
 
-    setState(() => _isListening = true);
+    setState(() {
+      _isListening = true;
+      _commandCooldown = false;
+    });
     _speech.listen(
       onResult: (result) {
+        if (_commandCooldown) return;
+        _commandCooldown = true;
         final text = result.recognizedWords.toLowerCase().trim();
         if (text.isNotEmpty) {
           _lastCommand = text;
           _parseCommand(text);
+          _stopListening();
+        } else {
+          _commandCooldown = false;
         }
       },
       listenFor: const Duration(seconds: 8),
@@ -532,6 +562,8 @@ class _CounterScreenState extends State<CounterScreen> {
                             breakdown: b,
                             onAdd: () => _quickAdd(b.angler),
                             onDelete: () => _deleteAngler(b.angler),
+                            onDecrement: (species) =>
+                                _decrementSpecies(b.angler, species),
                           );
                         },
                       ),
@@ -545,11 +577,13 @@ class _AnglerCard extends StatelessWidget {
   final AnglerBreakdown breakdown;
   final VoidCallback onAdd;
   final VoidCallback onDelete;
+  final void Function(String species) onDecrement;
 
   const _AnglerCard({
     required this.breakdown,
     required this.onAdd,
     required this.onDelete,
+    required this.onDecrement,
   });
 
   @override
@@ -650,6 +684,20 @@ class _AnglerCard extends StatelessWidget {
                                   fontWeight: FontWeight.w700,
                                   fontSize: 16,
                                   color: theme.colorScheme.primary)),
+                          const SizedBox(width: 4),
+                          InkWell(
+                            onTap: () => onDecrement(s.species),
+                            borderRadius: BorderRadius.circular(10),
+                            child: Container(
+                              padding: const EdgeInsets.all(2),
+                              decoration: BoxDecoration(
+                                color: Colors.red.shade50,
+                                borderRadius: BorderRadius.circular(10),
+                              ),
+                              child: Icon(Icons.remove_circle_outline,
+                                  size: 18, color: Colors.red.shade400),
+                            ),
+                          ),
                         ],
                       ),
                     )),
