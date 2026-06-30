@@ -8,6 +8,7 @@ import '../models/fish_status.dart';
 import '../models/fish_data.dart';
 import '../data/fish_database.dart';
 import '../models/tackle_item.dart';
+import '../models/species_tally.dart';
 
 class DatabaseService {
   static Database? _db;
@@ -27,7 +28,7 @@ class DatabaseService {
 
     return await openDatabase(
       path,
-      version: 7,
+      version: 8,
       onCreate: (db, version) async {
         await db.execute('''
           CREATE TABLE catches (
@@ -71,6 +72,15 @@ class DatabaseService {
           )
         ''');
         await db.execute('''
+          CREATE TABLE species_tallies (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            angler TEXT NOT NULL,
+            species TEXT NOT NULL,
+            count INTEGER DEFAULT 0,
+            UNIQUE(angler, species)
+          )
+        ''');
+        await db.execute('''
           CREATE TABLE tackle_items (
             id INTEGER PRIMARY KEY AUTOINCREMENT,
             name TEXT NOT NULL,
@@ -106,6 +116,17 @@ class DatabaseService {
               target_species TEXT DEFAULT '',
               tips TEXT DEFAULT '',
               created_at TEXT NOT NULL
+            )
+          ''');
+        }
+        if (oldVersion < 8) {
+          await db.execute('''
+            CREATE TABLE IF NOT EXISTS species_tallies (
+              id INTEGER PRIMARY KEY AUTOINCREMENT,
+              angler TEXT NOT NULL,
+              species TEXT NOT NULL,
+              count INTEGER DEFAULT 0,
+              UNIQUE(angler, species)
             )
           ''');
         }
@@ -539,5 +560,64 @@ class DatabaseService {
     final db = await database;
     return await db.delete('tackle_items',
         where: 'id = ?', whereArgs: [id]);
+  }
+
+  // ---- Species Tallies ----
+
+  /// Get all tallies grouped by angler.
+  Future<List<AnglerBreakdown>> getSpeciesBreakdown() async {
+    final db = await database;
+    final rows = await db.query('species_tallies', orderBy: 'angler ASC, species ASC');
+    
+    // Group by angler
+    final Map<String, List<SpeciesTally>> grouped = {};
+    for (final row in rows) {
+      final tally = SpeciesTally.fromMap(row);
+      grouped.putIfAbsent(tally.angler, () => []);
+      grouped[tally.angler]!.add(tally);
+    }
+    
+    return grouped.entries.map((e) => AnglerBreakdown(
+      angler: e.key,
+      total: e.value.fold(0, (sum, t) => sum + t.count),
+      species: e.value,
+    )).toList()
+      ..sort((a, b) => b.total.compareTo(a.total));
+  }
+
+  /// Increment a species tally for an angler (creates if not exists).
+  Future<void> incrementSpeciesTally(String angler, String species) async {
+    final db = await database;
+    final existing = await db.query('species_tallies',
+        where: 'angler = ? AND species = ?',
+        whereArgs: [angler, species]);
+    
+    if (existing.isEmpty) {
+      await db.insert('species_tallies', {
+        'angler': angler,
+        'species': species,
+        'count': 1,
+      });
+    } else {
+      final id = existing.first['id'] as int;
+      await db.rawUpdate(
+        'UPDATE species_tallies SET count = count + 1 WHERE id = ?',
+        [id],
+      );
+    }
+  }
+
+  /// Reset all species tallies (new trip).
+  Future<void> resetSpeciesTallies() async {
+    final db = await database;
+    await db.delete('species_tallies');
+  }
+
+  /// Get distinct species names from all tallies.
+  Future<List<String>> getCaughtSpecies() async {
+    final db = await database;
+    final rows = await db.rawQuery(
+        'SELECT DISTINCT species FROM species_tallies ORDER BY species ASC');
+    return rows.map((r) => r['species'] as String).toList();
   }
 }
