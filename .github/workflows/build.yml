@@ -1,0 +1,45 @@
+name: Build APK
+
+on:
+  push:
+    tags:
+      - 'v*'
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup Flutter
+        uses: subosito/flutter-action@v2
+        with:
+          flutter-version: '3.44'
+          channel: 'stable'
+
+      - name: Get dependencies
+        run: flutter pub get
+
+      - name: Build release APK
+        run: flutter build apk --release
+
+      - name: Get version
+        id: version
+        run: echo "VERSION=$(grep '^version: ' pubspec.yaml | cut -d' ' -f2)" >> $GITHUB_ENV
+
+      - name: Rename APK
+        run: |
+          cp build/app/outputs/flutter-apk/app-release.apk \
+            build/app/outputs/flutter-apk/BestFishBuddy-v${{ env.VERSION }}.apk
+
+      - name: Create Release
+        uses: softprops/action-gh-release@v2
+        with:
+          name: v${{ env.VERSION }}
+          body: |
+            BestFishBuddy v${{ env.VERSION }}
+            
+            Download the APK below to install on your Android device.
+          files: |
+            build/app/outputs/flutter-apk/BestFishBuddy-v${{ env.VERSION }}.apk
+          generate_release_notes: true
