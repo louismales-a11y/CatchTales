@@ -217,19 +217,110 @@ class _CounterScreenState extends State<CounterScreen> {
   }
 
   String? _findAngler(String spoken) {
-    // Get list of angler names from breakdown
     final names = _breakdown.map((b) => b.angler).toList();
-    // Also check the old counters table for anglers with no catches yet
-    // Direct match first
+    final s = spoken.toLowerCase().trim();
+
+    // 1. Exact match (case-insensitive)
     for (final name in names) {
-      if (name.toLowerCase() == spoken) return name;
+      if (name.toLowerCase() == s) return name;
     }
-    // Contains match
+
+    // 2. Contains match
     for (final name in names) {
-      if (name.toLowerCase().contains(spoken) ||
-          spoken.contains(name.toLowerCase())) return name;
+      final n = name.toLowerCase();
+      if (n.contains(s) || s.contains(n)) return name;
     }
+
+    // 3. Prefix match — first 3+ chars match
+    if (s.length >= 3) {
+      for (final name in names) {
+        final n = name.toLowerCase();
+        if (n.startsWith(s) || s.startsWith(n)) return name;
+      }
+    }
+
+    // 4. Consonant skeleton — strip vowels, compare
+    for (final name in names) {
+      final n = name.toLowerCase();
+      final skeletonS = s.replaceAll(RegExp(r'[aeiouy\s]'), '');
+      final skeletonN = n.replaceAll(RegExp(r'[aeiouy\s]'), '');
+      if (skeletonS == skeletonN ||
+          skeletonS.length >= 3 && skeletonN.startsWith(skeletonS) ||
+          skeletonN.length >= 3 && skeletonS.startsWith(skeletonN)) {
+        return name;
+      }
+    }
+
+    // 5. Levenshtein distance — within 2 edits for short names, 3 for longer
+    String? best;
+    int bestDist = 3;
+    for (final name in names) {
+      final n = name.toLowerCase();
+      final dist = _levenshtein(s, n);
+      final maxDist = n.length <= 4 ? 1 : (n.length <= 7 ? 2 : 3);
+      if (dist <= maxDist && dist < bestDist) {
+        bestDist = dist;
+        best = name;
+      }
+    }
+    if (best != null) return best;
+
+    // 6. Common nicknames / aliases
+    final aliases = <String, List<String>>{
+      'louis': ['louie', 'loui', 'luis', 'lou'],
+      'robert': ['rob', 'bob', 'bobby', 'robbie'],
+      'william': ['will', 'bill', 'billy', 'willy'],
+      'james': ['jim', 'jimmy', 'jamie'],
+      'richard': ['rich', 'dick', 'rick', 'ricky'],
+      'michael': ['mike', 'mikey', 'mick'],
+      'thomas': ['tom', 'tommy', 'thom'],
+      'christopher': ['chris', 'topher', 'kris'],
+      'joseph': ['joe', 'joey'],
+      'david': ['dave', 'davy'],
+      'daniel': ['dan', 'danny'],
+      'matthew': ['matt', 'matty'],
+      'jennifer': ['jen', 'jenny'],
+      'elizabeth': ['liz', 'lizzy', 'beth', 'betty'],
+      'margaret': ['maggie', 'meg', 'peg'],
+      'katherine': ['kate', 'katie', 'katy'],
+      'patrick': ['pat', 'patty', 'paddy'],
+      'andrew': ['andy', 'andrew', 'drew'],
+      'stephen': ['steve', 'steven', 'steph'],
+      'jonathan': ['jon', 'john', 'johnny', 'jonny'],
+      'samantha': ['sam', 'sammy'],
+    };
+    for (final entry in aliases.entries) {
+      if (entry.value.contains(s) || entry.key == s) {
+        // Check if any name matches the alias target or alias itself
+        for (final name in names) {
+          final n = name.toLowerCase();
+          if (n == entry.key || n == s || entry.value.contains(n)) return name;
+        }
+      }
+    }
+
     return null;
+  }
+
+  /// Levenshtein edit distance between two strings.
+  int _levenshtein(String a, String b) {
+    if (a.length < b.length) {
+      final tmp = a; a = b; b = tmp;
+    }
+    final inf = List.generate(b.length + 1, (i) => i);
+    for (int i = 1; i <= a.length; i++) {
+      final prev = List.from(inf);
+      inf[0] = i;
+      for (int j = 1; j <= b.length; j++) {
+        final cost = a[i - 1] == b[j - 1] ? 0 : 1;
+        inf[j] = [
+          inf[j - 1] + 1,       // insert
+          prev[j] + 1,           // delete
+          prev[j - 1] + cost,    // substitute
+        ].reduce((a, b) => a < b ? a : b);
+      }
+    }
+    return inf[b.length];
   }
 
   void _showVoiceFeedback(String msg) {
