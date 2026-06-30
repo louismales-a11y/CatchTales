@@ -439,29 +439,7 @@ class _HomeScreenState extends State<HomeScreen> {
               : _selectedIndex == 1
                   ? 'counter'
                   : 'map'),
-          // Stats (always visible)
-          IconButton(
-            icon: const Icon(Icons.bar_chart, size: 20),
-            onPressed: () => Navigator.push(
-              context,
-              MaterialPageRoute(builder: (_) => const StatsScreen()),
-            ),
-            tooltip: 'Statistics',
-          ),
-          // Dark mode toggle
-          IconButton(
-            icon: AnimatedSwitcher(
-              duration: const Duration(milliseconds: 300),
-              child: Icon(
-                tp.isDark ? Icons.light_mode : Icons.dark_mode,
-                key: ValueKey(tp.isDark),
-                size: 20,
-              ),
-            ),
-            onPressed: tp.toggleDark,
-            tooltip: tp.isDark ? 'Light mode' : 'Dark mode',
-          ),
-          // 3-dot menu with the rest
+          // 3-dot menu
           PopupMenuButton<String>(
             icon: Icon(Icons.more_vert, color: accent),
             onSelected: (value) {
@@ -490,6 +468,14 @@ class _HomeScreenState extends State<HomeScreen> {
                   Navigator.push(context,
                       MaterialPageRoute(
                           builder: (_) => const GalleryScreen()));
+                  break;
+                case 'stats':
+                  Navigator.push(context,
+                      MaterialPageRoute(
+                          builder: (_) => const StatsScreen()));
+                  break;
+                case 'dark_mode':
+                  tp.toggleDark();
                   break;
                 case 'tackle_box':
                   Navigator.push(context,
@@ -552,6 +538,26 @@ class _HomeScreenState extends State<HomeScreen> {
                 child: ListTile(
                   leading: Icon(Icons.set_meal),
                   title: Text('Tackle Box'),
+                  dense: true,
+                  contentPadding: EdgeInsets.zero,
+                ),
+              ),
+              const PopupMenuItem(
+                value: 'stats',
+                child: ListTile(
+                  leading: Icon(Icons.bar_chart),
+                  title: Text('Statistics'),
+                  dense: true,
+                  contentPadding: EdgeInsets.zero,
+                ),
+              ),
+              PopupMenuItem(
+                value: 'dark_mode',
+                child: ListTile(
+                  leading: Icon(tp.isDark
+                      ? Icons.light_mode
+                      : Icons.dark_mode),
+                  title: Text(tp.isDark ? 'Light mode' : 'Dark mode'),
                   dense: true,
                   contentPadding: EdgeInsets.zero,
                 ),
