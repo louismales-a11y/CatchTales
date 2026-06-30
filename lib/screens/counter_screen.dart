@@ -53,7 +53,7 @@ class _CounterScreenState extends State<CounterScreen> {
       },
     );
     if (!available) return;
-    _startContinuousListening();
+    _startListeningSession();
   }
 
   Future<void> _load() async {
@@ -143,7 +143,7 @@ class _CounterScreenState extends State<CounterScreen> {
     await _tryAutoStart();
   }
 
-  void _startContinuousListening() {
+  void _startListeningSession() {
     if (_isListening) return;
     setState(() {
       _isListening = true;
@@ -157,26 +157,33 @@ class _CounterScreenState extends State<CounterScreen> {
           _commandCooldown = true;
           _lastCommand = text;
           _parseCommand(text);
+          // Quick restart for next command
+          Future.delayed(const Duration(milliseconds: 600), () {
+            _commandCooldown = false;
+            if (_isListening && mounted) {
+              _restartSession();
+            }
+          });
         }
-        // Always restart after each result (even if no wake word)
-        Future.delayed(const Duration(milliseconds: 500), () {
-          _commandCooldown = false;
-          if (_isListening && mounted) {
-            _startContinuousListening();
-          }
-        });
       },
-      listenFor: const Duration(seconds: 5),
-      pauseFor: const Duration(seconds: 1),
+      listenFor: const Duration(seconds: 30),
+      pauseFor: const Duration(seconds: 3),
       listenOptions: stt.SpeechListenOptions(
         partialResults: false,
         cancelOnError: true,
       ),
     );
-    // Safety net: auto-restart if listen completes without result
-    Future.delayed(const Duration(seconds: 7), () {
-      if (_isListening && mounted) {
-        _startContinuousListening();
+  }
+
+  void _restartSession() {
+    if (!mounted) return;
+    _speech.stop().then((_) {
+      if (mounted && _isListening) {
+        Future.delayed(const Duration(milliseconds: 400), () {
+          if (mounted && _isListening) {
+            _startListeningSession();
+          }
+        });
       }
     });
   }
@@ -536,10 +543,10 @@ class _CounterScreenState extends State<CounterScreen> {
                       Expanded(
                         child: Text(
                           _isListening
-                              ? '🎤 Listening — say "fish buddy [name] caught a [species]"'
+                              ? '🎤 Mic active — say "fish buddy [name] caught a [species]"'
                               : _lastCommand.isNotEmpty
                                   ? '🗣️ "$_lastCommand"'
-                                  : '🎤 Always ready — say "fish buddy…"',
+                                  : '🎤 Say "fish buddy…"',
                           style: TextStyle(
                             fontSize: 12,
                             color: _isListening
