@@ -121,14 +121,46 @@ const _helpEntries = <String, _HelpEntry>{
   ),
   'counter': _HelpEntry(
     icon: Icons.people,
-    title: 'Angler Counter',
-    body: 'Keep a running count of fish caught per angler during a fishing trip.\n\n'
+    title: 'Angler Counter & Voice Commands',
+    body: 'Keep a running count of fish caught per angler during a fishing trip — '
+        'fully hands-free with voice!\n\n'
+        '📱 **Manual:**\n'
         '• Type an angler\'s name and tap "Add"\n'
-        '• Use + and – to adjust each person\'s count\n'
+        '• Tap + on a species to add one, or the - to remove\n'
         '• Tap "New Trip" to reset all counters to zero\n'
-        '• Delete an angler with the trash icon',
-    tips: 'Perfect for friendly competitions — see who catches the most! '
-        'Each tap of + is one fish added to that angler\'s tally.',
+        '• Delete an angler with the trash icon\n'
+        '• **Tap any species name** to edit/fix it (e.g. "pipe" → "pike")\n\n'
+        '🎤 **Voice (hands-free):**\n'
+        '• Tap the mic button to activate (turns red)\n'
+        '• Say **"fish buddy [name] caught [species]"** to tally\n'
+        '  Example: "fish buddy jason caught a pike"\n'
+        '• The app asks **"Record this fish?"** — say **"yes"** or **"no"**\n'
+        '• **"yes"** → opens Add Catch form with details pre-filled\n'
+        '• **"no"** → just tally, ready for next fish\n'
+        '• Say another "fish buddy…" command to tally the next fish',
+    tips: 'The app learns from your edits! Fix a species name once (tap to edit)\n'
+        'and future voice commands auto-correct. Example: edit "pipe" → "pike"\n'
+        'once, then saying "fish buddy jason caught a pipe" auto-records as "pike".\n'
+        'Only the 5 largest sizes are kept per species.',
+  ),
+  'add_catch': _HelpEntry(
+    icon: Icons.add_circle_outline,
+    title: 'Add Catch (Voice Ready)',
+    body: 'Record a full catch with photo, weight, length, location, and weather.\n\n'
+        '📱 **Manual:**\n'
+        '• Fill in angler, species, location, lure, weight, length\n'
+        '• Tap the photo area to take or choose a photo\n'
+        '• Tap the GPS button to auto-fill location and weather\n'
+        '• Tap "Save Catch" when done\n\n'
+        '🎤 **Voice (hands-free) after saying "yes":**\n'
+        'Tap the red mic button at bottom-right, then say:\n'
+        '• **"photo"** — opens front-facing selfie camera (3-2-1 countdown, auto-snap)\n'
+        '• **"weighs 5 lb"** — fills the weight field\n'
+        '• **"length 20 inches"** — fills the length field\n'
+        '• **"save"** — saves the catch and returns to the log\n'
+        'The mic stays active — just say your next command!',
+    tips: 'The selfie camera uses the front camera so you can hold the fish and snap. '
+        'Say "photo", pose with your fish, and the 3-second countdown auto-captures!',
   ),
   'map': _HelpEntry(
     icon: Icons.map,

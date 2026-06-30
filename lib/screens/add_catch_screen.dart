@@ -8,6 +8,7 @@ import 'package:path_provider/path_provider.dart';
 import 'package:speech_to_text/speech_to_text.dart' as stt;
 import '../models/catch.dart';
 import '../services/database_service.dart';
+import '../services/help_text.dart';
 import '../services/weather_service.dart';
 import '../services/widget_service.dart';
 import 'selfie_camera_screen.dart';
@@ -486,7 +487,10 @@ class _AddCatchScreenState extends State<AddCatchScreen> {
     final dateStr = DateFormat('MMM d, yyyy  h:mm a').format(_caughtAt);
 
     return Scaffold(
-      appBar: AppBar(title: Text(_isEditing ? 'Edit Catch' : 'Add Catch')),
+      appBar: AppBar(
+        title: Text(_isEditing ? 'Edit Catch' : 'Add Catch'),
+        actions: [helpButton(context, 'add_catch')],
+      ),
       body: Form(
         key: _formKey,
         child: ListView(
