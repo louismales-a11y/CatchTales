@@ -153,27 +153,32 @@ class _CounterScreenState extends State<CounterScreen> {
       onResult: (result) {
         if (_commandCooldown) return;
         final text = result.recognizedWords.toLowerCase().trim();
-        if (text.isNotEmpty &&
-            text.contains('fish buddy')) {
+        if (text.contains('fish buddy')) {
           _commandCooldown = true;
           _lastCommand = text;
           _parseCommand(text);
-          // Start listening again after a brief pause
-          Future.delayed(const Duration(milliseconds: 500), () {
-            _commandCooldown = false;
-            if (_isListening && mounted) {
-              _startContinuousListening();
-            }
-          });
         }
+        // Always restart after each result (even if no wake word)
+        Future.delayed(const Duration(milliseconds: 500), () {
+          _commandCooldown = false;
+          if (_isListening && mounted) {
+            _startContinuousListening();
+          }
+        });
       },
-      listenFor: const Duration(seconds: 60),
-      pauseFor: const Duration(seconds: 10),
+      listenFor: const Duration(seconds: 5),
+      pauseFor: const Duration(seconds: 1),
       listenOptions: stt.SpeechListenOptions(
         partialResults: false,
         cancelOnError: true,
       ),
     );
+    // Safety net: auto-restart if listen completes without result
+    Future.delayed(const Duration(seconds: 7), () {
+      if (_isListening && mounted) {
+        _startContinuousListening();
+      }
+    });
   }
 
   void _stopListening() {
@@ -531,10 +536,10 @@ class _CounterScreenState extends State<CounterScreen> {
                       Expanded(
                         child: Text(
                           _isListening
-                              ? '🎤 Say "fish buddy [name] caught a [species]"'
+                              ? '🎤 Listening — say "fish buddy [name] caught a [species]"'
                               : _lastCommand.isNotEmpty
                                   ? '🗣️ "$_lastCommand"'
-                                  : 'Auto-listening — say "fish buddy…"',
+                                  : '🎤 Always ready — say "fish buddy…"',
                           style: TextStyle(
                             fontSize: 12,
                             color: _isListening
