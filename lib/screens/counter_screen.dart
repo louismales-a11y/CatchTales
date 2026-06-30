@@ -1,7 +1,11 @@
+import 'dart:async';
+import 'dart:convert';
 import 'package:flutter/material.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'package:speech_to_text/speech_to_text.dart' as stt;
 import '../models/species_tally.dart';
 import '../services/database_service.dart';
+import 'add_catch_screen.dart';
 
 class CounterScreen extends StatefulWidget {
   const CounterScreen({super.key});
@@ -19,6 +23,14 @@ class _CounterScreenState extends State<CounterScreen> {
   late stt.SpeechToText _speech;
   bool _isListening = false;
   String _lastCommand = '';
+  String _liveTranscription = '';
+  DateTime? _lastCatchTime;
+  String _lastCatchKey = '';
+  DateTime? _wakeAt;
+  Map<String, String> _speciesCorrections = {};
+  String? _pendingAngler;
+  String? _pendingSpecies;
+  int _pendingCount = 0;
 
   @override
   void initState() {
@@ -26,19 +38,46 @@ class _CounterScreenState extends State<CounterScreen> {
     _speech = stt.SpeechToText();
     Future.microtask(() async {
       await _load();
-      _autoStartOnce();
+      await _loadCorrections();
+      _startMic();
     });
   }
 
-  /// Auto-start mic once on load. If it ends, it stays off — no restart loop.
-  Future<void> _autoStartOnce() async {
+  /// Load saved species corrections from SharedPreferences.
+  Future<void> _loadCorrections() async {
+    final prefs = await SharedPreferences.getInstance();
+    final data = prefs.getString('species_corrections');
+    if (data != null) {
+      _speciesCorrections = Map<String, String>.from(
+          json.decode(data) as Map);
+    }
+  }
+
+  /// Save species corrections to SharedPreferences.
+  Future<void> _saveCorrections() async {
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setString('species_corrections',
+        json.encode(_speciesCorrections));
+  }
+
+  /// Start the mic. Uses a long pause timeout so the session stays alive
+  /// for a full minute after each utterance — no cycling, no ping noise.
+  Future<void> _startMic() async {
     if (_isListening) return;
     final available = await _speech.initialize(
-      onError: (_) => setState(() => _isListening = false),
+      onError: (_) {
+        if (!mounted) return;
+        setState(() => _isListening = false);
+      },
       onStatus: (status) {
-        // Session ended — just update state, no restart
-        if (status == 'done' || status == 'notListening') {
+        if ((status == 'done' || status == 'notListening') && mounted) {
           setState(() => _isListening = false);
+          // If there's a pending tally, restart mic so user can respond
+          if (_pendingCount > 0) {
+            Future.delayed(const Duration(milliseconds: 500), () {
+              if (mounted && !_isListening) _startMic();
+            });
+          }
         }
       },
     );
@@ -46,17 +85,72 @@ class _CounterScreenState extends State<CounterScreen> {
     setState(() => _isListening = true);
     _speech.listen(
       onResult: (result) {
-        if (!result.finalResult) return; // only process final results
+        if (!mounted) return;
         final text = result.recognizedWords.toLowerCase().trim();
-        if (text.contains('fish buddy')) {
-          _lastCommand = text;
-          _parseCommand(text);
+        // Show what the mic hears in the live transcription
+        String status = '';
+        bool isWaked = false;
+
+        // 🥇 Check for pending tally FIRST (yes/no response to "Record this fish?")
+        // This takes priority over everything else.
+        if (_pendingCount > 0) {
+          final t = text.trim().toLowerCase();
+          if (t == 'no' || t == 'nope' || t == 'nah' ||
+              t.startsWith('tally') || t == 'just tally' ||
+              t == 'keep going' || t == 'next fish') {
+            // Explicit "no" → clear pending, stay on counter
+            _pendingCount = 0;
+            status = ' ✅ Just tally';
+            isWaked = true;
+          } else if (t == 'yes' || t == 'yeah' || t == 'yep' || t == 'yup' ||
+                     t == 'sure' || t == 'ok' || t == 'okay' ||
+                     t == 'record' || t.startsWith('log') ||
+                     t == 'add' || t == 'save') {
+            // Explicit "yes" → open catch form
+            isWaked = true;
+            _pendingCount = 0;
+            _openCatchForm(_pendingAngler!, _pendingSpecies!, 1);
+            setState(() => _liveTranscription = t + ' — opening catch form');
+            return;
+          }
+          // Anything else → ignore, stay pending
         }
+
+        // 🥈 Check for wake word
+        if (text.contains('fish') && text.contains('buddy')) {
+          _wakeAt = DateTime.now();
+          isWaked = true;
+          status = ' (🎤 wake!)';
+        }
+        // 🥉 Check if we're within 5s wake window
+        if (!isWaked && _wakeAt != null &&
+            DateTime.now().difference(_wakeAt!) < const Duration(seconds: 5)) {
+          isWaked = true;
+          status = ' (🎤 +5s)';
+        }
+
+        if (isWaked && text.contains('caught')) {
+          // Check if there's a real species word (≥3 letters) after "caught"
+          final words = text.split(RegExp(r'\s+'));
+          final idx = words.indexWhere((w) => w == 'caught');
+          final hasSpecies = idx >= 0 && idx < words.length - 1 &&
+              words.sublist(idx + 1).any((w) =>
+                  w.length >= 3 && RegExp(r'^[a-z]+$').hasMatch(w));
+          if (!hasSpecies) {
+            status = ' (⏳ waiting for species)';
+          } else {
+            status = ' (⚙️ processing!)';
+            _lastCommand = text;
+            _parseCommand(text);
+          }
+        }
+        setState(() => _liveTranscription = text + status);
       },
       listenOptions: stt.SpeechListenOptions(
         partialResults: true,
         cancelOnError: true,
         listenFor: const Duration(minutes: 10),
+        pauseFor: const Duration(seconds: 60),
       ),
     );
   }
@@ -147,6 +241,93 @@ class _CounterScreenState extends State<CounterScreen> {
     await _load();
   }
 
+  /// Show a dialog to rename a species (fix STT misrecognitions).
+  /// Saves the correction so voice commands auto-correct in the future.
+  Future<void> _editSpecies(String angler, String oldSpecies) async {
+    final ctrl = TextEditingController(text: oldSpecies);
+    final newSpecies = await showDialog<String>(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        title: const Text('Fix species name'),
+        content: TextField(
+          controller: ctrl,
+          autofocus: true,
+          decoration: const InputDecoration(
+            labelText: 'Species',
+            border: OutlineInputBorder(),
+          ),
+          textCapitalization: TextCapitalization.words,
+          onSubmitted: (v) => Navigator.pop(ctx, v.trim()),
+        ),
+        actions: [
+          TextButton(
+              onPressed: () => Navigator.pop(ctx),
+              child: const Text('Cancel')),
+          FilledButton(
+              onPressed: () => Navigator.pop(ctx, ctrl.text.trim()),
+              child: const Text('Save')),
+        ],
+      ),
+    );
+    if (newSpecies == null || newSpecies.isEmpty || newSpecies == oldSpecies) return;
+    final db = await DatabaseService.instance.database;
+    // Check if target species already exists for this angler
+    final existing = await db.query('species_tallies',
+        where: 'angler = ? AND species = ?',
+        whereArgs: [angler, newSpecies]);
+    if (existing.isNotEmpty) {
+      // Merge: add counts and sizes from old species into new species
+      final oldRow = await db.query('species_tallies',
+          where: 'angler = ? AND species = ?',
+          whereArgs: [angler, oldSpecies]);
+      if (oldRow.isNotEmpty) {
+        final oldCount = oldRow.first['count'] as int? ?? 0;
+        final oldSizes = oldRow.first['sizes'] as String? ?? '';
+        final newCount = existing.first['count'] as int? ?? 0;
+        final newSizes = existing.first['sizes'] as String? ?? '';
+        // Combine sizes (comma-separated) and let the SpeciesTally trim to 5
+        final combined = [newSizes, oldSizes]
+            .where((s) => s.isNotEmpty)
+            .join(',');
+        await db.update(
+          'species_tallies',
+          {'count': newCount + oldCount, 'sizes': combined},
+          where: 'angler = ? AND species = ?',
+          whereArgs: [angler, newSpecies],
+        );
+        // Delete the old species row
+        await db.delete('species_tallies',
+            where: 'angler = ? AND species = ?',
+            whereArgs: [angler, oldSpecies]);
+      }
+    } else {
+      // No conflict — simple rename
+      await db.update(
+        'species_tallies',
+        {'species': newSpecies},
+        where: 'angler = ? AND species = ?',
+        whereArgs: [angler, oldSpecies],
+      );
+    }
+    // Remember this correction for future voice commands
+    _speciesCorrections[oldSpecies.toLowerCase()] = newSpecies.toLowerCase();
+    await _saveCorrections();
+    if (!mounted) return;
+    await _load();
+  }
+
+  /// Open the full catch form with pre-filled data.
+  void _openCatchForm(String angler, String species, int count) {
+    Navigator.of(context).push(
+      MaterialPageRoute(
+        builder: (_) => AddCatchScreen(
+          initialAngler: angler,
+          initialSpecies: species,
+        ),
+      ),
+    );
+  }
+
   // ── Voice Command ──────────────────────────────────────────────────
 
   /// Tap mic to toggle on/off.
@@ -155,7 +336,7 @@ class _CounterScreenState extends State<CounterScreen> {
       _speech.stop();
       setState(() => _isListening = false);
     } else {
-      await _autoStartOnce();
+      await _startMic();
     }
   }
 
@@ -178,6 +359,21 @@ class _CounterScreenState extends State<CounterScreen> {
     }
 
     // ── Admin commands (no angler needed) ──
+    // Handle pending "Record this fish?" prompt
+    if (_pendingCount > 0) {
+      _pendingCount = 0; // clear regardless
+      // "yes" → open catch form
+      if (cmd == 'yes' || cmd == 'yeah' || cmd == 'yep' || cmd == 'yup' ||
+          cmd.startsWith('record') || cmd.startsWith('log') ||
+          cmd == 'add to catches' || cmd == 'save catch' ||
+          cmd == 'sure' || cmd == 'ok') {
+        _openCatchForm(_pendingAngler!, _pendingSpecies!, 1);
+        return;
+      }
+      // Anything else → just tally
+      setState(() => _liveTranscription = '✅ Just tally — ready for next fish');
+      return; // always return — don't reprocess as a fish command
+    }
     if (cmd.startsWith('help') || cmd == 'what can i say' || cmd == 'commands') {
       _showVoiceFeedback('Say "fish buddy [name] caught [species]" or "add [name]" to add angler, "reset" for new trip, "remove [name]" to delete');
       return;
@@ -220,7 +416,8 @@ class _CounterScreenState extends State<CounterScreen> {
       return;
     }
 
-    // Extract number of fish (default 1)
+    // Look for "caught" to split angler name and species
+    // (no size extraction — voice is for quick tally only)
     int count = 1;
     final numberWords = <String, int>{
       'one': 1, '1': 1, 'a': 1, 'an': 1,
@@ -231,22 +428,6 @@ class _CounterScreenState extends State<CounterScreen> {
       'ten': 10, '10': 10,
     };
 
-    // Extract size: "X inch" or "X in" or "X foot" or "X ft"
-    double? sizeInches;
-    final sizeMatch = RegExp(r'(\d+(\.\d+)?)\s*(inch|in|inches|"|foot|ft|feet)').firstMatch(cmd);
-    if (sizeMatch != null) {
-      final value = double.parse(sizeMatch.group(1)!);
-      final unit = sizeMatch.group(3)!.toLowerCase();
-      if (unit == 'foot' || unit == 'ft' || unit == 'feet') {
-        sizeInches = value * 12;
-      } else {
-        sizeInches = value;
-      }
-      // Remove the size text from the command for further parsing
-      cmd = cmd.replaceFirst(sizeMatch.group(0)!, '').trim();
-    }
-
-    // Look for "caught" to split angler name and species
     final caughtMatch = RegExp(r'caught\s+(\S+)').firstMatch(cmd);
     String? species;
     if (caughtMatch != null) {
@@ -254,30 +435,25 @@ class _CounterScreenState extends State<CounterScreen> {
       if (numberWords.containsKey(numOrSpecies)) {
         count = numberWords[numOrSpecies]!;
         final afterNum = cmd.substring(caughtMatch.end).trim();
-        species = afterNum.split(RegExp(r'\s+(and|the|big|huge|nice|great)\s+'))[0]
-            .split(' ')[0]
-            .trim();
+        species = afterNum.split(RegExp(r'\s+(and|the|big|huge|nice|great|a|an)\s+'))[0].trim();
         if (species.isEmpty) species = 'fish';
       } else if (numOrSpecies == 'a' || numOrSpecies == 'an') {
         final after = cmd.substring(caughtMatch.end).trim();
-        species = after.split(' ')[0].trim();
+        species = after.split(RegExp(r'\s+(and|the|big|huge|nice|great|a|an)\s+'))[0].trim();
         if (species.isEmpty) species = 'fish';
-        for (final w in ['big', 'huge', 'nice', 'great', 'and', 'the']) {
-          if (species == w) {
-            species = after.split(' ').length > 1
-                ? after.split(' ')[1].trim()
-                : 'fish';
-            break;
-          }
-        }
       } else {
-        species = numOrSpecies;
+        final after = cmd.substring(caughtMatch.start + 6).trim();
+        species = after.split(RegExp(r'\s+(and|the|big|huge|nice|great|a|an)\s+'))[0].trim();
+        if (species.isEmpty) species = numOrSpecies;
       }
     }
 
     if (species == null || species.isEmpty) {
       species = 'fish';
     }
+    // Apply any learned corrections (e.g. "pipe" → "pike" from past edits)
+    final corrected = _speciesCorrections[species.toLowerCase()];
+    if (corrected != null) species = corrected;
 
     // Extract angler name: everything from start to "caught"
     final nameEnd = cmd.indexOf('caught');
@@ -296,9 +472,15 @@ class _CounterScreenState extends State<CounterScreen> {
       return;
     }
 
-    _recordCatch(match, species, count, sizeInches: sizeInches);
+    // New "caught" command replaces any pending record — just tally
+    _pendingCount = 0;
+    _recordCatch(match, species, count);
   }
 
+  /// Correct common STT misrecognitions for species names using
+  /// Levenshtein distance against a known list.
+  /// Check if text contains something that sounds like "fish buddy".
+  /// Uses Levenshtein distance to handle STT misrecognitions.
   String? _findAngler(String spoken) {
     final names = _breakdown.map((b) => b.angler).toList();
     final s = spoken.toLowerCase().trim();
@@ -496,18 +678,29 @@ class _CounterScreenState extends State<CounterScreen> {
     );
   }
 
-  Future<void> _recordCatch(String angler, String species, int count,
-      {double? sizeInches}) async {
+  Future<void> _recordCatch(String angler, String species, int count) async {
+    final key = '$angler|$species|$count';
+    final now = DateTime.now();
+    if (key == _lastCatchKey && _lastCatchTime != null &&
+        now.difference(_lastCatchTime!) < const Duration(seconds: 3)) {
+      return;
+    }
+    _lastCatchKey = key;
+    _lastCatchTime = now;
+
+    // Set pending tally BEFORE any async work so "yes" response works
+    _pendingAngler = angler;
+    _pendingSpecies = species;
+    _pendingCount = count;
+    setState(() {
+      _liveTranscription = '✅ Tally: $angler +$count $species — Record this fish? Say yes or no';
+    });
+
     for (int i = 0; i < count; i++) {
-      await DatabaseService.instance.incrementSpeciesTally(angler, species,
-          sizeInches: sizeInches);
+      await DatabaseService.instance.incrementSpeciesTally(angler, species);
     }
     if (!mounted) return;
     await _load();
-    final sizeStr = sizeInches != null
-        ? ' ${sizeInches.toStringAsFixed(0)}"'
-        : '';
-    _showVoiceFeedback('✅ $angler caught $count $species$sizeStr');
   }
 
   /// Quick-add a species via UI (for when voice isn't convenient).
@@ -628,27 +821,81 @@ class _CounterScreenState extends State<CounterScreen> {
               // Voice command bar — always visible
               Container(
                 padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-                child: Row(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Expanded(
-                      child: _voicePromptText(theme),
+                    Row(
+                      children: [
+                        Expanded(
+                          child: _voicePromptText(theme),
+                        ),
+                        IconButton(
+                          icon: Icon(
+                            _isListening ? Icons.mic : Icons.mic_none,
+                            color: _isListening
+                                ? Colors.red
+                                : theme.colorScheme.primary,
+                          ),
+                          onPressed: _toggleListening,
+                          tooltip: _isListening
+                              ? 'Mute mic'
+                              : 'Unmute mic',
+                          visualDensity: VisualDensity.compact,
+                        ),
+                      ],
                     ),
-                    IconButton(
-                      icon: Icon(
-                        _isListening ? Icons.mic : Icons.mic_none,
-                        color: _isListening
-                            ? Colors.red
-                            : theme.colorScheme.primary,
+                    if (_liveTranscription.isNotEmpty)
+                      Padding(
+                        padding: const EdgeInsets.only(top: 4),
+                        child: Text(
+                          '🔊 "$_liveTranscription"',
+                          style: TextStyle(
+                            fontSize: 11,
+                            color: theme.colorScheme.primary,
+                            fontStyle: FontStyle.italic,
+                          ),
+                          maxLines: 2,
+                          overflow: TextOverflow.ellipsis,
+                        ),
                       ),
-                      onPressed: _toggleListening,
-                      tooltip: _isListening
-                          ? 'Mute mic'
-                          : 'Unmute mic',
-                      visualDensity: VisualDensity.compact,
-                    ),
                   ],
                 ),
               ),
+              // Prominent prompt banner when asking "Record this fish?"
+              if (_pendingCount > 0)
+                Container(
+                  width: double.infinity,
+                  padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                  decoration: BoxDecoration(
+                    gradient: LinearGradient(
+                      colors: [
+                        theme.colorScheme.primary.withValues(alpha: 0.15),
+                        theme.colorScheme.secondary.withValues(alpha: 0.08),
+                      ],
+                    ),
+                    border: Border(
+                      top: BorderSide(color: theme.colorScheme.primary.withValues(alpha: 0.3)),
+                      bottom: BorderSide(color: theme.colorScheme.primary.withValues(alpha: 0.3)),
+                    ),
+                  ),
+                  child: Row(
+                    children: [
+                      Icon(Icons.help_outline,
+                          color: theme.colorScheme.primary, size: 22),
+                      const SizedBox(width: 10),
+                      Expanded(
+                        child: Text(
+                          'Record $_pendingSpecies? Say "yes" or "no"',
+                          style: TextStyle(
+                            fontSize: 15,
+                            fontWeight: FontWeight.w600,
+                            color: theme.colorScheme.primary,
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
               const Divider(height: 1),
               // List
               Expanded(
@@ -688,6 +935,8 @@ class _CounterScreenState extends State<CounterScreen> {
                             onDelete: () => _deleteAngler(b.angler),
                             onDecrement: (species) =>
                                 _decrementSpecies(b.angler, species),
+                            onEdit: (species) =>
+                                _editSpecies(b.angler, species),
                           );
                         },
                       ),
@@ -702,12 +951,14 @@ class _AnglerCard extends StatelessWidget {
   final VoidCallback onAdd;
   final VoidCallback onDelete;
   final void Function(String species) onDecrement;
+  final void Function(String species) onEdit;
 
   const _AnglerCard({
     required this.breakdown,
     required this.onAdd,
     required this.onDelete,
     required this.onDecrement,
+    required this.onEdit,
   });
 
   @override
@@ -798,10 +1049,13 @@ class _AnglerCard extends StatelessWidget {
                               size: 16, color: Colors.grey.shade600),
                           const SizedBox(width: 8),
                           Expanded(
-                            child: Text(s.species,
-                                style: const TextStyle(
-                                    fontWeight: FontWeight.w500,
-                                    fontSize: 14)),
+                            child: GestureDetector(
+                              onTap: () => onEdit(s.species),
+                              child: Text(s.species,
+                                  style: const TextStyle(
+                                      fontWeight: FontWeight.w500,
+                                      fontSize: 14)),
+                            ),
                           ),
                           Text('${s.count}',
                               style: TextStyle(

@@ -1,18 +1,23 @@
+import 'dart:async';
 import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:intl/intl.dart';
 import 'package:path_provider/path_provider.dart';
+import 'package:speech_to_text/speech_to_text.dart' as stt;
 import '../models/catch.dart';
 import '../services/database_service.dart';
 import '../services/weather_service.dart';
 import '../services/widget_service.dart';
+import 'selfie_camera_screen.dart';
 
 class AddCatchScreen extends StatefulWidget {
   final Catch? existingCatch;
+  final String? initialAngler;
+  final String? initialSpecies;
 
-  const AddCatchScreen({super.key, this.existingCatch});
+  const AddCatchScreen({super.key, this.existingCatch, this.initialAngler, this.initialSpecies});
 
   @override
   State<AddCatchScreen> createState() => _AddCatchScreenState();
@@ -30,6 +35,12 @@ class _AddCatchScreenState extends State<AddCatchScreen> {
 
   DateTime _caughtAt = DateTime.now();
   File? _photoFile;
+
+  // Voice
+  late stt.SpeechToText _speech;
+  bool _voiceOn = false;
+  String _voiceStatus = '';
+  String _lastVoiceText = '';
   bool _saving = false;
   bool _fetchingLocation = false;
   bool _fetchingWeather = false;
@@ -50,6 +61,7 @@ class _AddCatchScreenState extends State<AddCatchScreen> {
   @override
   void initState() {
     super.initState();
+    _speech = stt.SpeechToText();
     if (_isEditing) {
       final c = widget.existingCatch!;
       _anglerCtrl.text = c.angler;
@@ -65,9 +77,9 @@ class _AddCatchScreenState extends State<AddCatchScreen> {
       _weatherTemp = c.weatherTemp;
       _weatherCondition = c.weatherCondition;
       _useMetric = c.weightUnit == 'kg' || c.lengthUnit == 'cm';
-      if (c.hasPhotos && c.primaryPhoto != null) {
-        _photoFile = File(c.primaryPhoto!);
-      }
+    } else {
+      if (widget.initialAngler != null) _anglerCtrl.text = widget.initialAngler!;
+      if (widget.initialSpecies != null) _speciesCtrl.text = widget.initialSpecies!;
     }
   }
 
@@ -80,6 +92,7 @@ class _AddCatchScreenState extends State<AddCatchScreen> {
     _weightCtrl.dispose();
     _lengthCtrl.dispose();
     _notesCtrl.dispose();
+    _speech.stop();
     super.dispose();
   }
 
@@ -143,9 +156,23 @@ class _AddCatchScreenState extends State<AddCatchScreen> {
 
   Future<void> _pickPhoto(ImageSource source) async {
     final picker = ImagePicker();
-    final picked = await picker.pickImage(source: source, maxWidth: 1024);
+    final picked = await picker.pickImage(
+      source: source,
+      maxWidth: 1024,
+      preferredCameraDevice: CameraDevice.front,
+    );
     if (picked != null) {
       setState(() => _photoFile = File(picked.path));
+    }
+  }
+
+  /// Open a selfie camera view (front camera) via the camera package.
+  Future<void> _openSelfieCamera() async {
+    final path = await Navigator.of(context).push<String>(
+      MaterialPageRoute(builder: (_) => const SelfieCameraScreen()),
+    );
+    if (path != null && mounted) {
+      setState(() => _photoFile = File(path));
     }
   }
 
@@ -342,6 +369,115 @@ class _AddCatchScreenState extends State<AddCatchScreen> {
         ),
       ),
     );
+  }
+
+  // ── Voice Commands ──────────────────────────────────────────────
+
+  Future<void> _toggleVoice() async {
+    if (_voiceOn) {
+      _speech.stop();
+      setState(() => _voiceOn = false);
+    } else {
+      _startVoice();
+    }
+  }
+
+  Future<void> _startVoice() async {
+    // Stop any existing session (e.g. from counter screen)
+    await _speech.stop();
+    await Future.delayed(const Duration(milliseconds: 500));
+    // Re-initialize to register our own onError/onStatus callbacks
+    _speech = stt.SpeechToText();
+    final available = await _speech.initialize(
+      onError: (_) {
+        if (!mounted) return;
+        setState(() => _voiceOn = false);
+        Future.delayed(const Duration(seconds: 2), () {
+          if (mounted && !_voiceOn) _startVoice();
+        });
+      },
+      onStatus: (status) {
+        if ((status == 'done' || status == 'notListening') && mounted) {
+          setState(() => _voiceOn = false);
+          Future.delayed(const Duration(milliseconds: 500), () {
+            if (mounted && !_voiceOn) _startVoice();
+          });
+        }
+      },
+    );
+    if (!available) return;
+    setState(() => _voiceOn = true);
+    _speech.listen(
+      onResult: (result) {
+        if (!mounted) return;
+        final t = result.recognizedWords.toLowerCase().trim();
+        if (t == _lastVoiceText) return;
+        _lastVoiceText = t;
+        _processVoice(t);
+      },
+      listenOptions: stt.SpeechListenOptions(
+        partialResults: true,
+        cancelOnError: true,
+        listenFor: const Duration(minutes: 10),
+        pauseFor: const Duration(seconds: 60),
+      ),
+    );
+  }
+
+  void _processVoice(String text) {
+    setState(() => _voiceStatus = '\"$text\"');
+
+    // Take photo — open selfie camera (front-facing)
+    if (text.contains('photo') || text.contains('camera') ||
+        text.contains('snap') || text.contains('picture') ||
+        text == 'shoot') {
+      _openSelfieCamera();
+      return;
+    }
+
+    // Weight: "weighs 5 lb" or "weight 2.5 kg"
+    final weightMatch = RegExp(r'(weighs?|weight|mass)\s+([\d.]+)\s*(lb|lbs|kg|kilos|pounds)?').firstMatch(text);
+    if (weightMatch != null) {
+      final value = double.tryParse(weightMatch.group(2)!);
+      final unit = weightMatch.group(3)?.toLowerCase() ?? '';
+      if (value != null) {
+        if (unit == 'kg' || unit == 'kilos') {
+          _useMetric = true;
+          _weightCtrl.text = value.toStringAsFixed(1);
+        } else {
+          _useMetric = false;
+          _weightCtrl.text = value.toStringAsFixed(1);
+        }
+        setState(() {});
+      }
+      return;
+    }
+
+    // Length: "length 20 inches" or "measures 50 cm"
+    final lengthMatch = RegExp(r'(length|measure|size|long)\s+([\d.]+)\s*(inch|in|inches|cm|centimeters|")?').firstMatch(text);
+    if (lengthMatch != null) {
+      final value = double.tryParse(lengthMatch.group(2)!);
+      final unit = lengthMatch.group(3)?.toLowerCase() ?? '';
+      if (value != null) {
+        if (unit == 'cm' || unit == 'centimeters') {
+          _useMetric = true;
+        } else {
+          _useMetric = false;
+        }
+        _lengthCtrl.text = value.toStringAsFixed(1);
+        setState(() {});
+      }
+      return;
+    }
+
+    // Save / Done
+    if (text.startsWith('save') || text.startsWith('done') ||
+        text == 'finish' || text == 'submit') {
+      _save();
+      return;
+    }
+
+    setState(() => _voiceStatus = '❓ Unrecognized: \"$text\"');
   }
 
   @override
@@ -639,6 +775,36 @@ class _AddCatchScreenState extends State<AddCatchScreen> {
           ],
         ),
       ),
+      floatingActionButton: FloatingActionButton.small(
+        onPressed: _toggleVoice,
+        backgroundColor: _voiceOn ? Colors.red : theme.colorScheme.primary,
+        child: Icon(
+          _voiceOn ? Icons.mic : Icons.mic_none,
+          color: Colors.white,
+        ),
+      ),
+      bottomNavigationBar: _voiceStatus.isNotEmpty
+          ? Container(
+              padding: const EdgeInsets.all(12),
+              color: theme.colorScheme.primary.withValues(alpha: 0.1),
+              child: Row(
+                children: [
+                  Icon(Icons.record_voice_over,
+                      size: 18, color: theme.colorScheme.primary),
+                  const SizedBox(width: 8),
+                  Expanded(
+                    child: Text(
+                      _voiceStatus,
+                      style: TextStyle(
+                        fontSize: 13,
+                        color: theme.colorScheme.primary,
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            )
+          : null,
     );
   }
 }

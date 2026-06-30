@@ -23,12 +23,30 @@ echo "   New:     version: $NEW_VERSION"
 sed -i "s/^version: .*/version: $NEW_VERSION/" pubspec.yaml
 
 # ─── 2. Read API keys ────────────────────────────────────────────────────
-# Set env vars or create a .env file:
-#   GOOGLE_MAPS_API_KEY=AIzaSy...
-#   OPENWEATHER_API_KEY=your_key...
+# Keys are read from (in order of priority):
+#   1. Already-set environment variables (CI/CD override)
+#   2. pass password-store (local dev, recommended)
+#   3. .env file (legacy fallback — avoid using)
+#
+# To set a key in pass:
+#   pass insert api/google-maps
+#   pass insert api/openweather
+
+if [ -z "$GOOGLE_MAPS_API_KEY" ] && command -v pass &>/dev/null; then
+  GOOGLE_MAPS_API_KEY=$(pass show api/google-maps 2>/dev/null || true)
+fi
+if [ -z "$OPENWEATHER_API_KEY" ] && command -v pass &>/dev/null; then
+  OPENWEATHER_API_KEY=$(pass show api/openweather 2>/dev/null || true)
+fi
+
+# Legacy .env fallback (only if pass didn't have the key)
 if [ -f .env ]; then
-  GOOGLE_MAPS_API_KEY=${GOOGLE_MAPS_API_KEY:-$(grep '^GOOGLE_MAPS_API_KEY=' .env | cut -d= -f2-)}
-  OPENWEATHER_API_KEY=${OPENWEATHER_API_KEY:-$(grep '^OPENWEATHER_API_KEY=' .env | cut -d= -f2-)}
+  if [ -z "$GOOGLE_MAPS_API_KEY" ]; then
+    GOOGLE_MAPS_API_KEY=${GOOGLE_MAPS_API_KEY:-$(grep '^GOOGLE_MAPS_API_KEY=' .env | cut -d= -f2-)}
+  fi
+  if [ -z "$OPENWEATHER_API_KEY" ]; then
+    OPENWEATHER_API_KEY=${OPENWEATHER_API_KEY:-$(grep '^OPENWEATHER_API_KEY=' .env | cut -d= -f2-)}
+  fi
 fi
 
 DART_DEFINES=""
