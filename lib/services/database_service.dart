@@ -70,6 +70,17 @@ class DatabaseService {
             created_at TEXT NOT NULL
           )
         ''');
+        await db.execute('''
+          CREATE TABLE tackle_items (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            name TEXT NOT NULL,
+            type TEXT NOT NULL,
+            photo_path TEXT,
+            target_species TEXT DEFAULT '',
+            tips TEXT DEFAULT '',
+            created_at TEXT NOT NULL
+          )
+        ''');
       },
       onUpgrade: (db, oldVersion, newVersion) async {
         if (oldVersion < 6) {

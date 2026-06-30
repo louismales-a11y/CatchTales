@@ -158,7 +158,7 @@ class _TodaysPickScreenState extends State<TodaysPickScreen> {
       if (mounted) {
         setState(() {
           _loadingRecs = false;
-          _error = 'Something went wrong. Please try again.';
+          _error = 'Something went wrong: $e';
         });
       }
     }

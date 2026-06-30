@@ -5,6 +5,7 @@ import '../services/database_service.dart';
 import 'add_tackle_screen.dart';
 import 'tackle_catalog_screen.dart';
 import 'tackle_detail_screen.dart';
+import 'todays_pick_screen.dart';
 
 class TackleBoxScreen extends StatefulWidget {
   const TackleBoxScreen({super.key});
@@ -64,6 +65,31 @@ class _TackleBoxScreenState extends State<TackleBoxScreen> {
                   style:
                       TextStyle(fontSize: 18, fontWeight: FontWeight.w700)),
               const SizedBox(height: 12),
+              ListTile(
+                leading: Container(
+                  padding: const EdgeInsets.all(8),
+                  decoration: BoxDecoration(
+                    color: Theme.of(context)
+                        .colorScheme
+                        .primary
+                        .withValues(alpha: 0.1),
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                  child: const Icon(Icons.auto_awesome),
+                ),
+                title: const Text("Today's Pick"),
+                subtitle: const Text('Get weather-aware recommendations'),
+                trailing: const Icon(Icons.chevron_right),
+                onTap: () {
+                  Navigator.pop(ctx);
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                        builder: (_) => const TodaysPickScreen()),
+                  ).then((_) => _load());
+                },
+              ),
+              const Divider(height: 4),
               ListTile(
                 leading: Container(
                   padding: const EdgeInsets.all(8),
