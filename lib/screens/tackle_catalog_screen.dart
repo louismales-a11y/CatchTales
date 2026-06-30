@@ -35,8 +35,38 @@ class _TackleCatalogScreenState extends State<TackleCatalogScreen> {
   }
 
   Future<void> _addToBox(TackleTypeInfo info) async {
+    // Prompt for a custom name so users can add variations (e.g. "White Spinnerbait")
+    final name = await showDialog<String>(
+      context: context,
+      builder: (ctx) {
+        final ctrl = TextEditingController(text: info.name);
+        return AlertDialog(
+          title: const Text('Name Your Tackle'),
+          content: TextField(
+            controller: ctrl,
+            autofocus: true,
+            decoration: const InputDecoration(
+              labelText: 'Tackle name',
+              hintText: 'e.g. White Spinnerbait',
+              border: OutlineInputBorder(),
+            ),
+          ),
+          actions: [
+            TextButton(
+                onPressed: () => Navigator.pop(ctx),
+                child: const Text('Cancel')),
+            FilledButton(
+                onPressed: () => Navigator.pop(ctx, ctrl.text.trim()),
+                child: const Text('Add')),
+          ],
+        );
+      },
+    );
+
+    if (name == null || name.isEmpty) return;
+
     final item = TackleItem(
-      name: info.name,
+      name: name,
       type: info.category,
       targetSpecies: List.from(info.targetSpecies),
       tips: info.tips,
@@ -45,7 +75,7 @@ class _TackleCatalogScreenState extends State<TackleCatalogScreen> {
     if (mounted) {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
-          content: Text('${info.name} added to your tackle box'),
+          content: Text('$name added to your tackle box'),
           duration: const Duration(seconds: 2),
         ),
       );

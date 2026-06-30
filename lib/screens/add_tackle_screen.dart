@@ -5,10 +5,12 @@ import '../models/tackle_item.dart';
 import '../data/tackle_database.dart';
 import '../services/database_service.dart';
 
-/// Screen to add a new tackle item — take a photo, pick the type,
+/// Screen to add or edit a tackle item — take a photo, pick the type,
 /// and it auto-fills target species + tips from the built-in database.
 class AddTackleScreen extends StatefulWidget {
-  const AddTackleScreen({super.key});
+  final TackleItem? existingItem;
+
+  const AddTackleScreen({super.key, this.existingItem});
 
   @override
   State<AddTackleScreen> createState() => _AddTackleScreenState();
@@ -21,6 +23,21 @@ class _AddTackleScreenState extends State<AddTackleScreen> {
   String? _photoPath;
   List<String> _selectedSpecies = [];
   bool _saving = false;
+
+  bool get _isEditing => widget.existingItem != null;
+
+  @override
+  void initState() {
+    super.initState();
+    final existing = widget.existingItem;
+    if (existing != null) {
+      _nameCtrl.text = existing.name;
+      _selectedType = existing.type;
+      _photoPath = existing.photoPath;
+      _selectedSpecies = List.from(existing.targetSpecies);
+      _tipsCtrl.text = existing.tips;
+    }
+  }
 
   /// Grouped tackle types by category.
   Map<String, List<TackleTypeInfo>> get _grouped {
@@ -143,6 +160,7 @@ class _AddTackleScreenState extends State<AddTackleScreen> {
     setState(() => _saving = true);
 
     final item = TackleItem(
+      id: widget.existingItem?.id,
       name: name,
       type: _selectedType,
       photoPath: _photoPath,
@@ -150,11 +168,17 @@ class _AddTackleScreenState extends State<AddTackleScreen> {
       tips: _tipsCtrl.text.trim(),
     );
 
-    await DatabaseService.instance.addTackleItem(item);
+    if (_isEditing) {
+      await DatabaseService.instance.updateTackleItem(item);
+    } else {
+      await DatabaseService.instance.addTackleItem(item);
+    }
 
     if (mounted) {
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('$name added to tackle box!')),
+        SnackBar(content: Text(_isEditing
+            ? '$name updated!'
+            : '$name added to tackle box!')),
       );
       Navigator.pop(context, true);
     }
@@ -166,7 +190,7 @@ class _AddTackleScreenState extends State<AddTackleScreen> {
     final bottomPad = MediaQuery.of(context).padding.bottom;
 
     return Scaffold(
-      appBar: AppBar(title: const Text('Add Tackle')),
+      appBar: AppBar(title: Text(_isEditing ? 'Edit Tackle' : 'Add Tackle')),
       body: ListView(
         padding: EdgeInsets.fromLTRB(16, 16, 16, 16 + bottomPad + 80),
         children: [

@@ -144,6 +144,56 @@ class _AddCatchScreenState extends State<AddCatchScreen> {
     }
   }
 
+  Future<void> _pickFromTackleBox() async {
+    final items = await DatabaseService.instance.getTackleItems();
+    if (items.isEmpty) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Your tackle box is empty')),
+        );
+      }
+      return;
+    }
+
+    if (!mounted) return;
+    final result = await showDialog<String>(
+      context: context,
+      builder: (ctx) => SimpleDialog(
+        title: const Text('Pick from Tackle Box'),
+        children: items.map((item) => SimpleDialogOption(
+          onPressed: () => Navigator.pop(ctx, item.name),
+          child: Row(
+            children: [
+              item.photoPath != null && File(item.photoPath!).existsSync()
+                  ? ClipRRect(
+                      borderRadius: BorderRadius.circular(6),
+                      child: Image.file(
+                        File(item.photoPath!),
+                        width: 32, height: 32, fit: BoxFit.cover,
+                        errorBuilder: (a,b,c) => const Icon(Icons.set_meal, size: 24),
+                      ),
+                    )
+                  : const Icon(Icons.set_meal, size: 24),
+              const SizedBox(width: 12),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(item.name, style: const TextStyle(fontSize: 14)),
+                    Text(item.type, style: const TextStyle(fontSize: 11, color: Colors.grey)),
+                  ],
+                ),
+              ),
+            ],
+          ),
+        )).toList(),
+      ),
+    );
+    if (result != null && mounted) {
+      _lureCtrl.text = result;
+    }
+  }
+
   Future<void> _pickDate() async {
     final date = await showDatePicker(
       context: context,
@@ -451,13 +501,37 @@ class _AddCatchScreenState extends State<AddCatchScreen> {
             ),
             const SizedBox(height: 14),
 
-            // Lure
-            TextFormField(
-              controller: _lureCtrl,
-              decoration: const InputDecoration(
-                labelText: 'Lure / Bait',
-                prefixIcon: Icon(Icons.vpn_key),
-              ),
+            // Lure (with tackle box picker)
+            Row(
+              children: [
+                Expanded(
+                  child: TextFormField(
+                    controller: _lureCtrl,
+                    decoration: const InputDecoration(
+                      labelText: 'Lure / Bait',
+                      prefixIcon: Icon(Icons.vpn_key),
+                    ),
+                  ),
+                ),
+                const SizedBox(width: 4),
+                SizedBox(
+                  height: 56,
+                  child: Tooltip(
+                    message: 'Pick from tackle box',
+                    child: IconButton(
+                      icon: const Icon(Icons.inventory_2, size: 20),
+                      onPressed: _pickFromTackleBox,
+                      style: IconButton.styleFrom(
+                        backgroundColor:
+                            theme.colorScheme.surfaceContainerHighest,
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(12),
+                        ),
+                      ),
+                    ),
+                  ),
+                ),
+              ],
             ),
             const SizedBox(height: 14),
 

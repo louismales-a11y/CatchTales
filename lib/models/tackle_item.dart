@@ -40,4 +40,23 @@ class TackleItem {
         tips: map['tips'] as String? ?? '',
         createdAt: DateTime.tryParse(map['created_at'] as String? ?? '') ?? DateTime.now(),
       );
+
+  TackleItem copyWith({
+    int? id,
+    String? name,
+    String? type,
+    String? photoPath,
+    List<String>? targetSpecies,
+    String? tips,
+    DateTime? createdAt,
+  }) =>
+      TackleItem(
+        id: id ?? this.id,
+        name: name ?? this.name,
+        type: type ?? this.type,
+        photoPath: photoPath ?? this.photoPath,
+        targetSpecies: targetSpecies ?? this.targetSpecies,
+        tips: tips ?? this.tips,
+        createdAt: createdAt ?? this.createdAt,
+      );
 }

@@ -2,13 +2,14 @@ import 'dart:io';
 import 'package:flutter/material.dart';
 import '../data/tackle_database.dart';
 import '../models/tackle_item.dart';
+import '../services/database_service.dart';
+import 'add_tackle_screen.dart';
 
 class TackleDetailScreen extends StatelessWidget {
   final TackleItem item;
 
   const TackleDetailScreen({super.key, required this.item});
 
-  /// Look up the emoji icon from the tackle database.
   String? get _icon {
     for (final t in tackleTypeDatabase) {
       if (t.name == item.name || t.category == item.type) {
@@ -26,7 +27,55 @@ class TackleDetailScreen extends StatelessWidget {
         item.photoPath != null && File(item.photoPath!).existsSync();
 
     return Scaffold(
-      appBar: AppBar(title: Text(item.name)),
+      appBar: AppBar(
+        title: Text(item.name),
+        actions: [
+          // Edit
+          IconButton(
+            icon: const Icon(Icons.edit_outlined),
+            tooltip: 'Edit',
+            onPressed: () async {
+              final result = await Navigator.push<bool>(
+                context,
+                MaterialPageRoute(
+                  builder: (_) => AddTackleScreen(existingItem: item),
+                ),
+              );
+              if (result == true && context.mounted) {
+                Navigator.pop(context, true);
+              }
+            },
+          ),
+          // Delete
+          IconButton(
+            icon: const Icon(Icons.delete_outline),
+            tooltip: 'Delete',
+            onPressed: () async {
+              if (item.id == null) return;
+              final confirm = await showDialog<bool>(
+                context: context,
+                builder: (ctx) => AlertDialog(
+                  title: const Text('Delete Tackle'),
+                  content: Text('Remove ${item.name}?'),
+                  actions: [
+                    TextButton(
+                        onPressed: () => Navigator.pop(ctx, false),
+                        child: const Text('Cancel')),
+                    TextButton(
+                        onPressed: () => Navigator.pop(ctx, true),
+                        child: const Text('Delete',
+                            style: TextStyle(color: Colors.red))),
+                  ],
+                ),
+              );
+              if (confirm == true && item.id != null) {
+                await DatabaseService.instance.deleteTackleItem(item.id!);
+                if (context.mounted) Navigator.pop(context, true);
+              }
+            },
+          ),
+        ],
+      ),
       body: ListView(
         padding: EdgeInsets.fromLTRB(16, 16, 16, 16 + bottomPad + 40),
         children: [
