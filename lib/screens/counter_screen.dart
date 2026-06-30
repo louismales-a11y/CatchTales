@@ -46,7 +46,6 @@ class _CounterScreenState extends State<CounterScreen> {
     setState(() => _isListening = true);
     _speech.listen(
       onResult: (result) {
-        if (!_isListening) return;
         if (!result.finalResult) return; // only process final results
         final text = result.recognizedWords.toLowerCase().trim();
         if (text.contains('fish buddy')) {
