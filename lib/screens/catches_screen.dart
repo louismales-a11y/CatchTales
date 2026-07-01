@@ -172,7 +172,7 @@ class CatchesScreenState extends State<CatchesScreen> {
               ),
             ),
             const SizedBox(height: 8),
-            Text('Tap 🎤 below, then say "jason caught a pike at Lake Erie"',
+            Text('Tap + to add a catch, then tap 🎤 for voice',
                 textAlign: TextAlign.center,
                 style: TextStyle(fontSize: 12, color: Colors.grey.shade600)),
           ],
