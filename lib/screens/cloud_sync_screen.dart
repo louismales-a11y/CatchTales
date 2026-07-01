@@ -26,6 +26,20 @@ class _CloudSyncScreenState extends State<CloudSyncScreen> {
     if (mounted) setState(() => _localCount = count);
   }
 
+  Future<void> _connect() async {
+    setState(() => _busy = true);
+    await _cloud.init();
+    setState(() => _busy = false);
+    if (mounted) _showResult();
+  }
+
+  Future<void> _disconnect() async {
+    setState(() => _busy = true);
+    await _cloud.signOut();
+    setState(() => _busy = false);
+    if (mounted) _showResult();
+  }
+
   Future<void> _upload() async {
     setState(() => _busy = true);
     await _cloud.uploadCatches();
@@ -109,12 +123,49 @@ class _CloudSyncScreenState extends State<CloudSyncScreen> {
           ),
           const SizedBox(height: 24),
 
-          // Buttons
+          // Connection buttons
+          Row(
+            children: [
+              Expanded(
+                child: SizedBox(
+                  height: 44,
+                  child: OutlinedButton.icon(
+                    onPressed: _cloud.isAvailable && !_busy && !_cloud.isConnected
+                        ? _connect
+                        : null,
+                    icon: const Icon(Icons.link, size: 18),
+                    label: const Text('Connect', style: TextStyle(fontSize: 13)),
+                    style: OutlinedButton.styleFrom(shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12))),
+                  ),
+                ),
+              ),
+              const SizedBox(width: 12),
+              Expanded(
+                child: SizedBox(
+                  height: 44,
+                  child: OutlinedButton.icon(
+                    onPressed: _cloud.isAvailable && !_busy && _cloud.isConnected
+                        ? _disconnect
+                        : null,
+                    icon: const Icon(Icons.link_off, size: 18),
+                    label: const Text('Disconnect', style: TextStyle(fontSize: 13)),
+                    style: OutlinedButton.styleFrom(
+                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                      foregroundColor: Colors.red,
+                    ),
+                  ),
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 20),
+
+          // Sync buttons
           SizedBox(
             width: double.infinity,
             height: 52,
             child: FilledButton.icon(
-              onPressed: _cloud.isAvailable && !_busy ? _upload : null,
+              onPressed: _cloud.isAvailable && !_busy && _cloud.isConnected ? _upload : null,
               icon: _busy
                   ? const SizedBox(width: 20, height: 20, child: CircularProgressIndicator(strokeWidth: 2, color: Colors.white))
                   : const Icon(Icons.cloud_upload),
@@ -127,7 +178,7 @@ class _CloudSyncScreenState extends State<CloudSyncScreen> {
             width: double.infinity,
             height: 52,
             child: OutlinedButton.icon(
-              onPressed: _cloud.isAvailable && !_busy ? _download : null,
+              onPressed: _cloud.isAvailable && !_busy && _cloud.isConnected ? _download : null,
               icon: const Icon(Icons.cloud_download),
               label: const Text('Download from Cloud'),
               style: OutlinedButton.styleFrom(shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14))),

@@ -22,6 +22,7 @@ class CloudSyncService {
   SyncStatus get status => _status;
   String get lastError => _lastError;
   bool get isAvailable => _available;
+  bool get isConnected => _available && _status == SyncStatus.connected;
 
   /// Initialize Firebase. Safe to call even if not configured.
   Future<void> init() async {
