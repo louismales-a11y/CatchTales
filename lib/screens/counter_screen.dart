@@ -31,6 +31,7 @@ class _CounterScreenState extends State<CounterScreen> {
   String? _pendingAngler;
   String? _pendingSpecies;
   int _pendingCount = 0;
+  String? _pendingLocation;
 
   @override
   void initState() {
@@ -109,7 +110,7 @@ class _CounterScreenState extends State<CounterScreen> {
             // Explicit "yes" → open catch form
             isWaked = true;
             _pendingCount = 0;
-            _openCatchForm(_pendingAngler!, _pendingSpecies!, 1);
+            _openCatchForm(_pendingAngler!, _pendingSpecies!, 1, location: _pendingLocation);
             setState(() => _liveTranscription = t + ' — opening catch form');
             return;
           }
@@ -317,12 +318,13 @@ class _CounterScreenState extends State<CounterScreen> {
   }
 
   /// Open the full catch form with pre-filled data.
-  void _openCatchForm(String angler, String species, int count) {
+  void _openCatchForm(String angler, String species, int count, {String? location}) {
     Navigator.of(context).push(
       MaterialPageRoute(
         builder: (_) => AddCatchScreen(
           initialAngler: angler,
           initialSpecies: species,
+          initialLocation: location,
         ),
       ),
     );
@@ -390,7 +392,14 @@ class _CounterScreenState extends State<CounterScreen> {
       return;
     }
 
-    _openCatchForm(match, species, count);
+    // Extract location from "at X" / "from X" / "in X" / "on X"
+    String? location;
+    final locationWords = RegExp(r'\b(at|from|in|on)\s+(.+)$').firstMatch(cmd);
+    if (locationWords != null) {
+      location = locationWords.group(2)!.trim();
+    }
+
+    _openCatchForm(match, species, count, location: location);
   }
 
   // ── Voice Command ──────────────────────────────────────────────────
@@ -544,8 +553,16 @@ class _CounterScreenState extends State<CounterScreen> {
       return;
     }
 
+    // Extract location from "at X" / "from X" / "in X" / "on X"
+    String? location;
+    final locationWords = RegExp(r'\b(at|from|in|on)\s+(.+)$').firstMatch(cmd);
+    if (locationWords != null) {
+      location = locationWords.group(2)!.trim();
+    }
+
     // New "caught" command replaces any pending record — just tally
     _pendingCount = 0;
+    _pendingLocation = location;
     _recordCatch(match, species, count);
   }
 

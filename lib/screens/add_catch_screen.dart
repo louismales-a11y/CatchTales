@@ -17,8 +17,9 @@ class AddCatchScreen extends StatefulWidget {
   final Catch? existingCatch;
   final String? initialAngler;
   final String? initialSpecies;
+  final String? initialLocation;
 
-  const AddCatchScreen({super.key, this.existingCatch, this.initialAngler, this.initialSpecies});
+  const AddCatchScreen({super.key, this.existingCatch, this.initialAngler, this.initialSpecies, this.initialLocation});
 
   @override
   State<AddCatchScreen> createState() => _AddCatchScreenState();
@@ -81,6 +82,7 @@ class _AddCatchScreenState extends State<AddCatchScreen> {
     } else {
       if (widget.initialAngler != null) _anglerCtrl.text = widget.initialAngler!;
       if (widget.initialSpecies != null) _speciesCtrl.text = widget.initialSpecies!;
+      if (widget.initialLocation != null) _locationCtrl.text = widget.initialLocation!;
     }
     // Auto-fetch GPS location when form opens
     Future.microtask(() => _getLocation());

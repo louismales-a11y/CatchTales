@@ -179,10 +179,18 @@ class CatchesScreenState extends State<CatchesScreen> {
         final name = words.sublist(0, idx).join(' ');
         if (name.isEmpty) return;
         String species = 'fish';
-        for (final w in words.sublist(idx + 1)) {
-          if (w.length >= 3 && RegExp(r'^[a-z]+$').hasMatch(w)) {
-            species = w;
+        String? location;
+        for (int i = idx + 1; i < words.length; i++) {
+          final w = words[i];
+          // Check for location keywords: "at", "from", "in", "on"
+          if ((w == 'at' || w == 'from' || w == 'in' || w == 'on') &&
+              i + 1 < words.length) {
+            // Everything after the keyword is the location
+            location = words.sublist(i + 1).join(' ');
             break;
+          }
+          if (species == 'fish' && w.length >= 3 && RegExp(r'^[a-z]+$').hasMatch(w)) {
+            species = w;
           }
         }
         _voiceStatus = '🎤 Opening form for $name - $species';
@@ -191,6 +199,7 @@ class CatchesScreenState extends State<CatchesScreen> {
             builder: (_) => AddCatchScreen(
               initialAngler: name,
               initialSpecies: species,
+              initialLocation: location,
             ),
           ),
         );
