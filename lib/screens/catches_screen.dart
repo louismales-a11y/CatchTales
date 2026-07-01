@@ -1,6 +1,8 @@
+import 'dart:async';
 import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
+import 'package:speech_to_text/speech_to_text.dart' as stt;
 import '../models/catch.dart';
 import '../services/database_service.dart';
 import '../services/widget_service.dart';
@@ -16,6 +18,11 @@ class CatchesScreen extends StatefulWidget {
 class CatchesScreenState extends State<CatchesScreen> {
   List<Catch> _catches = [];
   bool _loading = true;
+  // Voice
+  late stt.SpeechToText _speech;
+  bool _voiceOn = false;
+  String _voiceStatus = '';
+  String _lastVoiceText = '';
 
   @override
   void initState() {
@@ -126,7 +133,105 @@ class CatchesScreenState extends State<CatchesScreen> {
                 ),
               ),
         ),
+        _voiceBar(),
       ],
+    );
+  }
+
+  // ── Voice ──────────────────────────────────────────────────────
+
+  Future<void> _toggleVoice() async {
+    if (_voiceOn) {
+      _speech.stop();
+      setState(() => _voiceOn = false);
+    } else {
+      _startVoice();
+    }
+  }
+
+  Future<void> _startVoice() async {
+    await _speech.stop();
+    await Future.delayed(const Duration(milliseconds: 500));
+    final available = await _speech.initialize(
+      onError: (_) { if (mounted) setState(() => _voiceOn = false); },
+      onStatus: (status) {
+        if ((status == 'done' || status == 'notListening') && mounted) {
+          setState(() => _voiceOn = false);
+        }
+      },
+    );
+    if (!available) return;
+    setState(() => _voiceOn = true);
+    _speech.listen(
+      onResult: (result) {
+        if (!mounted) return;
+        final t = result.recognizedWords.toLowerCase().trim();
+        if (t == _lastVoiceText) return;
+        _lastVoiceText = t;
+        setState(() => _voiceStatus = '🎤 "$t"');
+        if (!t.contains('caught')) return;
+        final words = t.split(RegExp(r'\s+'));
+        final idx = words.indexWhere((w) => w == 'caught');
+        if (idx < 0 || idx >= words.length - 1) return;
+        final hasSpecies = words.sublist(idx + 1).any((w) =>
+            w.length >= 3 && RegExp(r'^[a-z]+$').hasMatch(w));
+        if (!hasSpecies) return;
+        final name = words.sublist(0, idx).join(' ');
+        if (name.isEmpty) return;
+        String species = 'fish';
+        for (final w in words.sublist(idx + 1)) {
+          if (w.length >= 3 && RegExp(r'^[a-z]+$').hasMatch(w)) {
+            species = w;
+            break;
+          }
+        }
+        _voiceStatus = '🎤 Opening form for $name - $species';
+        Navigator.of(context).push(
+          MaterialPageRoute(
+            builder: (_) => AddCatchScreen(
+              initialAngler: name,
+              initialSpecies: species,
+            ),
+          ),
+        );
+      },
+      listenOptions: stt.SpeechListenOptions(
+        partialResults: true,
+        cancelOnError: true,
+        listenFor: const Duration(minutes: 10),
+      ),
+    );
+  }
+
+  /// Add a voice mic button at the bottom of the catches list.
+  Widget _voiceBar() {
+    final theme = Theme.of(context);
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
+      child: Row(
+        children: [
+          Expanded(
+            child: Text(
+              _voiceStatus,
+              style: TextStyle(
+                fontSize: 11,
+                color: theme.colorScheme.primary,
+                fontStyle: FontStyle.italic,
+              ),
+              overflow: TextOverflow.ellipsis,
+            ),
+          ),
+          IconButton(
+            icon: Icon(
+              _voiceOn ? Icons.mic : Icons.mic_none,
+              color: _voiceOn ? Colors.red : theme.colorScheme.primary,
+            ),
+            onPressed: _toggleVoice,
+            tooltip: _voiceOn ? 'Mute mic' : 'Voice record catch',
+            visualDensity: VisualDensity.compact,
+          ),
+        ],
+      ),
     );
   }
 }
