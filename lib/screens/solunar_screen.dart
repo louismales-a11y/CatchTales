@@ -122,7 +122,7 @@ class _SolunarScreenState extends State<SolunarScreen> {
               : RefreshIndicator(
                   onRefresh: _load,
                   child: ListView(
-                    padding: const EdgeInsets.all(16),
+                    padding: EdgeInsets.fromLTRB(16, 16, 16, 16 + MediaQuery.of(context).padding.bottom + 80),
                     children: [
                       // Today's rating card
                       Card(
