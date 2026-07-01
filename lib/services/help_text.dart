@@ -112,12 +112,21 @@ const _helpEntries = <String, _HelpEntry>{
     body: 'This is your fishing log — every catch you\'ve recorded '
         'appears here as a card with the species, angler, weight, length, '
         'location, weather, and photo.\n\n'
+        '📱 **Manual:**\n'
         '• Tap a card to edit its details\n'
         '• Tap the + button to add a new catch\n'
         '• Swipe down to refresh\n'
-        '• Tap the delete icon to remove a catch',
+        '• Tap the delete icon to remove a catch\n\n'
+        '🎤 **Voice (from Counter tab):**\n'
+        '1. Go to the **Counter** tab and tap the mic\n'
+        '2. Say **\"fish buddy [name] caught [species]\"** to tally\n'
+        '3. Say **\"yes\"** when asked to record to the catch log\n'
+        '4. Add photo, weight, length by voice in the form\n'
+        '5. Say **\"save\"** to finish',
     tips: 'Add a photo to every catch — it makes the log much more memorable! '
-        'You can use the GPS button to auto-fill your location and weather.',
+        'You can use the GPS button to auto-fill your location and weather.\n'
+        'With voice, you never need to tap: tally on Counter, say "yes" to log, '
+        'then "photo", "weighs 5 lb", "length 20 inches", "save" — all hands-free!',
   ),
   'counter': _HelpEntry(
     icon: Icons.people,
