@@ -26,23 +26,27 @@ class CloudSyncService {
 
   /// Initialize Firebase. Safe to call even if not configured.
   Future<void> init() async {
-    if (_initialized) return;
-    _initialized = true;
-    try {
-      await Firebase.initializeApp();
-      _available = true;
-      _signInAnonymously();
-    } catch (e) {
-      // Firebase not configured — silently degrade
-      _available = false;
-      _status = SyncStatus.disconnected;
-      debugPrint('Cloud sync unavailable: $e');
+    if (!_initialized) {
+      _initialized = true;
+      try {
+        await Firebase.initializeApp();
+        _available = true;
+      } catch (e) {
+        _available = false;
+        _status = SyncStatus.disconnected;
+        debugPrint('Cloud sync unavailable: $e');
+        return;
+      }
     }
+    // Always try to sign in (or check existing session)
+    await _signInAnonymously();
   }
 
   Future<void> _signInAnonymously() async {
     try {
-      await FirebaseAuth.instance.signInAnonymously();
+      if (FirebaseAuth.instance.currentUser == null) {
+        await FirebaseAuth.instance.signInAnonymously();
+      }
       _status = SyncStatus.connected;
     } catch (e) {
       _status = SyncStatus.error;
@@ -115,5 +119,6 @@ class CloudSyncService {
       await FirebaseAuth.instance.signOut();
     } catch (_) {}
     _status = SyncStatus.disconnected;
+    _initialized = false;
   }
 }

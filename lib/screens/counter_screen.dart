@@ -5,6 +5,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'package:speech_to_text/speech_to_text.dart' as stt;
 import '../models/species_tally.dart';
 import '../services/database_service.dart';
+import '../services/session_service.dart';
 import 'add_catch_screen.dart';
 
 class CounterScreen extends StatefulWidget {
@@ -790,6 +791,10 @@ class _CounterScreenState extends State<CounterScreen> {
     }
     if (!mounted) return;
     await _load();
+    // Share to active session if any
+    if (SessionService.instance.currentCode != null) {
+      SessionService.instance.shareCatch(species, null, null, null);
+    }
   }
 
   /// Quick-add a species via UI (for when voice isn't convenient).

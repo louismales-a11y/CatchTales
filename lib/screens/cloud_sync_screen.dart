@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import '../services/cloud_sync_service.dart';
 import '../services/database_service.dart';
 import '../services/help_text.dart';
+import 'session_screen.dart';
 
 class CloudSyncScreen extends StatefulWidget {
   const CloudSyncScreen({super.key});
@@ -19,6 +20,11 @@ class _CloudSyncScreenState extends State<CloudSyncScreen> {
   void initState() {
     super.initState();
     _refreshCount();
+    // Re-check connection status
+    if (!_cloud.isConnected && _cloud.isAvailable) {
+      // Try reconnecting
+      Future.microtask(() => _connect());
+    }
   }
 
   Future<void> _refreshCount() async {
@@ -95,14 +101,16 @@ class _CloudSyncScreenState extends State<CloudSyncScreen> {
                   ),
                   const SizedBox(height: 12),
                   Text(
-                    _cloud.isAvailable ? 'Cloud Connected' : 'Cloud Unavailable',
-                    style: theme.textTheme.titleMedium?.copyWith(fontWeight: FontWeight.w700),
+                    _cloud.isConnected ? 'Cloud Connected' : _cloud.isAvailable ? 'Connecting...' : 'Cloud Unavailable',
+                    style: theme.textTheme.titleMedium?.copyWith(fontWeight: FontWeight.w700, color: _cloud.isConnected ? Colors.green : null),
                   ),
                   const SizedBox(height: 4),
                   Text(
-                    _cloud.isAvailable
+                    _cloud.isConnected
                         ? 'Your catches are ready to sync'
-                        : 'Firebase not configured — set up google-services.json',
+                        : _cloud.lastError.isNotEmpty
+                            ? 'Error: ${_cloud.lastError}'
+                            : 'Connecting...',
                     textAlign: TextAlign.center,
                     style: TextStyle(color: Colors.grey.shade600, fontSize: 13),
                   ),
@@ -122,6 +130,18 @@ class _CloudSyncScreenState extends State<CloudSyncScreen> {
             ),
           ),
           const SizedBox(height: 24),
+
+          // Fish Together card
+          Card(
+            child: ListTile(
+              leading: Icon(Icons.groups, color: theme.colorScheme.primary),
+              title: const Text('Fish Together'),
+              subtitle: const Text('Chat & share catches in real-time'),
+              trailing: const Icon(Icons.chevron_right, size: 20),
+              onTap: () => Navigator.push(context, MaterialPageRoute(builder: (_) => const SessionScreen())),
+            ),
+          ),
+          const SizedBox(height: 20),
 
           // Connection buttons
           Row(

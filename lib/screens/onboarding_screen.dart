@@ -49,6 +49,19 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
           'Everything you need before heading out!',
     ),
     _OnboardPage(
+      icon: Icons.cloud,
+      title: 'Cloud Sync & Fish Together',
+      desc: '**Cloud Sync** (⋮ menu > Cloud Sync):\n'
+          '  ☁️ Back up catches to the cloud\n'
+          '  ⬆️ Upload / ⬇️ Download / 🔗 Connect\n'
+          '  🔐 Anonymous auth — no login needed\n\n'
+          '**Fish Together** (from Cloud Sync screen):\n'
+          '  🎣 Start a session, share code with a buddy\n'
+          '  💬 Real-time chat while fishing\n'
+          '  📍 Share GPS location for emergencies\n'
+          '  🚨 Emergency alerts with directions',
+    ),
+    _OnboardPage(
       icon: Icons.more_vert,
       title: 'More Features (⋮ menu)',
       desc: 'Tap the ⋮ menu (top-right) for:\n'
@@ -59,7 +72,8 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
           '  🎣 Tackle Box & Catalog\n'
           '  📅 Calendar & Statistics\n'
           '  🖼️ Photo Gallery / 🌓 Dark mode\n'
-          '  ℹ️ About & Contact / 💬 Suggest / 🐛 Report',
+          '  ℹ️ About & Contact / 💬 Suggest / 🐛 Report\n'
+          '  ☁️ Cloud Sync & Fish Together',
     ),
     _OnboardPage(
       icon: Icons.help_outline,

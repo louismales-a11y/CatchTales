@@ -345,16 +345,25 @@ const _helpEntries = <String, _HelpEntry>{
   ),
   'cloud_sync': _HelpEntry(
     icon: Icons.cloud_outlined,
-    title: 'Cloud Sync',
-    body: 'Backup and sync your catches across devices.\n\n'
-        '☁️ **Upload to Cloud** — sends all local catches to Firebase\n'
-        '☁️ **Download from Cloud** — pulls catches from Firebase and merges locally\n'
-        '• No login required — uses anonymous authentication\n'
-        '• Internet connection required\n'
-        '• Photos are not synced (coming soon)\n\n'
-        'If the cloud is unavailable, Firebase may not be configured yet.',
-    tips: 'Sync before switching devices to keep your data safe. '
-        'The app never crashes if cloud is unavailable — it just shows disconnected.',
+    title: 'Cloud Sync & Fish Together',
+    body: 'Backup, sync, and fish with friends — all through the cloud.\n\n'
+        '☁️ **Cloud Sync:**\n'
+        '• **Upload to Cloud** — sends all catches to Firebase\n'
+        '• **Download from Cloud** — pulls catches and merges locally\n'
+        '• **Connect / Disconnect** — manual control\n'
+        '• Anonymous auth — no login required\n'
+        '• Photos not yet synced\n\n'
+        '🎣 **Fish Together:**\n'
+        '• **Start a Session** — get a shareable code (e.g. PIKE-73)\n'
+        '• **Join a Session** — enter a buddy\'s code\n'
+        '• **Real-time chat** — messages appear instantly\n'
+        '• **Auto-share catches** — tallying posts to the session feed\n'
+        '• **📍 Share Location** — sends GPS to the chat\n'
+        '• **🚨 Emergency** — sends alert with coordinates\n'
+        '• **Tap coordinates** — opens directions in maps',
+    tips: 'Sync before switching devices. For sessions, share your code with a buddy '
+        'and you\'re connected instantly — works across any distance! '
+        'Location sharing requires GPS permission.',
   ),
   'contact': _HelpEntry(
     icon: Icons.mail_outline,

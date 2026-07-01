@@ -18,6 +18,7 @@ import 'services/cloud_sync_service.dart';
 import 'screens/about_screen.dart';
 import 'screens/cloud_sync_screen.dart';
 import 'screens/contact_screen.dart';
+import 'screens/session_screen.dart';
 import 'screens/tackle_box_screen.dart';
 import 'services/help_text.dart';
 import 'services/theme_provider.dart';
