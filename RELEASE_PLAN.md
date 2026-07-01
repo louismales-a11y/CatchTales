@@ -188,3 +188,121 @@ bool hasAccess(String feature) {
 - Banner at top of free-limited screens: "Upgrade to Pro for unlimited access"
 - After saving catch #48, 49: show "Only 1-2 catches left in free version"
 - At catch #50: block saving, show upgrade screen
+
+## 💵 Ongoing Costs to Run the App
+
+### Free Services
+| Service | Notes |
+|---------|-------|
+| Voice recognition | On-device, no API calls |
+| SQLite database | Local on phone |
+| OpenStreetMap tiles | Free map tiles, no API key |
+| Fish ID data | Built into the app |
+| Selfie camera | Phone hardware |
+| GitHub source code & releases | Free hosting |
+| Firebase Auth (anonymous) | No cost |
+
+### Paid Services
+| Service | Free Tier | Overage Cost |
+|---------|-----------|--------------|
+| **OpenWeatherMap API** | 1,000 calls/day | ~$0.001/call after limit |
+| **Google Places API** | $200/mo free credit | Unlikely to exceed with light use |
+| **Firebase Firestore** | 1GB stored, 50K reads/day, 20K writes/day | $0.108/read, $0.018/write, $0.20/GB after free tier |
+| **Firebase Storage (photos)** | 5GB storage, 20K downloads/day | **$0.026/GB/month** — biggest potential cost |
+| **Firebase Cloud Messaging** | Free | $0 |
+| **Domain name** | ~$12/year | $12/yr |
+
+### Biggest Cost Drivers
+1. **Photo backup** — 1 photo = ~2-3MB. 100 users × 20 photos = 4-6GB (near free limit)
+2. **OpenWeatherMap** — Heavy users checking weather multiple times daily could exceed 1,000 calls
+3. **Firestore reads** — Loading catch lists, syncing sessions
+
+### Estimated Monthly Cost
+- **0-100 users:** ~$0 (all within free tiers)
+- **100-1,000 users:** ~$5-20/mo (storage & API overages)
+- **1,000-10,000 users:** ~$50-200/mo (scaling up)
+
+## 🤖 AI Fish ID (Photo Recognition)
+
+### How It Would Work
+1. User takes a photo (selfie camera or gallery)
+2. Photo sent to AI recognition service
+3. Service returns predicted species with confidence scores
+4. App auto-fills the species field, user confirms/corrects
+
+### Options
+
+**Option 1: Google Cloud Vision API**
+- Cost: **$1.50/1,000 images** (first 1,000/month free)
+- Can detect common objects but not trained specifically for fish species
+- Would need custom model training for accurate fish ID
+- Setup: Enable Cloud Vision API in Google Cloud Console
+
+**Option 2: Custom TensorFlow Lite Model**
+- Cost: **Free** (runs on-device, no server)
+- Requires training a model with thousands of labeled fish photos
+- Would need a dataset of ~100+ images per species
+- Runs offline, no latency, no privacy concerns
+- Setup: Collect training data → train model → embed in app (~2-4 weeks work)
+
+**Option 3: Third-party API (iNaturalist / FishAI)**
+- iNaturalist API: Free, uses community ID + AI
+- Accuracy varies by region and species
+- Requires internet connection
+
+### Recommended Path
+1. Start with **Google Cloud Vision** — quickest to implement, zero training needed
+2. If it becomes popular, train a **custom TFLite model** for offline use
+3. Show top 3 predictions, let user pick or correct
+
+### Estimated Timeline
+- Google Cloud Vision integration: **2-4 hours**
+- Custom model training: **2-4 weeks** (data collection + training)
+- Full implementation with UI: **4-6 hours**
+
+## 🗺️ Fishing Regulations (Canada)
+
+### Current Public Sources
+Each province/territory publishes a free PDF or web guide:
+
+| Province/Territory | Source | Format |
+|-------------------|--------|--------|
+| **Manitoba** | gov.mb.ca/fishing | PDF + Web |
+| **Ontario** | ontario.ca/fishing | PDF + Web |
+| **Saskatchewan** | saskatchewan.ca/fishing | PDF + Web |
+| **Alberta** | alberta.ca/fishing | PDF + Web |
+| **British Columbia** | gov.bc.ca/fishing | PDF + Web |
+| **Quebec** | quebec.ca/peche | PDF + Web (French) |
+| **New Brunswick** | gnb.ca/fishing | PDF + Web |
+| **Nova Scotia** | novascotia.ca/fishing | PDF + Web |
+| **PEI** | princeedwardisland.ca/fishing | PDF + Web |
+| **Newfoundland** | gov.nl.ca/fishing | PDF + Web |
+| **Yukon** | yukon.ca/fishing | PDF + Web |
+| **NWT** | nwt.ca/fishing | PDF + Web |
+| **Nunavut** | gov.nu.ca/fishing | PDF + Web |
+
+### Implementation Options
+
+**Option 1: Link to Government PDFs (easiest)**
+- Add a "Regulations" section in Fish ID or a new screen
+- List provinces/territories
+- Tap opens the PDF in a browser
+- Pro: Free, always up-to-date, no maintenance
+- Con: Requires internet, leaves the app
+
+**Option 2: Embed Key Rules (medium effort)**
+- Extract common limits, sizes, seasons into the app
+- Show relevant rules based on GPS location
+- Pro: Works offline, in-app experience
+- Con: Manual data entry, needs annual updates
+
+**Option 3: Regulations API (if available)**
+- Some provinces offer open data APIs
+- Would need research per province
+- Pro: Automatic updates
+- Con: Inconsistent availability
+
+### Recommended Start
+- **Option 1** for all 13 provinces/territories — quick links to official PDFs
+- **Option 2** later for Manitoba only (your home province) — embed key rules
+- Expand to other provinces based on user demand
