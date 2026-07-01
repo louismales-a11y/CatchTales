@@ -328,6 +328,71 @@ class _CounterScreenState extends State<CounterScreen> {
     );
   }
 
+  /// Parse "record [name] caught [species]" and open Add Catch form directly.
+  void _directRecord(String cmd) {
+    // Extract size (if any) — same regex as _parseCommand uses
+    final sizeMatch = RegExp(r'(\d+(\.\d+)?)\s*(inch|in|inches|"|foot|ft|feet)').firstMatch(cmd);
+    if (sizeMatch != null) {
+      cmd = cmd.replaceFirst(sizeMatch.group(0)!, '').trim();
+    }
+
+    // Extract number of fish
+    int count = 1;
+    final numberWords = <String, int>{
+      'one': 1, '1': 1, 'a': 1, 'an': 1,
+      'two': 2, '2': 2, 'three': 3, '3': 3,
+      'four': 4, '4': 4, 'five': 5, '5': 5,
+      'six': 6, '6': 6, 'seven': 7, '7': 7,
+      'eight': 8, '8': 8, 'nine': 9, '9': 9,
+      'ten': 10, '10': 10,
+    };
+
+    final caughtMatch = RegExp(r'caught\s+(\S+)').firstMatch(cmd);
+    String? species;
+    if (caughtMatch != null) {
+      final numOrSpecies = caughtMatch.group(1)!.toLowerCase();
+      if (numberWords.containsKey(numOrSpecies)) {
+        count = numberWords[numOrSpecies]!;
+        final afterNum = cmd.substring(caughtMatch.end).trim();
+        species = afterNum.split(RegExp(r'\s+(and|the|big|huge|nice|great|a|an)\s+'))[0].trim();
+        if (species.isEmpty) species = 'fish';
+      } else if (numOrSpecies == 'a' || numOrSpecies == 'an') {
+        final after = cmd.substring(caughtMatch.end).trim();
+        species = after.split(RegExp(r'\s+(and|the|big|huge|nice|great|a|an)\s+'))[0].trim();
+        if (species.isEmpty) species = 'fish';
+      } else {
+        final after = cmd.substring(caughtMatch.start + 6).trim();
+        species = after.split(RegExp(r'\s+(and|the|big|huge|nice|great|a|an)\s+'))[0].trim();
+        if (species.isEmpty) species = numOrSpecies;
+      }
+    }
+
+    if (species == null || species.isEmpty) species = 'fish';
+
+    // Apply learned corrections
+    final corrected = _speciesCorrections[species.toLowerCase()];
+    if (corrected != null) species = corrected;
+
+    // Extract angler name
+    final nameEnd = cmd.indexOf('caught');
+    final anglerName = nameEnd > 0
+        ? cmd.substring(0, nameEnd).trim()
+        : cmd.trim();
+
+    if (anglerName.isEmpty) {
+      _showVoiceFeedback('Say "fish buddy record [name] caught [species]"');
+      return;
+    }
+
+    final match = _findAngler(anglerName);
+    if (match == null) {
+      _showVoiceFeedback('No angler found matching "$anglerName"');
+      return;
+    }
+
+    _openCatchForm(match, species, count);
+  }
+
   // ── Voice Command ──────────────────────────────────────────────────
 
   /// Tap mic to toggle on/off.
@@ -356,6 +421,13 @@ class _CounterScreenState extends State<CounterScreen> {
         cmd = cmd.substring(prefix.length).trim();
         break;
       }
+    }
+
+    // ── Direct catch recording (skip tally, open form) ──
+    if (cmd.startsWith('record ')) {
+      // e.g. "record jason caught a pike" → open Add Catch form directly
+      _directRecord(cmd.substring(7).trim());
+      return;
     }
 
     // ── Admin commands (no angler needed) ──
