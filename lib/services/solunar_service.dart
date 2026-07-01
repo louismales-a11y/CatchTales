@@ -146,4 +146,28 @@ class SolunarPeriods {
     required this.moonriseHour,
     required this.moonsetHour,
   });
+
+  /// A 0-10 rating of how good fishing should be today
+  int get rating {
+    // Score based on overlap with daylight hours (roughly 6am-8pm)
+    int score = 6;
+    // Bonus for major periods during prime hours
+    for (final h in [major1Start, major2Start, minor1Start, minor2Start]) {
+      final hour = _parseHour(h);
+      if (hour >= 5 && hour <= 9) score++; // dawn
+      if (hour >= 17 && hour <= 20) score++; // dusk
+    }
+    return score.clamp(0, 10);
+  }
+
+  static double _parseHour(String timeStr) {
+    final parts = timeStr.trim().split(RegExp(r'\s+'));
+    if (parts.length < 2) return 12;
+    final timeParts = parts[0].split(':');
+    final h = int.tryParse(timeParts[0]) ?? 12;
+    final m = int.tryParse(timeParts[1]) ?? 0;
+    final isPM = parts[1].toUpperCase() == 'PM';
+    final hour24 = isPM ? (h == 12 ? 12 : h + 12) : (h == 12 ? 0 : h);
+    return hour24 + m / 60.0;
+  }
 }
