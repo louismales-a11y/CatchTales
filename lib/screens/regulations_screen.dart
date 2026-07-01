@@ -5,18 +5,6 @@ import '../services/help_text.dart';
 class RegulationsScreen extends StatelessWidget {
   const RegulationsScreen({super.key});
 
-  Future<void> _openUrl(BuildContext context, String url, String name) async {
-    try {
-      await launchUrl(Uri.parse(url), mode: LaunchMode.externalApplication);
-    } catch (_) {
-      if (context.mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Could not open $name'), behavior: SnackBarBehavior.floating),
-        );
-      }
-    }
-  }
-
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
@@ -48,7 +36,7 @@ class RegulationsScreen extends StatelessWidget {
           _ProvinceCard(
             name: 'Manitoba',
             emoji: '🏠',
-            url: 'https://gov.mb.ca/fishing',
+            url: 'https://gov.mb.ca/fish/fish.html',
             color: theme.colorScheme.primary,
             isHome: true,
           ),
@@ -59,9 +47,9 @@ class RegulationsScreen extends StatelessWidget {
           const SizedBox(height: 8),
           _ProvinceCard(name: 'Ontario', emoji: '🇨🇦', url: 'https://www.ontario.ca/fishing'),
           _ProvinceCard(name: 'Saskatchewan', emoji: '🇨🇦', url: 'https://www.saskatchewan.ca/fishing'),
-          _ProvinceCard(name: 'Alberta', emoji: '🇨🇦', url: 'https://www.alberta.ca/fishing'),
-          _ProvinceCard(name: 'British Columbia', emoji: '🇨🇦', url: 'https://www.gov.bc.ca/fishing'),
-          _ProvinceCard(name: 'Quebec', emoji: '🇨🇦', url: 'https://www.quebec.ca/peche'),
+          _ProvinceCard(name: 'Alberta', emoji: '🇨🇦', url: 'https://www.alberta.ca/recreation'),
+          _ProvinceCard(name: 'British Columbia', emoji: '🇨🇦', url: 'https://www2.gov.bc.ca/gov/content/environment/plants-animals-ecosystems/fish/aquatic-species/bc-fish-species'),
+          _ProvinceCard(name: 'Quebec', emoji: '🇨🇦', url: 'https://www.quebec.ca/en/loisirs/peche'),
           const SizedBox(height: 16),
 
           // Territories
@@ -75,10 +63,10 @@ class RegulationsScreen extends StatelessWidget {
           // Atlantic
           Text('Atlantic Canada', style: TextStyle(fontSize: 12, fontWeight: FontWeight.w600, color: Colors.grey.shade600)),
           const SizedBox(height: 8),
-          _ProvinceCard(name: 'New Brunswick', emoji: '🇨🇦', url: 'https://www.gnb.ca/fishing'),
-          _ProvinceCard(name: 'Nova Scotia', emoji: '🇨🇦', url: 'https://novascotia.ca/fishing'),
-          _ProvinceCard(name: 'Prince Edward Island', emoji: '🇨🇦', url: 'https://www.princeedwardisland.ca/fishing'),
-          _ProvinceCard(name: 'Newfoundland & Labrador', emoji: '🇨🇦', url: 'https://www.gov.nl.ca/fishing'),
+          _ProvinceCard(name: 'New Brunswick', emoji: '🇨🇦', url: 'https://www2.gnb.ca/content/gnb/en/departments/erd.html'),
+          _ProvinceCard(name: 'Nova Scotia', emoji: '🇨🇦', url: 'https://novascotia.ca/fish/'),
+          _ProvinceCard(name: 'Prince Edward Island', emoji: '🇨🇦', url: 'https://www.princeedwardisland.ca/en/information/environment-energy-and-climate-action/fishing'),
+          _ProvinceCard(name: 'Newfoundland & Labrador', emoji: '🇨🇦', url: 'https://www.gov.nl.ca/ecc/'),
           const SizedBox(height: 32),
 
           // Note
