@@ -8,7 +8,6 @@ import 'screens/catches_screen.dart';
 import 'screens/counter_screen.dart';
 import 'screens/map_screen.dart';
 import 'screens/prepare_screen.dart';
-import 'screens/regulations_screen.dart';
 import 'screens/stats_screen.dart';
 import 'screens/forecast_screen.dart';
 import 'screens/gallery_screen.dart';
@@ -469,11 +468,6 @@ class _HomeScreenState extends State<HomeScreen> {
                       MaterialPageRoute(
                           builder: (_) => const PrepareScreen()));
                   break;
-                case 'regulations':
-                  Navigator.push(context,
-                      MaterialPageRoute(
-                          builder: (_) => const RegulationsScreen()));
-                  break;
                 case 'weather':
                   Navigator.push(context,
                       MaterialPageRoute(
@@ -538,15 +532,6 @@ class _HomeScreenState extends State<HomeScreen> {
             },
             itemBuilder: (ctx) => [
               // ── Planning ──
-              const PopupMenuItem(
-                value: 'regulations',
-                child: ListTile(
-                  leading: Icon(Icons.description_outlined),
-                  title: Text('Fishing Regulations'),
-                  dense: true,
-                  contentPadding: EdgeInsets.zero,
-                ),
-              ),
               const PopupMenuItem(
                 value: 'prepare',
                 child: ListTile(

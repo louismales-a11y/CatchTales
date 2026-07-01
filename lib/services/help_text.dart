@@ -345,18 +345,6 @@ const _helpEntries = <String, _HelpEntry>{
     tips: 'Items auto-check based on your data (e.g. anglers check once added). '
         'Use the summary card at the bottom to see your readiness at a glance.',
   ),
-  'regulations': _HelpEntry(
-    icon: Icons.description_outlined,
-    title: 'Fishing Regulations',
-    body: 'View official fishing regulations for all Canadian provinces and territories.\n\n'
-        '• **Manitoba** (home province) — highlighted at top\n'
-        '• **Provinces** — Ontario, Saskatchewan, Alberta, BC, Quebec\n'
-        '• **Territories** — Yukon, NWT, Nunavut\n'
-        '• **Atlantic** — New Brunswick, Nova Scotia, PEI, Newfoundland\n\n'
-        'Tap any province to open its official fishing guide PDF in your browser.\n'
-        'Always check local regulations before fishing — limits, sizes, and seasons vary.',
-    tips: 'Regulations change annually. The links open the official government pages, so they\'re always up to date.',
-  ),
   'about': _HelpEntry(
     icon: Icons.info_outline,
     title: 'About',
