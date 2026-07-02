@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 import '../services/help_text.dart';
 import 'package:geolocator/geolocator.dart';
+import '../services/translation_service.dart';
 import '../services/weather_service.dart';
 
 class ForecastScreen extends StatefulWidget {
@@ -84,10 +86,11 @@ class _ForecastScreenState extends State<ForecastScreen> {
 
   @override
   Widget build(BuildContext context) {
+    context.watch<TranslationService>();
     final theme = Theme.of(context);
 
     return Scaffold(
-      appBar: AppBar(title: const Text('Weather Forecast'),
+      appBar: AppBar(title: Text(tr('weatherForecast')),
         actions: [
           helpButton(context, 'weather'),
         ]),
@@ -117,7 +120,7 @@ class _ForecastScreenState extends State<ForecastScreen> {
               ElevatedButton.icon(
                 onPressed: _loadWeather,
                 icon: const Icon(Icons.refresh),
-                label: const Text('Retry'),
+                label: Text(tr('retry')),
               ),
             ],
           ),
@@ -136,7 +139,7 @@ class _ForecastScreenState extends State<ForecastScreen> {
 
           // Forecast
           if (_forecast != null && _forecast!.isNotEmpty) ...[
-            Text('5-Day Forecast',
+            Text(tr('fiveDayForecast'),
                 style: theme.textTheme.titleMedium?.copyWith(
               fontWeight: FontWeight.w700,
             )),
@@ -181,7 +184,7 @@ class _ForecastScreenState extends State<ForecastScreen> {
                             fontWeight: FontWeight.w300,
                             color: theme.colorScheme.primary,
                           )),
-                      Text('Feels like $feelsLike°C • $condition',
+                      Text('${tr('feelsLike')} $feelsLike°C • $condition',
                           style: TextStyle(
                               fontSize: 14,
                               color: theme.colorScheme.onSurface

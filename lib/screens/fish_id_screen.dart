@@ -1,7 +1,9 @@
 import 'dart:async';
 import 'dart:io';
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 import '../services/help_text.dart';
+import '../services/translation_service.dart';
 import '../services/fish_image_service.dart';
 import '../services/database_service.dart';
 import '../models/fish_data.dart';
@@ -28,13 +30,8 @@ class _FishIdScreenState extends State<FishIdScreen>
 
   final _regions = [
     'All',
-    'USA',
     'Canada',
-    'Europe',
-    'Asia/Pacific',
-    'South America',
-    'Africa',
-    'Australia',
+    'USA',
   ];
 
   final _waterTypes = ['All', 'Freshwater', 'Saltwater', 'Saltwater / Freshwater'];
@@ -185,7 +182,13 @@ class _FishIdScreenState extends State<FishIdScreen>
 
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Fish ID'),
+        title: Row(children: [
+          const Text('Fish ID'),
+          const SizedBox(width: 8),
+          const Text('🇨🇦', style: TextStyle(fontSize: 16)),
+          const SizedBox(width: 4),
+          const Text('🇺🇸', style: TextStyle(fontSize: 16)),
+        ]),
         actions: [
           helpButton(context, 'fish_id'),
           IconButton(

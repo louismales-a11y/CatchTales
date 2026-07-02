@@ -1,10 +1,12 @@
 import 'dart:io';
 import 'dart:ui' as ui;
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 import 'package:flutter/rendering.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:share_plus/share_plus.dart';
 import '../services/help_text.dart';
+import '../services/translation_service.dart';
 import 'package:fl_chart/fl_chart.dart';
 import '../models/catch.dart';
 import '../services/badge_service.dart' as badges;
@@ -82,6 +84,7 @@ class _StatsScreenState extends State<StatsScreen> {
 
   @override
   Widget build(BuildContext context) {
+    context.watch<TranslationService>();
     if (_loading) {
       return const Center(child: CircularProgressIndicator());
     }
@@ -106,7 +109,7 @@ class _StatsScreenState extends State<StatsScreen> {
                 children: [
                   Icon(Icons.bar_chart, size: 64, color: Colors.grey.shade300),
                   const SizedBox(height: 16),
-                  Text('No data yet', style: TextStyle(fontSize: 18, color: Colors.grey.shade500)),
+                  Text(tr('noData'), style: TextStyle(fontSize: 18, color: Colors.grey.shade500)),
                   const SizedBox(height: 8),
                   Text('Add some catches to see stats', style: TextStyle(color: Colors.grey.shade400)),
                 ],
@@ -221,6 +224,7 @@ class _BadgeChip extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    context.watch<TranslationService>();
     return Tooltip(
       message: badge.description,
       child: Container(
@@ -250,6 +254,7 @@ class _InsightRow extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    context.watch<TranslationService>();
     return Padding(
       padding: const EdgeInsets.only(bottom: 6),
       child: Row(
@@ -271,6 +276,7 @@ class _StatCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    context.watch<TranslationService>();
     final theme = Theme.of(context);
     return Card(
       margin: const EdgeInsets.only(bottom: 6),
@@ -307,6 +313,7 @@ class _ListRow extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    context.watch<TranslationService>();
     return Card(
       margin: const EdgeInsets.only(bottom: 4),
       child: Padding(
@@ -328,6 +335,7 @@ class _PieChart extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    context.watch<TranslationService>();
     final colors = [Colors.cyan, Colors.pink, Colors.amber, Colors.green, Colors.purple, Colors.orange, Colors.blue, Colors.red, Colors.teal, Colors.indigo];
     final total = data.values.fold<int>(0, (a, b) => a + b);
     final entries = data.entries.toList();
@@ -367,6 +375,7 @@ class _BarChart extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    context.watch<TranslationService>();
     final entries = data.entries.toList();
     final maxY = data.values.reduce((a, b) => a > b ? a : b);
     return BarChart(BarChartData(

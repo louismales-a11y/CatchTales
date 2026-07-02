@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import '../services/translation_service.dart';
 
 /// Shows a short walkthrough for new users.
 /// Appears only once — dismissed after swipe or tap "Got it!".
@@ -14,89 +16,46 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
   final _pageCtrl = PageController();
   int _page = 0;
 
-  static const _pages = [
+  static List<_OnboardPage> get _pages => [
     _OnboardPage(
       icon: Icons.record_voice_over,
-      title: 'Voice Tally',
-      desc: 'Say "fish buddy jason caught a pike"\n'
-          'to tally fish per angler.\n'
-          'Then say "yes" or "no" to log it.',
+      title: tr('onboardVoiceTally'),
+      desc: tr('onboardDescVoiceTally'),
     ),
     _OnboardPage(
       icon: Icons.add_circle_outline,
-      title: 'Record a Catch',
-      desc: 'Tap + or say "record jason caught a pike"\n'
-          'to open the catch form.\n'
-          'GPS & weather auto-fill!',
+      title: tr('onboardRecordCatch'),
+      desc: tr('onboardDescRecordCatch'),
     ),
     _OnboardPage(
       icon: Icons.camera_alt_outlined,
-      title: 'Voice in Forms',
-      desc: 'Tap the red 🎤 in the catch form, then say:\n'
-          '  • "photo" — selfie camera, 3-2-1 snap\n'
-          '  • "weighs 5 lb" — fill weight\n'
-          '  • "length 20 inches" — fill length\n'
-          '  • "save" — done!',
+      title: tr('onboardVoiceForms'),
+      desc: tr('onboardDescVoiceForms'),
     ),
     _OnboardPage(
       icon: Icons.checklist,
-      title: 'Prepare for Fishing',
-      desc: 'Tap **Prepare for Fishing** in the ⋮ menu\n'
-          'for a pre-trip checklist:\n'
-          '  ✅ Add anglers, check weather & solunar\n'
-          '  ✅ Set up tackle, review fish ID\n'
-          '  ✅ Check map spots, start new trip\n'
-          'Everything you need before heading out!',
+      title: tr('onboardPrepare'),
+      desc: tr('onboardDescPrepare'),
     ),
     _OnboardPage(
       icon: Icons.cloud,
-      title: 'Cloud Sync & Fish Together',
-      desc: '**Cloud Sync** (⋮ menu > Cloud Sync):\n'
-          '  ☁️ Back up catches to the cloud\n'
-          '  ⬆️ Upload / ⬇️ Download / 🔗 Connect\n'
-          '  📸 Photos auto-backup to cloud storage\n'
-          '  🔐 Anonymous auth — no login needed\n\n'
-          '**Fish Together** (from Cloud Sync screen):\n'
-          '  🎣 Start a session, share code with a buddy\n'
-          '  💬 Real-time chat while fishing\n'
-          '  📍 Share GPS location for emergencies\n'
-          '  🚨 Emergency alerts with directions',
+      title: tr('onboardCloudSync'),
+      desc: tr('onboardDescCloudSync'),
     ),
     _OnboardPage(
       icon: Icons.star,
-      title: 'Stats, Badges & Achievements',
-      desc: '**Statistics** (⋮ menu > Statistics):\n'
-          '  📊 Charts, breakdowns, trends\n'
-          '  🏆 Personal records & insights\n'
-          '  ⭐ Badges: First Catch, Master Angler, \n'
-          '     Species Collector, Big Catch & more\n'
-          '  📤 Share your stats as an image\n\n'
-          '**Offline Mode:**\n'
-          '  ☁️ Weather data cached for offline use\n'
-          '  🔔 Push notifications for weather alerts',
+      title: tr('onboardStats'),
+      desc: tr('onboardDescStats'),
     ),
     _OnboardPage(
       icon: Icons.more_vert,
-      title: 'More Features (⋮ menu)',
-      desc: 'Tap the ⋮ menu (top-right) for:\n'
-          '  🎣 Prepare for Fishing checklist\n'
-          '  🌤️ Weather & 5-day forecast\n'
-          '  🌙 Solunar w/ wind, gusts & marine\n'
-          '  🐟 Fish ID Field Guide\n'
-          '  🎣 Tackle Box & Catalog\n'
-          '  📅 Calendar / 📊 Statistics & Badges\n'
-          '  🖼️ Photo Gallery / 🌓 Dark mode\n'
-          '  ℹ️ About & Contact / 💬 Suggest / 🐛 Report\n'
-          '  ☁️ Cloud Sync & Fish Together',
+      title: tr('onboardMoreFeatures'),
+      desc: tr('onboardDescMoreFeatures'),
     ),
     _OnboardPage(
       icon: Icons.help_outline,
-      title: 'Help is Everywhere',
-      desc: 'Tap ❓ (top-right) on any screen\n'
-          'for detailed help on that feature.\n\n'
-          '📱 **Check for Updates** on the About screen\n'
-          'to see if a newer version is available.\n\n'
-          'Have a great fishing trip! 🎣',
+      title: tr('onboardHelp'),
+      desc: tr('onboardDescHelp'),
       isLast: true,
     ),
   ];
@@ -126,7 +85,7 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
               alignment: Alignment.topRight,
               child: TextButton(
                 onPressed: _done,
-                child: Text('Skip', style: TextStyle(color: Colors.grey.shade500)),
+                child: Text(tr('skip'), style: TextStyle(color: Colors.grey.shade500)),
               ),
             ),
             // Pages
@@ -173,7 +132,7 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
                         _done();
                       }
                     },
-                    child: Text(_page < _pages.length - 1 ? 'Next' : 'Got it!'),
+                    child: Text(_page < _pages.length - 1 ? tr('next') : tr('gotIt')),
                   ),
                 ],
               ),

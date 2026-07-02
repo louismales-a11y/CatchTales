@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 import 'package:geolocator/geolocator.dart';
 import '../services/help_text.dart';
+import '../services/translation_service.dart';
 import '../services/database_service.dart';
 import '../services/solunar_service.dart';
 import 'forecast_screen.dart';
@@ -63,10 +65,11 @@ class _PrepareScreenState extends State<PrepareScreen> {
 
   @override
   Widget build(BuildContext context) {
+    context.watch<TranslationService>();
     final theme = Theme.of(context);
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Prepare for Fishing'),
+        title: Text(tr('prepare')),
         actions: [helpButton(context, 'prepare')],
       ),
       body: _loading
@@ -80,7 +83,7 @@ class _PrepareScreenState extends State<PrepareScreen> {
                     children: [
                       Icon(Icons.checklist, size: 48, color: theme.colorScheme.primary),
                       const SizedBox(height: 8),
-                      Text("Let's get ready to fish!",
+                      Text(tr('letsGetReady'),
                           style: theme.textTheme.titleMedium?.copyWith(fontWeight: FontWeight.w700)),
                     ],
                   ),
@@ -90,46 +93,46 @@ class _PrepareScreenState extends State<PrepareScreen> {
                 // Checklist items
                 _checkItem(
                   icon: Icons.people,
-                  label: 'Add Anglers',
+                  label: tr('checkAddAnglers'),
                   done: _hasAnglers,
-                  detail: _hasAnglers ? '$_anglerCount angler${_anglerCount == 1 ? '' : 's'}' : 'No anglers yet',
+                  detail: _hasAnglers ? trp('nAnglers', {'count': '$_anglerCount'}) : tr('noAnglersYet'),
                   screen: null,
                   onTap: _showAddAnglersHelp,
                 ),
                 _checkItem(
                   icon: Icons.wb_sunny,
-                  label: 'Check Weather',
+                  label: tr('checkWeather'),
                   done: true,
-                  detail: 'Today\'s forecast & solunar',
+                  detail: tr('todayForecastSolunar'),
                   screen: const ForecastScreen(),
                 ),
                 _checkItem(
                   icon: Icons.nights_stay,
-                  label: 'Best Fishing Times',
+                  label: tr('solunar'),
                   done: _rating >= 5,
-                  detail: _rating >= 5 ? 'Today\'s rating: $_rating/10' : 'Rating: $_rating/10',
+                  detail: _rating >= 5 ? '${tr('todaysRating')}: $_rating/10' : '${tr('rating')}: $_rating/10',
                   screen: const SolunarScreen(),
                   detailColor: _rating >= 7 ? Colors.green : _rating >= 5 ? Colors.amber : Colors.grey,
                 ),
                 _checkItem(
                   icon: Icons.inventory_2,
-                  label: 'Set Up Tackle',
+                  label: tr('checkTackle'),
                   done: _hasTackle,
-                  detail: _hasTackle ? '$_tackleCount item${_tackleCount == 1 ? '' : 's'}' : 'Tackle box empty',
+                  detail: _hasTackle ? trp('nItems', {'count': '$_tackleCount'}) : tr('tackleBoxEmpty'),
                   screen: const TackleBoxScreen(),
                 ),
                 _checkItem(
                   icon: Icons.menu_book,
-                  label: 'Review Fish ID',
+                  label: tr('checkFishId'),
                   done: true,
-                  detail: 'Browse species',
+                  detail: tr('browseSpecies'),
                   screen: const FishIdScreen(),
                 ),
                 _checkItem(
                   icon: Icons.map,
-                  label: 'Check Map & Spots',
+                  label: tr('checkMapSpots'),
                   done: _hasSpots,
-                  detail: _hasSpots ? '$_spotCount spot${_spotCount == 1 ? '' : 's'}' : 'No saved spots',
+                  detail: _hasSpots ? trp('nSpots', {'count': '$_spotCount'}) : tr('noSavedSpots'),
                   screen: const MapScreen(),
                 ),
 
@@ -144,9 +147,9 @@ class _PrepareScreenState extends State<PrepareScreen> {
                         Row(
                           mainAxisAlignment: MainAxisAlignment.spaceAround,
                           children: [
-                            _summaryTile(Icons.people, '$_anglerCount', 'Anglers'),
-                            _summaryTile(Icons.inventory_2, '$_tackleCount', 'Tackle'),
-                            _summaryTile(Icons.star, '$_rating/10', 'Rating'),
+                            _summaryTile(Icons.people, '$_anglerCount', tr('anglers')),
+                            _summaryTile(Icons.inventory_2, '$_tackleCount', tr('tackle')),
+                            _summaryTile(Icons.star, '$_rating/10', tr('rating')),
                           ],
                         ),
                       ],
@@ -163,7 +166,7 @@ class _PrepareScreenState extends State<PrepareScreen> {
                   child: FilledButton.icon(
                     onPressed: _hasAnglers ? _startTrip : null,
                     icon: const Icon(Icons.play_arrow),
-                    label: const Text('Start New Trip'),
+                    label: Text(tr('startNewTrip')),
                     style: FilledButton.styleFrom(
                       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
                     ),
@@ -172,7 +175,7 @@ class _PrepareScreenState extends State<PrepareScreen> {
                 if (!_hasAnglers)
                   Padding(
                     padding: const EdgeInsets.only(top: 6),
-                    child: Text('Add at least one angler first',
+                    child: Text(tr('addAnglerFirst'),
                         textAlign: TextAlign.center,
                         style: TextStyle(fontSize: 12, color: Colors.grey.shade500)),
                   ),
@@ -196,7 +199,7 @@ class _PrepareScreenState extends State<PrepareScreen> {
         actions: [
           FilledButton(
             onPressed: () => Navigator.pop(ctx),
-            child: const Text('Got it'),
+            child: Text(tr('gotIt')),
           ),
         ],
       ),
@@ -260,8 +263,8 @@ class _PrepareScreenState extends State<PrepareScreen> {
     await DatabaseService.instance.resetSpeciesTallies();
     if (mounted) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('New trip started! Ready to fish. 🎣'),
+        SnackBar(
+          content: Text(tr('newTripStarted')),
           behavior: SnackBarBehavior.floating,
         ),
       );

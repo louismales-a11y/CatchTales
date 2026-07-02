@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 import '../services/help_text.dart';
+import '../services/translation_service.dart';
 import 'package:table_calendar/table_calendar.dart';
 import 'package:intl/intl.dart';
 import '../models/catch.dart';
@@ -94,11 +96,12 @@ class _CalendarScreenState extends State<CalendarScreen> {
 
   @override
   Widget build(BuildContext context) {
+    context.watch<TranslationService>();
     final theme = Theme.of(context);
     final dateFormat = DateFormat('MMM d, yyyy');
 
     return Scaffold(
-      appBar: AppBar(title: const Text('Fishing Log Calendar'),
+      appBar: AppBar(title: Text(tr('fishingCalendar')),
         actions: [
           helpButton(context, 'calendar'),
         ]),
@@ -184,10 +187,10 @@ class _CalendarScreenState extends State<CalendarScreen> {
             child: Row(
               mainAxisAlignment: MainAxisAlignment.spaceEvenly,
               children: [
-                _statCol(Icons.set_meal, '$_monthTotal', 'Catches'),
-                _statCol(Icons.set_meal, '$_monthSpecies', 'Species'),
+                _statCol(Icons.set_meal, '$_monthTotal', tr('catches')),
+                _statCol(Icons.set_meal, '$_monthSpecies', tr('species')),
                 if (_topAngler.isNotEmpty)
-                  _statCol(Icons.emoji_events, _topAngler, 'Top Angler'),
+                  _statCol(Icons.emoji_events, _topAngler, tr('topAngler')),
               ],
             ),
           ),
@@ -197,7 +200,7 @@ class _CalendarScreenState extends State<CalendarScreen> {
             child: Row(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
-                _legendItem(Colors.transparent, 'None'),
+                _legendItem(Colors.transparent, tr('none')),
                 const SizedBox(width: 4),
                 _legendItem(Colors.green.shade100, '1'),
                 const SizedBox(width: 4),
@@ -223,7 +226,7 @@ class _CalendarScreenState extends State<CalendarScreen> {
                 Text(
                   _selectedDay != null
                       ? dateFormat.format(_selectedDay!)
-                      : 'Select a day',
+                      : tr('selectDay'),
                   style: theme.textTheme.titleSmall?.copyWith(
                     fontWeight: FontWeight.w700,
                   ),
@@ -231,7 +234,7 @@ class _CalendarScreenState extends State<CalendarScreen> {
                 const Spacer(),
                 if (_dayCatches.isNotEmpty)
                   Text(
-                    '${_dayCatches.length} catch${_dayCatches.length == 1 ? '' : 'es'}',
+                    '${_dayCatches.length} ${tr('catches')}',
                     style: TextStyle(
                         fontSize: 13,
                         color: theme.colorScheme.onSurface
@@ -253,7 +256,7 @@ class _CalendarScreenState extends State<CalendarScreen> {
                                 size: 48,
                                 color: Colors.grey.shade300),
                             const SizedBox(height: 8),
-                            Text('No catches this day',
+                            Text(tr('noCatchesDay'),
                                 style: TextStyle(
                                     fontSize: 15,
                                     color: Colors.grey.shade500)),
@@ -370,6 +373,7 @@ class _CatchTile extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    context.watch<TranslationService>();
     final theme = Theme.of(context);
     final timeStr = DateFormat('h:mm a').format(catch_.caughtAt);
 

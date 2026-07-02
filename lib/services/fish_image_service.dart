@@ -121,22 +121,35 @@ class FishImageService {
   }
 
   static Future<String?> _fetchThumbnailUrl(String query) async {
-    try {
-      final title = query.replaceAll(' ', '_');
-      final uri = Uri.parse(
-          'https://en.wikipedia.org/api/rest_v1/page/summary/$title');
-      final resp = await http
-          .get(uri, headers: _headers)
-          .timeout(const Duration(seconds: 10));
+    // Try up to 3 times with backoff for rate limiting
+    for (int attempt = 0; attempt < 3; attempt++) {
+      try {
+        final title = query.replaceAll(' ', '_');
+        final uri = Uri.parse(
+            'https://en.wikipedia.org/api/rest_v1/page/summary/$title');
+        final resp = await http
+            .get(uri, headers: _headers)
+            .timeout(const Duration(seconds: 10));
 
-      if (resp.statusCode == 200) {
-        final data = jsonDecode(resp.body) as Map<String, dynamic>;
-        final thumb = data['thumbnail'] as Map<String, dynamic>?;
-        if (thumb != null && thumb['source'] is String) {
-          return thumb['source'] as String;
+        if (resp.statusCode == 200) {
+          final data = jsonDecode(resp.body) as Map<String, dynamic>;
+          final thumb = data['thumbnail'] as Map<String, dynamic>?;
+          if (thumb != null && thumb['source'] is String) {
+            return thumb['source'] as String;
+          }
+        } else if (resp.statusCode == 429 && attempt < 2) {
+          // Rate limited — wait and retry
+          await Future.delayed(Duration(seconds: 1 * (attempt + 1)));
+          continue;
+        }
+      } catch (_) {
+        if (attempt < 2) {
+          await Future.delayed(const Duration(milliseconds: 500));
+          continue;
         }
       }
-    } catch (_) {}
+      break;
+    }
     return null;
   }
 }

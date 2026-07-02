@@ -1,8 +1,10 @@
 import 'dart:async';
 import 'dart:io';
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 import 'package:intl/intl.dart';
 import 'package:speech_to_text/speech_to_text.dart' as stt;
+import '../services/translation_service.dart';
 import '../models/catch.dart';
 import '../services/database_service.dart';
 import 'add_catch_screen.dart';
@@ -62,15 +64,15 @@ class CatchesScreenState extends State<CatchesScreen> {
     final confirm = await showDialog<bool>(
       context: context,
       builder: (ctx) => AlertDialog(
-        title: const Text('Delete Catch'),
-        content: Text('Remove ${c.species} caught by ${c.angler}?'),
+        title: Text(tr('deleteCatch')),
+        content: Text(trp('removeCatch', {'species': c.species, 'angler': c.angler})),
         actions: [
           TextButton(
               onPressed: () => Navigator.pop(ctx, false),
-              child: const Text('Cancel')),
+              child: Text(tr('cancel'))),
           TextButton(
               onPressed: () => Navigator.pop(ctx, true),
-              child: const Text('Delete', style: TextStyle(color: Colors.red))),
+              child: Text(tr('delete'), style: const TextStyle(color: Colors.red))),
         ],
       ),
     );
@@ -82,6 +84,7 @@ class CatchesScreenState extends State<CatchesScreen> {
 
   @override
   Widget build(BuildContext context) {
+    context.watch<TranslationService>();
     if (_loading) {
       return const Center(child: CircularProgressIndicator());
     }
@@ -102,14 +105,14 @@ class CatchesScreenState extends State<CatchesScreen> {
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            const Text('Your first catch goes here!',
-                style: TextStyle(
+            Text(tr('yourFirstCatch'),
+                style: const TextStyle(
                     fontSize: 16,
                     fontWeight: FontWeight.w600)),
             const SizedBox(height: 8),
-            const Text('Sample catch — will disappear after\nyou record your first one',
+            Text(tr('sampleCatch'),
                 textAlign: TextAlign.center,
-                style: TextStyle(fontSize: 12, color: Colors.grey)),
+                style: const TextStyle(fontSize: 12, color: Colors.grey)),
             const SizedBox(height: 12),
             // Sample catch card with photo
             Card(
@@ -148,7 +151,7 @@ class CatchesScreenState extends State<CatchesScreen> {
                               style: Theme.of(context).textTheme.titleMedium?.copyWith(
                                   fontWeight: FontWeight.w600)),
                           const SizedBox(height: 2),
-                          Text('You', style: TextStyle(fontSize: 12, color: Colors.grey.shade600)),
+                          Text(tr('you'), style: TextStyle(fontSize: 12, color: Colors.grey.shade600)),
                           const SizedBox(height: 4),
                           Row(
                             children: [
@@ -156,7 +159,7 @@ class CatchesScreenState extends State<CatchesScreen> {
                               const SizedBox(width: 12),
                               _sampleStat(Icons.straighten, '58 cm'),
                               const SizedBox(width: 12),
-                              _sampleStat(Icons.wb_sunny, 'Sunny'),
+                              _sampleStat(Icons.wb_sunny, tr('sunny')),
                             ],
                           ),
                           const SizedBox(height: 2),
@@ -170,7 +173,7 @@ class CatchesScreenState extends State<CatchesScreen> {
               ),
             ),
             const SizedBox(height: 8),
-            Text('Tap + to add a catch, then tap 🎤 for voice',
+            Text(tr('tapPlusVoice'),
                 textAlign: TextAlign.center,
                 style: TextStyle(fontSize: 12, color: Colors.grey.shade600)),
           ],
@@ -309,7 +312,7 @@ class CatchesScreenState extends State<CatchesScreen> {
               color: _voiceOn ? Colors.red : theme.colorScheme.primary,
             ),
             onPressed: _toggleVoice,
-            tooltip: _voiceOn ? 'Mute mic' : 'Voice record catch',
+            tooltip: _voiceOn ? tr('muteMic') : tr('voiceRecord'),
             visualDensity: VisualDensity.compact,
           ),
         ],

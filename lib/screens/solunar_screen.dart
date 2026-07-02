@@ -1,6 +1,8 @@
 import 'dart:math';
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 import '../services/help_text.dart';
+import '../services/translation_service.dart';
 import 'package:geolocator/geolocator.dart';
 import '../services/solunar_service.dart';
 import '../services/weather_service.dart';
@@ -77,10 +79,11 @@ class _SolunarScreenState extends State<SolunarScreen> {
 
   @override
   Widget build(BuildContext context) {
+    context.watch<TranslationService>();
     final theme = Theme.of(context);
 
     return Scaffold(
-      appBar: AppBar(title: const Text('Best Fishing Times'),
+      appBar: AppBar(title: Text(tr('solunar')),
         actions: [
           helpButton(context, 'solunar'),
         ]),
@@ -99,7 +102,7 @@ class _SolunarScreenState extends State<SolunarScreen> {
                       ElevatedButton.icon(
                         onPressed: _load,
                         icon: const Icon(Icons.refresh),
-                        label: const Text('Retry'),
+                        label: Text(tr('retry')),
                       ),
                     ],
                   ),
@@ -121,7 +124,7 @@ class _SolunarScreenState extends State<SolunarScreen> {
                                 child: Column(
                                   crossAxisAlignment: CrossAxisAlignment.start,
                                   children: [
-                                    Text('Today\'s Rating',
+                                    Text(tr('todaysRating'),
                                         style: theme.textTheme.titleMedium?.copyWith(fontWeight: FontWeight.w700)),
                                     Text(
                                       _ratingLabel(_solunar!.rating),
@@ -248,7 +251,7 @@ class _SolunarScreenState extends State<SolunarScreen> {
                       const SizedBox(height: 16),
 
                       // Best fishing times
-                      Text('Best Fishing Times Today',
+                      Text(tr('bestTimesToday'),
                           style: theme.textTheme.titleMedium
                               ?.copyWith(fontWeight: FontWeight.w700)),
                       const SizedBox(height: 12),
@@ -394,7 +397,7 @@ class _SolunarScreenState extends State<SolunarScreen> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Text('24-Hour Timeline',
+            Text(tr('twentyFourHourTimeline'),
                 style: TextStyle(fontSize: 13, fontWeight: FontWeight.w600, color: Colors.grey.shade600)),
             const SizedBox(height: 10),
             ClipRRect(

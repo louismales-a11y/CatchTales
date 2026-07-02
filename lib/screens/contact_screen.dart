@@ -1,7 +1,9 @@
 import 'dart:io';
 import 'package:device_info_plus/device_info_plus.dart';
 import '../services/help_text.dart';
+import '../services/translation_service.dart';
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 import 'package:package_info_plus/package_info_plus.dart';
 import 'package:url_launcher/url_launcher.dart';
 import '../services/app_identity.dart';
@@ -66,7 +68,7 @@ $subject:
       if (context.mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: const Text('Thanks for helping improve the app! 🙏'),
+            content: Text(tr('thanksForFeedback')),
             behavior: SnackBarBehavior.floating,
             duration: const Duration(seconds: 4),
           ),
@@ -75,7 +77,7 @@ $subject:
     } catch (_) {
       if (context.mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('No email app found')),
+          SnackBar(content: Text(tr('noEmailApp'))),
         );
       }
     }
@@ -83,10 +85,11 @@ $subject:
 
   @override
   Widget build(BuildContext context) {
+    context.watch<TranslationService>();
     final theme = Theme.of(context);
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Contact'),
+        title: Text(tr('contact')),
         actions: [helpButton(context, 'contact')],
       ),
       body: ListView(
@@ -123,7 +126,7 @@ $subject:
             child: ElevatedButton.icon(
               onPressed: () => _sendEmail(context, 'Suggest a feature'),
               icon: const Icon(Icons.lightbulb_outline),
-              label: const Text('Suggest a Feature'),
+              label: Text(tr('suggestFeature')),
               style: ElevatedButton.styleFrom(
                 shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(14)),
@@ -137,7 +140,7 @@ $subject:
             child: OutlinedButton.icon(
               onPressed: () => _sendEmail(context, 'Report a bug'),
               icon: const Icon(Icons.bug_report_outlined),
-              label: const Text('Report a Bug'),
+              label: Text(tr('reportBug')),
               style: OutlinedButton.styleFrom(
                 shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(14)),
@@ -174,9 +177,7 @@ $subject:
                   const SizedBox(width: 10),
                   Expanded(
                     child: Text(
-                      'We respect your privacy. Only the information you provide '
-                      'and basic device details (model, OS, app version) are included '
-                      'to help diagnose issues. No personal data is collected or shared.',
+                      tr('privacyDisclaimer'),
                       style: TextStyle(
                         fontSize: 12,
                         color: theme.colorScheme.onSurface.withValues(alpha: 0.7),

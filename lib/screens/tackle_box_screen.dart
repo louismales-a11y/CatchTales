@@ -1,6 +1,8 @@
 import 'dart:io';
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 import '../services/help_text.dart';
+import '../services/translation_service.dart';
 import '../models/tackle_item.dart';
 import '../services/database_service.dart';
 import 'add_tackle_screen.dart';
@@ -102,7 +104,7 @@ class _TackleBoxScreenState extends State<TackleBoxScreen> {
                   borderRadius: BorderRadius.circular(2),
                 ),
               ),
-              const Text('Add to Tackle Box',
+              Text(tr('addToTackleBox'),
                   style:
                       TextStyle(fontSize: 18, fontWeight: FontWeight.w700)),
               const SizedBox(height: 12),
@@ -118,8 +120,8 @@ class _TackleBoxScreenState extends State<TackleBoxScreen> {
                   ),
                   child: const Icon(Icons.auto_awesome),
                 ),
-                title: const Text("Today's Pick"),
-                subtitle: const Text('Get weather-aware recommendations'),
+                title: Text(tr('todaysPick')),
+                subtitle: Text(tr('todaysPickSub')),
                 trailing: const Icon(Icons.chevron_right),
                 onTap: () {
                   Navigator.pop(ctx);
@@ -143,8 +145,8 @@ class _TackleBoxScreenState extends State<TackleBoxScreen> {
                   ),
                   child: const Icon(Icons.menu_book),
                 ),
-                title: const Text('Browse Catalog'),
-                subtitle: const Text('Pick from common lures and tackle'),
+                title: Text(tr('browseCatalog')),
+                subtitle: Text(tr('browseCatalogSub')),
                 trailing: const Icon(Icons.chevron_right),
                 onTap: () {
                   Navigator.pop(ctx);
@@ -168,8 +170,8 @@ class _TackleBoxScreenState extends State<TackleBoxScreen> {
                   ),
                   child: const Icon(Icons.camera_alt),
                 ),
-                title: const Text('Take Photo'),
-                subtitle: const Text('Snap a picture of your own tackle'),
+                title: Text(tr('takePhoto')),
+                subtitle: Text(tr('takePhotoSub')),
                 trailing: const Icon(Icons.chevron_right),
                 onTap: () {
                   Navigator.pop(ctx);
@@ -194,9 +196,9 @@ class _TackleBoxScreenState extends State<TackleBoxScreen> {
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            const Padding(
-              padding: EdgeInsets.fromLTRB(16, 16, 16, 8),
-              child: Text('Sort by',
+            Padding(
+              padding: const EdgeInsets.fromLTRB(16, 16, 16, 8),
+              child: Text(tr('sortBy'),
                   style: TextStyle(
                       fontSize: 16, fontWeight: FontWeight.w700)),
             ),
@@ -235,16 +237,16 @@ class _TackleBoxScreenState extends State<TackleBoxScreen> {
     final confirm = await showDialog<bool>(
       context: context,
       builder: (ctx) => AlertDialog(
-        title: const Text('Delete Tackle'),
-        content: Text('Remove ${item.name} from your tackle box?'),
+        title: Text(tr('delete')),
+        content: Text(trp('removeItem', {'item': item.name})),
         actions: [
           helpButton(context, 'tackle_box'),
           TextButton(
               onPressed: () => Navigator.pop(ctx, false),
-              child: const Text('Cancel')),
+              child: Text(tr('cancel'))),
           TextButton(
               onPressed: () => Navigator.pop(ctx, true),
-              child: const Text('Delete',
+              child: Text(tr('delete'),
                   style: TextStyle(color: Colors.red))),
         ],
       ),
@@ -267,11 +269,12 @@ class _TackleBoxScreenState extends State<TackleBoxScreen> {
 
   @override
   Widget build(BuildContext context) {
+    context.watch<TranslationService>();
     final theme = Theme.of(context);
 
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Tackle Box'),
+        title: Text(tr('tackleBox')),
         actions: [
           helpButton(context, 'tackle_box'),
           IconButton(
@@ -334,7 +337,7 @@ class _TackleBoxScreenState extends State<TackleBoxScreen> {
                     padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
                     child: Row(
                       children: [
-                        Text('${_filtered.length} items',
+                        Text('${_filtered.length} ${tr('items')}',
                             style: TextStyle(
                                 fontSize: 12,
                                 color: theme.colorScheme.onSurface
@@ -360,7 +363,7 @@ class _TackleBoxScreenState extends State<TackleBoxScreen> {
                                   Icon(Icons.search_off,
                                       size: 48, color: Colors.grey.shade300),
                                   const SizedBox(height: 8),
-                                  Text('No matches found',
+                                  Text(tr('noMatches'),
                                       style: TextStyle(
                                           color: Colors.grey.shade500)),
                                 ],
@@ -408,19 +411,19 @@ class _TackleBoxScreenState extends State<TackleBoxScreen> {
           Icon(Icons.inventory_2,
               size: 64, color: Colors.grey.shade300),
           const SizedBox(height: 16),
-          Text('Your tackle box is empty',
+          Text(tr('tackleBoxEmpty'),
               style: TextStyle(
                   fontSize: 18,
                   color: Colors.grey.shade500)),
           const SizedBox(height: 8),
-          Text('Tap + to add your first tackle',
+          Text(tr('tapToAddTackle'),
               style: TextStyle(
                   color: Colors.grey.shade400)),
           const SizedBox(height: 24),
           ElevatedButton.icon(
             onPressed: _showAddOptions,
             icon: const Icon(Icons.add),
-            label: const Text('Add Tackle'),
+            label: Text(tr('addTackle')),
           ),
         ],
       ),
@@ -443,6 +446,7 @@ class _TackleCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    context.watch<TranslationService>();
     final theme = Theme.of(context);
     final hasPhoto =
         item.photoPath != null && File(item.photoPath!).existsSync();

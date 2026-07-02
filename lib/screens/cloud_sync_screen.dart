@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 import '../services/cloud_sync_service.dart';
 import '../services/database_service.dart';
 import '../services/help_text.dart';
+import '../services/translation_service.dart';
 import 'session_screen.dart';
 
 class CloudSyncScreen extends StatefulWidget {
@@ -61,7 +63,7 @@ class _CloudSyncScreenState extends State<CloudSyncScreen> {
     if (mounted) {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
-          content: Text('Downloaded $count catches from cloud'),
+          content: Text(trp('downloadedCatches', {'count': '$count'})),
           behavior: SnackBarBehavior.floating,
         ),
       );
@@ -71,7 +73,7 @@ class _CloudSyncScreenState extends State<CloudSyncScreen> {
   void _showResult() {
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
-        content: Text(_cloud.isAvailable ? 'Synced successfully! ☁️' : 'Cloud sync unavailable'),
+        content: Text(_cloud.isAvailable ? tr('syncedSuccess') : tr('cloudUnavailable')),
         behavior: SnackBarBehavior.floating,
       ),
     );
@@ -79,10 +81,11 @@ class _CloudSyncScreenState extends State<CloudSyncScreen> {
 
   @override
   Widget build(BuildContext context) {
+    context.watch<TranslationService>();
     final theme = Theme.of(context);
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Cloud Sync'),
+        title: Text(tr('cloudSync')),
         actions: [helpButton(context, 'cloud_sync')],
       ),
       body: ListView(
@@ -101,16 +104,16 @@ class _CloudSyncScreenState extends State<CloudSyncScreen> {
                   ),
                   const SizedBox(height: 12),
                   Text(
-                    _cloud.isConnected ? 'Cloud Connected' : _cloud.isAvailable ? 'Connecting...' : 'Cloud Unavailable',
+                    _cloud.isConnected ? tr('cloudConnected') : _cloud.isAvailable ? tr('connecting') : tr('cloudUnavailable'),
                     style: theme.textTheme.titleMedium?.copyWith(fontWeight: FontWeight.w700, color: _cloud.isConnected ? Colors.green : null),
                   ),
                   const SizedBox(height: 4),
                   Text(
                     _cloud.isConnected
-                        ? 'Your catches are ready to sync'
+                        ? tr('readyToSync')
                         : _cloud.lastError.isNotEmpty
-                            ? 'Error: ${_cloud.lastError}'
-                            : 'Connecting...',
+                            ? '${tr('error')}: ${_cloud.lastError}'
+                            : tr('connecting'),
                     textAlign: TextAlign.center,
                     style: TextStyle(color: Colors.grey.shade600, fontSize: 13),
                   ),
@@ -124,7 +127,7 @@ class _CloudSyncScreenState extends State<CloudSyncScreen> {
           Card(
             child: ListTile(
               leading: Icon(Icons.set_meal, color: theme.colorScheme.primary),
-              title: const Text('Local Catches'),
+              title: Text(tr('localCatches')),
               trailing: Text('$_localCount',
                   style: TextStyle(fontWeight: FontWeight.w700, fontSize: 18, color: theme.colorScheme.primary)),
             ),
@@ -135,8 +138,8 @@ class _CloudSyncScreenState extends State<CloudSyncScreen> {
           Card(
             child: ListTile(
               leading: Icon(Icons.groups, color: theme.colorScheme.primary),
-              title: const Text('Fish Together'),
-              subtitle: const Text('Chat & share catches in real-time'),
+              title: Text(tr('fishTogether')),
+              subtitle: Text(tr('chatShareCatches')),
               trailing: const Icon(Icons.chevron_right, size: 20),
               onTap: () => Navigator.push(context, MaterialPageRoute(builder: (_) => const SessionScreen())),
             ),
@@ -154,7 +157,7 @@ class _CloudSyncScreenState extends State<CloudSyncScreen> {
                         ? _connect
                         : null,
                     icon: const Icon(Icons.link, size: 18),
-                    label: const Text('Connect', style: TextStyle(fontSize: 13)),
+                    label: Text(tr('connect'), style: const TextStyle(fontSize: 13)),
                     style: OutlinedButton.styleFrom(shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12))),
                   ),
                 ),
@@ -168,7 +171,7 @@ class _CloudSyncScreenState extends State<CloudSyncScreen> {
                         ? _disconnect
                         : null,
                     icon: const Icon(Icons.link_off, size: 18),
-                    label: const Text('Disconnect', style: TextStyle(fontSize: 13)),
+                    label: Text(tr('disconnect'), style: const TextStyle(fontSize: 13)),
                     style: OutlinedButton.styleFrom(
                       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
                       foregroundColor: Colors.red,
@@ -189,7 +192,7 @@ class _CloudSyncScreenState extends State<CloudSyncScreen> {
               icon: _busy
                   ? const SizedBox(width: 20, height: 20, child: CircularProgressIndicator(strokeWidth: 2, color: Colors.white))
                   : const Icon(Icons.cloud_upload),
-              label: const Text('Upload to Cloud'),
+              label: Text(tr('uploadToCloud')),
               style: FilledButton.styleFrom(shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14))),
             ),
           ),
@@ -200,7 +203,7 @@ class _CloudSyncScreenState extends State<CloudSyncScreen> {
             child: OutlinedButton.icon(
               onPressed: _cloud.isAvailable && !_busy && _cloud.isConnected ? _download : null,
               icon: const Icon(Icons.cloud_download),
-              label: const Text('Download from Cloud'),
+              label: Text(tr('downloadFromCloud')),
               style: OutlinedButton.styleFrom(shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14))),
             ),
           ),
@@ -215,8 +218,8 @@ class _CloudSyncScreenState extends State<CloudSyncScreen> {
                 borderRadius: BorderRadius.circular(12),
                 border: Border.all(color: Colors.amber.shade200),
               ),
-              child: const Text(
-                'To enable cloud sync, a Firebase project needs to be set up and google-services.json added to the Android project.',
+              child: Text(
+                tr('cloudSetupInfo'),
                 style: TextStyle(fontSize: 12, height: 1.5),
               ),
             ),

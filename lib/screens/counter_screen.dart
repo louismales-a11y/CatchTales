@@ -1,11 +1,13 @@
 import 'dart:async';
 import 'dart:convert';
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:speech_to_text/speech_to_text.dart' as stt;
 import '../models/species_tally.dart';
 import '../services/database_service.dart';
 import '../services/session_service.dart';
+import '../services/translation_service.dart';
 import 'add_catch_screen.dart';
 
 class CounterScreen extends StatefulWidget {
@@ -202,16 +204,16 @@ class _CounterScreenState extends State<CounterScreen> {
     final confirm = await showDialog<bool>(
       context: context,
       builder: (ctx) => AlertDialog(
-        title: const Text('Remove Angler'),
-        content: Text('Remove $angler and all their catches?'),
+        title: Text(tr('delete')),
+        content: Text(trp('removeAngler', {'angler': angler})),
         actions: [
           TextButton(
               onPressed: () => Navigator.pop(ctx, false),
-              child: const Text('Cancel')),
+              child: Text(tr('cancel'))),
           TextButton(
               onPressed: () => Navigator.pop(ctx, true),
               child:
-                  const Text('Remove', style: TextStyle(color: Colors.red))),
+                  Text(tr('remove'), style: const TextStyle(color: Colors.red))),
         ],
       ),
     );
@@ -250,13 +252,13 @@ class _CounterScreenState extends State<CounterScreen> {
     final newSpecies = await showDialog<String>(
       context: context,
       builder: (ctx) => AlertDialog(
-        title: const Text('Fix species name'),
+        title: Text(tr('editSpecies')),
         content: TextField(
           controller: ctrl,
           autofocus: true,
-          decoration: const InputDecoration(
-            labelText: 'Species',
-            border: OutlineInputBorder(),
+          decoration: InputDecoration(
+            labelText: tr('species'),
+            border: const OutlineInputBorder(),
           ),
           textCapitalization: TextCapitalization.words,
           onSubmitted: (v) => Navigator.pop(ctx, v.trim()),
@@ -264,10 +266,10 @@ class _CounterScreenState extends State<CounterScreen> {
         actions: [
           TextButton(
               onPressed: () => Navigator.pop(ctx),
-              child: const Text('Cancel')),
+              child: Text(tr('cancel'))),
           FilledButton(
               onPressed: () => Navigator.pop(ctx, ctrl.text.trim()),
-              child: const Text('Save')),
+              child: Text(tr('save'))),
         ],
       ),
     );
@@ -804,14 +806,14 @@ class _CounterScreenState extends State<CounterScreen> {
       builder: (ctx) {
         final ctrl = TextEditingController();
         return AlertDialog(
-          title: Text('$angler caught…'),
+          title: Text(trp('anglerCaught', {'angler': angler})),
           content: TextField(
             controller: ctrl,
             autofocus: true,
-            decoration: const InputDecoration(
-              labelText: 'Species',
-              hintText: 'e.g. Pike, Bass, Perch',
-              border: OutlineInputBorder(),
+            decoration: InputDecoration(
+              labelText: tr('species'),
+              hintText: tr('speciesHint'),
+              border: const OutlineInputBorder(),
             ),
             textCapitalization: TextCapitalization.words,
             onSubmitted: (v) => Navigator.pop(ctx, v.trim()),
@@ -819,10 +821,10 @@ class _CounterScreenState extends State<CounterScreen> {
           actions: [
             TextButton(
                 onPressed: () => Navigator.pop(ctx),
-                child: const Text('Cancel')),
+                child: Text(tr('cancel'))),
             FilledButton(
                 onPressed: () => Navigator.pop(ctx, ctrl.text.trim()),
-                child: const Text('Add')),
+                child: Text(tr('addAngler'))),
           ],
         );
       },
@@ -836,6 +838,7 @@ class _CounterScreenState extends State<CounterScreen> {
 
   @override
   Widget build(BuildContext context) {
+    context.watch<TranslationService>();
     final theme = Theme.of(context);
 
     return _loading
@@ -856,7 +859,7 @@ class _CounterScreenState extends State<CounterScreen> {
                 padding: const EdgeInsets.fromLTRB(16, 12, 16, 0),
                 child: Row(
                   children: [
-                    Text('Anglers',
+                    Text(tr('anglers'),
                         style: theme.textTheme.titleMedium?.copyWith(
                           fontWeight: FontWeight.w600,
                         )),
@@ -865,7 +868,7 @@ class _CounterScreenState extends State<CounterScreen> {
                       TextButton.icon(
                         onPressed: _resetAll,
                         icon: const Icon(Icons.refresh, size: 16),
-                        label: const Text('New Trip'),
+                        label: Text(tr('newTrip')),
                         style: TextButton.styleFrom(
                           foregroundColor: theme.colorScheme.error,
                           visualDensity: VisualDensity.compact,
@@ -886,7 +889,7 @@ class _CounterScreenState extends State<CounterScreen> {
                         child: TextField(
                           controller: _nameCtrl,
                           decoration: InputDecoration(
-                            hintText: 'Angler name',
+                            hintText: tr('anglerName'),
                             contentPadding:
                                 const EdgeInsets.symmetric(horizontal: 14),
                             border: OutlineInputBorder(
@@ -904,7 +907,7 @@ class _CounterScreenState extends State<CounterScreen> {
                       height: 44,
                       child: ElevatedButton(
                         onPressed: _addAngler,
-                        child: const Text('Add'),
+                        child: Text(tr('addAngler')),
                       ),
                     ),
                   ],
@@ -1001,16 +1004,16 @@ class _CounterScreenState extends State<CounterScreen> {
                             Icon(Icons.people_outline,
                                 size: 64, color: Colors.grey.shade300),
                             const SizedBox(height: 16),
-                            Text('No anglers yet',
+                            Text(tr('noAnglersYet'),
                                 style: TextStyle(
                                     fontSize: 18,
                                     color: Colors.grey.shade500)),
                             const SizedBox(height: 8),
-                            Text('Type a name above and tap Add',
+                            Text(tr('typeNameAndAdd'),
                                 style: TextStyle(
                                     color: Colors.grey.shade400)),
                             const SizedBox(height: 4),
-                            Text('or say "fish buddy add [name]" via voice',
+                            Text(tr('voiceAddHint'),
                                 style: TextStyle(
                                     fontSize: 12,
                                     color: Colors.grey.shade400)),
@@ -1109,7 +1112,7 @@ class _AnglerCard extends StatelessWidget {
             ? [
                 Padding(
                   padding: const EdgeInsets.symmetric(vertical: 8),
-                  child: Text('Say "fish buddy ${b.angler} caught a pike"',
+                  child: Text(trp('voiceSayHint', {'angler': b.angler}),
                       style: TextStyle(
                           fontSize: 12,
                           fontStyle: FontStyle.italic,
@@ -1120,13 +1123,13 @@ class _AnglerCard extends StatelessWidget {
                 // Species tally header
                 Row(
                   children: [
-                    Text('Species',
+                    Text(tr('species'),
                         style: TextStyle(
                             fontSize: 11,
                             fontWeight: FontWeight.w600,
                             color: Colors.grey.shade500)),
                     const Spacer(),
-                    Text('Count',
+                    Text(tr('count'),
                         style: TextStyle(
                             fontSize: 11,
                             fontWeight: FontWeight.w600,
@@ -1182,7 +1185,7 @@ class _AnglerCard extends StatelessWidget {
                 const Divider(height: 8),
                 Row(
                   children: [
-                    Text('Total',
+                    Text(tr('total'),
                         style: TextStyle(
                             fontWeight: FontWeight.w700,
                             fontSize: 13,

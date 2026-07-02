@@ -1,9 +1,11 @@
 import 'dart:convert';
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 import 'package:http/http.dart' as http;
 import 'package:package_info_plus/package_info_plus.dart';
 import 'package:url_launcher/url_launcher.dart';
 import '../services/help_text.dart';
+import '../services/translation_service.dart';
 
 class AboutScreen extends StatefulWidget {
   const AboutScreen({super.key});
@@ -55,11 +57,11 @@ class _AboutScreenState extends State<AboutScreen> {
         if (mounted && _isNewerVersion(tag, _version)) {
           final download = await showDialog<bool>(
             context: context, builder: (ctx) => AlertDialog(
-              title: const Text('Update Available'),
-              content: Text('Version $tag is available (current: $_version)\n\nOpen GitHub to download?'),
+              title: Text(tr('updateAvailable')),
+              content: Text(trp('updateContent', {'tag': tag, 'version': _version})),
               actions: [
-                TextButton(onPressed: () => Navigator.pop(ctx, false), child: const Text('Later')),
-                FilledButton(onPressed: () => Navigator.pop(ctx, true), child: const Text('Download')),
+                TextButton(onPressed: () => Navigator.pop(ctx, false), child: Text(tr('later'))),
+                FilledButton(onPressed: () => Navigator.pop(ctx, true), child: Text(tr('download'))),
               ],
             ),
           );
@@ -73,7 +75,7 @@ class _AboutScreenState extends State<AboutScreen> {
     } catch (_) {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Could not check for updates'), behavior: SnackBarBehavior.floating),
+          SnackBar(content: Text(tr('checkFailed')), behavior: SnackBarBehavior.floating),
         );
       }
     }
@@ -82,10 +84,11 @@ class _AboutScreenState extends State<AboutScreen> {
 
   @override
   Widget build(BuildContext context) {
+    context.watch<TranslationService>();
     final theme = Theme.of(context);
     return Scaffold(
       appBar: AppBar(
-        title: const Text('About'),
+        title: Text(tr('about')),
         actions: [helpButton(context, 'about')],
       ),
       body: ListView(
@@ -139,17 +142,8 @@ class _AboutScreenState extends State<AboutScreen> {
           Card(
             child: Padding(
               padding: const EdgeInsets.all(16),
-              child: Text(
-                'Your hands-free fishing companion.\n'
-                'Track catches by voice, snap selfies with your fish, '
-                'and never lose a fishing memory.\n\n'
-                '🗣️ Voice tally & recording\n'
-                '📍 GPS & weather auto-fetch\n'
-                '🤳 Selfie camera with countdown\n'
-                '🌙 Solunar best fishing times\n'
-                '🗺️ Interactive catch map',
-                style: TextStyle(height: 1.6, fontSize: 14),
-              ),
+              child: Text(tr('aboutDescription'),
+                style: TextStyle(height: 1.6, fontSize: 14)),
             ),
           ),
           const SizedBox(height: 16),
@@ -161,17 +155,17 @@ class _AboutScreenState extends State<AboutScreen> {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Text('Built with',
+                  Text(tr('builtWith'),
                       style: theme.textTheme.titleSmall
                           ?.copyWith(fontWeight: FontWeight.w600)),
                   const SizedBox(height: 8),
                   _bullets([
-                    'Flutter & Dart',
-                    'SQLite (sqflite)',
-                    'OpenStreetMap (flutter_map)',
-                    'OpenWeatherMap API',
-                    'Google Places API',
-                    'Speech-to-text (speech_to_text)',
+                    tr('techFlutter'),
+                    tr('techSqlite'),
+                    tr('techOsm'),
+                    tr('techOwm'),
+                    tr('techGooglePlaces'),
+                    tr('techStt'),
                   ]),
                 ],
               ),
@@ -182,7 +176,7 @@ class _AboutScreenState extends State<AboutScreen> {
           // Sign off
           Center(
             child: Text(
-              'Tight Lines, Be Safe! 🎣',
+              tr('tightLines'),
               style: TextStyle(
                 fontSize: 16,
                 fontWeight: FontWeight.w600,

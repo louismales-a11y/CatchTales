@@ -1,6 +1,7 @@
 import 'dart:async';
 import 'dart:io';
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:intl/intl.dart';
@@ -11,6 +12,7 @@ import '../services/database_service.dart';
 import '../services/help_text.dart';
 import '../services/photo_backup_service.dart';
 import '../services/weather_service.dart';
+import '../services/translation_service.dart';
 import 'selfie_camera_screen.dart';
 
 class AddCatchScreen extends StatefulWidget {
@@ -108,7 +110,7 @@ class _AddCatchScreenState extends State<AddCatchScreen> {
       if (!serviceEnabled) {
         if (mounted) {
           ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(content: Text('Location services disabled')),
+            SnackBar(content: Text(tr('locationDisabled'))),
           );
         }
         setState(() => _fetchingLocation = false);
@@ -137,7 +139,7 @@ class _AddCatchScreenState extends State<AddCatchScreen> {
       if (mounted) {
         setState(() => _fetchingLocation = false);
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Error getting location: $e')),
+          SnackBar(content: Text(trp('errorGettingLocation', {'error': '$e'}))),
         );
       }
     }
@@ -186,7 +188,7 @@ class _AddCatchScreenState extends State<AddCatchScreen> {
     if (items.isEmpty) {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Your tackle box is empty')),
+          SnackBar(content: Text(tr('tackleBoxEmpty'))),
         );
       }
       return;
@@ -314,7 +316,7 @@ class _AddCatchScreenState extends State<AddCatchScreen> {
     } catch (e) {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Error saving: $e')),
+          SnackBar(content: Text(trp('errorSavingCatch', {'error': '$e'}))),
         );
       }
       setState(() => _saving = false);
@@ -488,12 +490,13 @@ class _AddCatchScreenState extends State<AddCatchScreen> {
 
   @override
   Widget build(BuildContext context) {
+    context.watch<TranslationService>();
     final theme = Theme.of(context);
     final dateStr = DateFormat('MMM d, yyyy  h:mm a').format(_caughtAt);
 
     return Scaffold(
       appBar: AppBar(
-        title: Text(_isEditing ? 'Edit Catch' : 'Add Catch'),
+        title: Text(_isEditing ? tr('editCatch') : tr('addCatch')),
         actions: [helpButton(context, 'add_catch')],
       ),
       body: Form(
@@ -537,13 +540,13 @@ class _AddCatchScreenState extends State<AddCatchScreen> {
                                     ],
                                   ),
                                 ),
-                                child: const Row(
+                                child: Row(
                                   children: [
-                                    Icon(Icons.edit,
+                                    const Icon(Icons.edit,
                                         color: Colors.white, size: 16),
-                                    SizedBox(width: 6),
-                                    Text('Tap to change',
-                                        style: TextStyle(
+                                    const SizedBox(width: 6),
+                                    Text(tr('tapToChange'),
+                                        style: const TextStyle(
                                             color: Colors.white, fontSize: 13)),
                                   ],
                                 ),
@@ -559,7 +562,7 @@ class _AddCatchScreenState extends State<AddCatchScreen> {
                               Icon(Icons.camera_alt_outlined,
                                   size: 48, color: Colors.grey.shade400),
                               const SizedBox(height: 8),
-                              Text('Tap to add a photo',
+                              Text(tr('tapToAddPhoto'),
                                   style: TextStyle(
                                       fontSize: 15,
                                       color: Colors.grey.shade500)),
@@ -619,12 +622,12 @@ class _AddCatchScreenState extends State<AddCatchScreen> {
             // Angler
             TextFormField(
               controller: _anglerCtrl,
-              decoration: const InputDecoration(
-                labelText: 'Angler *',
-                prefixIcon: Icon(Icons.person),
+              decoration: InputDecoration(
+                labelText: tr('angler') + ' *',
+                prefixIcon: const Icon(Icons.person),
               ),
               validator: (v) =>
-                  (v == null || v.trim().isEmpty) ? 'Required' : null,
+                  (v == null || v.trim().isEmpty) ? tr('required') : null,
               textCapitalization: TextCapitalization.words,
             ),
             const SizedBox(height: 14),
@@ -632,12 +635,12 @@ class _AddCatchScreenState extends State<AddCatchScreen> {
             // Species
             TextFormField(
               controller: _speciesCtrl,
-              decoration: const InputDecoration(
-                labelText: 'Species *',
-                prefixIcon: Icon(Icons.emoji_nature),
+              decoration: InputDecoration(
+                labelText: tr('species') + ' *',
+                prefixIcon: const Icon(Icons.emoji_nature),
               ),
               validator: (v) =>
-                  (v == null || v.trim().isEmpty) ? 'Required' : null,
+                  (v == null || v.trim().isEmpty) ? tr('required') : null,
               textCapitalization: TextCapitalization.words,
             ),
             const SizedBox(height: 14),
@@ -645,9 +648,9 @@ class _AddCatchScreenState extends State<AddCatchScreen> {
             // Location
             TextFormField(
               controller: _locationCtrl,
-              decoration: const InputDecoration(
-                labelText: 'Location',
-                prefixIcon: Icon(Icons.location_on),
+              decoration: InputDecoration(
+                labelText: tr('location'),
+                prefixIcon: const Icon(Icons.location_on),
               ),
               textCapitalization: TextCapitalization.words,
             ),
@@ -659,9 +662,9 @@ class _AddCatchScreenState extends State<AddCatchScreen> {
                 Expanded(
                   child: TextFormField(
                     controller: _lureCtrl,
-                    decoration: const InputDecoration(
-                      labelText: 'Lure / Bait',
-                      prefixIcon: Icon(Icons.vpn_key),
+                    decoration: InputDecoration(
+                      labelText: tr('lure'),
+                      prefixIcon: const Icon(Icons.vpn_key),
                     ),
                   ),
                 ),
@@ -669,7 +672,7 @@ class _AddCatchScreenState extends State<AddCatchScreen> {
                 SizedBox(
                   height: 56,
                   child: Tooltip(
-                    message: 'Pick from tackle box',
+                    message: tr('pickFromTackle'),
                     child: IconButton(
                       icon: const Icon(Icons.inventory_2, size: 20),
                       onPressed: _pickFromTackleBox,
@@ -690,11 +693,11 @@ class _AddCatchScreenState extends State<AddCatchScreen> {
             // Unit toggle
             Row(
               children: [
-                const Text('Units:',
-                    style: TextStyle(fontSize: 13, fontWeight: FontWeight.w600)),
+                Text(tr('units') + ':',
+                    style: const TextStyle(fontSize: 13, fontWeight: FontWeight.w600)),
                 const SizedBox(width: 8),
                 ChoiceChip(
-                  label: const Text('Metric', style: TextStyle(fontSize: 12)),
+                  label: Text(tr('metric'), style: const TextStyle(fontSize: 12)),
                   selected: _useMetric,
                   onSelected: (_) => setState(() => _useMetric = true),
                   visualDensity: VisualDensity.compact,
@@ -702,7 +705,7 @@ class _AddCatchScreenState extends State<AddCatchScreen> {
                 ),
                 const SizedBox(width: 6),
                 ChoiceChip(
-                  label: const Text('Imperial', style: TextStyle(fontSize: 12)),
+                  label: Text(tr('imperial'), style: const TextStyle(fontSize: 12)),
                   selected: !_useMetric,
                   onSelected: (_) => setState(() => _useMetric = false),
                   visualDensity: VisualDensity.compact,
@@ -718,7 +721,7 @@ class _AddCatchScreenState extends State<AddCatchScreen> {
                   child: TextFormField(
                     controller: _weightCtrl,
                     decoration: InputDecoration(
-                      labelText: 'Weight ($_weightUnit)',
+                      labelText: '${tr('weight')} ($_weightUnit)',
                       prefixIcon: const Icon(Icons.monitor_weight),
                     ),
                     keyboardType: TextInputType.number,
@@ -729,7 +732,7 @@ class _AddCatchScreenState extends State<AddCatchScreen> {
                   child: TextFormField(
                     controller: _lengthCtrl,
                     decoration: InputDecoration(
-                      labelText: 'Length ($_lengthUnit)',
+                      labelText: '${tr('length')} ($_lengthUnit)',
                       prefixIcon: const Icon(Icons.straighten),
                     ),
                     keyboardType: TextInputType.number,
@@ -744,9 +747,9 @@ class _AddCatchScreenState extends State<AddCatchScreen> {
               onTap: _pickDate,
               borderRadius: BorderRadius.circular(12),
               child: InputDecorator(
-                decoration: const InputDecoration(
-                  labelText: 'Date & Time',
-                  prefixIcon: Icon(Icons.calendar_today),
+                decoration: InputDecoration(
+                  labelText: tr('dateTime'),
+                  prefixIcon: const Icon(Icons.calendar_today),
                 ),
                 child: Text(dateStr,
                     style: const TextStyle(fontWeight: FontWeight.w500)),
@@ -757,9 +760,9 @@ class _AddCatchScreenState extends State<AddCatchScreen> {
             // Notes
             TextFormField(
               controller: _notesCtrl,
-              decoration: const InputDecoration(
-                labelText: 'Notes',
-                prefixIcon: Icon(Icons.notes),
+              decoration: InputDecoration(
+                labelText: tr('notes'),
+                prefixIcon: const Icon(Icons.notes),
               ),
               maxLines: 3,
             ),
@@ -777,7 +780,7 @@ class _AddCatchScreenState extends State<AddCatchScreen> {
                             strokeWidth: 2.5, color: Colors.white),
                       )
                     : const Icon(Icons.save),
-                label: Text(_saving ? 'Saving...' : 'Save Catch'),
+                label: Text(_saving ? tr('saving') : tr('saveCatch')),
               ),
             ),
             const SizedBox(height: 32),
