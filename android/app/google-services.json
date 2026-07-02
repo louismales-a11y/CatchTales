@@ -23,6 +23,25 @@
           "other_platform_oauth_client": []
         }
       }
+    },
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:649755574010:android:7c5fd250214d9da3b81344",
+        "android_client_info": {
+          "package_name": "com.bestfishbuddy.bestfishbuddy.dev"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyAJdZ8AQ008frEUWDPtjrzPo5hKv5ykxyc"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
     }
   ],
   "configuration_version": "1"

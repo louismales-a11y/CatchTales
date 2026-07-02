@@ -235,7 +235,7 @@ class _SplashScreenTestState extends State<SplashScreenTest> {
                 child: ClipRRect(
                   borderRadius: BorderRadius.circular(28),
                   child:
-                      Image.asset('assets/test_logo.png', fit: BoxFit.cover),
+                      Image.asset('assets/logo.png', fit: BoxFit.cover),
                 ),
               ),
               const SizedBox(height: 20),
@@ -525,7 +525,7 @@ class _HomeScreenTestState extends State<HomeScreenTest> {
             ClipRRect(
               borderRadius: BorderRadius.circular(7),
               child: Image.asset(
-                'assets/test_logo.png',
+                'assets/logo.png',
                 width: 30,
                 height: 30,
                 fit: BoxFit.cover,
