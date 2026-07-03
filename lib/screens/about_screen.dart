@@ -269,7 +269,7 @@ class _AboutScreenState extends State<AboutScreen> {
                       border: Border.all(color: Colors.grey.shade200),
                     ),
                     child: QrImageView(
-                      data: 'https://tinyurl.com/24572pxx',
+                      data: 'https://tinyurl.com/2a2kkl7r',
                       version: QrVersions.auto,
                       size: 180,
                       backgroundColor: Colors.white,
@@ -286,7 +286,7 @@ class _AboutScreenState extends State<AboutScreen> {
                   const SizedBox(height: 8),
                   TextButton.icon(
                     onPressed: () async {
-                      final url = Uri.parse('https://tinyurl.com/24572pxx');
+                      final url = Uri.parse('https://tinyurl.com/2a2kkl7r');
                       if (await canLaunchUrl(url)) {
                         await launchUrl(url, mode: LaunchMode.externalApplication);
                       }
