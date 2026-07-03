@@ -269,7 +269,7 @@ class _AboutScreenState extends State<AboutScreen> {
                       border: Border.all(color: Colors.grey.shade200),
                     ),
                     child: QrImageView(
-                      data: 'https://github.com/louismales-a11y/BestFishBuddy-Free/releases/latest',
+                      data: 'https://tinyurl.com/24572pxx',
                       version: QrVersions.auto,
                       size: 180,
                       backgroundColor: Colors.white,
@@ -286,7 +286,7 @@ class _AboutScreenState extends State<AboutScreen> {
                   const SizedBox(height: 8),
                   TextButton.icon(
                     onPressed: () async {
-                      final url = Uri.parse('https://github.com/louismales-a11y/BestFishBuddy-Free/releases/latest');
+                      final url = Uri.parse('https://tinyurl.com/24572pxx');
                       if (await canLaunchUrl(url)) {
                         await launchUrl(url, mode: LaunchMode.externalApplication);
                       }
