@@ -17,10 +17,15 @@ import 'screens/fish_id_screen.dart';
 import 'services/cloud_sync_service.dart';
 import 'services/notification_service.dart';
 import 'services/translation_service.dart';
+import 'services/pro_service.dart';
+import 'services/database_service.dart';
+import 'services/analytics_service.dart';
+import 'services/api_config.dart';
 import 'screens/about_screen.dart';
 import 'screens/cloud_sync_screen.dart';
 import 'screens/contact_screen.dart';
 import 'screens/tackle_box_screen.dart';
+import 'screens/community_stats_screen.dart';
 import 'screens/language_picker_screen.dart';
 import 'services/help_text.dart';
 import 'services/theme_provider.dart';
@@ -75,7 +80,7 @@ class BestFishBuddyAppTest extends StatelessWidget {
     final tp = context.watch<ThemeProvider>();
     context.watch<TranslationService>();
     return MaterialApp(
-      title: 'Best Fish Buddy - Can/US Pro',
+      title: ApiConfig.appDisplayName,
       debugShowCheckedModeBanner: false,
       checkerboardOffscreenLayers: false,
       checkerboardRasterCacheImages: false,
@@ -258,8 +263,8 @@ class _SplashScreenTestState extends State<SplashScreenTest> {
                     letterSpacing: 3,
                   )),
               const SizedBox(height: 2),
-              const Text('PRO-VERSION',
-                  style: TextStyle(
+              Text(context.watch<ProService>().isPro ? 'PRO-VERSION' : 'FREE-VERSION',
+                  style: const TextStyle(
                     fontSize: 11,
                     fontWeight: FontWeight.w700,
                     color: Color(0xFF76FF03),
@@ -526,6 +531,7 @@ class _HomeScreenTestState extends State<HomeScreenTest> {
 
   @override
   Widget build(BuildContext context) {
+    AnalyticsService.instance.logScreen('home');
     final tp = context.watch<ThemeProvider>();
     context.watch<TranslationService>();
     final accent = tp.themeInfo.accent;
@@ -547,7 +553,8 @@ class _HomeScreenTestState extends State<HomeScreenTest> {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text('Best Fish Buddy', style: TextStyle(fontSize: Theme.of(context).textTheme.titleLarge?.fontSize)),
-                Text('Pro Version', style: TextStyle(fontSize: 10, color: Colors.grey.shade400)),
+                Text(context.watch<ProService>().isPro ? tr('proVersion') : tr('freeVersion'),
+                    style: TextStyle(fontSize: 10, color: Colors.grey.shade400)),
               ],
             ),
           ],
@@ -569,6 +576,11 @@ class _HomeScreenTestState extends State<HomeScreenTest> {
                   Navigator.push(context,
                       MaterialPageRoute(
                           builder: (_) => const PrepareScreen()));
+                  break;
+                case 'community_stats':
+                  Navigator.push(context,
+                      MaterialPageRoute(
+                          builder: (_) => const CommunityStatsScreen()));
                   break;
                 case 'weather':
                   Navigator.push(context,
@@ -597,6 +609,10 @@ class _HomeScreenTestState extends State<HomeScreenTest> {
                           builder: (_) => const CalendarScreen()));
                   break;
                 case 'stats':
+                  if (!ProService.instance.isPro) {
+                    ProService.showUpgradeDialog(context);
+                    return;
+                  }
                   Navigator.push(context,
                       MaterialPageRoute(
                           builder: (_) => const StatsScreen()));
@@ -618,6 +634,10 @@ class _HomeScreenTestState extends State<HomeScreenTest> {
                   break;
                 // ── Cloud ──
                 case 'cloud_sync':
+                  if (!ProService.instance.isPro) {
+                    ProService.showUpgradeDialog(context);
+                    return;
+                  }
                   Navigator.push(context,
                       MaterialPageRoute(
                           builder: (_) => const CloudSyncScreen()));
@@ -642,6 +662,15 @@ class _HomeScreenTestState extends State<HomeScreenTest> {
                 child: ListTile(
                   leading: Icon(Icons.checklist),
                   title: Text(tr('prepare')),
+                  dense: true,
+                  contentPadding: EdgeInsets.zero,
+                ),
+              ),
+              PopupMenuItem(
+                value: 'community_stats',
+                child: ListTile(
+                  leading: Icon(Icons.people),
+                  title: const Text('Community Stats'),
                   dense: true,
                   contentPadding: EdgeInsets.zero,
                 ),
@@ -780,6 +809,16 @@ class _HomeScreenTestState extends State<HomeScreenTest> {
       floatingActionButton: _selectedIndex == 0
           ? FloatingActionButton(
               onPressed: () async {
+                if (!ProService.instance.isPro) {
+                  final count = await DatabaseService.instance.getCatchCount();
+                  if (count >= ProService.freeCatchLimit) {
+                    if (context.mounted) {
+                      ProService.showUpgradeDialog(context);
+                    }
+                    return;
+                  }
+                }
+                if (!context.mounted) return;
                 final added = await Navigator.push<bool>(
                   context,
                   MaterialPageRoute(

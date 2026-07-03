@@ -6,6 +6,7 @@ import 'package:flutter/rendering.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:share_plus/share_plus.dart';
 import '../services/help_text.dart';
+import '../services/pro_service.dart';
 import '../services/translation_service.dart';
 import 'package:fl_chart/fl_chart.dart';
 import '../models/catch.dart';
@@ -85,6 +86,13 @@ class _StatsScreenState extends State<StatsScreen> {
   @override
   Widget build(BuildContext context) {
     context.watch<TranslationService>();
+    if (!context.watch<ProService>().isPro) {
+      return Scaffold(
+        appBar: AppBar(title: const Text('Statistics'), actions: [helpButton(context, 'stats')]),
+        body: _buildUpgradePrompt(),
+      );
+    }
+
     if (_loading) {
       return const Center(child: CircularProgressIndicator());
     }
@@ -214,6 +222,51 @@ class _StatsScreenState extends State<StatsScreen> {
                 ],
               ),
             ),
+    );
+  }
+
+  Widget _buildUpgradePrompt() {
+    final theme = Theme.of(context);
+    return Center(
+      child: Padding(
+        padding: const EdgeInsets.all(32),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Container(
+              width: 80,
+              height: 80,
+              decoration: BoxDecoration(
+                color: Colors.amber.shade50,
+                borderRadius: BorderRadius.circular(20),
+              ),
+              child: const Icon(Icons.bar_chart, size: 40, color: Colors.amber),
+            ),
+            const SizedBox(height: 24),
+            Text(
+              tr('statsIsPro'),
+              style: theme.textTheme.titleLarge?.copyWith(fontWeight: FontWeight.w700),
+              textAlign: TextAlign.center,
+            ),
+            const SizedBox(height: 12),
+            Text(
+              tr('statsProDesc'),
+              style: TextStyle(fontSize: 14, color: Colors.grey.shade600),
+              textAlign: TextAlign.center,
+            ),
+            const SizedBox(height: 24),
+            SizedBox(
+              width: double.infinity,
+              height: 48,
+              child: FilledButton.icon(
+                onPressed: () => ProService.showUpgradeDialog(context),
+                icon: const Icon(Icons.star),
+                label: Text(tr('upgradeToPro')),
+              ),
+            ),
+          ],
+        ),
+      ),
     );
   }
 }

@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import '../services/translation_service.dart';
 
@@ -46,6 +45,11 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
       icon: Icons.star,
       title: tr('onboardStats'),
       desc: tr('onboardDescStats'),
+    ),
+    _OnboardPage(
+      icon: Icons.people,
+      title: tr('onboardCommunityStats'),
+      desc: tr('onboardDescCommunityStats'),
     ),
     _OnboardPage(
       icon: Icons.more_vert,

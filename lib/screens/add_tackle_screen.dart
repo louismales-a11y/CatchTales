@@ -1,6 +1,8 @@
 import 'dart:io';
 import 'package:flutter/material.dart';
 import '../services/help_text.dart';
+import '../services/pro_service.dart';
+import '../services/translation_service.dart';
 import 'package:image_picker/image_picker.dart';
 import '../models/tackle_item.dart';
 import '../data/tackle_database.dart';
@@ -172,6 +174,18 @@ class _AddTackleScreenState extends State<AddTackleScreen> {
     if (_isEditing) {
       await DatabaseService.instance.updateTackleItem(item);
     } else {
+      // Check free limit
+      final currentCount = await DatabaseService.instance.getTackleItemCount();
+      if (!ProService.instance.isPro && currentCount >= ProService.freeTackleLimit) {
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(content: Text(trp('tackleLimitReached', {'limit': '${ProService.freeTackleLimit}'}))),
+          );
+          ProService.showUpgradeDialog(context);
+        }
+        setState(() => _saving = false);
+        return;
+      }
       await DatabaseService.instance.addTackleItem(item);
     }
 

@@ -2,8 +2,11 @@ import 'dart:async';
 import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'package:url_launcher/url_launcher.dart';
 import '../services/help_text.dart';
+import '../services/pro_service.dart';
 import '../services/translation_service.dart';
+import '../services/analytics_service.dart';
 import '../services/fish_image_service.dart';
 import '../services/database_service.dart';
 import '../models/fish_data.dart';
@@ -18,33 +21,16 @@ class FishIdScreen extends StatefulWidget {
   State<FishIdScreen> createState() => _FishIdScreenState();
 }
 
-class _FishIdScreenState extends State<FishIdScreen>
-    with SingleTickerProviderStateMixin {
-  late TabController _tabCtrl;
+class _FishIdScreenState extends State<FishIdScreen> {
   final _searchCtrl = TextEditingController();
   String _searchQuery = '';
-  String _selectedRegion = 'All';
-  String _selectedWater = 'All';
+  String _selectedWater = 'Freshwater';
   List<FishSpecies> _customFish = [];
   Map<String, FishStatus> _statusMap = {};
-
-  final _regions = [
-    'All',
-    'Canada',
-    'USA',
-  ];
-
-  final _waterTypes = ['All', 'Freshwater', 'Saltwater', 'Saltwater / Freshwater'];
 
   @override
   void initState() {
     super.initState();
-    _tabCtrl = TabController(length: _regions.length, vsync: this);
-    _tabCtrl.addListener(() {
-      if (!_tabCtrl.indexIsChanging) {
-        setState(() => _selectedRegion = _regions[_tabCtrl.index]);
-      }
-    });
     _loadData();
   }
 
@@ -61,7 +47,6 @@ class _FishIdScreenState extends State<FishIdScreen>
 
   @override
   void dispose() {
-    _tabCtrl.dispose();
     _searchCtrl.dispose();
     super.dispose();
   }
@@ -71,18 +56,19 @@ class _FishIdScreenState extends State<FishIdScreen>
   List<FishSpecies> get _filtered {
     final query = _searchQuery.toLowerCase().trim();
     final allFish = [...fishDatabase, ..._customFish];
-    var results = allFish.where((f) {
-      // Region filter
-      final regionMatch =
-          _selectedRegion == 'All' || f.regions.contains(_selectedRegion);
-      if (!regionMatch) return false;
-      // Water type filter
-      if (_selectedWater != 'All' && f.waterType != _selectedWater) return false;
+    // Free users only see first 10 species
+    final limited = ProService.instance.isPro ? allFish : allFish.take(ProService.freeFishIdLimit).toList();
+    var results = limited.where((f) {
+      // Water type filter (inclusive: 'Freshwater' matches 'Freshwater' or 'Freshwater, Saltwater')
+      if (f.waterType != _selectedWater &&
+          f.waterType != '$_selectedWater / Saltwater' &&
+          f.waterType != 'Saltwater / $_selectedWater' &&
+          f.waterType != 'Freshwater, Saltwater' &&
+          f.waterType != 'Saltwater, Freshwater') return false;
       // Search query
       if (query.isEmpty) return true;
       return f.name.toLowerCase().contains(query) ||
-          f.scientificName.toLowerCase().contains(query) ||
-          f.regions.any((r) => r.toLowerCase().contains(query));
+          f.scientificName.toLowerCase().contains(query);
     }).toList();
 
     // Sort
@@ -176,7 +162,9 @@ class _FishIdScreenState extends State<FishIdScreen>
   }
 
   @override
+  @override
   Widget build(BuildContext context) {
+    AnalyticsService.instance.logScreen('fish_id');
     final theme = Theme.of(context);
     final results = _filtered;
 
@@ -201,6 +189,7 @@ class _FishIdScreenState extends State<FishIdScreen>
             tooltip: 'Add a fish',
             onPressed: _openAddFish,
           ),
+
         ],
       ),
       body: Column(
@@ -237,50 +226,30 @@ class _FishIdScreenState extends State<FishIdScreen>
               ),
             ),
           ),
-          // ── Region tabs ──
-          SizedBox(
-            height: 40,
-            child: TabBar(
-              controller: _tabCtrl,
-              isScrollable: true,
-              tabAlignment: TabAlignment.start,
-              labelColor: theme.colorScheme.primary,
-              unselectedLabelColor:
-                  theme.colorScheme.onSurface.withValues(alpha: 0.5),
-              indicatorColor: theme.colorScheme.primary,
-              dividerColor: Colors.transparent,
-              labelStyle:
-                  const TextStyle(fontSize: 13, fontWeight: FontWeight.w600),
-              tabs: _regions.map((r) => Tab(text: r)).toList(),
-            ),
-          ),
-          const Divider(height: 1),
-          // ── Water type chips ──
+          // ── Water type toggle ──
           Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
-            child: SingleChildScrollView(
-              scrollDirection: Axis.horizontal,
-              child: Row(
-                children: _waterTypes.map((w) {
-                  final active = _selectedWater == w;
-                  return Padding(
-                    padding: const EdgeInsets.only(right: 6),
-                    child: FilterChip(
-                      label: Text(w, style: const TextStyle(fontSize: 12)),
-                      selected: active,
-                      onSelected: (_) => setState(() => _selectedWater = w),
-                      visualDensity: VisualDensity.compact,
-                      materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
-                    ),
-                  );
-                }).toList(),
+            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+            child: SizedBox(
+              width: double.infinity,
+              child: SegmentedButton<String>(
+                segments: const [
+                  ButtonSegment(value: 'Freshwater', label: Text('🌊 Freshwater'), icon: Icon(Icons.water_drop, size: 16)),
+                  ButtonSegment(value: 'Saltwater', label: Text('🌎 Saltwater'), icon: Icon(Icons.waves, size: 16)),
+                ],
+                selected: {_selectedWater},
+                onSelectionChanged: (v) => setState(() => _selectedWater = v.first),
+                style: ButtonStyle(
+                  visualDensity: VisualDensity.compact,
+                  tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                ),
               ),
             ),
           ),
+          const Divider(height: 1),
           // ── Results count ──
           if (results.isNotEmpty)
             Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 6),
+              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
               child: Row(
                 children: [
                   Text('${results.length} species',
@@ -288,12 +257,25 @@ class _FishIdScreenState extends State<FishIdScreen>
                           fontSize: 12,
                           color: theme.colorScheme.onSurface
                               .withValues(alpha: 0.5))),
-                  const Spacer(),
-                  Text(_selectedRegion,
-                      style: TextStyle(
-                          fontSize: 12,
-                          fontWeight: FontWeight.w600,
-                          color: theme.colorScheme.primary)),
+                ],
+              ),
+            ),
+          // ── Free upgrade banner ──
+          if (!context.watch<ProService>().isPro)
+            Container(
+              width: double.infinity,
+              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+              color: const Color(0xFF1A237E),
+              child: Row(
+                children: [
+                  const Icon(Icons.star, size: 14, color: Color(0xFFFFD600)),
+                  const SizedBox(width: 6),
+                  Expanded(
+                    child: Text(
+                      trp('freeFishIdBanner', {'count': '${ProService.freeFishIdLimit}', 'total': '${fishDatabase.length}'}),
+                      style: const TextStyle(fontSize: 12, color: Colors.white),
+                    ),
+                  ),
                 ],
               ),
             ),
@@ -331,6 +313,7 @@ class _FishIdScreenState extends State<FishIdScreen>
       ),
     );
   }
+
 }
 
 // ─── Fish Card ────────────────────────────────────────────────────────────
@@ -556,6 +539,7 @@ class _FishCardState extends State<_FishCard> {
                         ),
                       ],
                     ),
+
                   ],
                 ),
               ),
@@ -589,6 +573,7 @@ class _FishDetailScreenState extends State<_FishDetailScreen> {
   @override
   void initState() {
     super.initState();
+    AnalyticsService.instance.logFishViewed(widget.fish.name);
     _imagePathFuture = FishImageService.getImagePath(
       commonName: widget.fish.name,
       scientificName: widget.fish.scientificName,
@@ -716,6 +701,8 @@ class _FishDetailScreenState extends State<_FishDetailScreen> {
                 )),
           ],
           // ── Protected banner ──
+          // ── Community Stats ──
+
           if (fish.isProtected) ...[
             const SizedBox(height: 8),
             Container(
@@ -778,6 +765,23 @@ class _FishDetailScreenState extends State<_FishDetailScreen> {
                 onTap: _toggleFavorite,
               ),
             ],
+          ),
+          // ── Read more on Wikipedia ──
+          const SizedBox(height: 16),
+          OutlinedButton.icon(
+            onPressed: () async {
+              // Try scientific name first, then common name
+              final url = Uri.parse(
+                'https://en.wikipedia.org/wiki/${Uri.encodeComponent(widget.fish.scientificName)}');
+              if (await canLaunchUrl(url)) {
+                await launchUrl(url, mode: LaunchMode.externalApplication);
+              }
+            },
+            icon: const Icon(Icons.open_in_new, size: 16),
+            label: Text('Read more on Wikipedia'),
+            style: OutlinedButton.styleFrom(
+              foregroundColor: theme.colorScheme.primary,
+            ),
           ),
           const SizedBox(height: 24),
         ],
@@ -863,6 +867,7 @@ class _FishDetailScreenState extends State<_FishDetailScreen> {
       ),
     );
   }
+
 }
 
 /// Compact status toggle chip for caught / master / wishlist.

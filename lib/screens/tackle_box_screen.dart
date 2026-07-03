@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../services/help_text.dart';
 import '../services/translation_service.dart';
+import '../services/pro_service.dart';
 import '../models/tackle_item.dart';
 import '../services/database_service.dart';
 import 'add_tackle_screen.dart';
@@ -84,6 +85,10 @@ class _TackleBoxScreenState extends State<TackleBoxScreen> {
   }
 
   void _showAddOptions() {
+    if (!ProService.instance.isPro && _allItems.length >= ProService.freeTackleLimit) {
+      ProService.showUpgradeDialog(context);
+      return;
+    }
     showModalBottomSheet(
       context: context,
       shape: const RoundedRectangleBorder(
@@ -331,6 +336,25 @@ class _TackleBoxScreenState extends State<TackleBoxScreen> {
                       ),
                     ),
                   ),
+                // Free limit banner
+                if (!context.watch<ProService>().isPro)
+                  Container(
+                    width: double.infinity,
+                    padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
+                    color: const Color(0xFF1A237E),
+                    child: Row(
+                      children: [
+                        const Icon(Icons.star, size: 16, color: Color(0xFFFFD600)),
+                        const SizedBox(width: 8),
+                        Expanded(
+                          child: Text(
+                            trp('freeTackleBanner', {'count': '${_allItems.length}', 'limit': '${ProService.freeTackleLimit}'}),
+                            style: const TextStyle(fontSize: 13, color: Colors.white, fontWeight: FontWeight.w500),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
                 // Count
                 if (_allItems.isNotEmpty)
                   Padding(
@@ -501,14 +525,16 @@ class _TackleCard extends StatelessWidget {
                   padding: EdgeInsets.zero,
                   constraints: const BoxConstraints(),
                 ),
-                IconButton(
-                  icon: const Icon(Icons.delete_outline, size: 16),
-                  onPressed: onDelete,
-                  color: theme.colorScheme.error.withValues(alpha: 0.7),
-                  visualDensity: VisualDensity.compact,
-                  padding: EdgeInsets.zero,
-                  constraints: const BoxConstraints(),
-                ),
+                // Delete (Pro only)
+                if (ProService.instance.isPro)
+                  IconButton(
+                    icon: const Icon(Icons.delete_outline, size: 16),
+                    onPressed: onDelete,
+                    color: theme.colorScheme.error.withValues(alpha: 0.7),
+                    visualDensity: VisualDensity.compact,
+                    padding: EdgeInsets.zero,
+                    constraints: const BoxConstraints(),
+                  ),
               ],
             ),
           ],

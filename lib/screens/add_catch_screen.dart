@@ -13,6 +13,9 @@ import '../services/help_text.dart';
 import '../services/photo_backup_service.dart';
 import '../services/weather_service.dart';
 import '../services/translation_service.dart';
+import '../services/pro_service.dart';
+import '../services/community_stats_service.dart';
+import '../services/analytics_service.dart';
 import 'selfie_camera_screen.dart';
 
 class AddCatchScreen extends StatefulWidget {
@@ -281,7 +284,7 @@ class _AddCatchScreenState extends State<AddCatchScreen> {
       if (_photoFile != null) {
         savedPhotoPath = await _savePhoto(_photoFile!);
         // Back up photo to Firebase Storage
-        final url = await PhotoBackupService.instance.uploadPhoto(_photoFile!.path, catchId: '${DateTime.now().millisecondsSinceEpoch}');
+        await PhotoBackupService.instance.uploadPhoto(_photoFile!.path, catchId: '${DateTime.now().millisecondsSinceEpoch}');
       }
 
       final catchItem = Catch(
@@ -310,7 +313,22 @@ class _AddCatchScreenState extends State<AddCatchScreen> {
         await DatabaseService.instance
             .updateCatch(catchItem.copyWith(id: widget.existingCatch!.id));
       } else {
+        // Check free limit
+        final currentCount = await DatabaseService.instance.getCatchCount();
+        if (!ProService.instance.isPro && currentCount >= ProService.freeCatchLimit) {
+          if (mounted) {
+            ScaffoldMessenger.of(context).showSnackBar(
+              SnackBar(content: Text(tr('catchLimitReached'))),
+            );
+            ProService.showUpgradeDialog(context);
+          }
+          setState(() => _saving = false);
+          return;
+        }
         await DatabaseService.instance.addCatch(catchItem);
+        AnalyticsService.instance.logCatchAdded(species: catchItem.species);
+        // Fire-and-forget: update community stats (no await — best-effort)
+        CommunityStatsService.instance.updateCatchStats(catchItem);
       }
       if (mounted) Navigator.pop(context, true);
     } catch (e) {

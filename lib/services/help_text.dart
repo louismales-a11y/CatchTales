@@ -232,4 +232,12 @@ Map<String, _HelpEntry> get _helpEntries => <String, _HelpEntry>{
     tips: 'Bug reports auto-include your device model and app version so issues '
         'can be fixed faster. You control what additional info to write.',
   ),
+  'community_stats': _HelpEntry(
+    icon: Icons.people,
+    title: tr('helpCommunityStats'),
+    body: tr('helpBodyCommunityStats'),
+    tips: 'Search results are powered by Google Places. Data is aggregated anonymously from '
+        'fellow anglers — no personal information or exact locations are shared. '
+        'Results improve as more anglers record their catches!',
+  ),
 };

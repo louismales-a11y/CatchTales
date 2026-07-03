@@ -3,6 +3,7 @@ import 'package:provider/provider.dart';
 import '../services/cloud_sync_service.dart';
 import '../services/database_service.dart';
 import '../services/help_text.dart';
+import '../services/pro_service.dart';
 import '../services/translation_service.dart';
 import 'session_screen.dart';
 
@@ -88,7 +89,58 @@ class _CloudSyncScreenState extends State<CloudSyncScreen> {
         title: Text(tr('cloudSync')),
         actions: [helpButton(context, 'cloud_sync')],
       ),
-      body: ListView(
+      body: context.watch<ProService>().isPro
+          ? _buildCloudContent(theme)
+          : _buildUpgradePrompt(theme),
+    );
+  }
+
+  Widget _buildUpgradePrompt(ThemeData theme) {
+    return Center(
+      child: Padding(
+        padding: const EdgeInsets.all(32),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Container(
+              width: 80,
+              height: 80,
+              decoration: BoxDecoration(
+                color: Colors.amber.shade50,
+                borderRadius: BorderRadius.circular(20),
+              ),
+              child: const Icon(Icons.cloud_upload, size: 40, color: Colors.amber),
+            ),
+            const SizedBox(height: 24),
+            Text(
+              tr('cloudSyncIsPro'),
+              style: theme.textTheme.titleLarge?.copyWith(fontWeight: FontWeight.w700),
+              textAlign: TextAlign.center,
+            ),
+            const SizedBox(height: 12),
+            Text(
+              tr('cloudSyncProDesc'),
+              style: TextStyle(fontSize: 14, color: Colors.grey.shade600),
+              textAlign: TextAlign.center,
+            ),
+            const SizedBox(height: 24),
+            SizedBox(
+              width: double.infinity,
+              height: 48,
+              child: FilledButton.icon(
+                onPressed: () => ProService.showUpgradeDialog(context),
+                icon: const Icon(Icons.star),
+                label: Text(tr('upgradeToPro')),
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildCloudContent(ThemeData theme) {
+    return ListView(
         padding: const EdgeInsets.all(24),
         children: [
           // Status card
@@ -224,7 +276,6 @@ class _CloudSyncScreenState extends State<CloudSyncScreen> {
               ),
             ),
         ],
-      ),
-    );
+      );
   }
 }

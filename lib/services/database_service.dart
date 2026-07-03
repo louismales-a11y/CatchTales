@@ -554,6 +554,12 @@ class DatabaseService {
     return maps.map((m) => TackleItem.fromMap(m)).toList();
   }
 
+  Future<int> getTackleItemCount() async {
+    final db = await database;
+    final result = await db.rawQuery('SELECT COUNT(*) as cnt FROM tackle_items');
+    return (result.first['cnt'] as int?) ?? 0;
+  }
+
   Future<int> addTackleItem(TackleItem item) async {
     final db = await database;
     return await db.insert('tackle_items', item.toMap());

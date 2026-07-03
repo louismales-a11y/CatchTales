@@ -4,8 +4,11 @@ import 'package:provider/provider.dart';
 import 'package:http/http.dart' as http;
 import 'package:package_info_plus/package_info_plus.dart';
 import 'package:url_launcher/url_launcher.dart';
+import 'package:qr_flutter/qr_flutter.dart';
 import '../services/help_text.dart';
 import '../services/translation_service.dart';
+import '../services/pro_service.dart';
+import '../services/api_config.dart';
 
 class AboutScreen extends StatefulWidget {
   const AboutScreen({super.key});
@@ -85,6 +88,7 @@ class _AboutScreenState extends State<AboutScreen> {
   @override
   Widget build(BuildContext context) {
     context.watch<TranslationService>();
+    final pro = context.watch<ProService>();
     final theme = Theme.of(context);
     return Scaffold(
       appBar: AppBar(
@@ -182,6 +186,115 @@ class _AboutScreenState extends State<AboutScreen> {
                 fontWeight: FontWeight.w600,
                 fontStyle: FontStyle.italic,
                 color: theme.colorScheme.primary,
+              ),
+            ),
+          ),
+          const SizedBox(height: 24),
+          // ── Dev Mode Toggle (Developer build only) ──
+          if (ApiConfig.isDev) ...[const SizedBox(height: 16),
+          Card(
+            color: theme.colorScheme.primary.withValues(alpha: 0.05),
+            child: Padding(
+              padding: const EdgeInsets.all(14),
+              child: Column(
+                children: [
+                  Row(
+                    children: [
+                      Icon(Icons.build, size: 20, color: theme.colorScheme.primary),
+                      const SizedBox(width: 10),
+                      const Text('Developer Options',
+                          style: TextStyle(fontWeight: FontWeight.w600)),
+                    ],
+                  ),
+                  const SizedBox(height: 8),
+                  Row(
+                    children: [
+                      Text(pro.isPro ? 'Pro Mode: ON' : 'Pro Mode: OFF',
+                          style: TextStyle(
+                            fontSize: 14,
+                            color: pro.isPro ? Colors.green.shade700 : Colors.grey.shade600,
+                            fontWeight: pro.isPro ? FontWeight.w600 : FontWeight.w400,
+                          )),
+                      const Spacer(),
+                      Switch(
+                        value: pro.isPro,
+                        onChanged: (v) async {
+                          if (v) {
+                            await ProService.instance.unlockPro();
+                          } else {
+                            await ProService.instance.resetToFree();
+                          }
+                        },
+                      ),
+                    ],
+                  ),
+                  Text(
+                    pro.isPro
+                        ? 'All Pro features unlocked ✓'
+                        : 'Free mode active — 10 catch limit, no delete',
+                    style: TextStyle(fontSize: 11, color: Colors.grey.shade600),
+                  ),
+                ],
+              ),
+            ),
+          ),
+          ],
+          const SizedBox(height: 24),
+          // ── QR Code: Download Free Version ──
+          Card(
+            child: Padding(
+              padding: const EdgeInsets.all(16),
+              child: Column(
+                children: [
+                  Row(
+                    children: [
+                      Icon(Icons.share, size: 20, color: theme.colorScheme.primary),
+                      const SizedBox(width: 10),
+                      Text(tr('shareFreeApp'),
+                          style: const TextStyle(fontWeight: FontWeight.w600)),
+                    ],
+                  ),
+                  const SizedBox(height: 12),
+                  Text(
+                    tr('scanToDownload'),
+                    style: TextStyle(fontSize: 13, color: Colors.grey.shade600),
+                    textAlign: TextAlign.center,
+                  ),
+                  const SizedBox(height: 16),
+                  Container(
+                    padding: const EdgeInsets.all(16),
+                    decoration: BoxDecoration(
+                      color: Colors.white,
+                      borderRadius: BorderRadius.circular(16),
+                      border: Border.all(color: Colors.grey.shade200),
+                    ),
+                    child: QrImageView(
+                      data: 'https://github.com/louismales-a11y/BestFishBuddy-Free/releases/latest',
+                      version: QrVersions.auto,
+                      size: 180,
+                      backgroundColor: Colors.white,
+                      eyeStyle: const QrEyeStyle(
+                        eyeShape: QrEyeShape.square,
+                        color: Color(0xFF0A0E1A),
+                      ),
+                      dataModuleStyle: const QrDataModuleStyle(
+                        dataModuleShape: QrDataModuleShape.square,
+                        color: Color(0xFF0A0E1A),
+                      ),
+                    ),
+                  ),
+                  const SizedBox(height: 8),
+                  TextButton.icon(
+                    onPressed: () async {
+                      final url = Uri.parse('https://github.com/louismales-a11y/BestFishBuddy-Free/releases/latest');
+                      if (await canLaunchUrl(url)) {
+                        await launchUrl(url, mode: LaunchMode.externalApplication);
+                      }
+                    },
+                    icon: const Icon(Icons.open_in_new, size: 16),
+                    label: Text(tr('openDownloadPage'), style: const TextStyle(fontSize: 13)),
+                  ),
+                ],
               ),
             ),
           ),

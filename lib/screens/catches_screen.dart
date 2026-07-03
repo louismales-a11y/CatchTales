@@ -5,6 +5,7 @@ import 'package:provider/provider.dart';
 import 'package:intl/intl.dart';
 import 'package:speech_to_text/speech_to_text.dart' as stt;
 import '../services/translation_service.dart';
+import '../services/pro_service.dart';
 import '../models/catch.dart';
 import '../services/database_service.dart';
 import 'add_catch_screen.dart';
@@ -99,6 +100,25 @@ class CatchesScreenState extends State<CatchesScreen> {
             ),
           ),
         ),
+        // Free limit banner
+        if (!context.watch<ProService>().isPro)
+          Container(
+            width: double.infinity,
+            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
+            color: const Color(0xFF1A237E),
+            child: Row(
+              children: [
+                const Icon(Icons.star, size: 16, color: Color(0xFFFFD600)),
+                const SizedBox(width: 8),
+                Expanded(
+                  child: Text(
+                    trp('freeCatchBanner', {'count': '${_catches.length}', 'limit': '${ProService.freeCatchLimit}'}),
+                    style: const TextStyle(fontSize: 13, color: Colors.white, fontWeight: FontWeight.w500),
+                  ),
+                ),
+              ],
+            ),
+          ),
         Expanded(
           child: _catches.isEmpty
               ? Center(
@@ -400,13 +420,14 @@ class _CatchCard extends StatelessWidget {
                       ],
                     ),
                   ),
-                  // Delete
-                  IconButton(
-                    icon: const Icon(Icons.delete_outline, size: 20),
-                    onPressed: onDelete,
-                    color: theme.colorScheme.error.withValues(alpha: 0.7),
-                    visualDensity: VisualDensity.compact,
-                  ),
+                  // Delete (Pro only)
+                  if (ProService.instance.isPro)
+                    IconButton(
+                      icon: const Icon(Icons.delete_outline, size: 20),
+                      onPressed: onDelete,
+                      color: theme.colorScheme.error.withValues(alpha: 0.7),
+                      visualDensity: VisualDensity.compact,
+                    ),
                 ],
               ),
               const SizedBox(height: 10),

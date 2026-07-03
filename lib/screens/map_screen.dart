@@ -12,7 +12,9 @@ import 'package:url_launcher/url_launcher.dart';
 import '../models/catch.dart';
 import '../models/favorite_spot.dart';
 import '../services/database_service.dart';
+import '../services/pro_service.dart';
 import 'spots_screen.dart';
+import '../services/analytics_service.dart';
 
 const _defaultCenter = LatLng(39.8283, -98.5795);
 const _defaultZoom = 4.0;
@@ -33,7 +35,7 @@ class MapScreenState extends State<MapScreen> {
   List<PlaceResult> _searchResults = [];
   String? _activeCategory;
   LatLng? _userLocation;
-  bool _loading = true, _searching = false, _locRequested = false;
+  bool _loading = true, _searching = false, _locRequested = false, _showNauticalChart = false;
 
   // Offline cache
   late String _cacheDir;
@@ -245,13 +247,23 @@ class MapScreenState extends State<MapScreen> {
     _mapController.move(LatLng((a + b) / 2, (c + d) / 2), 10);
   }
 
+  bool _checkProAccess() {
+    if (ProService.instance.isPro) return true;
+    ProService.showUpgradeDialog(context);
+    return false;
+  }
+
   void _onCategoryTap(_SearchCat cat) {
+    if (!_checkProAccess()) return;
     if (_activeCategory == cat.label) { setState(() { _activeCategory = null; _searchResults = []; }); return; }
     setState(() => _activeCategory = cat.label);
     _searchCtrl.text = cat.query; _searchPlaces(cat.query);
   }
 
-  void _onSearchSubmit(String v) { setState(() => _activeCategory = null); _focusNode.unfocus(); if (v.trim().isNotEmpty) _searchPlaces(v); }
+  void _onSearchSubmit(String v) {
+    if (!_checkProAccess()) return;
+    setState(() => _activeCategory = null); _focusNode.unfocus(); if (v.trim().isNotEmpty) _searchPlaces(v);
+  }
 
   // ─── Locate ─────────────────────────────────────────────────────────────
 
@@ -418,6 +430,15 @@ class MapScreenState extends State<MapScreen> {
             if (_cachedTiles > 0) const SizedBox(height: 12),
           ],
           FloatingActionButton.small(
+            heroTag: 'nautical',
+            onPressed: () { AnalyticsService.instance.logNauticalChartToggled(!_showNauticalChart); setState(() => _showNauticalChart = !_showNauticalChart); },
+            backgroundColor: _showNauticalChart ? t.colorScheme.primary : t.colorScheme.surface,
+            elevation: 4,
+            tooltip: _showNauticalChart ? 'Hide nautical chart' : 'Show nautical chart (depths, wrecks, buoys)',
+            child: Icon(Icons.directions_boat, color: _showNauticalChart ? Colors.white : t.colorScheme.primary, size: 20),
+          ),
+          const SizedBox(height: 12),
+          FloatingActionButton.small(
             heroTag: 'spots',
             onPressed: _openSpotsList,
             backgroundColor: t.colorScheme.surface,
@@ -439,7 +460,7 @@ class MapScreenState extends State<MapScreen> {
           Material(elevation: 4, borderRadius: BorderRadius.circular(28), color: t.colorScheme.surface, child: TextField(
             controller: _searchCtrl, focusNode: _focusNode, onSubmitted: _onSearchSubmit, textInputAction: TextInputAction.search,
             decoration: InputDecoration(
-              hintText: 'Search places...', hintStyle: TextStyle(color: t.colorScheme.onSurface.withValues(alpha: 0.4)),
+              hintText: ProService.instance.isPro ? 'Search places...' : '🔒 Search places (Pro)', hintStyle: TextStyle(color: t.colorScheme.onSurface.withValues(alpha: 0.4)),
               prefixIcon: _searching ? const Padding(padding: EdgeInsets.all(14), child: SizedBox(width: 18, height: 18, child: CircularProgressIndicator(strokeWidth: 2))) : Icon(Icons.search, color: t.colorScheme.primary),
               suffixIcon: _searchCtrl.text.isNotEmpty ? IconButton(icon: const Icon(Icons.clear, size: 20), onPressed: () { _searchCtrl.clear(); setState(() { _searchResults = []; _activeCategory = null; }); }) : null,
               border: OutlineInputBorder(borderRadius: BorderRadius.circular(28), borderSide: BorderSide.none), filled: false,
@@ -449,9 +470,10 @@ class MapScreenState extends State<MapScreen> {
           const SizedBox(height: 8),
           SingleChildScrollView(scrollDirection: Axis.horizontal, child: Row(children: _categories.map((cat) {
             final active = _activeCategory == cat.label;
+            final isPro = ProService.instance.isPro;
             return Padding(padding: const EdgeInsets.only(right: 8), child: FilterChip(
-              avatar: Icon(cat.icon, size: 18, color: active ? Colors.white : t.colorScheme.primary),
-              label: Text(cat.label, style: TextStyle(fontSize: 13, color: active ? Colors.white : t.colorScheme.onSurface)),
+              avatar: Icon(isPro ? cat.icon : Icons.lock, size: 16, color: active ? Colors.white : t.colorScheme.primary),
+              label: Text(isPro ? cat.label : '${cat.label} 🔒', style: TextStyle(fontSize: 13, color: active ? Colors.white : t.colorScheme.onSurface)),
               selected: active, onSelected: (_) => _onCategoryTap(cat), selectedColor: t.colorScheme.primary, checkmarkColor: Colors.white,
               showCheckmark: false, backgroundColor: t.colorScheme.surface.withValues(alpha: 0.85), side: BorderSide.none,
               elevation: active ? 2 : 1, padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 0), materialTapTargetSize: MaterialTapTargetSize.shrinkWrap, visualDensity: VisualDensity.compact,
