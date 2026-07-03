@@ -75,8 +75,11 @@ class BestFishBuddyAppTest extends StatelessWidget {
     final tp = context.watch<ThemeProvider>();
     context.watch<TranslationService>();
     return MaterialApp(
-      title: 'Best Fish Buddy - Can/US',
+      title: 'Best Fish Buddy - Can/US Pro',
       debugShowCheckedModeBanner: false,
+      checkerboardOffscreenLayers: false,
+      checkerboardRasterCacheImages: false,
+      showPerformanceOverlay: false,
       theme: _buildTheme(tp.themeName, Brightness.light),
       darkTheme: _buildTheme(tp.themeName, Brightness.dark),
       themeMode: tp.themeMode,
@@ -239,7 +242,7 @@ class _SplashScreenTestState extends State<SplashScreenTest> {
                 ),
               ),
               const SizedBox(height: 20),
-              const Text('Best Fish Buddy',
+              const Text('Best Fish Buddy Pro',
                   style: TextStyle(
                     fontSize: 30,
                     fontWeight: FontWeight.w800,
@@ -253,6 +256,14 @@ class _SplashScreenTestState extends State<SplashScreenTest> {
                     fontWeight: FontWeight.w400,
                     color: Colors.white,
                     letterSpacing: 3,
+                  )),
+              const SizedBox(height: 2),
+              const Text('PRO-VERSION',
+                  style: TextStyle(
+                    fontSize: 11,
+                    fontWeight: FontWeight.w700,
+                    color: Color(0xFF76FF03),
+                    letterSpacing: 4,
                   )),
               const SizedBox(height: 4),
               const Text('🇨🇦  🇺🇸',
@@ -535,9 +546,8 @@ class _HomeScreenTestState extends State<HomeScreenTest> {
             Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text('Best Fish Buddy'),
-                Text('🌐 ${tr('catches')} | ${TranslationService.instance.currentLang}',
-                    style: TextStyle(fontSize: 10, color: Colors.yellow.shade300)),
+                Text('Best Fish Buddy', style: TextStyle(fontSize: Theme.of(context).textTheme.titleLarge?.fontSize)),
+                Text('Pro Version', style: TextStyle(fontSize: 10, color: Colors.grey.shade400)),
               ],
             ),
           ],

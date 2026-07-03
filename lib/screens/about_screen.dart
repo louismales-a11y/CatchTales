@@ -104,7 +104,7 @@ class _AboutScreenState extends State<AboutScreen> {
                       width: 80, height: 80, fit: BoxFit.cover),
                 ),
                 const SizedBox(height: 12),
-                Text('Best Fish Buddy',
+                Text('Best Fish Buddy Pro',
                     style: theme.textTheme.titleLarge
                         ?.copyWith(fontWeight: FontWeight.w800)),
                 if (_version.isNotEmpty)

@@ -2,6 +2,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:geolocator/geolocator.dart';
+import 'package:flutter/services.dart';
 import 'package:url_launcher/url_launcher.dart';
 import '../services/session_service.dart';
 
@@ -315,6 +316,43 @@ class _SessionDashboardState extends State<_SessionDashboard> {
       ),
       body: Column(
         children: [
+          // Session code card
+          Card(
+            margin: const EdgeInsets.fromLTRB(16, 12, 16, 0),
+            child: Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 14),
+              child: Row(
+                children: [
+                  Icon(Icons.link, color: theme.colorScheme.primary, size: 22),
+                  const SizedBox(width: 12),
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text('Session Code',
+                            style: TextStyle(fontSize: 12, color: Colors.grey.shade600)),
+                        Text(widget.code,
+                            style: TextStyle(
+                                fontSize: 22,
+                                fontWeight: FontWeight.w800,
+                                letterSpacing: 3,
+                                color: theme.colorScheme.primary)),
+                      ],
+                    ),
+                  ),
+                  GestureDetector(
+                    onTap: () {
+                      Clipboard.setData(ClipboardData(text: widget.code));
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        const SnackBar(content: Text('Code copied!'), duration: Duration(seconds: 2)),
+                      );
+                    },
+                    child: Icon(Icons.copy, size: 18, color: Colors.grey.shade400),
+                  ),
+                ],
+              ),
+            ),
+          ),
           // Members bar
           StreamBuilder<DocumentSnapshot>(
             stream: _s.sessionStream(),
