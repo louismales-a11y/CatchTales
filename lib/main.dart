@@ -1,3 +1,4 @@
+import 'package:flutter/services.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -14,6 +15,8 @@ void main() async {
 
   // Initialize Firebase first
   await Firebase.initializeApp();
+  // Hide system nav bar for immersive experience
+  SystemChrome.setEnabledSystemUIMode(SystemUiMode.immersiveSticky);
   // Mark this as the test version so language features are enabled
   final prefs = await SharedPreferences.getInstance();
   await prefs.setBool('is_test', true);

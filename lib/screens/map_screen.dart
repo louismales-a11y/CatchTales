@@ -14,6 +14,7 @@ import '../models/favorite_spot.dart';
 import '../services/database_service.dart';
 import '../services/pro_service.dart';
 import 'spots_screen.dart';
+import 'offline_maps_screen.dart';
 import '../services/analytics_service.dart';
 
 const _defaultCenter = LatLng(39.8283, -98.5795);
@@ -35,7 +36,7 @@ class MapScreenState extends State<MapScreen> {
   List<PlaceResult> _searchResults = [];
   String? _activeCategory;
   LatLng? _userLocation;
-  bool _loading = true, _searching = false, _locRequested = false, _showNauticalChart = false;
+  bool _loading = true, _searching = false, _locRequested = false, _showNauticalChart = false, _showDepth = false;
 
   // Offline cache
   late String _cacheDir;
@@ -302,6 +303,30 @@ class MapScreenState extends State<MapScreen> {
     ));
   }
 
+  Widget _fabLabel(IconData icon, String label, VoidCallback onTap, ThemeData t, {bool active = false}) {
+    return Row(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        Container(
+          padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+          decoration: BoxDecoration(
+            color: Colors.black87,
+            borderRadius: BorderRadius.circular(6),
+          ),
+          child: Text(label,
+              style: const TextStyle(color: Colors.white, fontSize: 11, fontWeight: FontWeight.w500)),
+        ),
+        const SizedBox(width: 8),
+        FloatingActionButton.small(
+          onPressed: onTap,
+          backgroundColor: active ? t.colorScheme.primary : t.colorScheme.surface,
+          elevation: 4,
+          child: Icon(icon, color: active ? Colors.white : t.colorScheme.primary, size: 20),
+        ),
+      ],
+    );
+  }
+
   void _openSpotsList() => Navigator.push(context, MaterialPageRoute(builder: (_) => const SpotsScreen())).then((_) => loadCatches());
 
   // ─── Directions ─────────────────────────────────────────────────────────
@@ -405,56 +430,41 @@ class MapScreenState extends State<MapScreen> {
               urlTemplate: 'https://tile.openstreetmap.org/{z}/{x}/{y}.png',
               userAgentPackageName: 'com.bestfishbuddy.bestfishbuddy',
             ),
+            if (_showNauticalChart)
+              Opacity(
+                opacity: 0.8,
+                child: TileLayer(
+                  urlTemplate: 'https://tiles.openseamap.org/seamark/{z}/{x}/{y}.png',
+                  userAgentPackageName: 'com.bestfishbuddy.bestfishbuddy',
+                ),
+              ),
+            if (_showDepth)
+              Opacity(
+                opacity: 0.7,
+                child: TileLayer(
+                  urlTemplate: 'https://tiles.openseamap.org/depth/{z}/{x}/{y}.png',
+                  userAgentPackageName: 'com.bestfishbuddy.bestfishbuddy',
+                ),
+              ),
             MarkerLayer(markers: _markers(t)),
           ],
         ),
         if (_downloading) Positioned(top: 0, left: 0, right: 0, child: LinearProgressIndicator(value: _dlProgress > 0 ? _dlProgress : null, backgroundColor: Colors.black26)),
         Positioned(right: 16, bottom: 30, child: Column(mainAxisSize: MainAxisSize.min, children: [
-          if (_cacheReady) ...[
-            FloatingActionButton.small(
-              heroTag: 'dl',
-              onPressed: _downloading ? null : _downloadRegion,
-              backgroundColor: t.colorScheme.surface,
-              elevation: 4,
-              tooltip: _cachedTiles > 0 ? 'Offline ($_cacheLabel)' : 'Download offline area',
-              child: Icon(
-                _downloading
-                    ? Icons.hourglass_top
-                    : _cachedTiles > 0
-                        ? Icons.cloud_done
-                        : Icons.cloud_download,
-                color: t.colorScheme.primary,
-                size: 20,
-              ),
-            ),
-            if (_cachedTiles > 0) const SizedBox(height: 12),
-          ],
-          FloatingActionButton.small(
-            heroTag: 'nautical',
-            onPressed: () { AnalyticsService.instance.logNauticalChartToggled(!_showNauticalChart); setState(() => _showNauticalChart = !_showNauticalChart); },
-            backgroundColor: _showNauticalChart ? t.colorScheme.primary : t.colorScheme.surface,
-            elevation: 4,
-            tooltip: _showNauticalChart ? 'Hide nautical chart' : 'Show nautical chart (depths, wrecks, buoys)',
-            child: Icon(Icons.directions_boat, color: _showNauticalChart ? Colors.white : t.colorScheme.primary, size: 20),
-          ),
+          if (_cacheReady)
+            _fabLabel(Icons.cloud_download, 'Offline', () {
+              Navigator.push(context, MaterialPageRoute(builder: (_) => OfflineMapsScreen()));
+            }, t),
+          if (_cacheReady) const SizedBox(height: 12),
+          _fabLabel(Icons.directions_boat, 'Nautical', () => setState(() => _showNauticalChart = !_showNauticalChart), t,
+              active: _showNauticalChart),
           const SizedBox(height: 12),
-          FloatingActionButton.small(
-            heroTag: 'spots',
-            onPressed: _openSpotsList,
-            backgroundColor: t.colorScheme.surface,
-            elevation: 4,
-            tooltip: 'Favorite spots',
-            child: Icon(Icons.star, color: t.colorScheme.primary, size: 20),
-          ),
+          _fabLabel(Icons.water, 'Depth', () => setState(() => _showDepth = !_showDepth), t,
+              active: _showDepth),
           const SizedBox(height: 12),
-          FloatingActionButton.small(
-            heroTag: 'locate',
-            onPressed: _goToMyLocation,
-            backgroundColor: t.colorScheme.surface,
-            elevation: 4,
-            tooltip: 'Locate me',
-            child: Icon(Icons.my_location, color: t.colorScheme.primary, size: 22),
-          ),
+          _fabLabel(Icons.star, 'Spots', _openSpotsList, t),
+          const SizedBox(height: 12),
+          _fabLabel(Icons.my_location, 'Locate', _goToMyLocation, t),
         ])),
         Positioned(top: 12, left: 12, right: 12, child: Column(mainAxisSize: MainAxisSize.min, children: [
           Material(elevation: 4, borderRadius: BorderRadius.circular(28), color: t.colorScheme.surface, child: TextField(

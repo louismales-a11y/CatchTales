@@ -438,7 +438,7 @@ class _CommunityStatsScreenState extends State<CommunityStatsScreen> {
 
   Widget _buildSearchView(ThemeData theme) {
     return ListView(
-      padding: const EdgeInsets.all(16),
+      padding: EdgeInsets.fromLTRB(16, 16, 16, 16 + MediaQuery.of(context).padding.bottom),
       children: [
         const SizedBox(height: 16),
         Center(child: Container(width: 72, height: 72, decoration: BoxDecoration(
@@ -574,7 +574,7 @@ class _CommunityStatsScreenState extends State<CommunityStatsScreen> {
     final hasLakeData = _waterBody != null && _species.isNotEmpty && !_species.first.isSample;
 
     return ListView(
-      padding: const EdgeInsets.all(16),
+      padding: EdgeInsets.fromLTRB(16, 16, 16, 16 + MediaQuery.of(context).padding.bottom),
       children: [
         // ── Header ──
         Card(

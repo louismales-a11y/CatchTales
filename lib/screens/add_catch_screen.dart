@@ -6,6 +6,7 @@ import 'package:geolocator/geolocator.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:intl/intl.dart';
 import 'package:path_provider/path_provider.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'package:speech_to_text/speech_to_text.dart' as stt;
 import '../models/catch.dart';
 import '../services/database_service.dart';
@@ -89,6 +90,8 @@ class _AddCatchScreenState extends State<AddCatchScreen> {
       if (widget.initialSpecies != null) _speciesCtrl.text = widget.initialSpecies!;
       if (widget.initialLocation != null) _locationCtrl.text = widget.initialLocation!;
     }
+    // Auto-fill saved angler name
+    _loadSavedAngler();
     // Auto-fetch GPS location when form opens
     Future.microtask(() => _getLocation());
   }
@@ -104,6 +107,18 @@ class _AddCatchScreenState extends State<AddCatchScreen> {
     _notesCtrl.dispose();
     _speech.stop();
     super.dispose();
+  }
+
+  Future<void> _loadSavedAngler() async {
+    if (_isEditing) return;
+    if (_anglerCtrl.text.isNotEmpty) return;
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      final saved = prefs.getString('angler_name');
+      if (saved != null && saved.isNotEmpty) {
+        _anglerCtrl.text = saved;
+      }
+    } catch (_) {}
   }
 
   Future<void> _getLocation() async {

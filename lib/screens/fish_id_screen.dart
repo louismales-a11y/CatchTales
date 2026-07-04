@@ -200,7 +200,7 @@ class _FishIdScreenState extends State<FishIdScreen> {
             padding: const EdgeInsets.fromLTRB(12, 8, 12, 4),
             child: TextField(
               controller: _searchCtrl,
-              onChanged: (v) => setState(() {}),
+              onChanged: (v) => setState(() => _searchQuery = v),
               decoration: InputDecoration(
                 hintText: 'Search fish...',
                 hintStyle: TextStyle(
@@ -302,7 +302,7 @@ class _FishIdScreenState extends State<FishIdScreen> {
                     ),
                   )
                 : ListView.builder(
-                    padding: const EdgeInsets.fromLTRB(12, 0, 12, 12),
+                    padding: EdgeInsets.fromLTRB(12, 0, 12, 12 + MediaQuery.of(context).padding.bottom),
                     itemCount: results.length,
                     itemBuilder: (context, index) => _FishCard(
                       fish: results[index],
@@ -382,7 +382,7 @@ class _FishCardState extends State<_FishCard> {
         path,
         width: 60,
         height: 60,
-        fit: BoxFit.cover,
+        fit: BoxFit.contain,
         errorBuilder: (ctx, err, stack) => _iconThumb(fish),
         loadingBuilder: (ctx, child, progress) {
           if (progress == null) return child;
@@ -394,7 +394,7 @@ class _FishCardState extends State<_FishCard> {
       File(path),
       width: 60,
       height: 60,
-      fit: BoxFit.cover,
+      fit: BoxFit.contain,
       errorBuilder: (a, b, c) => _iconThumb(fish),
     );
   }
@@ -832,7 +832,7 @@ class _FishDetailScreenState extends State<_FishDetailScreen> {
         path,
         height: 180,
         width: double.infinity,
-        fit: BoxFit.cover,
+        fit: BoxFit.contain,
         loadingBuilder: (ctx, child, progress) {
           if (progress == null) return child;
           return Container(
@@ -850,7 +850,7 @@ class _FishDetailScreenState extends State<_FishDetailScreen> {
       File(path),
       height: 180,
       width: double.infinity,
-      fit: BoxFit.cover,
+      fit: BoxFit.contain,
       errorBuilder: (a, b, c) => _imageFallback(fish),
     );
   }

@@ -1093,18 +1093,22 @@ class _AnglerCard extends StatelessWidget {
           mainAxisSize: MainAxisSize.min,
           children: [
             IconButton(
-              icon: const Icon(Icons.add_circle, size: 22),
+              icon: Icon(Icons.add_circle, size: JasonConfig.instance.enabled ? 32 : 22),
               onPressed: onAdd,
               color: theme.colorScheme.primary,
               tooltip: 'Quick add catch',
-              visualDensity: VisualDensity.compact,
+              constraints: JasonConfig.instance.enabled
+                  ? const BoxConstraints(minWidth: 48, minHeight: 48)
+                  : null,
             ),
             IconButton(
-              icon: const Icon(Icons.delete_outline, size: 18),
+              icon: Icon(Icons.delete_outline, size: JasonConfig.instance.enabled ? 28 : 18),
               onPressed: onDelete,
               color: theme.colorScheme.error.withValues(alpha: 0.7),
               tooltip: 'Remove angler',
-              visualDensity: VisualDensity.compact,
+              constraints: JasonConfig.instance.enabled
+                  ? const BoxConstraints(minWidth: 48, minHeight: 48)
+                  : null,
             ),
             const Icon(Icons.expand_more, size: 20),
           ],
@@ -1197,6 +1201,49 @@ class _AnglerCard extends StatelessWidget {
                             fontWeight: FontWeight.w800,
                             fontSize: 18,
                             color: theme.colorScheme.primary)),
+                  ],
+                ),
+                // ── Big action buttons ──
+                const SizedBox(height: 8),
+                Row(
+                  children: [
+                    Expanded(
+                      child: SizedBox(
+                        height: JasonConfig.instance.enabled ? 56 : 44,
+                        child: OutlinedButton.icon(
+                          onPressed: onAdd,
+                          icon: const Icon(Icons.add_circle, size: 24),
+                          label: Text(
+                            JasonConfig.instance.enabled ? 'Add Catch' : 'Add',
+                            style: TextStyle(fontSize: JasonConfig.instance.enabled ? 14 : 12),
+                          ),
+                          style: OutlinedButton.styleFrom(
+                            foregroundColor: theme.colorScheme.primary,
+                            shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(12)),
+                          ),
+                        ),
+                      ),
+                    ),
+                    const SizedBox(width: 8),
+                    Expanded(
+                      child: SizedBox(
+                        height: JasonConfig.instance.enabled ? 56 : 44,
+                        child: OutlinedButton.icon(
+                          onPressed: onDelete,
+                          icon: const Icon(Icons.delete_outline, size: 24),
+                          label: Text(
+                            JasonConfig.instance.enabled ? 'Remove' : 'Remove',
+                            style: TextStyle(fontSize: JasonConfig.instance.enabled ? 14 : 12),
+                          ),
+                          style: OutlinedButton.styleFrom(
+                            foregroundColor: theme.colorScheme.error,
+                            shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(12)),
+                          ),
+                        ),
+                      ),
+                    ),
                   ],
                 ),
               ],

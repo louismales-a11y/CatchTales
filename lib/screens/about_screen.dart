@@ -260,8 +260,9 @@ class _AboutScreenState extends State<AboutScreen> {
                           const Spacer(),
                           Switch(
                             value: JasonConfig.instance.enabled,
-                            onChanged: (v) async {
-                              await JasonConfig.instance.setEnabled(v);
+                            onChanged: (v) {
+                              JasonConfig.instance.setEnabled(v);
+                              setState(() {});
                             },
                           ),
                         ],

@@ -21,6 +21,7 @@ import 'services/pro_service.dart';
 import 'services/database_service.dart';
 import 'services/analytics_service.dart';
 import 'services/api_config.dart';
+import 'services/jason_config.dart';
 import 'screens/about_screen.dart';
 import 'screens/cloud_sync_screen.dart';
 import 'screens/contact_screen.dart';
@@ -535,7 +536,9 @@ class _HomeScreenTestState extends State<HomeScreenTest> {
     final tp = context.watch<ThemeProvider>();
     context.watch<TranslationService>();
     final accent = tp.themeInfo.accent;
-    return Scaffold(
+    return PopScope(
+      canPop: Navigator.of(context).canPop(),
+      child: Scaffold(
       appBar: AppBar(
         title: Row(
           children: [
@@ -822,7 +825,11 @@ class _HomeScreenTestState extends State<HomeScreenTest> {
                 final added = await Navigator.push<bool>(
                   context,
                   MaterialPageRoute(
-                      builder: (_) => const AddCatchScreen()),
+                      builder: (_) => AddCatchScreen(
+                          initialAngler: JasonConfig.instance.enabled
+                              ? null
+                              : null) // initialAngler loaded from prefs inside AddCatchScreen
+                      ),
                 );
                 if (added == true) {
                   _catchesKey.currentState?.loadCatches();
@@ -862,6 +869,7 @@ class _HomeScreenTestState extends State<HomeScreenTest> {
             label: tr('map'),
           ),
         ],
+      ),
       ),
     );
   }
