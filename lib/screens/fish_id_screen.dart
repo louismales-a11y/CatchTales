@@ -8,6 +8,7 @@ import '../services/pro_service.dart';
 import '../services/translation_service.dart';
 import '../services/analytics_service.dart';
 import '../services/fish_image_service.dart';
+import '../services/jason_config.dart';
 import '../services/database_service.dart';
 import '../models/fish_data.dart';
 import '../models/fish_status.dart';
@@ -770,11 +771,25 @@ class _FishDetailScreenState extends State<_FishDetailScreen> {
           const SizedBox(height: 16),
           OutlinedButton.icon(
             onPressed: () async {
-              // Try scientific name first, then common name
               final url = Uri.parse(
                 'https://en.wikipedia.org/wiki/${Uri.encodeComponent(widget.fish.scientificName)}');
-              if (await canLaunchUrl(url)) {
-                await launchUrl(url, mode: LaunchMode.externalApplication);
+              if (JasonConfig.instance.enabled) {
+                // Jason: try with fallback
+                try {
+                  await launchUrl(url, mode: LaunchMode.externalApplication);
+                } catch (_) {
+                  final searchUrl = Uri.parse(
+                    'https://en.wikipedia.org/wiki/Special:Search?search=${Uri.encodeComponent(widget.fish.name)}');
+                  try {
+                    await launchUrl(searchUrl,
+                        mode: LaunchMode.externalApplication);
+                  } catch (_) {}
+                }
+              } else {
+                // Original: try once
+                try {
+                  await launchUrl(url, mode: LaunchMode.externalApplication);
+                } catch (_) {}
               }
             },
             icon: const Icon(Icons.open_in_new, size: 16),

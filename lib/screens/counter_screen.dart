@@ -8,6 +8,7 @@ import '../models/species_tally.dart';
 import '../services/database_service.dart';
 import '../services/session_service.dart';
 import '../services/translation_service.dart';
+import '../services/jason_config.dart';
 import 'add_catch_screen.dart';
 
 class CounterScreen extends StatefulWidget {
@@ -1168,15 +1169,15 @@ class _AnglerCard extends StatelessWidget {
                           const SizedBox(width: 4),
                           InkWell(
                             onTap: () => onDecrement(s.species),
-                            borderRadius: BorderRadius.circular(10),
+                            borderRadius: BorderRadius.circular(14),
                             child: Container(
-                              padding: const EdgeInsets.all(2),
+                              padding: EdgeInsets.all(JasonConfig.instance.enabled ? 6 : 2),
                               decoration: BoxDecoration(
                                 color: Colors.red.shade50,
-                                borderRadius: BorderRadius.circular(10),
+                                borderRadius: BorderRadius.circular(14),
                               ),
                               child: Icon(Icons.remove_circle_outline,
-                                  size: 18, color: Colors.red.shade400),
+                                  size: JasonConfig.instance.enabled ? 28 : 18, color: Colors.red.shade400),
                             ),
                           ),
                         ],

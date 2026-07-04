@@ -9,6 +9,7 @@ import '../services/help_text.dart';
 import '../services/translation_service.dart';
 import '../services/pro_service.dart';
 import '../services/api_config.dart';
+import '../services/jason_config.dart';
 
 class AboutScreen extends StatefulWidget {
   const AboutScreen({super.key});
@@ -190,8 +191,8 @@ class _AboutScreenState extends State<AboutScreen> {
             ),
           ),
           const SizedBox(height: 24),
-          // ── Dev Mode Toggle (Developer build only) ──
-          if (ApiConfig.isDev) ...[const SizedBox(height: 16),
+          // ── Dev Mode Toggle (Developer build only, hidden in Jason) ──
+          if (ApiConfig.isDev && ApiConfig.appVersion != 'jason') ...[const SizedBox(height: 16),
           Card(
             color: theme.colorScheme.primary.withValues(alpha: 0.05),
             child: Padding(
@@ -240,6 +241,42 @@ class _AboutScreenState extends State<AboutScreen> {
           ),
           ],
           const SizedBox(height: 24),
+          // ── Jason Mode Toggle (Dev/Jason builds only) ──
+          if (ApiConfig.isDev)
+            Padding(
+              padding: const EdgeInsets.only(bottom: 16),
+              child: Card(
+                color: Colors.amber.shade50,
+                child: Padding(
+                  padding: const EdgeInsets.all(14),
+                  child: Column(
+                    children: [
+                      Row(
+                        children: [
+                          Icon(Icons.science, size: 20, color: Colors.amber.shade800),
+                          const SizedBox(width: 10),
+                          const Text('Jason Mode',
+                              style: TextStyle(fontWeight: FontWeight.w600)),
+                          const Spacer(),
+                          Switch(
+                            value: JasonConfig.instance.enabled,
+                            onChanged: (v) async {
+                              await JasonConfig.instance.setEnabled(v);
+                            },
+                          ),
+                        ],
+                      ),
+                      Text(
+                        JasonConfig.instance.enabled
+                            ? 'Jason fixes active: bigger buttons, better Wikipedia links'
+                            : 'Original behavior (no fixes applied)',
+                        style: TextStyle(fontSize: 11, color: Colors.amber.shade800),
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+            ),
           // ── QR Code: Download Free Version ──
           Card(
             child: Padding(

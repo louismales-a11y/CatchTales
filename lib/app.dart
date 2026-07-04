@@ -552,7 +552,7 @@ class _HomeScreenTestState extends State<HomeScreenTest> {
             Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text('Best Fish Buddy', style: TextStyle(fontSize: Theme.of(context).textTheme.titleLarge?.fontSize)),
+                Text(ApiConfig.appDisplayName, style: TextStyle(fontSize: Theme.of(context).textTheme.titleLarge?.fontSize)),
                 Text(context.watch<ProService>().isPro ? tr('proVersion') : tr('freeVersion'),
                     style: TextStyle(fontSize: 10, color: Colors.grey.shade400)),
               ],
