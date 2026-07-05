@@ -824,7 +824,7 @@ class _CounterScreenState extends State<CounterScreen> {
                 child: Text(tr('cancel'))),
             FilledButton(
                 onPressed: () => Navigator.pop(ctx, ctrl.text.trim()),
-                child: Text(tr('addAngler'))),
+                child: Text(tr('addCatch'))),
           ],
         );
       },
