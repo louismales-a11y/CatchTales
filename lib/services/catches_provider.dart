@@ -1,4 +1,5 @@
 import 'package:flutter/foundation.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import '../models/catch.dart';
 import 'catches_db_service.dart';
 
@@ -72,6 +73,16 @@ class CatchesProvider extends ChangeNotifier {
   Future<bool> addCatch(Catch c) async {
     try {
       await CatchesDbService.instance.addCatch(c);
+      final count = await CatchesDbService.instance.getCatchCount();
+      // Show rate prompt after 5 catches (only once)
+      if (count >= 5) {
+        final prefs = await SharedPreferences.getInstance();
+        final alreadyPrompted = prefs.getBool('rate_prompt_shown') ?? false;
+        if (!alreadyPrompted) {
+          await prefs.setBool('rate_prompt_shown', true);
+          _pendingRatePrompt = true;
+        }
+      }
       await loadCatches();
       return true;
     } catch (e) {
@@ -79,6 +90,16 @@ class CatchesProvider extends ChangeNotifier {
       notifyListeners();
       return false;
     }
+  }
+
+  /// Whether a rate prompt should be shown.
+  bool _pendingRatePrompt = false;
+  bool get pendingRatePrompt => _pendingRatePrompt;
+
+  /// Clear the rate prompt flag after showing.
+  void clearRatePrompt() {
+    _pendingRatePrompt = false;
+    notifyListeners();
   }
 
   /// Update a catch and refresh the list.

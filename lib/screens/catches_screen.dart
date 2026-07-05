@@ -109,6 +109,42 @@ class CatchesScreenState extends State<CatchesScreen> {
             ),
           ),
         ),
+        // Rate prompt banner (shown once after 5 catches)
+        if (cp.pendingRatePrompt)
+          Container(
+            width: double.infinity,
+            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
+            color: Theme.of(context).colorScheme.primary.withValues(alpha: 0.1),
+            child: Row(
+              children: [
+                Icon(Icons.star,
+                    size: 18, color: Colors.amber.shade700),
+                const SizedBox(width: 8),
+                Expanded(
+                  child: Text(
+                    'Enjoying Best Fish Buddy? Rate us! ⭐',
+                    style: const TextStyle(fontSize: 13,
+                        fontWeight: FontWeight.w500),
+                  ),
+                ),
+                TextButton(
+                  onPressed: () {
+                    cp.clearRatePrompt();
+                    // TODO: Open app store link
+                  },
+                  child: const Text('Rate',
+                      style: TextStyle(fontSize: 12)),
+                ),
+                IconButton(
+                  icon: const Icon(Icons.close, size: 16),
+                  onPressed: cp.clearRatePrompt,
+                  visualDensity: VisualDensity.compact,
+                  padding: EdgeInsets.zero,
+                  constraints: const BoxConstraints(),
+                ),
+              ],
+            ),
+          ),
         // Free limit banner
         if (!context.watch<ProService>().isPro)
           Container(
