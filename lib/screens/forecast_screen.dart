@@ -5,6 +5,7 @@ import 'package:geolocator/geolocator.dart';
 import '../services/notification_service.dart';
 import '../services/translation_service.dart';
 import '../services/weather_service.dart';
+import '../services/tide_service.dart';
 
 class ForecastScreen extends StatefulWidget {
   const ForecastScreen({super.key});
@@ -16,6 +17,7 @@ class ForecastScreen extends StatefulWidget {
 class _ForecastScreenState extends State<ForecastScreen> {
   List<ForecastDay>? _forecast;
   Map<String, dynamic>? _current;
+  TideData? _tide;
   bool _loading = true;
   String? _error;
   String _city = '';
@@ -34,6 +36,15 @@ class _ForecastScreenState extends State<ForecastScreen> {
     });
 
     try {
+      // Load tide data
+      try {
+        final pos = await Geolocator.getCurrentPosition(
+          locationSettings: const LocationSettings(
+            accuracy: LocationAccuracy.low, timeLimit: Duration(seconds: 5)),
+        );
+        final tide = await TideService.instance.getTideData(pos.latitude, pos.longitude);
+        if (mounted) setState(() => _tide = tide);
+      } catch (_) {}
       if (!_notifPrompted && mounted) {
         _notifPrompted = true;
         NotificationService.instance.requestPermissionIfNeeded(context);
@@ -149,6 +160,11 @@ class _ForecastScreenState extends State<ForecastScreen> {
           const SizedBox(height: 20),
 
           // Forecast
+          // Tide data
+          if (_tide != null && _tide!.events.isNotEmpty) ...[
+            _buildTideCard(theme, _tide!),
+            const SizedBox(height: 20),
+          ],
           if (_forecast != null && _forecast!.isNotEmpty) ...[
             Text(tr('fiveDayForecast'),
                 style: theme.textTheme.titleMedium?.copyWith(
@@ -237,6 +253,105 @@ class _ForecastScreenState extends State<ForecastScreen> {
                 fontWeight: FontWeight.w600, fontSize: 14)),
         Text(label,
             style: TextStyle(fontSize: 11, color: Colors.grey.shade500)),
+      ],
+    );
+  }
+
+  Widget _buildTideCard(ThemeData theme, TideData tide) {
+    final nextHigh = tide.events.firstWhere(
+      (e) => e.type == 'high',
+      orElse: () => tide.events.first,
+    );
+    final nextLow = tide.events.firstWhere(
+      (e) => e.type == 'low',
+      orElse: () => tide.events.first,
+    );
+    return Card(
+      child: Padding(
+        padding: const EdgeInsets.all(16),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Row(
+              children: [
+                Icon(Icons.water, size: 20, color: theme.colorScheme.primary),
+                const SizedBox(width: 8),
+                Text('Tide: ${tide.stationName}',
+                    style: theme.textTheme.titleSmall?.copyWith(
+                  fontWeight: FontWeight.w600,
+                )),
+              ],
+            ),
+            const SizedBox(height: 12),
+            Row(
+              children: [
+                _tideStat(
+                  icon: Icons.arrow_upward,
+                  label: 'High',
+                  value: '${nextHigh.height.toStringAsFixed(1)}m',
+                  time: '${nextHigh.time.hour}:${nextHigh.time.minute.toString().padLeft(2, '0')}',
+                  color: Colors.blue.shade600,
+                ),
+                const SizedBox(width: 24),
+                _tideStat(
+                  icon: Icons.arrow_downward,
+                  label: 'Low',
+                  value: '${nextLow.height.toStringAsFixed(1)}m',
+                  time: '${nextLow.time.hour}:${nextLow.time.minute.toString().padLeft(2, '0')}',
+                  color: Colors.brown.shade400,
+                ),
+              ],
+            ),
+            const SizedBox(height: 8),
+            Wrap(
+              spacing: 8,
+              runSpacing: 4,
+              children: tide.events.take(6).map((e) {
+                final time = '${e.time.hour.toString().padLeft(2, '0')}:${e.time.minute.toString().padLeft(2, '0')}';
+                return Chip(
+                  label: Text(
+                    '${e.type == 'high' ? '▲' : '▼'} $time ${e.height.toStringAsFixed(1)}m',
+                    style: const TextStyle(fontSize: 11),
+                  ),
+                  materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                  visualDensity: VisualDensity.compact,
+                );
+              }).toList(),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _tideStat({
+    required IconData icon,
+    required String label,
+    required String value,
+    required String time,
+    required Color color,
+  }) {
+    return Row(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        Icon(icon, size: 16, color: color),
+        const SizedBox(width: 4),
+        Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(label,
+                style: TextStyle(
+                    fontSize: 11, color: Colors.grey.shade600)),
+            Text(value,
+                style: TextStyle(
+                    fontSize: 16,
+                    fontWeight: FontWeight.w700,
+                    color: color)),
+            Text(time,
+                style: TextStyle(
+                    fontSize: 11, color: Colors.grey.shade600)),
+          ],
+        ),
       ],
     );
   }
