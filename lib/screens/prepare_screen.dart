@@ -25,7 +25,7 @@ class PrepareScreen extends StatefulWidget {
 
 class _PrepareScreenState extends State<PrepareScreen> {
   bool _loading = true;
-  Set<String> _done = {};
+  final Set<String> _done = {};
   int _anglerCount = 0;
   int _tackleCount = 0;
   int _spotCount = 0;
@@ -123,6 +123,7 @@ class _PrepareScreenState extends State<PrepareScreen> {
                   icon: Icons.people,
                   label: tr('checkAddAnglers'),
                   detail: _anglerCount > 0 ? trp('nAnglers', {'count': '$_anglerCount'}) : tr('noAnglersYet'),
+                  onTapExtra: _anglerCount == 0 ? _showAddAnglersHelp : null,
                 ),
                 _checkItem(
                   key: 'weather',
@@ -243,6 +244,7 @@ class _PrepareScreenState extends State<PrepareScreen> {
     required String detail,
     Widget? screen,
     Color? detailColor,
+    VoidCallback? onTapExtra,
   }) {
     final done = _done.contains(key);
     final theme = Theme.of(context);
@@ -281,7 +283,9 @@ class _PrepareScreenState extends State<PrepareScreen> {
         ),
         onTap: () {
           _toggle(key);
-          if (screen != null && !done) {
+          if (onTapExtra != null && !done) {
+            onTapExtra();
+          } else if (screen != null && !done) {
             Navigator.push(context, MaterialPageRoute(builder: (_) => screen));
           }
         },
