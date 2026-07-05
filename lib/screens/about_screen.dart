@@ -21,6 +21,12 @@ class _AboutScreenState extends State<AboutScreen> {
   void initState() {
     super.initState();
     _loadVersion();
+    _checkNotifStatus();
+  }
+
+  Future<void> _checkNotifStatus() async {
+    await NotificationService.instance.checkEnabled();
+    if (mounted) setState(() {});
   }
 
   Future<void> _loadVersion() async {
@@ -172,21 +178,52 @@ class _AboutScreenState extends State<AboutScreen> {
                 children: [
                   Row(
                     children: [
-                      Icon(Icons.notifications_outlined, size: 20, color: theme.colorScheme.primary),
+                      Icon(
+                        NotificationService.instance.enabled
+                            ? Icons.notifications_active
+                            : Icons.notifications_off_outlined,
+                        size: 20,
+                        color: NotificationService.instance.enabled
+                            ? Colors.green.shade600
+                            : theme.colorScheme.primary,
+                      ),
                       const SizedBox(width: 10),
                       const Text('Push Notifications',
                           style: TextStyle(fontWeight: FontWeight.w600)),
                       const Spacer(),
-                      OutlinedButton.icon(
-                        onPressed: () =>
-                            NotificationService.instance.requestPermissionIfNeeded(context),
-                        icon: const Icon(Icons.notifications_active, size: 16),
-                        label: const Text('Enable', style: TextStyle(fontSize: 12)),
-                        style: OutlinedButton.styleFrom(
-                          padding: const EdgeInsets.symmetric(horizontal: 12),
-                          visualDensity: VisualDensity.compact,
+                      Container(
+                        padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                        decoration: BoxDecoration(
+                          color: NotificationService.instance.enabled
+                              ? Colors.green.shade50
+                              : Colors.grey.shade100,
+                          borderRadius: BorderRadius.circular(12),
+                        ),
+                        child: Text(
+                          NotificationService.instance.enabled ? 'ON' : 'OFF',
+                          style: TextStyle(
+                            fontSize: 12,
+                            fontWeight: FontWeight.w700,
+                            color: NotificationService.instance.enabled
+                                ? Colors.green.shade700
+                                : Colors.grey.shade600,
+                          ),
                         ),
                       ),
+                      if (!NotificationService.instance.enabled) ...[const SizedBox(width: 8),
+                        OutlinedButton.icon(
+                          onPressed: () async {
+                            await NotificationService.instance.requestPermissionIfNeeded(context, force: true);
+                            await _checkNotifStatus();
+                          },
+                          icon: const Icon(Icons.notifications_active, size: 16),
+                          label: const Text('Enable', style: TextStyle(fontSize: 12)),
+                          style: OutlinedButton.styleFrom(
+                            padding: const EdgeInsets.symmetric(horizontal: 12),
+                            visualDensity: VisualDensity.compact,
+                          ),
+                        ),
+                      ],
                     ],
                   ),
                   const SizedBox(height: 6),

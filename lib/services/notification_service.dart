@@ -12,6 +12,22 @@ class NotificationService {
   NotificationService._();
 
   bool _initialized = false;
+  bool _enabled = false;
+
+  /// Whether the user has granted notification permission.
+  bool get enabled => _enabled;
+
+  /// Check current permission status.
+  Future<bool> checkEnabled() async {
+    try {
+      final messaging = FirebaseMessaging.instance;
+      final settings = await messaging.getNotificationSettings();
+      _enabled = settings.authorizationStatus == AuthorizationStatus.authorized;
+    } catch (_) {
+      _enabled = false;
+    }
+    return _enabled;
+  }
 
   /// Silently sets up FCM infrastructure without requesting permission.
   /// Call [requestPermissionIfNeeded] later at a contextual moment.
@@ -41,10 +57,11 @@ class NotificationService {
   }
 
   /// Shows a contextual dialog explaining why notifications are useful,
-  /// then requests system permission. Only shows once.
-  Future<void> requestPermissionIfNeeded(BuildContext context) async {
+  /// then requests system permission. Only shows once automatically;
+  /// can be called again from About screen.
+  Future<void> requestPermissionIfNeeded(BuildContext context, {bool force = false}) async {
     final prefs = await SharedPreferences.getInstance();
-    if (prefs.getBool('notif_prompt_shown') == true) return;
+    if (!force && prefs.getBool('notif_prompt_shown') == true) return;
     await prefs.setBool('notif_prompt_shown', true);
 
     if (!context.mounted) return;
@@ -91,6 +108,7 @@ class NotificationService {
           badge: true,
           sound: true,
         );
+        await checkEnabled();
       } catch (_) {}
     }
   }
