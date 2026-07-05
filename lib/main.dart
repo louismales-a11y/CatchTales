@@ -9,6 +9,7 @@ import 'services/api_config.dart';
 import 'services/theme_provider.dart';
 import 'services/catches_provider.dart';
 import 'services/connectivity_service.dart';
+import 'services/tts_service.dart';
 import 'package:firebase_core/firebase_core.dart';
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -30,6 +31,8 @@ void main() async {
   }
   // Start connectivity monitoring
   ConnectivityService.instance.start();
+  // Initialize TTS
+  TtsService.instance.init();
 
   runApp(
     MultiProvider(

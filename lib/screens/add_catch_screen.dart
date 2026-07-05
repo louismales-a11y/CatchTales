@@ -15,6 +15,7 @@ import '../services/catches_db_service.dart';
 import '../services/tackle_db_service.dart';
 import '../services/help_text.dart';
 import '../services/photo_backup_service.dart';
+import '../services/tts_service.dart';
 import '../services/weather_service.dart';
 import '../services/translation_service.dart';
 import '../services/pro_service.dart';
@@ -350,6 +351,7 @@ class _AddCatchScreenState extends State<AddCatchScreen> {
         await CatchesDbService.instance.addCatch(catchItem);
         HapticFeedback.mediumImpact();
         AnalyticsService.instance.logCatchAdded(species: catchItem.species);
+        TtsService.instance.speak('Saved ${catchItem.species}');
         // Fire-and-forget: update community stats (no await — best-effort)
         CommunityStatsService.instance.updateCatchStats(catchItem);
       }

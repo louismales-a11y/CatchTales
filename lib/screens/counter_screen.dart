@@ -10,6 +10,7 @@ import '../services/counters_db_service.dart';
 import '../services/species_tally_db_service.dart';
 import '../services/session_service.dart';
 import '../services/translation_service.dart';
+import '../services/tts_service.dart';
 import 'add_catch_screen.dart';
 
 class CounterScreen extends StatefulWidget {
@@ -741,6 +742,7 @@ class _CounterScreenState extends State<CounterScreen> {
     for (int i = 0; i < count; i++) {
       await SpeciesTallyDbService.instance.incrementSpeciesTally(angler, species);
     }
+    TtsService.instance.speak('$count $species');
     HapticFeedback.lightImpact();
     if (!mounted) return;
     await _load();
