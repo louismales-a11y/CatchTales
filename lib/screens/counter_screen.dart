@@ -1,6 +1,7 @@
 import 'dart:async';
 import 'dart:convert';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:speech_to_text/speech_to_text.dart' as stt;
@@ -227,6 +228,7 @@ class _CounterScreenState extends State<CounterScreen> {
 
   Future<void> _decrementSpecies(String angler, String species) async {
     await SpeciesTallyDbService.instance.decrementSpeciesTally(angler, species);
+    HapticFeedback.lightImpact();
     if (!mounted) return;
     await _load();
   }
@@ -739,6 +741,7 @@ class _CounterScreenState extends State<CounterScreen> {
     for (int i = 0; i < count; i++) {
       await SpeciesTallyDbService.instance.incrementSpeciesTally(angler, species);
     }
+    HapticFeedback.lightImpact();
     if (!mounted) return;
     await _load();
     // Share to active session if any

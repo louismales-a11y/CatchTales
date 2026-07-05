@@ -1,6 +1,7 @@
 import 'dart:async';
 import 'dart:io';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:provider/provider.dart';
 import 'package:intl/intl.dart';
 import 'package:speech_to_text/speech_to_text.dart' as stt;
@@ -65,6 +66,7 @@ class CatchesScreenState extends State<CatchesScreen> {
 
   Future<void> _deleteCatch(Catch c) async {
     if (c.id == null) return;
+    HapticFeedback.mediumImpact();
     await _provider.deleteCatch(c.id!);
   }
 
@@ -403,6 +405,7 @@ class CatchesScreenState extends State<CatchesScreen> {
   // ── Voice ──────────────────────────────────────────────────────
 
   Future<void> _toggleVoice() async {
+    HapticFeedback.lightImpact();
     if (_voiceOn) {
       _speech.stop();
       setState(() => _voiceOn = false);

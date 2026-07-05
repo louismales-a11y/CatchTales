@@ -1,6 +1,7 @@
 import 'dart:async';
 import 'dart:io';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:provider/provider.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:image_picker/image_picker.dart';
@@ -347,6 +348,7 @@ class _AddCatchScreenState extends State<AddCatchScreen> {
           return;
         }
         await CatchesDbService.instance.addCatch(catchItem);
+        HapticFeedback.mediumImpact();
         AnalyticsService.instance.logCatchAdded(species: catchItem.species);
         // Fire-and-forget: update community stats (no await — best-effort)
         CommunityStatsService.instance.updateCatchStats(catchItem);
