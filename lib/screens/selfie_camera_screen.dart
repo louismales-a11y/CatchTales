@@ -25,6 +25,7 @@ class _SelfieCameraScreenState extends State<SelfieCameraScreen> {
 
   Future<void> _initCamera() async {
     final cameras = await availableCameras();
+    if (!mounted) return;
     // Find front camera, fall back to first available
     final front = cameras.firstWhere(
       (c) => c.lensDirection == CameraLensDirection.front,
@@ -59,7 +60,8 @@ class _SelfieCameraScreenState extends State<SelfieCameraScreen> {
     } catch (e) {
       if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Camera error: $e')),
+        SnackBar(behavior: SnackBarBehavior.floating,
+              content: Text('Camera error: $e')),
       );
       Navigator.of(context).pop();
     }

@@ -18,7 +18,7 @@ import 'services/cloud_sync_service.dart';
 import 'services/notification_service.dart';
 import 'services/translation_service.dart';
 import 'services/pro_service.dart';
-import 'services/database_service.dart';
+import 'services/catches_provider.dart';
 import 'services/analytics_service.dart';
 import 'services/api_config.dart';
 import 'screens/about_screen.dart';
@@ -435,18 +435,39 @@ class _HomeScreenTestState extends State<HomeScreenTest> {
                   );
                 }),
                 const Divider(height: 4),
-                // Dark mode toggle
+                // Follow system toggle
+                SwitchListTile(
+                  title: const Text('Follow system'),
+                  subtitle: tp.followSystem
+                      ? Text('Uses your device settings',
+                          style: TextStyle(fontSize: 11, color: Colors.grey.shade500))
+                      : null,
+                  secondary: Icon(
+                    Icons.settings_brightness,
+                    color: theme.colorScheme.primary,
+                  ),
+                  value: tp.followSystem,
+                  onChanged: (v) {
+                    tp.setFollowSystem(v);
+                    Navigator.pop(ctx);
+                  },
+                ),
+                // Manual dark mode toggle (disabled when following system)
                 SwitchListTile(
                   title: Text(tr('darkMode')),
                   secondary: Icon(
                     tp.isDark ? Icons.dark_mode : Icons.light_mode,
-                    color: theme.colorScheme.primary,
+                    color: tp.followSystem
+                        ? Colors.grey
+                        : theme.colorScheme.primary,
                   ),
-                  value: tp.isDark,
-                  onChanged: (_) {
-                    tp.toggleDark();
-                    Navigator.pop(ctx);
-                  },
+                  value: tp.followSystem ? false : tp.isDark,
+                  onChanged: tp.followSystem
+                      ? null
+                      : (_) {
+                          tp.toggleDark();
+                          Navigator.pop(ctx);
+                        },
                 ),
               ],
             ),
@@ -770,10 +791,14 @@ class _HomeScreenTestState extends State<HomeScreenTest> {
               PopupMenuItem(
                 value: 'dark_mode',
                 child: ListTile(
-                  leading: Icon(tp.isDark
-                      ? Icons.light_mode
-                      : Icons.dark_mode),
-                  title: Text(tp.isDark ? tr('lightMode') : tr('darkMode')),
+                  leading: Icon(tp.followSystem
+                      ? Icons.settings_brightness
+                      : (tp.isDark
+                          ? Icons.light_mode
+                          : Icons.dark_mode)),
+                  title: Text(tp.followSystem
+                      ? 'System (${tr('darkMode')})'
+                      : (tp.isDark ? tr('lightMode') : tr('darkMode'))),
                   dense: true,
                   contentPadding: EdgeInsets.zero,
                 ),
@@ -817,7 +842,7 @@ class _HomeScreenTestState extends State<HomeScreenTest> {
           ? FloatingActionButton(
               onPressed: () async {
                 if (!ProService.instance.isPro) {
-                  final count = await DatabaseService.instance.getCatchCount();
+                  final count = await context.read<CatchesProvider>().getCatchCount();
                   if (count >= ProService.freeCatchLimit) {
                     if (context.mounted) {
                       ProService.showUpgradeDialog(context);
@@ -832,7 +857,7 @@ class _HomeScreenTestState extends State<HomeScreenTest> {
                       builder: (_) => const AddCatchScreen()),
                 );
                 if (added == true) {
-                  _catchesKey.currentState?.loadCatches();
+                  if (context.mounted) context.read<CatchesProvider>().loadCatches();
                 }
               },
               child: const Icon(Icons.add),

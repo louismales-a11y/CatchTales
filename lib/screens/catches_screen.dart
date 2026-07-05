@@ -6,8 +6,8 @@ import 'package:intl/intl.dart';
 import 'package:speech_to_text/speech_to_text.dart' as stt;
 import '../services/translation_service.dart';
 import '../services/pro_service.dart';
+import '../services/catches_provider.dart';
 import '../models/catch.dart';
-import '../services/database_service.dart';
 import 'add_catch_screen.dart';
 
 class CatchesScreen extends StatefulWidget {
@@ -18,35 +18,21 @@ class CatchesScreen extends StatefulWidget {
 }
 
 class CatchesScreenState extends State<CatchesScreen> {
-  List<Catch> _catches = [];
-  bool _loading = true;
-  // Voice
+  // Voice state (UI-specific, not in provider)
   late stt.SpeechToText _speech;
   bool _voiceOn = false;
   String _voiceStatus = '';
   String _lastVoiceText = '';
 
+  CatchesProvider get _provider => context.read<CatchesProvider>();
+
   @override
   void initState() {
     super.initState();
-    Future.microtask(() => loadCatches());
+    // Catches already loaded by CatchesProvider in main.dart
   }
 
-  Future<void> loadCatches() async {
-    if (!mounted) return;
-    setState(() => _loading = true);
-    try {
-      final catches = await DatabaseService.instance.getCatches();
-      if (mounted) {
-        setState(() {
-          _catches = catches;
-          _loading = false;
-        });
-      }
-    } catch (e) {
-      if (mounted) setState(() => _loading = false);
-    }
-  }
+  Future<void> loadCatches() => _provider.loadCatches();
 
   Future<void> _editCatch(Catch c) async {
     final updated = await Navigator.push<bool>(
@@ -56,7 +42,7 @@ class CatchesScreenState extends State<CatchesScreen> {
       ),
     );
     if (updated == true) {
-      await loadCatches();
+      await _provider.loadCatches();
     }
   }
 
@@ -78,15 +64,15 @@ class CatchesScreenState extends State<CatchesScreen> {
       ),
     );
     if (confirm == true) {
-      await DatabaseService.instance.deleteCatch(c.id!);
-      await loadCatches();
+      await _provider.deleteCatch(c.id!);
     }
   }
 
   @override
   Widget build(BuildContext context) {
     context.watch<TranslationService>();
-    if (_loading) {
+    final cp = context.watch<CatchesProvider>();
+    if (cp.loading) {
       return const Center(child: CircularProgressIndicator());
     }
     return Column(
@@ -112,7 +98,7 @@ class CatchesScreenState extends State<CatchesScreen> {
                 const SizedBox(width: 8),
                 Expanded(
                   child: Text(
-                    trp('freeCatchBanner', {'count': '${_catches.length}', 'limit': '${ProService.freeCatchLimit}'}),
+                    trp('freeCatchBanner', {'count': '${cp.count}', 'limit': '${ProService.freeCatchLimit}'}),
                     style: const TextStyle(fontSize: 13, color: Colors.white, fontWeight: FontWeight.w500),
                   ),
                 ),
@@ -120,7 +106,7 @@ class CatchesScreenState extends State<CatchesScreen> {
             ),
           ),
         Expanded(
-          child: _catches.isEmpty
+          child: cp.catches.isEmpty
               ? Center(
         child: Column(
           mainAxisSize: MainAxisSize.min,
@@ -203,9 +189,9 @@ class CatchesScreenState extends State<CatchesScreen> {
                 onRefresh: loadCatches,
                 child: ListView.builder(
                   padding: const EdgeInsets.all(12),
-                  itemCount: _catches.length,
+                  itemCount: cp.catches.length,
                   itemBuilder: (context, index) {
-                    final c = _catches[index];
+                    final c = cp.catches[index];
                     return _CatchCard(
                       catch_: c,
                       onTap: () => _editCatch(c),

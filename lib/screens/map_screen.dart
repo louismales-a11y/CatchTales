@@ -12,7 +12,9 @@ import 'package:url_launcher/url_launcher.dart';
 import '../models/catch.dart';
 import '../models/favorite_spot.dart';
 import '../models/depth_reading.dart';
-import '../services/database_service.dart';
+import '../services/catches_db_service.dart';
+import '../services/spots_db_service.dart';
+import '../services/depth_db_service.dart';
 import '../services/pro_service.dart';
 import '../services/offline_region_service.dart';
 import '../services/api_config.dart';
@@ -91,7 +93,7 @@ class MapScreenState extends State<MapScreen> {
 
   Future<void> _loadDepthReadings() async {
     try {
-      final readings = await DatabaseService.instance.getDepthReadings();
+      final readings = await DepthDbService.instance.getDepthReadings();
       if (mounted) setState(() => _depthReadings = readings);
     } catch (_) {}
   }
@@ -137,7 +139,7 @@ class MapScreenState extends State<MapScreen> {
                 longitude: ll.longitude,
                 depthFeet: depth,
               );
-              await DatabaseService.instance.addDepthReading(r);
+              await DepthDbService.instance.addDepthReading(r);
               if (ctx.mounted) Navigator.pop(ctx);
               _loadDepthReadings();
             },
@@ -152,8 +154,8 @@ class MapScreenState extends State<MapScreen> {
     if (!mounted) return;
     setState(() => _loading = true);
     try {
-      final catches = await DatabaseService.instance.getCatches();
-      final spots = await DatabaseService.instance.getSpots();
+      final catches = await CatchesDbService.instance.getCatches();
+      final spots = await SpotsDbService.instance.getSpots();
       if (mounted) {
         setState(() {
           _catchesWithLocation = catches.where((c) => c.latitude != null && c.longitude != null).toList();
@@ -255,9 +257,9 @@ class MapScreenState extends State<MapScreen> {
         TextButton(onPressed: () => Navigator.pop(ctx), child: const Text('Cancel')),
         ElevatedButton(onPressed: () async {
           if (c.text.trim().isEmpty) return;
-          await DatabaseService.instance.addSpot(FavoriteSpot(name: c.text.trim(), latitude: ll.latitude, longitude: ll.longitude, bestSpecies: s.text.trim().isNotEmpty ? s.text.trim() : null));
+          await SpotsDbService.instance.addSpot(FavoriteSpot(name: c.text.trim(), latitude: ll.latitude, longitude: ll.longitude, bestSpecies: s.text.trim().isNotEmpty ? s.text.trim() : null));
           if (ctx.mounted) Navigator.pop(ctx);
-          if (mounted) { final spots = await DatabaseService.instance.getSpots(); setState(() => _spots = spots); }
+          if (mounted) { final spots = await SpotsDbService.instance.getSpots(); setState(() => _spots = spots); }
         }, child: const Text('Save')),
       ],
     ));
@@ -682,7 +684,8 @@ class MapScreenState extends State<MapScreen> {
     });
   }
 
-  void _err(String m) { if (!mounted) return; ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(m), backgroundColor: Colors.red.shade700)); }
+  void _err(String m) { if (!mounted) return; ScaffoldMessenger.of(context).showSnackBar(SnackBar(behavior: SnackBarBehavior.floating,
+              content: Text(m), backgroundColor: Colors.red.shade700)); }
 
   // ─── Markers ────────────────────────────────────────────────────────────
 

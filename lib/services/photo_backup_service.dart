@@ -1,4 +1,5 @@
 import 'dart:io';
+import 'package:flutter/foundation.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_storage/firebase_storage.dart';
 
@@ -28,8 +29,9 @@ class PhotoBackupService {
 
       await ref.putFile(file);
       return await ref.getDownloadURL();
-    } catch (_) {
-      return null; // Silent fail — photo stays local
+    } catch (e) {
+      debugPrint('PhotoBackupService.uploadPhoto failed: $e');
+      return null; // Photo stays local
     }
   }
 
@@ -38,6 +40,8 @@ class PhotoBackupService {
     try {
       final ref = FirebaseStorage.instance.refFromURL(url);
       await ref.delete();
-    } catch (_) {}
+    } catch (e) {
+      debugPrint('PhotoBackupService.deletePhoto failed: $e');
+    }
   }
 }

@@ -76,7 +76,8 @@ $subject:
     } catch (_) {
       if (context.mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text(tr('noEmailApp'))),
+          SnackBar(behavior: SnackBarBehavior.floating,
+              content: Text(tr('noEmailApp'))),
         );
       }
     }

@@ -1,6 +1,6 @@
 import '../data/tackle_database.dart';
 import '../models/tackle_item.dart';
-import '../services/database_service.dart';
+import '../services/tackle_db_service.dart';
 /// A suggestion with reasoning.
 class TackleSuggestion {
   final String name;
@@ -50,7 +50,7 @@ class TackleRecommender {
     // ── Gather candidate tackle ──
 
     // 1. From user's tackle box
-    final myItems = await DatabaseService.instance.getTackleItems();
+    final myItems = await TackleDbService.instance.getTackleItems();
 
     // 2. From catalog (all types that target this species)
     final catalogTypes = tackleTypeDatabase.where(

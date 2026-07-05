@@ -3,7 +3,7 @@ import 'package:flutter/material.dart';
 import '../services/help_text.dart';
 import 'package:intl/intl.dart';
 import '../models/catch.dart';
-import '../services/database_service.dart';
+import '../services/catches_db_service.dart';
 
 class GalleryScreen extends StatefulWidget {
   const GalleryScreen({super.key});
@@ -24,7 +24,7 @@ class _GalleryScreenState extends State<GalleryScreen> {
 
   Future<void> _load() async {
     setState(() => _loading = true);
-    final catches = await DatabaseService.instance.getCatches();
+    final catches = await CatchesDbService.instance.getCatches();
     if (mounted) {
       setState(() {
         _catchesWithPhotos =

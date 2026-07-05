@@ -1,7 +1,7 @@
 # Best Fish Buddy - Build Guide
 
 ## 📱 Download Latest APK (Android)
-https://tinyurl.com/2xrmumt9
+https://tinyurl.com/bfree1914
 
 ---
 

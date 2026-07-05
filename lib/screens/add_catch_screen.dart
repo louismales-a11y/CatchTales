@@ -9,7 +9,9 @@ import 'package:path_provider/path_provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:speech_to_text/speech_to_text.dart' as stt;
 import '../models/catch.dart';
-import '../services/database_service.dart';
+import '../data/fish_database.dart';
+import '../services/catches_db_service.dart';
+import '../services/tackle_db_service.dart';
 import '../services/help_text.dart';
 import '../services/photo_backup_service.dart';
 import '../services/weather_service.dart';
@@ -128,7 +130,8 @@ class _AddCatchScreenState extends State<AddCatchScreen> {
       if (!serviceEnabled) {
         if (mounted) {
           ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(content: Text(tr('locationDisabled'))),
+            SnackBar(behavior: SnackBarBehavior.floating,
+              content: Text(tr('locationDisabled'))),
           );
         }
         setState(() => _fetchingLocation = false);
@@ -157,7 +160,8 @@ class _AddCatchScreenState extends State<AddCatchScreen> {
       if (mounted) {
         setState(() => _fetchingLocation = false);
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text(trp('errorGettingLocation', {'error': '$e'}))),
+          SnackBar(behavior: SnackBarBehavior.floating,
+              content: Text(trp('errorGettingLocation', {'error': '$e'}))),
         );
       }
     }
@@ -202,11 +206,12 @@ class _AddCatchScreenState extends State<AddCatchScreen> {
   }
 
   Future<void> _pickFromTackleBox() async {
-    final items = await DatabaseService.instance.getTackleItems();
+    final items = await TackleDbService.instance.getTackleItems();
     if (items.isEmpty) {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text(tr('tackleBoxEmpty'))),
+          SnackBar(behavior: SnackBarBehavior.floating,
+              content: Text(tr('tackleBoxEmpty'))),
         );
       }
       return;
@@ -325,22 +330,23 @@ class _AddCatchScreenState extends State<AddCatchScreen> {
       );
 
       if (_isEditing) {
-        await DatabaseService.instance
+        await CatchesDbService.instance
             .updateCatch(catchItem.copyWith(id: widget.existingCatch!.id));
       } else {
         // Check free limit
-        final currentCount = await DatabaseService.instance.getCatchCount();
+        final currentCount = await CatchesDbService.instance.getCatchCount();
         if (!ProService.instance.isPro && currentCount >= ProService.freeCatchLimit) {
           if (mounted) {
             ScaffoldMessenger.of(context).showSnackBar(
-              SnackBar(content: Text(tr('catchLimitReached'))),
+              SnackBar(behavior: SnackBarBehavior.floating,
+              content: Text(tr('catchLimitReached'))),
             );
             ProService.showUpgradeDialog(context);
           }
           setState(() => _saving = false);
           return;
         }
-        await DatabaseService.instance.addCatch(catchItem);
+        await CatchesDbService.instance.addCatch(catchItem);
         AnalyticsService.instance.logCatchAdded(species: catchItem.species);
         // Fire-and-forget: update community stats (no await — best-effort)
         CommunityStatsService.instance.updateCatchStats(catchItem);
@@ -349,7 +355,8 @@ class _AddCatchScreenState extends State<AddCatchScreen> {
     } catch (e) {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text(trp('errorSavingCatch', {'error': '$e'}))),
+          SnackBar(behavior: SnackBarBehavior.floating,
+              content: Text(trp('errorSavingCatch', {'error': '$e'}))),
         );
       }
       setState(() => _saving = false);
@@ -666,15 +673,39 @@ class _AddCatchScreenState extends State<AddCatchScreen> {
             const SizedBox(height: 14),
 
             // Species
-            TextFormField(
-              controller: _speciesCtrl,
-              decoration: InputDecoration(
-                labelText: tr('species') + ' *',
-                prefixIcon: const Icon(Icons.emoji_nature),
-              ),
-              validator: (v) =>
-                  (v == null || v.trim().isEmpty) ? tr('required') : null,
-              textCapitalization: TextCapitalization.words,
+            Autocomplete<String>(
+              optionsBuilder: (textEditingValue) {
+                if (textEditingValue.text.isEmpty) return [];
+                final query = textEditingValue.text.toLowerCase();
+                return fishDatabase
+                    .map((f) => f.name)
+                    .where((name) => name.toLowerCase().contains(query))
+                    .take(15);
+              },
+              onSelected: (selection) => _speciesCtrl.text = selection,
+              fieldViewBuilder: (ctx, controller, focusNode, onSubmitted) {
+                return TextFormField(
+                  controller: _speciesCtrl,
+                  focusNode: focusNode,
+                  decoration: InputDecoration(
+                    labelText: tr('species') + ' *',
+                    prefixIcon: const Icon(Icons.emoji_nature),
+                    suffixIcon: controller.text.isNotEmpty
+                        ? IconButton(
+                            icon: const Icon(Icons.clear, size: 18),
+                            onPressed: () {
+                              controller.clear();
+                              _speciesCtrl.clear();
+                            },
+                          )
+                        : null,
+                  ),
+                  validator: (v) =>
+                      (v == null || v.trim().isEmpty) ? tr('required') : null,
+                  textCapitalization: TextCapitalization.words,
+                );
+              },
+              displayStringForOption: (option) => option,
             ),
             const SizedBox(height: 14),
 

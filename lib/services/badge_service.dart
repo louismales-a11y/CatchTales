@@ -1,4 +1,4 @@
-import '../services/database_service.dart';
+import '../services/catches_db_service.dart';
 
 /// Achievement badges earned by the user.
 class BadgeService {
@@ -7,7 +7,7 @@ class BadgeService {
 
   /// Calculate earned badges based on catch data.
   Future<List<Badge>> getBadges() async {
-    final db = DatabaseService.instance;
+    final db = CatchesDbService.instance;
     final catches = await db.getCatches();
     final speciesSet = catches.map((c) => c.species.toLowerCase()).toSet();
     final speciesCount = speciesSet.length;

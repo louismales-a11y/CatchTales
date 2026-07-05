@@ -5,7 +5,7 @@ import '../services/help_text.dart';
 import '../services/translation_service.dart';
 import '../services/pro_service.dart';
 import '../models/tackle_item.dart';
-import '../services/database_service.dart';
+import '../services/tackle_db_service.dart';
 import 'add_tackle_screen.dart';
 import 'tackle_catalog_screen.dart';
 import 'tackle_detail_screen.dart';
@@ -43,7 +43,7 @@ class _TackleBoxScreenState extends State<TackleBoxScreen> {
     if (!mounted) return;
     setState(() => _loading = true);
     try {
-      final items = await DatabaseService.instance.getTackleItems();
+      final items = await TackleDbService.instance.getTackleItems();
       if (mounted) {
         setState(() {
           _allItems = items;
@@ -261,7 +261,7 @@ class _TackleBoxScreenState extends State<TackleBoxScreen> {
       ),
     );
     if (confirm == true) {
-      await DatabaseService.instance.deleteTackleItem(item.id!);
+      await TackleDbService.instance.deleteTackleItem(item.id!);
       _load();
     }
   }

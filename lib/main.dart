@@ -7,6 +7,7 @@ import 'services/translation_service.dart';
 import 'services/pro_service.dart';
 import 'services/api_config.dart';
 import 'services/theme_provider.dart';
+import 'services/catches_provider.dart';
 import 'package:firebase_core/firebase_core.dart';
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -31,6 +32,7 @@ void main() async {
     MultiProvider(
       providers: [
         ChangeNotifierProvider(create: (_) => ThemeProvider()),
+        ChangeNotifierProvider(create: (_) => CatchesProvider()..loadCatches()),
         ChangeNotifierProvider<TranslationService>.value(value: TranslationService.instance),
         ChangeNotifierProvider<ProService>.value(value: ProService.instance),
       ],

@@ -5,7 +5,8 @@ import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:speech_to_text/speech_to_text.dart' as stt;
 import '../models/species_tally.dart';
-import '../services/database_service.dart';
+import '../services/counters_db_service.dart';
+import '../services/species_tally_db_service.dart';
 import '../services/session_service.dart';
 import '../services/translation_service.dart';
 import 'add_catch_screen.dart';
@@ -170,7 +171,7 @@ class _CounterScreenState extends State<CounterScreen> {
     if (!mounted) return;
     setState(() => _loading = true);
     try {
-      final breakdown = await DatabaseService.instance.getSpeciesBreakdown();
+      final breakdown = await SpeciesTallyDbService.instance.getSpeciesBreakdown();
       if (mounted) {
         setState(() {
           _breakdown = breakdown;
@@ -186,7 +187,7 @@ class _CounterScreenState extends State<CounterScreen> {
     final name = voiceName ?? _nameCtrl.text.trim();
     if (name.isEmpty) return;
     _nameCtrl.clear();
-    await DatabaseService.instance.addCounter(name);
+    await CountersDbService.instance.addCounter(name);
     if (!mounted) return;
     await _load();
     if (voiceName != null) {
@@ -195,7 +196,7 @@ class _CounterScreenState extends State<CounterScreen> {
   }
 
   Future<void> _resetAll() async {
-    await DatabaseService.instance.resetSpeciesTallies();
+    await SpeciesTallyDbService.instance.resetSpeciesTallies();
     if (!mounted) return;
     await _load();
   }
@@ -218,29 +219,14 @@ class _CounterScreenState extends State<CounterScreen> {
       ),
     );
     if (confirm == true) {
-      await DatabaseService.instance.deleteAngler(angler);
+      await CountersDbService.instance.deleteAngler(angler);
       if (!mounted) return;
       await _load();
     }
   }
 
   Future<void> _decrementSpecies(String angler, String species) async {
-    final db = await DatabaseService.instance.database;
-    final rows = await db.query('species_tallies',
-        where: 'angler = ? AND species = ?',
-        whereArgs: [angler, species]);
-    if (rows.isEmpty) return;
-    final id = rows.first['id'] as int;
-    final count = rows.first['count'] as int;
-    if (count <= 1) {
-      await db.delete('species_tallies',
-          where: 'id = ?', whereArgs: [id]);
-    } else {
-      await db.rawUpdate(
-        'UPDATE species_tallies SET count = count - 1 WHERE id = ?',
-        [id],
-      );
-    }
+    await SpeciesTallyDbService.instance.decrementSpeciesTally(angler, species);
     if (!mounted) return;
     await _load();
   }
@@ -274,45 +260,7 @@ class _CounterScreenState extends State<CounterScreen> {
       ),
     );
     if (newSpecies == null || newSpecies.isEmpty || newSpecies == oldSpecies) return;
-    final db = await DatabaseService.instance.database;
-    // Check if target species already exists for this angler
-    final existing = await db.query('species_tallies',
-        where: 'angler = ? AND species = ?',
-        whereArgs: [angler, newSpecies]);
-    if (existing.isNotEmpty) {
-      // Merge: add counts and sizes from old species into new species
-      final oldRow = await db.query('species_tallies',
-          where: 'angler = ? AND species = ?',
-          whereArgs: [angler, oldSpecies]);
-      if (oldRow.isNotEmpty) {
-        final oldCount = oldRow.first['count'] as int? ?? 0;
-        final oldSizes = oldRow.first['sizes'] as String? ?? '';
-        final newCount = existing.first['count'] as int? ?? 0;
-        final newSizes = existing.first['sizes'] as String? ?? '';
-        // Combine sizes (comma-separated) and let the SpeciesTally trim to 5
-        final combined = [newSizes, oldSizes]
-            .where((s) => s.isNotEmpty)
-            .join(',');
-        await db.update(
-          'species_tallies',
-          {'count': newCount + oldCount, 'sizes': combined},
-          where: 'angler = ? AND species = ?',
-          whereArgs: [angler, newSpecies],
-        );
-        // Delete the old species row
-        await db.delete('species_tallies',
-            where: 'angler = ? AND species = ?',
-            whereArgs: [angler, oldSpecies]);
-      }
-    } else {
-      // No conflict — simple rename
-      await db.update(
-        'species_tallies',
-        {'species': newSpecies},
-        where: 'angler = ? AND species = ?',
-        whereArgs: [angler, oldSpecies],
-      );
-    }
+    await SpeciesTallyDbService.instance.renameSpecies(angler, oldSpecies, newSpecies);
     // Remember this correction for future voice commands
     _speciesCorrections[oldSpecies.toLowerCase()] = newSpecies.toLowerCase();
     await _saveCorrections();
@@ -789,7 +737,7 @@ class _CounterScreenState extends State<CounterScreen> {
     });
 
     for (int i = 0; i < count; i++) {
-      await DatabaseService.instance.incrementSpeciesTally(angler, species);
+      await SpeciesTallyDbService.instance.incrementSpeciesTally(angler, species);
     }
     if (!mounted) return;
     await _load();
@@ -997,27 +945,32 @@ class _CounterScreenState extends State<CounterScreen> {
               // List
               Expanded(
                 child: _breakdown.isEmpty
-                    ? Center(
-                        child: Column(
-                          mainAxisSize: MainAxisSize.min,
-                          children: [
-                            Icon(Icons.people_outline,
-                                size: 64, color: Colors.grey.shade300),
-                            const SizedBox(height: 16),
-                            Text(tr('noAnglersYet'),
-                                style: TextStyle(
-                                    fontSize: 18,
-                                    color: Colors.grey.shade500)),
-                            const SizedBox(height: 8),
-                            Text(tr('typeNameAndAdd'),
-                                style: TextStyle(
-                                    color: Colors.grey.shade400)),
-                            const SizedBox(height: 4),
-                            Text(tr('voiceAddHint'),
-                                style: TextStyle(
-                                    fontSize: 12,
-                                    color: Colors.grey.shade400)),
-                          ],
+                    ? SingleChildScrollView(
+                        child: Center(
+                          child: Padding(
+                            padding: const EdgeInsets.only(top: 32, bottom: 32),
+                            child: Column(
+                              mainAxisSize: MainAxisSize.min,
+                              children: [
+                                Icon(Icons.people_outline,
+                                    size: 64, color: Colors.grey.shade300),
+                                const SizedBox(height: 16),
+                                Text(tr('noAnglersYet'),
+                                    style: TextStyle(
+                                        fontSize: 18,
+                                        color: Colors.grey.shade500)),
+                                const SizedBox(height: 8),
+                                Text(tr('typeNameAndAdd'),
+                                    style: TextStyle(
+                                        color: Colors.grey.shade400)),
+                                const SizedBox(height: 4),
+                                Text(tr('voiceAddHint'),
+                                    style: TextStyle(
+                                        fontSize: 12,
+                                        color: Colors.grey.shade400)),
+                              ],
+                            ),
+                          ),
                         ),
                       )
                     : ListView.builder(

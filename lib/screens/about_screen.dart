@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:package_info_plus/package_info_plus.dart';
+import 'package:shared_preferences/shared_preferences.dart';
+import 'onboarding_screen.dart';
 import '../services/notification_service.dart';
 import '../services/translation_service.dart';
 import '../services/pro_service.dart';
@@ -188,9 +190,11 @@ class _AboutScreenState extends State<AboutScreen> {
                             : theme.colorScheme.primary,
                       ),
                       const SizedBox(width: 10),
-                      const Text('Push Notifications',
-                          style: TextStyle(fontWeight: FontWeight.w600)),
-                      const Spacer(),
+                      const Expanded(
+                        child: Text('Push Notifications',
+                            style: TextStyle(fontWeight: FontWeight.w600)),
+                      ),
+                      const SizedBox(width: 8),
                       Container(
                         padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
                         decoration: BoxDecoration(
@@ -234,6 +238,49 @@ class _AboutScreenState extends State<AboutScreen> {
                         color: theme.colorScheme.onSurface.withValues(alpha: 0.7)),
                   ),
                 ],
+              ),
+            ),
+          ),
+          const SizedBox(height: 16),
+          // ── Show Walkthrough ──
+          Card(
+            child: Padding(
+              padding: const EdgeInsets.all(14),
+              child: InkWell(
+                borderRadius: BorderRadius.circular(12),
+                onTap: () async {
+                  final prefs = await SharedPreferences.getInstance();
+                  await prefs.setBool('onboarding_done', false);
+                  if (!context.mounted) return;
+                  await showDialog(
+                    context: context,
+                    barrierDismissible: false,
+                    useSafeArea: false,
+                    builder: (_) => const OnboardingScreen(),
+                  );
+                  await prefs.setBool('onboarding_done', true);
+                },
+                child: Row(
+                  children: [
+                    Icon(Icons.school, size: 22, color: theme.colorScheme.primary),
+                    const SizedBox(width: 12),
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text('Show Walkthrough',
+                              style: TextStyle(fontWeight: FontWeight.w600, fontSize: 14)),
+                          Text(
+                            'Replay the intro tutorial with all tips',
+                            style: TextStyle(fontSize: 12,
+                                color: theme.colorScheme.onSurface.withValues(alpha: 0.7)),
+                          ),
+                        ],
+                      ),
+                    ),
+                    const Icon(Icons.chevron_right, size: 20),
+                  ],
+                ),
               ),
             ),
           ),

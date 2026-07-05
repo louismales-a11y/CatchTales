@@ -5,7 +5,7 @@ import '../services/translation_service.dart';
 import 'package:table_calendar/table_calendar.dart';
 import 'package:intl/intl.dart';
 import '../models/catch.dart';
-import '../services/database_service.dart';
+import '../services/catches_db_service.dart';
 import 'add_catch_screen.dart';
 
 class CalendarScreen extends StatefulWidget {
@@ -38,7 +38,7 @@ class _CalendarScreenState extends State<CalendarScreen> {
   Future<void> _loadHeatmap(DateTime month) async {
     final first = DateTime(month.year, month.month, 1);
     final last = DateTime(month.year, month.month + 1, 0);
-    final data = await DatabaseService.instance
+    final data = await CatchesDbService.instance
         .getCatchCountByDateRange(first, last);
     if (mounted) {
       setState(() {
@@ -48,7 +48,7 @@ class _CalendarScreenState extends State<CalendarScreen> {
   }
 
   Future<void> _loadMonthStats(DateTime month) async {
-    final db = DatabaseService.instance;
+    final db = CatchesDbService.instance;
     final first = DateTime(month.year, month.month, 1);
     final last = DateTime(month.year, month.month + 1, 0);
     final catches = await db.getCatches();
@@ -72,7 +72,7 @@ class _CalendarScreenState extends State<CalendarScreen> {
   Future<void> _loadDayCatches(DateTime day) async {
     setState(() => _loadingCatches = true);
     final catches =
-        await DatabaseService.instance.getCatchesByDate(day);
+        await CatchesDbService.instance.getCatchesByDate(day);
     if (mounted) {
       setState(() {
         _dayCatches = catches;

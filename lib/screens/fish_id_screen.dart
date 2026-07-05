@@ -8,7 +8,7 @@ import '../services/pro_service.dart';
 import '../services/translation_service.dart';
 import '../services/analytics_service.dart';
 import '../services/fish_image_service.dart';
-import '../services/database_service.dart';
+import '../services/fish_db_service.dart';
 import '../models/fish_data.dart';
 import '../models/fish_status.dart';
 import '../data/fish_database.dart';
@@ -35,8 +35,8 @@ class _FishIdScreenState extends State<FishIdScreen> {
   }
 
   Future<void> _loadData() async {
-    final custom = await DatabaseService.instance.getCustomFish();
-    final status = await DatabaseService.instance.getAllFishStatus();
+    final custom = await FishDbService.instance.getCustomFish();
+    final status = await FishDbService.instance.getAllFishStatus();
     if (mounted) {
       setState(() {
         _customFish = custom;
@@ -299,13 +299,16 @@ class _FishIdScreenState extends State<FishIdScreen> {
                       ],
                     ),
                   )
-                : ListView.builder(
+                : RefreshIndicator(
+                    onRefresh: _loadData,
+                    child: ListView.builder(
                     padding: EdgeInsets.fromLTRB(12, 0, 12, 12 + MediaQuery.of(context).padding.bottom),
                     itemCount: results.length,
                     itemBuilder: (context, index) => _FishCard(
                       fish: results[index],
                       status: _statusMap[results[index].name],
                     ),
+                  ),
                   ),
           ),
           const SizedBox(height: 4),
@@ -798,21 +801,21 @@ class _FishDetailScreenState extends State<_FishDetailScreen> {
   }
 
   Future<void> _toggleCaught() async {
-    await DatabaseService.instance.toggleCaught(widget.fish.name);
+    await FishDbService.instance.toggleCaught(widget.fish.name);
     if (mounted) {
       Navigator.pop(context, true);
     }
   }
 
   Future<void> _toggleMaster() async {
-    await DatabaseService.instance.toggleMaster(widget.fish.name);
+    await FishDbService.instance.toggleMaster(widget.fish.name);
     if (mounted) {
       Navigator.pop(context, true);
     }
   }
 
   Future<void> _toggleFavorite() async {
-    await DatabaseService.instance.toggleFavorite(widget.fish.name);
+    await FishDbService.instance.toggleFavorite(widget.fish.name);
     if (mounted) {
       Navigator.pop(context, true);
     }

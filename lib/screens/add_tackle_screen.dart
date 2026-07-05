@@ -6,7 +6,7 @@ import '../services/translation_service.dart';
 import 'package:image_picker/image_picker.dart';
 import '../models/tackle_item.dart';
 import '../data/tackle_database.dart';
-import '../services/database_service.dart';
+import '../services/tackle_db_service.dart';
 
 /// Screen to add or edit a tackle item — take a photo, pick the type,
 /// and it auto-fills target species + tips from the built-in database.
@@ -66,6 +66,7 @@ class _AddTackleScreenState extends State<AddTackleScreen> {
       imageQuality: 85,
       maxWidth: 1024,
     );
+    if (!mounted) return;
     if (picked != null) {
       setState(() => _photoPath = picked.path);
     }
@@ -155,7 +156,8 @@ class _AddTackleScreenState extends State<AddTackleScreen> {
     final name = _nameCtrl.text.trim();
     if (name.isEmpty || _selectedType.isEmpty) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Please select a tackle type and name')),
+        const SnackBar(behavior: SnackBarBehavior.floating,
+              content: Text('Please select a tackle type and name')),
       );
       return;
     }
@@ -172,26 +174,28 @@ class _AddTackleScreenState extends State<AddTackleScreen> {
     );
 
     if (_isEditing) {
-      await DatabaseService.instance.updateTackleItem(item);
+      await TackleDbService.instance.updateTackleItem(item);
     } else {
       // Check free limit
-      final currentCount = await DatabaseService.instance.getTackleItemCount();
+      final currentCount = await TackleDbService.instance.getTackleItemCount();
       if (!ProService.instance.isPro && currentCount >= ProService.freeTackleLimit) {
         if (mounted) {
           ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(content: Text(trp('tackleLimitReached', {'limit': '${ProService.freeTackleLimit}'}))),
+            SnackBar(behavior: SnackBarBehavior.floating,
+              content: Text(trp('tackleLimitReached', {'limit': '${ProService.freeTackleLimit}'}))),
           );
           ProService.showUpgradeDialog(context);
         }
         setState(() => _saving = false);
         return;
       }
-      await DatabaseService.instance.addTackleItem(item);
+      await TackleDbService.instance.addTackleItem(item);
     }
 
     if (mounted) {
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text(_isEditing
+        SnackBar(behavior: SnackBarBehavior.floating,
+              content: Text(_isEditing
             ? '$name updated!'
             : '$name added to tackle box!')),
       );

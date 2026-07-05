@@ -11,7 +11,7 @@ import '../services/translation_service.dart';
 import 'package:fl_chart/fl_chart.dart';
 import '../models/catch.dart';
 import '../services/badge_service.dart' as badges;
-import '../services/database_service.dart';
+import '../services/catches_db_service.dart';
 
 class StatsScreen extends StatefulWidget {
   const StatsScreen({super.key});
@@ -42,13 +42,13 @@ class _StatsScreenState extends State<StatsScreen> {
     setState(() => _loading = true);
     try {
       final results = await Future.wait([
-        DatabaseService.instance.getCatchCount(),
-        DatabaseService.instance.biggestByWeight(),
-        DatabaseService.instance.biggestByLength(),
-        DatabaseService.instance.speciesBreakdown(),
-        DatabaseService.instance.catchesByMonth(),
-        DatabaseService.instance.topAnglers(),
-        DatabaseService.instance.topLocations(),
+        CatchesDbService.instance.getCatchCount(),
+        CatchesDbService.instance.biggestByWeight(),
+        CatchesDbService.instance.biggestByLength(),
+        CatchesDbService.instance.speciesBreakdown(),
+        CatchesDbService.instance.catchesByMonth(),
+        CatchesDbService.instance.topAnglers(),
+        CatchesDbService.instance.topLocations(),
         badges.BadgeService.instance.getBadges(),
       ]);
       if (mounted) {

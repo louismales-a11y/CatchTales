@@ -2,7 +2,7 @@ import 'dart:io';
 import 'package:flutter/material.dart';
 import '../data/tackle_database.dart';
 import '../models/tackle_item.dart';
-import '../services/database_service.dart';
+import '../services/tackle_db_service.dart';
 import 'add_tackle_screen.dart';
 
 class TackleDetailScreen extends StatelessWidget {
@@ -69,7 +69,7 @@ class TackleDetailScreen extends StatelessWidget {
                 ),
               );
               if (confirm == true && item.id != null) {
-                await DatabaseService.instance.deleteTackleItem(item.id!);
+                await TackleDbService.instance.deleteTackleItem(item.id!);
                 if (context.mounted) Navigator.pop(context, true);
               }
             },

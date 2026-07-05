@@ -3,7 +3,10 @@ import 'package:provider/provider.dart';
 import 'package:geolocator/geolocator.dart';
 import '../services/help_text.dart';
 import '../services/translation_service.dart';
-import '../services/database_service.dart';
+import '../services/counters_db_service.dart';
+import '../services/tackle_db_service.dart';
+import '../services/spots_db_service.dart';
+import '../services/species_tally_db_service.dart';
 import '../services/solunar_service.dart';
 import 'forecast_screen.dart';
 import 'fish_id_screen.dart';
@@ -33,11 +36,13 @@ class _PrepareScreenState extends State<PrepareScreen> {
   }
 
   Future<void> _load() async {
-    final db = DatabaseService.instance;
+    final countersDb = CountersDbService.instance;
+    final tackleDb = TackleDbService.instance;
+    final spotsDb = SpotsDbService.instance;
     try {
-      final counters = await db.getCounters();
-      final tackle = await db.getTackleItems();
-      final spots = await db.getSpots();
+      final counters = await countersDb.getCounters();
+      final tackle = await tackleDb.getTackleItems();
+      final spots = await spotsDb.getSpots();
       _anglerCount = counters.length;
       _tackleCount = tackle.length;
       _spotCount = spots.length;
@@ -284,7 +289,8 @@ class _PrepareScreenState extends State<PrepareScreen> {
   }
 
   Future<void> _startTrip() async {
-    await DatabaseService.instance.resetSpeciesTallies();
+    await SpeciesTallyDbService.instance.resetSpeciesTallies();
+    if (!mounted) return;
     setState(() => _done.clear());
     if (mounted) {
       ScaffoldMessenger.of(context).showSnackBar(

@@ -2,7 +2,7 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import '../services/help_text.dart';
 import '../models/fish_data.dart';
-import '../services/database_service.dart';
+import '../services/fish_db_service.dart';
 import '../services/wikipedia_service.dart';
 
 class AddFishScreen extends StatefulWidget {
@@ -57,7 +57,7 @@ class _AddFishScreenState extends State<AddFishScreen> {
 
   Future<void> _checkDuplicate(String name) async {
     if (name.trim().isEmpty) return;
-    final isDup = await DatabaseService.instance.isDuplicateFish(name);
+    final isDup = await FishDbService.instance.isDuplicateFish(name);
     setState(() => _duplicateError =
         isDup ? 'A fish named "$name" already exists!' : null);
   }
@@ -131,11 +131,12 @@ class _AddFishScreenState extends State<AddFishScreen> {
       color: Color(_regionColors[_selectedRegion] ?? 0xFF2196F3),
     );
 
-    await DatabaseService.instance.addCustomFish(fish);
+    await FishDbService.instance.addCustomFish(fish);
 
     if (mounted) {
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('${fish.name} added!')),
+        SnackBar(behavior: SnackBarBehavior.floating,
+              content: Text('${fish.name} added!')),
       );
       Navigator.pop(context, true);
     }

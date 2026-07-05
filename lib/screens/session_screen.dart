@@ -60,7 +60,9 @@ class _SessionScreenState extends State<SessionScreen> {
       if (mounted) {
         setState(() => _creating = false);
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Error: $e'), behavior: SnackBarBehavior.floating),
+          SnackBar(behavior: SnackBarBehavior.floating,
+              content: Text('Error: $e'),
+          ),
         );
       }
     }
@@ -81,7 +83,9 @@ class _SessionScreenState extends State<SessionScreen> {
           );
         } else {
           ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(content: Text('Session not found or expired'), behavior: SnackBarBehavior.floating),
+            const SnackBar(behavior: SnackBarBehavior.floating,
+              content: Text('Session not found or expired'),
+          ),
           );
         }
       }
@@ -89,7 +93,9 @@ class _SessionScreenState extends State<SessionScreen> {
       if (mounted) {
         setState(() => _joining = false);
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Error: $e'), behavior: SnackBarBehavior.floating),
+          SnackBar(behavior: SnackBarBehavior.floating,
+              content: Text('Error: $e'),
+          ),
         );
       }
     }
@@ -223,7 +229,11 @@ class _SessionDashboardState extends State<_SessionDashboard> {
       bool serviceEnabled = await Geolocator.isLocationServiceEnabled();
       if (!serviceEnabled) {
         if (mounted) ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Please enable location services'), behavior: SnackBarBehavior.floating));
+          const SnackBar(
+            behavior: SnackBarBehavior.floating,
+            content: Text('Please enable location services'),
+          ),
+        );
         return;
       }
       LocationPermission permission = await Geolocator.checkPermission();
@@ -232,7 +242,11 @@ class _SessionDashboardState extends State<_SessionDashboard> {
       }
       if (permission == LocationPermission.denied || permission == LocationPermission.deniedForever) {
         if (mounted) ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Location permission needed to share your position'), behavior: SnackBarBehavior.floating));
+          const SnackBar(
+            behavior: SnackBarBehavior.floating,
+            content: Text('Location permission needed to share your position'),
+          ),
+        );
         return;
       }
       final pos = await Geolocator.getCurrentPosition(
@@ -243,13 +257,17 @@ class _SessionDashboardState extends State<_SessionDashboard> {
       );
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Location sent to session!'), behavior: SnackBarBehavior.floating),
+          const SnackBar(behavior: SnackBarBehavior.floating,
+              content: Text('Location sent to session!'),
+          ),
         );
       }
     } catch (e) {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Could not get location: $e'), behavior: SnackBarBehavior.floating),
+          SnackBar(behavior: SnackBarBehavior.floating,
+              content: Text('Could not get location: $e'),
+          ),
         );
       }
     }
@@ -260,7 +278,11 @@ class _SessionDashboardState extends State<_SessionDashboard> {
       bool serviceEnabled = await Geolocator.isLocationServiceEnabled();
       if (!serviceEnabled) {
         if (mounted) ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Please enable location services'), behavior: SnackBarBehavior.floating));
+          const SnackBar(
+            behavior: SnackBarBehavior.floating,
+            content: Text('Please enable location services'),
+          ),
+        );
         return;
       }
       LocationPermission permission = await Geolocator.checkPermission();
@@ -269,7 +291,11 @@ class _SessionDashboardState extends State<_SessionDashboard> {
       }
       if (permission == LocationPermission.denied || permission == LocationPermission.deniedForever) {
         if (mounted) ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Location permission needed for emergency alerts'), behavior: SnackBarBehavior.floating));
+          const SnackBar(
+            behavior: SnackBarBehavior.floating,
+            content: Text('Location permission needed for emergency alerts'),
+          ),
+        );
         return;
       }
       final pos = await Geolocator.getCurrentPosition(
@@ -278,17 +304,21 @@ class _SessionDashboardState extends State<_SessionDashboard> {
       final lat = pos.latitude.toStringAsFixed(5);
       final lng = pos.longitude.toStringAsFixed(5);
       await _s.sendMessage(
-        '🚨 EMERGENCY! I\'m at $lat,$lng — need help!'
+        '🚨 EMERGENCY! I\'m at $lat,$lng — need help!',
       );
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Emergency alert sent! 🚨'), behavior: SnackBarBehavior.floating),
+          const SnackBar(behavior: SnackBarBehavior.floating,
+              content: Text('Emergency alert sent! 🚨'),
+          ),
         );
       }
     } catch (e) {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Could not send location: $e'), behavior: SnackBarBehavior.floating),
+          SnackBar(behavior: SnackBarBehavior.floating,
+              content: Text('Could not send location: $e'),
+          ),
         );
       }
     }
@@ -348,7 +378,11 @@ class _SessionDashboardState extends State<_SessionDashboard> {
                     onTap: () {
                       Clipboard.setData(ClipboardData(text: widget.code));
                       ScaffoldMessenger.of(context).showSnackBar(
-                        const SnackBar(content: Text('Code copied!'), duration: Duration(seconds: 2)),
+                        const SnackBar(
+                          behavior: SnackBarBehavior.floating,
+                          content: Text('Code copied!'),
+                          duration: Duration(seconds: 2),
+                        ),
                       );
                     },
                     child: Icon(Icons.copy, size: 18, color: Colors.grey.shade400),

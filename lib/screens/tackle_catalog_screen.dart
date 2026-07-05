@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import '../services/help_text.dart';
 import '../data/tackle_database.dart';
 import '../models/tackle_item.dart';
-import '../services/database_service.dart';
+import '../services/tackle_db_service.dart';
 import '../services/tackle_image_service.dart';
 
 /// Browse all common tackle types and add them to your personal tackle box.
@@ -77,7 +77,7 @@ class _TackleCatalogScreenState extends State<TackleCatalogScreen> {
       targetSpecies: List.from(info.targetSpecies),
       tips: info.tips,
     );
-    await DatabaseService.instance.addTackleItem(item);
+    await TackleDbService.instance.addTackleItem(item);
     if (mounted) {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(

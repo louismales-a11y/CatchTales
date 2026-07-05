@@ -9,7 +9,7 @@ import '../data/fish_database.dart';
 import '../services/tackle_recommender.dart';
 import '../services/weather_service.dart';
 import '../services/tackle_image_service.dart';
-import '../services/database_service.dart';
+import '../services/tackle_db_service.dart';
 import 'tackle_detail_screen.dart';
 
 class TodaysPickScreen extends StatefulWidget {
@@ -175,10 +175,11 @@ class _TodaysPickScreenState extends State<TodaysPickScreen> {
         targetSpecies: List.from(type.targetSpecies),
         tips: type.tips,
       );
-      await DatabaseService.instance.addTackleItem(item);
+      await TackleDbService.instance.addTackleItem(item);
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('$name added to your tackle box!')),
+          SnackBar(behavior: SnackBarBehavior.floating,
+              content: Text('$name added to your tackle box!')),
         );
         _generate(); // re-generate to update isInMyBox flags
       }

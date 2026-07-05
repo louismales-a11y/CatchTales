@@ -23,7 +23,8 @@ class NotificationService {
       final messaging = FirebaseMessaging.instance;
       final settings = await messaging.getNotificationSettings();
       _enabled = settings.authorizationStatus == AuthorizationStatus.authorized;
-    } catch (_) {
+    } catch (e) {
+      debugPrint('NotificationService.checkEnabled: $e');
       _enabled = false;
     }
     return _enabled;
@@ -51,8 +52,8 @@ class NotificationService {
 
       // Handle notification taps (app opened from notification)
       FirebaseMessaging.onMessageOpenedApp.listen(_handleMessage);
-    } catch (_) {
-      // Silent fail
+    } catch (e) {
+      debugPrint('NotificationService.init: $e');
     }
   }
 
@@ -109,7 +110,9 @@ class NotificationService {
           sound: true,
         );
         await checkEnabled();
-      } catch (_) {}
+      } catch (e) {
+        debugPrint('NotificationService.requestPermission: $e');
+      }
     }
   }
 
@@ -119,7 +122,9 @@ class NotificationService {
           .collection('users')
           .doc(uid)
           .set({'fcm_token': token}, SetOptions(merge: true));
-    } catch (_) {}
+    } catch (e) {
+      debugPrint('NotificationService._storeToken: $e');
+    }
   }
 
   void _handleMessage(RemoteMessage message) {

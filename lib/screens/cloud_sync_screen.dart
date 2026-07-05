@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../services/cloud_sync_service.dart';
-import '../services/database_service.dart';
+import '../services/catches_db_service.dart';
 import '../services/help_text.dart';
 import '../services/pro_service.dart';
 import '../services/translation_service.dart';
@@ -31,13 +31,14 @@ class _CloudSyncScreenState extends State<CloudSyncScreen> {
   }
 
   Future<void> _refreshCount() async {
-    final count = await DatabaseService.instance.getCatchCount();
+    final count = await CatchesDbService.instance.getCatchCount();
     if (mounted) setState(() => _localCount = count);
   }
 
   Future<void> _connect() async {
     setState(() => _busy = true);
     await _cloud.init();
+    if (!mounted) return;
     setState(() => _busy = false);
     if (mounted) _showResult();
   }
@@ -45,6 +46,7 @@ class _CloudSyncScreenState extends State<CloudSyncScreen> {
   Future<void> _disconnect() async {
     setState(() => _busy = true);
     await _cloud.signOut();
+    if (!mounted) return;
     setState(() => _busy = false);
     if (mounted) _showResult();
   }
@@ -52,6 +54,7 @@ class _CloudSyncScreenState extends State<CloudSyncScreen> {
   Future<void> _upload() async {
     setState(() => _busy = true);
     await _cloud.uploadCatches();
+    if (!mounted) return;
     setState(() => _busy = false);
     if (mounted) _showResult();
   }
@@ -60,6 +63,7 @@ class _CloudSyncScreenState extends State<CloudSyncScreen> {
     setState(() => _busy = true);
     final count = await _cloud.downloadCatches();
     await _refreshCount();
+    if (!mounted) return;
     setState(() => _busy = false);
     if (mounted) {
       ScaffoldMessenger.of(context).showSnackBar(
@@ -72,10 +76,14 @@ class _CloudSyncScreenState extends State<CloudSyncScreen> {
   }
 
   void _showResult() {
+    final err = _cloud.lastError;
+    final ok = _cloud.status == SyncStatus.connected;
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
-        content: Text(_cloud.isAvailable ? tr('syncedSuccess') : tr('cloudUnavailable')),
+        content: Text(err.isNotEmpty && !ok ? err : (ok ? tr('syncedSuccess') : tr('cloudUnavailable'))),
+        backgroundColor: ok ? null : Colors.red.shade700,
         behavior: SnackBarBehavior.floating,
+        duration: Duration(seconds: err.isNotEmpty ? 5 : 3),
       ),
     );
   }

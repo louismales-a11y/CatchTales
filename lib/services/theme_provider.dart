@@ -3,6 +3,8 @@ import 'package:shared_preferences/shared_preferences.dart';
 
 class ThemeProvider extends ChangeNotifier {
   static const _key = 'theme_name';
+  static const _sysKey = 'follow_system';
+  static const _darkKey = '${_key}_dark';
   static const List<ThemeInfo> themes = [
     ThemeInfo('Ocean Blue', Icons.water_drop, Color(0xFF00BCD4)),
     ThemeInfo('Forest Green', Icons.forest, Color(0xFF4CAF50)),
@@ -13,14 +15,19 @@ class ThemeProvider extends ChangeNotifier {
 
   String _themeName = themes.first.name;
   bool _dark = false;
+  bool _followSystem = false;
 
   String get themeName => _themeName;
   ThemeInfo get themeInfo => themes.firstWhere((t) => t.name == _themeName,
       orElse: () => themes.first);
   bool get isDark => _dark;
+  bool get followSystem => _followSystem;
 
-  /// Returns [ThemeMode] based on current dark/light toggle.
-  ThemeMode get themeMode => _dark ? ThemeMode.dark : ThemeMode.light;
+  /// Returns [ThemeMode] based on current settings.
+  ThemeMode get themeMode {
+    if (_followSystem) return ThemeMode.system;
+    return _dark ? ThemeMode.dark : ThemeMode.light;
+  }
 
   ThemeProvider() {
     _load();
@@ -29,7 +36,8 @@ class ThemeProvider extends ChangeNotifier {
   Future<void> _load() async {
     final prefs = await SharedPreferences.getInstance();
     _themeName = prefs.getString(_key) ?? themes.first.name;
-    _dark = prefs.getBool('${_key}_dark') ?? false;
+    _dark = prefs.getBool(_darkKey) ?? false;
+    _followSystem = prefs.getBool(_sysKey) ?? false;
     notifyListeners();
   }
 
@@ -41,11 +49,30 @@ class ThemeProvider extends ChangeNotifier {
     await prefs.setString(_key, name);
   }
 
-  Future<void> toggleDark() async {
-    _dark = !_dark;
+  Future<void> setFollowSystem(bool value) async {
+    _followSystem = value;
+    if (!_followSystem) {
+      // When turning off system follow, reset to manual light mode
+      _dark = false;
+    }
     notifyListeners();
     final prefs = await SharedPreferences.getInstance();
-    await prefs.setBool('${_key}_dark', _dark);
+    await prefs.setBool(_sysKey, _followSystem);
+    if (!_followSystem) await prefs.setBool(_darkKey, false);
+  }
+
+  Future<void> toggleDark() async {
+    if (_followSystem) {
+      // Toggling dark manually while in system mode turns off system follow
+      _followSystem = false;
+      _dark = true;
+    } else {
+      _dark = !_dark;
+    }
+    notifyListeners();
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setBool(_sysKey, _followSystem);
+    await prefs.setBool(_darkKey, _dark);
   }
 }
 

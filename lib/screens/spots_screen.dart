@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:geolocator/geolocator.dart';
 import '../models/favorite_spot.dart';
-import '../services/database_service.dart';
+import '../services/spots_db_service.dart';
 
 class SpotsScreen extends StatefulWidget {
   const SpotsScreen({super.key});
@@ -22,7 +22,7 @@ class _SpotsScreenState extends State<SpotsScreen> {
 
   Future<void> _load() async {
     setState(() => _loading = true);
-    final spots = await DatabaseService.instance.getSpots();
+    final spots = await SpotsDbService.instance.getSpots();
     if (mounted) {
       setState(() {
         _spots = spots;
@@ -57,7 +57,7 @@ class _SpotsScreenState extends State<SpotsScreen> {
       ),
     );
     if (confirm == true) {
-      await DatabaseService.instance.deleteSpot(spot.id!);
+      await SpotsDbService.instance.deleteSpot(spot.id!);
       _load();
     }
   }
@@ -180,7 +180,8 @@ class _AddSpotScreenState extends State<_AddSpotScreen> {
       if (mounted) {
         setState(() => _fetchingLocation = false);
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Error: $e')),
+          SnackBar(behavior: SnackBarBehavior.floating,
+              content: Text('Error: $e')),
         );
       }
     }
@@ -189,7 +190,8 @@ class _AddSpotScreenState extends State<_AddSpotScreen> {
   Future<void> _save() async {
     if (_nameCtrl.text.trim().isEmpty) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Name is required')),
+        const SnackBar(behavior: SnackBarBehavior.floating,
+              content: Text('Name is required')),
       );
       return;
     }
@@ -197,13 +199,14 @@ class _AddSpotScreenState extends State<_AddSpotScreen> {
     final lng = double.tryParse(_lngCtrl.text);
     if (lat == null || lng == null) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Valid latitude & longitude required')),
+        const SnackBar(behavior: SnackBarBehavior.floating,
+              content: Text('Valid latitude & longitude required')),
       );
       return;
     }
 
     setState(() => _saving = true);
-    await DatabaseService.instance.addSpot(FavoriteSpot(
+    await SpotsDbService.instance.addSpot(FavoriteSpot(
       name: _nameCtrl.text.trim(),
       latitude: lat,
       longitude: lng,

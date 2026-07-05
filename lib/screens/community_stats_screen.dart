@@ -281,6 +281,14 @@ class _CommunityStatsScreenState extends State<CommunityStatsScreen> {
     }
   }
 
+  Future<void> _refresh() async {
+    if (_waterBody != null && _locationName != null) {
+      await _loadLakeStats(_locationName!, _waterBody!);
+    } else if (_locationName != null) {
+      await _loadStateStats(_locationName!);
+    }
+  }
+
   Future<void> _loadLakeStats(String state, String lake) async {
     setState(() => _screen = 'loading');
     try {
@@ -579,7 +587,9 @@ class _CommunityStatsScreenState extends State<CommunityStatsScreen> {
     final isSample = _species.isNotEmpty && _species.first.isSample;
     final hasLakeData = _waterBody != null && _species.isNotEmpty && !_species.first.isSample;
 
-    return ListView(
+    return RefreshIndicator(
+      onRefresh: _refresh,
+      child: ListView(
       padding: EdgeInsets.fromLTRB(16, 16, 16, 16 + MediaQuery.of(context).padding.bottom),
       children: [
         // ── Header ──
@@ -657,6 +667,7 @@ class _CommunityStatsScreenState extends State<CommunityStatsScreen> {
           ),
         ),
       ],
+    ),
     );
   }
 

@@ -3,7 +3,7 @@ import 'package:firebase_core/firebase_core.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import '../models/catch.dart';
-import 'database_service.dart';
+import 'catches_db_service.dart';
 
 /// Cloud sync status
 enum SyncStatus { disconnected, syncing, connected, error }
@@ -59,7 +59,7 @@ class CloudSyncService {
     if (!_available) return;
     _status = SyncStatus.syncing;
     try {
-      final catches = await DatabaseService.instance.getCatches();
+      final catches = await CatchesDbService.instance.getCatches();
       final userId = FirebaseAuth.instance.currentUser?.uid;
       if (userId == null) throw Exception('Not signed in');
 
@@ -102,7 +102,7 @@ class CloudSyncService {
         final data = doc.data();
         data['id'] = null; // let local DB assign ID
         final c = Catch.fromMap(data);
-        await DatabaseService.instance.addCatch(c);
+        await CatchesDbService.instance.addCatch(c);
         count++;
       }
       _status = SyncStatus.connected;
@@ -117,7 +117,9 @@ class CloudSyncService {
   Future<void> signOut() async {
     try {
       await FirebaseAuth.instance.signOut();
-    } catch (_) {}
+    } catch (e) {
+      debugPrint('CloudSyncService.signOut failed: $e');
+    }
     _status = SyncStatus.disconnected;
     _initialized = false;
   }

@@ -26,6 +26,12 @@ class _OfflineMapsScreenState extends State<OfflineMapsScreen> {
 
   void _onRegionsChanged() => setState(() {});
 
+  Future<void> _refresh() async {
+    await OfflineRegionService.instance.init();
+    if (!mounted) return;
+    setState(() {});
+  }
+
   Future<void> _deleteRegion(OfflineRegion region) async {
     final confirmed = await showDialog<bool>(
       context: context,
@@ -115,7 +121,9 @@ class _OfflineMapsScreenState extends State<OfflineMapsScreen> {
                 ),
               ),
             )
-          : ListView(
+          : RefreshIndicator(
+              onRefresh: _refresh,
+              child: ListView(
               padding: const EdgeInsets.all(16),
               children: [
                 // Summary card
@@ -218,6 +226,7 @@ class _OfflineMapsScreenState extends State<OfflineMapsScreen> {
                 const SizedBox(height: 24),
               ],
             ),
+          ),
     );
   }
 }
