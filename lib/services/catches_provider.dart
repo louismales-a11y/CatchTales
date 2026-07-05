@@ -8,13 +8,34 @@ import 'catches_db_service.dart';
 /// calling CatchesDbService directly and managing their own _catches + _loading.
 class CatchesProvider extends ChangeNotifier {
   List<Catch> _catches = [];
+  List<Catch> _filtered = [];
   bool _loading = true;
   String? _error;
+  String _searchQuery = '';
 
-  List<Catch> get catches => _catches;
+  List<Catch> get catches => _searchQuery.isEmpty ? _catches : _filtered;
   bool get loading => _loading;
   String? get error => _error;
-  int get count => _catches.length;
+  int get count => catches.length;
+  String get searchQuery => _searchQuery;
+
+  /// Update the search query and re-filter.
+  void setSearchQuery(String query) {
+    _searchQuery = query.trim().toLowerCase();
+    if (_searchQuery.isEmpty) {
+      _filtered = [];
+    } else {
+      _filtered = _catches.where((c) {
+        return c.species.toLowerCase().contains(_searchQuery) ||
+            c.angler.toLowerCase().contains(_searchQuery) ||
+            c.location.toLowerCase().contains(_searchQuery) ||
+            c.lure.toLowerCase().contains(_searchQuery) ||
+            (c.notes?.toLowerCase().contains(_searchQuery) ?? false) ||
+            (c.tripName?.toLowerCase().contains(_searchQuery) ?? false);
+      }).toList();
+    }
+    notifyListeners();
+  }
 
   /// Load catches from DB. Call this on app start and after mutations.
   Future<void> loadCatches() async {
@@ -24,11 +45,13 @@ class CatchesProvider extends ChangeNotifier {
 
     try {
       _catches = await CatchesDbService.instance.getCatches();
+      _filtered = _catches;
       _loading = false;
     } catch (e) {
       _error = 'Failed to load catches: $e';
       _loading = false;
     }
+    if (_searchQuery.isNotEmpty) setSearchQuery(_searchQuery);
     notifyListeners();
   }
 

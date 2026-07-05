@@ -27,12 +27,26 @@ class CatchesScreenState extends State<CatchesScreen> {
   // Undo support for swipe-to-delete
   Catch? _lastDeleted;
 
+  // Search
+  final _searchCtrl = TextEditingController();
+  final _searchFocus = FocusNode();
+
   CatchesProvider get _provider => context.read<CatchesProvider>();
 
   @override
   void initState() {
     super.initState();
     // Catches already loaded by CatchesProvider in main.dart
+    _searchCtrl.addListener(() {
+      context.read<CatchesProvider>().setSearchQuery(_searchCtrl.text);
+    });
+  }
+
+  @override
+  void dispose() {
+    _searchCtrl.dispose();
+    _searchFocus.dispose();
+    super.dispose();
   }
 
   Future<void> loadCatches() => _provider.loadCatches();
@@ -114,86 +128,154 @@ class CatchesScreenState extends State<CatchesScreen> {
               ],
             ),
           ),
+        // Search bar
+        if (cp.catches.isNotEmpty || cp.searchQuery.isNotEmpty)
+          Padding(
+            padding: const EdgeInsets.fromLTRB(12, 8, 12, 0),
+            child: TextField(
+              controller: _searchCtrl,
+              focusNode: _searchFocus,
+              decoration: InputDecoration(
+                hintText: tr('searchCatches'),
+                prefixIcon: const Icon(Icons.search, size: 20),
+                suffixIcon: _searchCtrl.text.isNotEmpty
+                    ? IconButton(
+                        icon: const Icon(Icons.clear, size: 18),
+                        onPressed: () {
+                          _searchCtrl.clear();
+                          _searchFocus.unfocus();
+                        },
+                      )
+                    : null,
+                isDense: true,
+                contentPadding:
+                    const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+                border: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(12),
+                ),
+              ),
+              textCapitalization: TextCapitalization.none,
+            ),
+          ),
         Expanded(
           child: cp.catches.isEmpty
               ? Center(
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Text(tr('yourFirstCatch'),
-                style: const TextStyle(
-                    fontSize: 16,
-                    fontWeight: FontWeight.w600)),
-            const SizedBox(height: 8),
-            Text(tr('sampleCatch'),
-                textAlign: TextAlign.center,
-                style: const TextStyle(fontSize: 12, color: Colors.grey)),
-            const SizedBox(height: 12),
-            // Sample catch card with photo
-            Card(
-              margin: const EdgeInsets.symmetric(horizontal: 12, vertical: 5),
-              child: Padding(
-                padding: const EdgeInsets.all(12),
-                child: Row(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    // Photo
-                    ClipRRect(
-                      borderRadius: BorderRadius.circular(12),
-                      child: Image.asset(
-                        'assets/sample_bass.jpg',
-                        width: 52,
-                        height: 52,
-                        fit: BoxFit.cover,
-                        errorBuilder: (_, _, _) => Container(
-                          width: 52, height: 52,
-                          decoration: BoxDecoration(
-                            color: Theme.of(context).colorScheme.primary.withValues(alpha: 0.1),
-                            borderRadius: BorderRadius.circular(12),
+                  child: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Icon(
+                        cp.searchQuery.isNotEmpty
+                            ? Icons.search_off
+                            : Icons.set_meal,
+                        size: 48,
+                        color: Theme.of(context)
+                            .colorScheme
+                            .onSurface
+                            .withValues(alpha: 0.3),
+                      ),
+                      const SizedBox(height: 12),
+                      Text(
+                        cp.searchQuery.isNotEmpty
+                            ? tr('noSearchResults')
+                            : tr('yourFirstCatch'),
+                        style: const TextStyle(
+                            fontSize: 16, fontWeight: FontWeight.w600),
+                      ),
+                      if (cp.searchQuery.isEmpty) ...[                        const SizedBox(height: 8),
+                        Text(tr('sampleCatch'),
+                            textAlign: TextAlign.center,
+                            style: const TextStyle(
+                                fontSize: 12, color: Colors.grey)),
+                        const SizedBox(height: 12),
+                        // Sample catch card with photo
+                        Card(
+                          margin: const EdgeInsets.symmetric(
+                              horizontal: 12, vertical: 5),
+                          child: Padding(
+                            padding: const EdgeInsets.all(12),
+                            child: Row(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                // Photo
+                                ClipRRect(
+                                  borderRadius: BorderRadius.circular(12),
+                                  child: Image.asset(
+                                    'assets/sample_bass.jpg',
+                                    width: 100,
+                                    height: 80,
+                                    fit: BoxFit.cover,
+                                    errorBuilder: (_, _, _) => Container(
+                                      width: 100,
+                                      height: 80,
+                                      decoration: BoxDecoration(
+                                        color: Theme.of(context)
+                                            .colorScheme
+                                            .primary
+                                            .withValues(alpha: 0.1),
+                                        borderRadius:
+                                            BorderRadius.circular(12),
+                                      ),
+                                      child: Icon(Icons.set_meal,
+                                          color: Theme.of(context)
+                                              .colorScheme
+                                              .primary,
+                                          size: 26),
+                                    ),
+                                  ),
+                                ),
+                                const SizedBox(width: 12),
+                                // Info
+                                Expanded(
+                                  child: Column(
+                                    crossAxisAlignment:
+                                        CrossAxisAlignment.start,
+                                    children: [
+                                      Text('Largemouth Bass',
+                                          style: Theme.of(context)
+                                              .textTheme
+                                              .titleMedium
+                                              ?.copyWith(
+                                                  fontWeight:
+                                                      FontWeight.w600)),
+                                      const SizedBox(height: 2),
+                                      Text(tr('you'),
+                                          style: TextStyle(
+                                              fontSize: 12,
+                                              color: Colors.grey.shade600)),
+                                      const SizedBox(height: 4),
+                                      Row(
+                                        children: [
+                                          _sampleStat(
+                                              Icons.monitor_weight, '4.5 kg'),
+                                          const SizedBox(width: 12),
+                                          _sampleStat(
+                                              Icons.straighten, '58 cm'),
+                                          const SizedBox(width: 12),
+                                          _sampleStat(
+                                              Icons.wb_sunny, tr('sunny')),
+                                        ],
+                                      ),
+                                      const SizedBox(height: 2),
+                                      Text('📍 Lake Michigan',
+                                          style: TextStyle(
+                                              fontSize: 11,
+                                              color: Colors.grey.shade500)),
+                                    ],
+                                  ),
+                                ),
+                              ],
+                            ),
                           ),
-                          child: Icon(Icons.set_meal,
-                              color: Theme.of(context).colorScheme.primary, size: 26),
                         ),
-                      ),
-                    ),
-                    const SizedBox(width: 12),
-                    // Info
-                    Expanded(
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Text('Largemouth Bass',
-                              style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                                  fontWeight: FontWeight.w600)),
-                          const SizedBox(height: 2),
-                          Text(tr('you'), style: TextStyle(fontSize: 12, color: Colors.grey.shade600)),
-                          const SizedBox(height: 4),
-                          Row(
-                            children: [
-                              _sampleStat(Icons.monitor_weight, '4.5 kg'),
-                              const SizedBox(width: 12),
-                              _sampleStat(Icons.straighten, '58 cm'),
-                              const SizedBox(width: 12),
-                              _sampleStat(Icons.wb_sunny, tr('sunny')),
-                            ],
-                          ),
-                          const SizedBox(height: 2),
-                          Text('📍 Lake Michigan',
-                              style: TextStyle(fontSize: 11, color: Colors.grey.shade500)),
-                        ],
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-            ),
-            const SizedBox(height: 8),
-            Text(tr('tapPlusVoice'),
-                textAlign: TextAlign.center,
-                style: TextStyle(fontSize: 12, color: Colors.grey.shade600)),
-          ],
-        ),
-      )
+                        const SizedBox(height: 8),
+                        Text(tr('tapPlusVoice'),
+                            textAlign: TextAlign.center,
+                            style: TextStyle(
+                                fontSize: 12, color: Colors.grey.shade600)),
+                      ],
+                    ],
+                  ),
+                )
               : RefreshIndicator(
                 onRefresh: loadCatches,
                 child: ListView.builder(

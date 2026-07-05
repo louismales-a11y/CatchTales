@@ -266,6 +266,8 @@ class TranslationService extends ChangeNotifier {
       'undo': 'Undo',
       'proFeature': 'Pro Feature',
       'upgradeToDelete': 'Swipe to delete is a Pro feature. Upgrade to delete catches.',
+      'searchCatches': 'Search catches by species, angler, location...',
+      'noSearchResults': 'No catches match your search',
     },
     'fr': {
       'appTitle': 'Best Fish Buddy Pro',
