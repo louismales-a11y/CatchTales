@@ -10,6 +10,7 @@ import 'services/theme_provider.dart';
 import 'services/catches_provider.dart';
 import 'services/connectivity_service.dart';
 import 'services/tts_service.dart';
+import 'services/local_notification_service.dart';
 import 'package:firebase_core/firebase_core.dart';
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -33,6 +34,8 @@ void main() async {
   ConnectivityService.instance.start();
   // Initialize TTS
   TtsService.instance.init();
+  // Initialize local notifications
+  LocalNotificationService.instance.init();
 
   runApp(
     MultiProvider(
