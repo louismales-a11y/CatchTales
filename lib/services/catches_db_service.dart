@@ -2,9 +2,27 @@ import '../models/catch.dart';
 import 'database_service.dart';
 
 /// Catch CRUD and catch-related statistics queries.
+///
+/// Maintains a simple in-memory cache for [getCatches] to avoid
+/// re-querying the database on every rebuild. The cache is
+/// invalidated on any write operation (add, update, delete).
 class CatchesDbService {
   static final CatchesDbService instance = CatchesDbService._();
   CatchesDbService._();
+
+  // In-memory cache for catches list
+  List<Catch>? _cachedCatches;
+  DateTime? _cacheTimestamp;
+  static const _cacheTtl = Duration(seconds: 5);
+
+  bool get _cacheValid =>
+      _cachedCatches != null &&
+      DateTime.now().difference(_cacheTimestamp!) < _cacheTtl;
+
+  void _invalidateCache() {
+    _cachedCatches = null;
+    _cacheTimestamp = null;
+  }
 
   Future<int> getCatchCount() async {
     final db = await DatabaseService.instance.database;
@@ -13,9 +31,12 @@ class CatchesDbService {
   }
 
   Future<List<Catch>> getCatches() async {
+    if (_cacheValid) return _cachedCatches!;
     final db = await DatabaseService.instance.database;
     final maps = await db.query('catches', orderBy: 'created_at DESC');
-    return maps.map((m) => Catch.fromMap(m)).toList();
+    _cachedCatches = maps.map((m) => Catch.fromMap(m)).toList();
+    _cacheTimestamp = DateTime.now();
+    return _cachedCatches!;
   }
 
   Future<List<Catch>> getCatchesByDate(DateTime date) async {
@@ -47,18 +68,24 @@ class CatchesDbService {
 
   Future<int> addCatch(Catch c) async {
     final db = await DatabaseService.instance.database;
-    return await db.insert('catches', c.toMap());
+    final id = await db.insert('catches', c.toMap());
+    _invalidateCache();
+    return id;
   }
 
   Future<int> updateCatch(Catch c) async {
     final db = await DatabaseService.instance.database;
-    return await db.update('catches', c.toMap(),
+    final rows = await db.update('catches', c.toMap(),
         where: 'id = ?', whereArgs: [c.id]);
+    _invalidateCache();
+    return rows;
   }
 
   Future<int> deleteCatch(int id) async {
     final db = await DatabaseService.instance.database;
-    return await db.delete('catches', where: 'id = ?', whereArgs: [id]);
+    final rows = await db.delete('catches', where: 'id = ?', whereArgs: [id]);
+    _invalidateCache();
+    return rows;
   }
 
   // ---- Statistics ----
