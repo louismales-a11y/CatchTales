@@ -21,7 +21,6 @@ import 'services/pro_service.dart';
 import 'services/database_service.dart';
 import 'services/analytics_service.dart';
 import 'services/api_config.dart';
-import 'services/jason_config.dart';
 import 'screens/about_screen.dart';
 import 'screens/cloud_sync_screen.dart';
 import 'screens/contact_screen.dart';
@@ -563,12 +562,6 @@ class _HomeScreenTestState extends State<HomeScreenTest> {
           ],
         ),
         actions: [
-          // Help
-          helpButton(context, _selectedIndex == 0
-              ? 'catches'
-              : _selectedIndex == 1
-                  ? 'counter'
-                  : 'map'),
           // 3-dot menu
           PopupMenuButton<String>(
             icon: Icon(Icons.more_vert, color: accent),
@@ -808,7 +801,18 @@ class _HomeScreenTestState extends State<HomeScreenTest> {
           ),
         ],
       ),
-      body: _screens[_selectedIndex],
+      body: Column(
+        children: [
+          Expanded(
+            child: _screens[_selectedIndex],
+          ),
+          helpChip(context, _selectedIndex == 0
+              ? 'catches'
+              : _selectedIndex == 1
+                  ? 'counter'
+                  : 'map'),
+        ],
+      ),
       floatingActionButton: _selectedIndex == 0
           ? FloatingActionButton(
               onPressed: () async {
@@ -825,11 +829,7 @@ class _HomeScreenTestState extends State<HomeScreenTest> {
                 final added = await Navigator.push<bool>(
                   context,
                   MaterialPageRoute(
-                      builder: (_) => AddCatchScreen(
-                          initialAngler: JasonConfig.instance.enabled
-                              ? null
-                              : null) // initialAngler loaded from prefs inside AddCatchScreen
-                      ),
+                      builder: (_) => const AddCatchScreen()),
                 );
                 if (added == true) {
                   _catchesKey.currentState?.loadCatches();

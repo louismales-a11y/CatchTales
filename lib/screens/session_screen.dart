@@ -4,6 +4,7 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:flutter/services.dart';
 import 'package:url_launcher/url_launcher.dart';
+import '../services/notification_service.dart';
 import '../services/session_service.dart';
 
 class SessionScreen extends StatefulWidget {
@@ -45,6 +46,9 @@ class _SessionScreenState extends State<SessionScreen> {
     if (name.isEmpty) return;
     setState(() => _creating = true);
     try {
+      if (mounted) {
+        NotificationService.instance.requestPermissionIfNeeded(context);
+      }
       final code = await _s.createSession(name);
       if (mounted) {
         setState(() => _creating = false);

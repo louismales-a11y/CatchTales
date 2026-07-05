@@ -200,7 +200,6 @@ class _PhotoViewerState extends State<_PhotoViewer> {
           style: const TextStyle(fontSize: 16),
         ),
         actions: [
-          helpButton(context, 'gallery'),
           Padding(
             padding: const EdgeInsets.only(right: 8),
             child: Center(
@@ -211,22 +210,29 @@ class _PhotoViewerState extends State<_PhotoViewer> {
           ),
         ],
       ),
-      body: GestureDetector(
-        onVerticalDragEnd: (details) {
-          if (details.primaryVelocity != null &&
-              details.primaryVelocity!.abs() > 500) {
-            Navigator.pop(context);
-          }
-        },
-        child: PageView.builder(
+      body: Column(
+        children: [
+          Expanded(
+            child: GestureDetector(
+              onVerticalDragEnd: (details) {
+            if (details.primaryVelocity != null &&
+                details.primaryVelocity!.abs() > 500) {
+              Navigator.pop(context);
+            }
+          },
+          child: PageView.builder(
           controller: _pageCtrl,
           itemCount: widget.catches.length,
           onPageChanged: (i) => setState(() => _currentIndex = i),
           itemBuilder: (context, index) {
             final catch_ = widget.catches[index];
             return _PhotoPage(catch_: catch_);
-          },
+            },
+          ),
         ),
+      ),
+          helpChip(context, 'gallery'),
+        ],
       ),
     );
   }

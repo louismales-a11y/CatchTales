@@ -70,11 +70,14 @@ class _PrepareScreenState extends State<PrepareScreen> {
     return Scaffold(
       appBar: AppBar(
         title: Text(tr('prepare')),
-        actions: [helpButton(context, 'prepare')],
+
       ),
-      body: _loading
-          ? const Center(child: CircularProgressIndicator())
-          : ListView(
+      body: Column(
+        children: [
+          Expanded(
+            child: _loading
+                ? const Center(child: CircularProgressIndicator())
+                : ListView(
               padding: const EdgeInsets.all(16),
               children: [
                 // Header
@@ -179,9 +182,13 @@ class _PrepareScreenState extends State<PrepareScreen> {
                         textAlign: TextAlign.center,
                         style: TextStyle(fontSize: 12, color: Colors.grey.shade500)),
                   ),
-                const SizedBox(height: 40),
+                const SizedBox(height: 24),
               ],
             ),
+          ),
+          helpChip(context, 'prepare'),
+        ],
+      ),
     );
   }
 

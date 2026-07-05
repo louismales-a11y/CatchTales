@@ -530,7 +530,7 @@ class _AddCatchScreenState extends State<AddCatchScreen> {
     return Scaffold(
       appBar: AppBar(
         title: Text(_isEditing ? tr('editCatch') : tr('addCatch')),
-        actions: [helpButton(context, 'add_catch')],
+
       ),
       body: Form(
         key: _formKey,
@@ -816,7 +816,9 @@ class _AddCatchScreenState extends State<AddCatchScreen> {
                 label: Text(_saving ? tr('saving') : tr('saveCatch')),
               ),
             ),
-            const SizedBox(height: 32),
+            const SizedBox(height: 8),
+            helpChip(context, 'add_catch'),
+            const SizedBox(height: 24),
           ],
         ),
       ),

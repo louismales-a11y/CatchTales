@@ -102,9 +102,7 @@ class _CalendarScreenState extends State<CalendarScreen> {
 
     return Scaffold(
       appBar: AppBar(title: Text(tr('fishingCalendar')),
-        actions: [
-          helpButton(context, 'calendar'),
-        ]),
+),
       body: Column(
         children: [
           // Calendar
@@ -277,6 +275,9 @@ class _CalendarScreenState extends State<CalendarScreen> {
                         ),
                       ),
           ),
+          const SizedBox(height: 4),
+          helpChip(context, 'calendar'),
+          const SizedBox(height: 12),
         ],
       ),
     );

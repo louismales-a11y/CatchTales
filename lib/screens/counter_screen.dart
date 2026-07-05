@@ -8,7 +8,6 @@ import '../models/species_tally.dart';
 import '../services/database_service.dart';
 import '../services/session_service.dart';
 import '../services/translation_service.dart';
-import '../services/jason_config.dart';
 import 'add_catch_screen.dart';
 
 class CounterScreen extends StatefulWidget {
@@ -1093,22 +1092,18 @@ class _AnglerCard extends StatelessWidget {
           mainAxisSize: MainAxisSize.min,
           children: [
             IconButton(
-              icon: Icon(Icons.add_circle, size: JasonConfig.instance.enabled ? 32 : 22),
+              icon: const Icon(Icons.add_circle, size: 32),
               onPressed: onAdd,
               color: theme.colorScheme.primary,
               tooltip: 'Quick add catch',
-              constraints: JasonConfig.instance.enabled
-                  ? const BoxConstraints(minWidth: 48, minHeight: 48)
-                  : null,
+              constraints: const BoxConstraints(minWidth: 48, minHeight: 48),
             ),
             IconButton(
-              icon: Icon(Icons.delete_outline, size: JasonConfig.instance.enabled ? 28 : 18),
+              icon: Icon(Icons.delete_outline, size: 28),
               onPressed: onDelete,
               color: theme.colorScheme.error.withValues(alpha: 0.7),
               tooltip: 'Remove angler',
-              constraints: JasonConfig.instance.enabled
-                  ? const BoxConstraints(minWidth: 48, minHeight: 48)
-                  : null,
+              constraints: const BoxConstraints(minWidth: 48, minHeight: 48),
             ),
             const Icon(Icons.expand_more, size: 20),
           ],
@@ -1175,13 +1170,13 @@ class _AnglerCard extends StatelessWidget {
                             onTap: () => onDecrement(s.species),
                             borderRadius: BorderRadius.circular(14),
                             child: Container(
-                              padding: EdgeInsets.all(JasonConfig.instance.enabled ? 6 : 2),
+                              padding: const EdgeInsets.all(6),
                               decoration: BoxDecoration(
                                 color: Colors.red.shade50,
                                 borderRadius: BorderRadius.circular(14),
                               ),
                               child: Icon(Icons.remove_circle_outline,
-                                  size: JasonConfig.instance.enabled ? 28 : 18, color: Colors.red.shade400),
+                                  size: 28, color: Colors.red.shade400),
                             ),
                           ),
                         ],
@@ -1209,13 +1204,13 @@ class _AnglerCard extends StatelessWidget {
                   children: [
                     Expanded(
                       child: SizedBox(
-                        height: JasonConfig.instance.enabled ? 56 : 44,
+                        height: 56,
                         child: OutlinedButton.icon(
                           onPressed: onAdd,
                           icon: const Icon(Icons.add_circle, size: 24),
-                          label: Text(
-                            JasonConfig.instance.enabled ? 'Add Catch' : 'Add',
-                            style: TextStyle(fontSize: JasonConfig.instance.enabled ? 14 : 12),
+                          label: const Text(
+                            'Add Catch',
+                            style: TextStyle(fontSize: 14),
                           ),
                           style: OutlinedButton.styleFrom(
                             foregroundColor: theme.colorScheme.primary,
@@ -1228,13 +1223,13 @@ class _AnglerCard extends StatelessWidget {
                     const SizedBox(width: 8),
                     Expanded(
                       child: SizedBox(
-                        height: JasonConfig.instance.enabled ? 56 : 44,
+                        height: 56,
                         child: OutlinedButton.icon(
                           onPressed: onDelete,
                           icon: const Icon(Icons.delete_outline, size: 24),
-                          label: Text(
-                            JasonConfig.instance.enabled ? 'Remove' : 'Remove',
-                            style: TextStyle(fontSize: JasonConfig.instance.enabled ? 14 : 12),
+                          label: const Text(
+                            'Remove',
+                            style: TextStyle(fontSize: 14),
                           ),
                           style: OutlinedButton.styleFrom(
                             foregroundColor: theme.colorScheme.error,

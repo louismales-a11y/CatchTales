@@ -159,10 +159,7 @@ class _AddFishScreenState extends State<AddFishScreen> {
     return Scaffold(
       appBar: AppBar(
         title: const Text('Add a Fish'),
-        actions: [
-          helpButton(context, 'add_fish'),
-        ]
-      ),
+),
       body: Form(
         key: _formKey,
         child: ListView(
@@ -345,6 +342,9 @@ class _AddFishScreenState extends State<AddFishScreen> {
                 label: Text(_saving ? 'Saving...' : 'Add Fish'),
               ),
             ),
+            const SizedBox(height: 8),
+            helpChip(context, 'add_fish'),
+            const SizedBox(height: 24),
           ],
         ),
       ),

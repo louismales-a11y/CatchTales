@@ -192,9 +192,7 @@ class _TodaysPickScreenState extends State<TodaysPickScreen> {
 
     return Scaffold(
       appBar: AppBar(title: const Text("Today's Pick"),
-        actions: [
-          helpButton(context, 'todays_pick'),
-        ]),
+),
       body: ListView(
         padding: const EdgeInsets.all(16),
         children: [
@@ -376,6 +374,9 @@ class _TodaysPickScreenState extends State<TodaysPickScreen> {
                   imageUrl: s.imageUrl,
                 )),
           ],
+          const SizedBox(height: 8),
+          helpChip(context, 'todays_pick'),
+          const SizedBox(height: 24),
         ],
       ),
     );

@@ -30,10 +30,13 @@ class ApiConfig {
       const String.fromEnvironment('APP_VERSION', defaultValue: 'dev');
 
   /// Whether this is the developer build (has toggle).
-  static bool get isDev => appVersion == 'dev' || appVersion == 'jason';
+  static bool get isDev => appVersion == 'dev';
 
   /// Whether this is the Pro build.
   static bool get isProBuild => appVersion == 'pro';
+
+  /// Whether this is the Free build.
+  static bool get isFreeBuild => appVersion == 'free';
 
   /// Display name for the app.
   static String get appDisplayName {
@@ -43,7 +46,7 @@ class ApiConfig {
       case 'free':
         return 'Best Fish Buddy Free';
       default:
-        return 'Best Fish Buddy Jason';
+        return 'Best Fish Buddy Dev';
     }
   }
 }

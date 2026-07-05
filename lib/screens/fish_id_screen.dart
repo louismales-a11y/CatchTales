@@ -8,7 +8,6 @@ import '../services/pro_service.dart';
 import '../services/translation_service.dart';
 import '../services/analytics_service.dart';
 import '../services/fish_image_service.dart';
-import '../services/jason_config.dart';
 import '../services/database_service.dart';
 import '../models/fish_data.dart';
 import '../models/fish_status.dart';
@@ -179,7 +178,6 @@ class _FishIdScreenState extends State<FishIdScreen> {
           const Text('🇺🇸', style: TextStyle(fontSize: 16)),
         ]),
         actions: [
-          helpButton(context, 'fish_id'),
           IconButton(
             icon: const Icon(Icons.sort),
             tooltip: 'Sort',
@@ -310,6 +308,9 @@ class _FishIdScreenState extends State<FishIdScreen> {
                     ),
                   ),
           ),
+          const SizedBox(height: 4),
+          helpChip(context, 'fish_id'),
+          const SizedBox(height: 12),
         ],
       ),
     );
@@ -773,22 +774,14 @@ class _FishDetailScreenState extends State<_FishDetailScreen> {
             onPressed: () async {
               final url = Uri.parse(
                 'https://en.wikipedia.org/wiki/${Uri.encodeComponent(widget.fish.scientificName)}');
-              if (JasonConfig.instance.enabled) {
-                // Jason: try with fallback
+              try {
+                await launchUrl(url, mode: LaunchMode.externalApplication);
+              } catch (_) {
+                final searchUrl = Uri.parse(
+                  'https://en.wikipedia.org/wiki/Special:Search?search=${Uri.encodeComponent(widget.fish.name)}');
                 try {
-                  await launchUrl(url, mode: LaunchMode.externalApplication);
-                } catch (_) {
-                  final searchUrl = Uri.parse(
-                    'https://en.wikipedia.org/wiki/Special:Search?search=${Uri.encodeComponent(widget.fish.name)}');
-                  try {
-                    await launchUrl(searchUrl,
-                        mode: LaunchMode.externalApplication);
-                  } catch (_) {}
-                }
-              } else {
-                // Original: try once
-                try {
-                  await launchUrl(url, mode: LaunchMode.externalApplication);
+                  await launchUrl(searchUrl,
+                      mode: LaunchMode.externalApplication);
                 } catch (_) {}
               }
             },

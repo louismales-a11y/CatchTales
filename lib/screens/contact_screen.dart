@@ -1,6 +1,5 @@
 import 'dart:io';
 import 'package:device_info_plus/device_info_plus.dart';
-import '../services/help_text.dart';
 import '../services/translation_service.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
@@ -90,7 +89,7 @@ $subject:
     return Scaffold(
       appBar: AppBar(
         title: Text(tr('contact')),
-        actions: [helpButton(context, 'contact')],
+
       ),
       body: ListView(
         padding: const EdgeInsets.all(24),
@@ -189,7 +188,7 @@ $subject:
               ),
             ),
           ),
-          const SizedBox(height: 40),
+          const SizedBox(height: 24),
         ],
       ),
     );

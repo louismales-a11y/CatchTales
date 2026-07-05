@@ -2,6 +2,7 @@ import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:path/path.dart' as p;
 import 'package:path_provider/path_provider.dart';
+import '../services/offline_region_service.dart';
 
 class OfflineMapsScreen extends StatefulWidget {
   const OfflineMapsScreen({super.key});
@@ -11,137 +12,210 @@ class OfflineMapsScreen extends StatefulWidget {
 }
 
 class _OfflineMapsScreenState extends State<OfflineMapsScreen> {
-  int _tileCount = 0;
-  int _tileSize = 0;
-  bool _loading = true;
-
   @override
   void initState() {
     super.initState();
-    _loadStats();
+    OfflineRegionService.instance.addListener(_onRegionsChanged);
   }
 
-  Future<void> _loadStats() async {
-    setState(() => _loading = true);
-    try {
-      final dir = await getApplicationDocumentsDirectory();
-      final cacheDir = p.join(dir.path, 'map_tiles');
-      final cacheFile = Directory(cacheDir);
-      int count = 0;
-      int size = 0;
-      if (await cacheFile.exists()) {
-        final files = cacheFile.listSync(recursive: true).whereType<File>();
-        for (final f in files) {
-          if (f.path.endsWith('.png')) {
-            count++;
-            size += await f.length();
-          }
-        }
-      }
-      if (mounted) {
-        setState(() {
-          _tileCount = count;
-          _tileSize = size;
-          _loading = false;
-        });
-      }
-    } catch (_) {
-      if (mounted) setState(() => _loading = false);
-    }
+  @override
+  void dispose() {
+    OfflineRegionService.instance.removeListener(_onRegionsChanged);
+    super.dispose();
   }
 
-  Future<void> _clearCache() async {
+  void _onRegionsChanged() => setState(() {});
+
+  Future<void> _deleteRegion(OfflineRegion region) async {
     final confirmed = await showDialog<bool>(
       context: context,
       builder: (ctx) => AlertDialog(
-        title: const Text('Clear Offline Maps?'),
-        content: Text('Delete $_tileCount cached tiles ($_fmtBytes(_tileSize))?'),
+        title: const Text('Delete Region?'),
+        content: Text('Delete cached tiles for "${region.name}" (${region.tileLabel})?'),
         actions: [
           TextButton(onPressed: () => Navigator.pop(ctx, false), child: const Text('Cancel')),
-          FilledButton(onPressed: () => Navigator.pop(ctx, true), child: const Text('Delete')),
+          FilledButton(onPressed: () => Navigator.pop(ctx, true), child: const Text('Delete'),
+              style: FilledButton.styleFrom(backgroundColor: Colors.red)),
         ],
       ),
     );
     if (confirmed == true) {
-      try {
-        final dir = await getApplicationDocumentsDirectory();
-        final cacheDir = Directory(p.join(dir.path, 'map_tiles'));
-        if (await cacheDir.exists()) {
-          await cacheDir.delete(recursive: true);
-        }
-        await _loadStats();
-        if (mounted) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(content: Text('Offline maps cleared'), backgroundColor: Colors.green),
-          );
-        }
-      } catch (_) {}
+      await OfflineRegionService.instance.remove(region.id);
+      await _deleteRegionTiles(region);
     }
   }
 
-  String _fmtBytes(int b) =>
-      b < 1024 ? '${b}B' : b < 1048576 ? '${(b / 1024).toStringAsFixed(1)} KB' : '${(b / 1048576).toStringAsFixed(1)} MB';
+  Future<void> _deleteRegionTiles(OfflineRegion region) async {
+    try {
+      final dir = await getApplicationDocumentsDirectory();
+      final regionDir = Directory(p.join(dir.path, 'map_tiles', region.id));
+      if (await regionDir.exists()) {
+        await regionDir.delete(recursive: true);
+      }
+    } catch (_) {}
+  }
+
+  Future<void> _clearAll() async {
+    final totalTiles = OfflineRegionService.instance.regions.fold<int>(0, (s, r) => s + r.tileCount);
+    final confirmed = await showDialog<bool>(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        title: const Text('Clear All Offline Maps?'),
+        content: Text('Delete all $totalTiles cached tiles from all regions?'),
+        actions: [
+          TextButton(onPressed: () => Navigator.pop(ctx, false), child: const Text('Cancel')),
+          FilledButton(onPressed: () => Navigator.pop(ctx, true), child: const Text('Delete All'),
+              style: FilledButton.styleFrom(backgroundColor: Colors.red)),
+        ],
+      ),
+    );
+    if (confirmed == true) {
+      final ids = OfflineRegionService.instance.regions.map((r) => r.id).toList();
+      for (final id in ids) {
+        await _deleteRegionTiles(OfflineRegion(id: id, name: '', minLat: 0, maxLat: 0, minLng: 0, maxLng: 0));
+      }
+      await OfflineRegionService.instance.clearAll();
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
+    final regions = OfflineRegionService.instance.regions;
+    final totalTiles = regions.fold<int>(0, (s, r) => s + r.tileCount);
+    final totalBytes = regions.fold<int>(0, (s, r) => s + r.byteSize);
+
     return Scaffold(
       appBar: AppBar(title: const Text('Offline Maps')),
-      body: _loading
-          ? const Center(child: CircularProgressIndicator())
+      body: regions.isEmpty
+          ? Center(
+              child: Padding(
+                padding: const EdgeInsets.all(32),
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Icon(Icons.cloud_download, size: 64, color: Colors.grey.shade300),
+                    const SizedBox(height: 16),
+                    Text('No offline maps', style: theme.textTheme.titleMedium?.copyWith(fontWeight: FontWeight.w600)),
+                    const SizedBox(height: 8),
+                    Text(
+                      'Go to the Map screen, zoom to an area,\n'
+                      'then use the download button to select\n'
+                      'and cache a region.',
+                      textAlign: TextAlign.center,
+                      style: TextStyle(fontSize: 14, color: Colors.grey.shade600, height: 1.5),
+                    ),
+                    const SizedBox(height: 24),
+                    OutlinedButton.icon(
+                      onPressed: () => Navigator.pop(context),
+                      icon: const Icon(Icons.map, size: 20),
+                      label: const Text('Open Map'),
+                    ),
+                  ],
+                ),
+              ),
+            )
           : ListView(
               padding: const EdgeInsets.all(16),
               children: [
-                // Stats card
+                // Summary card
                 Card(
                   child: Padding(
                     padding: const EdgeInsets.all(20),
                     child: Column(
                       children: [
-                        Icon(Icons.cloud_done, size: 48, color: _tileCount > 0 ? Colors.green.shade400 : Colors.grey.shade400),
+                        Icon(Icons.cloud_done, size: 48,
+                            color: totalTiles > 0 ? Colors.green.shade400 : Colors.grey.shade400),
                         const SizedBox(height: 12),
                         Text(
-                          _tileCount > 0 ? '$_tileCount tiles cached' : 'No offline maps',
+                          totalTiles > 0 ? '$totalTiles tiles cached' : 'No cached tiles',
                           style: theme.textTheme.titleMedium?.copyWith(fontWeight: FontWeight.w700),
                         ),
-                        if (_tileCount > 0) ...[
+                        if (totalTiles > 0) ...[
                           const SizedBox(height: 4),
-                          Text(_fmtBytes(_tileSize), style: TextStyle(fontSize: 14, color: Colors.grey.shade600)),
+                          Text(
+                            OfflineRegionService.fmtBytes(totalBytes),
+                            style: TextStyle(fontSize: 14, color: Colors.grey.shade600),
+                          ),
+                          const SizedBox(height: 4),
+                          Text('${regions.length} region${regions.length == 1 ? '' : 's'}',
+                              style: TextStyle(fontSize: 13, color: Colors.grey.shade500)),
                         ],
                       ],
                     ),
                   ),
                 ),
                 const SizedBox(height: 16),
-                // Actions
-                SizedBox(
-                  width: double.infinity,
-                  height: 48,
-                  child: FilledButton.icon(
-                    onPressed: _tileCount > 0 ? _clearCache : null,
-                    icon: const Icon(Icons.delete_outline, size: 20),
-                    label: const Text('Clear all offline maps'),
-                  ),
-                ),
-                const SizedBox(height: 12),
+
+                // Region list
+                ...regions.map((r) => Card(
+                      margin: const EdgeInsets.only(bottom: 8),
+                      child: ListTile(
+                        leading: Container(
+                          width: 44,
+                          height: 44,
+                          decoration: BoxDecoration(
+                            color: Colors.blue.shade50,
+                            borderRadius: BorderRadius.circular(12),
+                          ),
+                          child: Icon(Icons.map, color: Colors.blue.shade600, size: 22),
+                        ),
+                        title: Text(r.name, style: const TextStyle(fontWeight: FontWeight.w600)),
+                        subtitle: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text('${r.tileLabel} • ${r.sizeLabel}'),
+                            if (r.hasDepth || r.hasNautical)
+                              Row(
+                                children: [
+                                  if (r.hasDepth)
+                                    Container(
+                                      margin: const EdgeInsets.only(top: 4, right: 6),
+                                      padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                                      decoration: BoxDecoration(
+                                        color: Colors.blue.shade50,
+                                        borderRadius: BorderRadius.circular(8),
+                                      ),
+                                      child: Text('Depth', style: TextStyle(fontSize: 10, color: Colors.blue.shade700)),
+                                    ),
+                                  if (r.hasNautical)
+                                    Container(
+                                      margin: const EdgeInsets.only(top: 4),
+                                      padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                                      decoration: BoxDecoration(
+                                        color: Colors.teal.shade50,
+                                        borderRadius: BorderRadius.circular(8),
+                                      ),
+                                      child: Text('Nautical', style: TextStyle(fontSize: 10, color: Colors.teal.shade700)),
+                                    ),
+                                ],
+                              ),
+                          ],
+                        ),
+                        trailing: IconButton(
+                          icon: Icon(Icons.delete_outline, color: Colors.red.shade300, size: 20),
+                          onPressed: () => _deleteRegion(r),
+                        ),
+                        onTap: () => Navigator.pop(context, r),
+                      ),
+                    )),
+
+                // Clear all button
+                const SizedBox(height: 8),
                 SizedBox(
                   width: double.infinity,
                   height: 48,
                   child: OutlinedButton.icon(
-                    onPressed: () => Navigator.pop(context),
-                    icon: const Icon(Icons.map, size: 20),
-                    label: const Text('Back to map'),
+                    onPressed: totalTiles > 0 ? _clearAll : null,
+                    icon: const Icon(Icons.delete_sweep, size: 20),
+                    label: const Text('Clear all offline maps'),
+                    style: OutlinedButton.styleFrom(
+                      foregroundColor: Colors.red,
+                      side: BorderSide(color: Colors.red.shade200),
+                    ),
                   ),
                 ),
-                if (_tileCount > 0) ...[
-                  const SizedBox(height: 24),
-                  Text('Cached areas:', style: theme.textTheme.titleSmall?.copyWith(fontWeight: FontWeight.w600)),
-                  const SizedBox(height: 8),
-                  Text(
-                    'Tiles are organized by zoom level and cover the areas you\'ve downloaded on the map screen.',
-                    style: TextStyle(fontSize: 13, color: Colors.grey.shade600),
-                  ),
-                ],
+                const SizedBox(height: 24),
               ],
             ),
     );

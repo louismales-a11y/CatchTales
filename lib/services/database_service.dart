@@ -4,6 +4,7 @@ import 'package:path/path.dart' as p;
 import '../models/catch.dart';
 import '../models/counter.dart';
 import '../models/favorite_spot.dart';
+import '../models/depth_reading.dart';
 import '../models/fish_status.dart';
 import '../models/fish_data.dart';
 import '../data/fish_database.dart';
@@ -28,7 +29,7 @@ class DatabaseService {
 
     return await openDatabase(
       path,
-      version: 9,
+      version: 10,
       onCreate: (db, version) async {
         await db.execute('''
           CREATE TABLE catches (
@@ -92,6 +93,16 @@ class DatabaseService {
             created_at TEXT NOT NULL
           )
         ''');
+        await db.execute('''
+          CREATE TABLE depth_readings (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            latitude REAL NOT NULL,
+            longitude REAL NOT NULL,
+            depth_feet REAL NOT NULL,
+            angler TEXT,
+            logged_at TEXT NOT NULL
+          )
+        ''');
       },
       onUpgrade: (db, oldVersion, newVersion) async {
         if (oldVersion < 6) {
@@ -129,6 +140,18 @@ class DatabaseService {
               count INTEGER DEFAULT 0,
               sizes TEXT DEFAULT '',
               UNIQUE(angler, species)
+            )
+          ''');
+        }
+        if (oldVersion < 10) {
+          await db.execute('''
+            CREATE TABLE depth_readings (
+              id INTEGER PRIMARY KEY AUTOINCREMENT,
+              latitude REAL NOT NULL,
+              longitude REAL NOT NULL,
+              depth_feet REAL NOT NULL,
+              angler TEXT,
+              logged_at TEXT NOT NULL
             )
           ''');
         }
@@ -289,6 +312,29 @@ class DatabaseService {
     final db = await database;
     return await db.delete('favorite_spots',
         where: 'id = ?', whereArgs: [id]);
+  }
+
+  // ---- Depth Readings ----
+
+  Future<List<DepthReading>> getDepthReadings() async {
+    final db = await database;
+    final maps = await db.query('depth_readings', orderBy: 'logged_at DESC');
+    return maps.map((m) => DepthReading.fromMap(m)).toList();
+  }
+
+  Future<int> addDepthReading(DepthReading r) async {
+    final db = await database;
+    return await db.insert('depth_readings', r.toMap());
+  }
+
+  Future<int> deleteDepthReading(int id) async {
+    final db = await database;
+    return await db.delete('depth_readings', where: 'id = ?', whereArgs: [id]);
+  }
+
+  Future<void> clearDepthReadings() async {
+    final db = await database;
+    await db.delete('depth_readings');
   }
 
   // ---- Counters ----

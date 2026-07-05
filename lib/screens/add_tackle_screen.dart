@@ -206,9 +206,7 @@ class _AddTackleScreenState extends State<AddTackleScreen> {
 
     return Scaffold(
       appBar: AppBar(title: Text(_isEditing ? 'Edit Tackle' : 'Add Tackle'),
-        actions: [
-          helpButton(context, 'add_tackle'),
-        ]),
+),
       body: ListView(
         padding: EdgeInsets.fromLTRB(16, 16, 16, 16 + bottomPad + 80),
         children: [
@@ -335,6 +333,9 @@ class _AddTackleScreenState extends State<AddTackleScreen> {
               label: Text(_saving ? 'Saving...' : 'Add to Tackle Box'),
             ),
           ),
+          const SizedBox(height: 8),
+          helpChip(context, 'add_tackle'),
+          const SizedBox(height: 24),
         ],
       ),
     );

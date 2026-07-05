@@ -87,11 +87,18 @@ class _CloudSyncScreenState extends State<CloudSyncScreen> {
     return Scaffold(
       appBar: AppBar(
         title: Text(tr('cloudSync')),
-        actions: [helpButton(context, 'cloud_sync')],
+
       ),
-      body: context.watch<ProService>().isPro
-          ? _buildCloudContent(theme)
-          : _buildUpgradePrompt(theme),
+      body: Column(
+        children: [
+          Expanded(
+            child: context.watch<ProService>().isPro
+                ? _buildCloudContent(theme)
+                : _buildUpgradePrompt(theme),
+          ),
+          helpChip(context, 'cloud_sync'),
+        ],
+      ),
     );
   }
 

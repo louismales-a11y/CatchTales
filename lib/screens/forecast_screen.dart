@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../services/help_text.dart';
 import 'package:geolocator/geolocator.dart';
+import '../services/notification_service.dart';
 import '../services/translation_service.dart';
 import '../services/weather_service.dart';
 
@@ -18,6 +19,7 @@ class _ForecastScreenState extends State<ForecastScreen> {
   bool _loading = true;
   String? _error;
   String _city = '';
+  bool _notifPrompted = false;
 
   @override
   void initState() {
@@ -32,6 +34,10 @@ class _ForecastScreenState extends State<ForecastScreen> {
     });
 
     try {
+      if (!_notifPrompted && mounted) {
+        _notifPrompted = true;
+        NotificationService.instance.requestPermissionIfNeeded(context);
+      }
       bool serviceEnabled = await Geolocator.isLocationServiceEnabled();
       if (!serviceEnabled) {
         setState(() {
@@ -91,10 +97,15 @@ class _ForecastScreenState extends State<ForecastScreen> {
 
     return Scaffold(
       appBar: AppBar(title: Text(tr('weatherForecast')),
-        actions: [
-          helpButton(context, 'weather'),
-        ]),
-      body: _buildBody(theme),
+),
+      body: Column(
+        children: [
+          Expanded(
+            child: _buildBody(theme),
+          ),
+          helpChip(context, 'weather'),
+        ],
+      ),
     );
   }
 
@@ -146,6 +157,7 @@ class _ForecastScreenState extends State<ForecastScreen> {
             const SizedBox(height: 12),
             ..._forecast!.map((day) => _buildForecastTile(theme, day)),
           ],
+          const SizedBox(height: 24),
         ],
       ),
     );

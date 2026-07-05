@@ -88,8 +88,15 @@ class _StatsScreenState extends State<StatsScreen> {
     context.watch<TranslationService>();
     if (!context.watch<ProService>().isPro) {
       return Scaffold(
-        appBar: AppBar(title: const Text('Statistics'), actions: [helpButton(context, 'stats')]),
-        body: _buildUpgradePrompt(),
+        appBar: AppBar(title: const Text('Statistics')),
+        body: Column(
+          children: [
+            Expanded(
+              child: _buildUpgradePrompt(),
+            ),
+            helpChip(context, 'stats'),
+          ],
+        ),
       );
     }
 
@@ -107,23 +114,25 @@ class _StatsScreenState extends State<StatsScreen> {
               tooltip: 'Share stats',
               onPressed: _shareStats,
             ),
-          helpButton(context, 'stats'),
         ],
       ),
-      body: _totalCatches == 0
-          ? Center(
-              child: Column(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  Icon(Icons.bar_chart, size: 64, color: Colors.grey.shade300),
-                  const SizedBox(height: 16),
-                  Text(tr('noData'), style: TextStyle(fontSize: 18, color: Colors.grey.shade500)),
-                  const SizedBox(height: 8),
-                  Text('Add some catches to see stats', style: TextStyle(color: Colors.grey.shade400)),
-                ],
-              ),
-            )
-          : RepaintBoundary(
+      body: Column(
+        children: [
+          Expanded(
+            child: _totalCatches == 0
+                ? Center(
+                    child: Column(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        Icon(Icons.bar_chart, size: 64, color: Colors.grey.shade300),
+                        const SizedBox(height: 16),
+                        Text(tr('noData'), style: TextStyle(fontSize: 18, color: Colors.grey.shade500)),
+                        const SizedBox(height: 8),
+                        Text('Add some catches to see stats', style: TextStyle(color: Colors.grey.shade400)),
+                      ],
+                    ),
+                  )
+                : RepaintBoundary(
               key: _shareKey,
               child: ListView(
                 padding: EdgeInsets.fromLTRB(12, 12, 12, 12 + MediaQuery.of(context).padding.bottom + 80),
@@ -159,7 +168,7 @@ class _StatsScreenState extends State<StatsScreen> {
                       runSpacing: 8,
                       children: _badges.map((b) => _BadgeChip(badge: b)).toList(),
                     ),
-                    const SizedBox(height: 16),
+                    const SizedBox(height: 24),
                   ],
 
                   // Species Breakdown
@@ -202,7 +211,7 @@ class _StatsScreenState extends State<StatsScreen> {
                   if (_totalCatches >= 10) ...[
                     _InsightRow(icon: Icons.speed, text: 'Average: ${(_totalCatches / (_catchesByMonth.length > 0 ? _catchesByMonth.length : 1)).toStringAsFixed(1)} fish/month'),
                   ],
-                  const SizedBox(height: 16),
+                  const SizedBox(height: 24),
 
                   // Top Anglers
                   if (_topAnglers.isNotEmpty) ...[
@@ -222,6 +231,10 @@ class _StatsScreenState extends State<StatsScreen> {
                 ],
               ),
             ),
+          ),
+          helpChip(context, 'stats'),
+        ],
+      ),
     );
   }
 

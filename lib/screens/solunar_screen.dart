@@ -84,13 +84,14 @@ class _SolunarScreenState extends State<SolunarScreen> {
 
     return Scaffold(
       appBar: AppBar(title: Text(tr('solunar')),
-        actions: [
-          helpButton(context, 'solunar'),
-        ]),
-      body: _loading
-          ? const Center(child: CircularProgressIndicator())
-          : _error != null
-              ? Center(
+),
+      body: Column(
+        children: [
+          Expanded(
+            child: _loading
+                ? const Center(child: CircularProgressIndicator())
+                : _error != null
+                    ? Center(
                   child: Column(
                     mainAxisSize: MainAxisSize.min,
                     children: [
@@ -293,10 +294,13 @@ class _SolunarScreenState extends State<SolunarScreen> {
                         'Moonset',
                       ),
 
-                      const SizedBox(height: 12),
                     ],
                   ),
                 ),
+          ),
+          helpChip(context, 'solunar'),
+        ],
+      ),
     );
   }
 

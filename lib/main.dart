@@ -8,8 +8,6 @@ import 'services/pro_service.dart';
 import 'services/api_config.dart';
 import 'services/theme_provider.dart';
 import 'package:firebase_core/firebase_core.dart';
-import 'services/jason_config.dart';
-
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
 
@@ -24,9 +22,7 @@ void main() async {
   await TranslationService.instance.loadLanguage();
   // Load Pro status
   await ProService.instance.load();
-  // Load Jason config
-  await JasonConfig.instance.load();
-  // Auto-unlock Pro for Jason builds (so only Jason toggle matters)
+  // Auto-unlock Pro for Dev builds
   if (ApiConfig.isDev && !ProService.instance.isPro) {
     await ProService.instance.unlockPro();
   }

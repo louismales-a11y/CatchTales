@@ -389,7 +389,6 @@ class _CommunityStatsScreenState extends State<CommunityStatsScreen> {
           ],
         ),
         actions: [
-          helpButton(context, 'community_stats'),
           if (_species.isNotEmpty)
             IconButton(
               icon: const Icon(Icons.search),
@@ -398,7 +397,14 @@ class _CommunityStatsScreenState extends State<CommunityStatsScreen> {
             ),
         ],
       ),
-      body: _buildBody(theme),
+      body: Column(
+        children: [
+          Expanded(
+            child: _buildBody(theme),
+          ),
+          helpChip(context, 'community_stats'),
+        ],
+      ),
     );
   }
 

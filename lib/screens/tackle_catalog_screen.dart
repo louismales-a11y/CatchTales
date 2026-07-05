@@ -53,7 +53,11 @@ class _TackleCatalogScreenState extends State<TackleCatalogScreen> {
             ),
           ),
           actions: [
-          helpButton(context, 'catalog'),
+            TextButton.icon(
+              icon: const Icon(Icons.help, size: 18),
+              label: const Text('Help'),
+              onPressed: () => showHelp(context, 'catalog'),
+            ),
             TextButton(
                 onPressed: () => Navigator.pop(ctx),
                 child: const Text('Cancel')),

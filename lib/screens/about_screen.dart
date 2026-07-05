@@ -1,15 +1,10 @@
-import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import 'package:http/http.dart' as http;
 import 'package:package_info_plus/package_info_plus.dart';
-import 'package:url_launcher/url_launcher.dart';
-import 'package:qr_flutter/qr_flutter.dart';
-import '../services/help_text.dart';
 import '../services/translation_service.dart';
 import '../services/pro_service.dart';
 import '../services/api_config.dart';
-import '../services/jason_config.dart';
+
 
 class AboutScreen extends StatefulWidget {
   const AboutScreen({super.key});
@@ -20,8 +15,6 @@ class AboutScreen extends StatefulWidget {
 
 class _AboutScreenState extends State<AboutScreen> {
   String _version = '';
-  bool _checking = false;
-  bool _upToDate = false;
 
   @override
   void initState() {
@@ -29,61 +22,11 @@ class _AboutScreenState extends State<AboutScreen> {
     _loadVersion();
   }
 
-  /// Compare two version strings like "v1.8.12" and "v1.8.6".
-  bool _isNewerVersion(String tag, String current) {
-    final tagParts = tag.replaceAll('v', '').split('.').map((e) => int.tryParse(e) ?? 0).toList();
-    final curParts = current.replaceAll('v', '').split('.').map((e) => int.tryParse(e) ?? 0).toList();
-    for (int i = 0; i < 3; i++) {
-      final t = i < tagParts.length ? tagParts[i] : 0;
-      final c = i < curParts.length ? curParts[i] : 0;
-      if (t > c) return true;
-      if (t < c) return false;
-    }
-    return false;
-  }
-
   Future<void> _loadVersion() async {
     try {
       final info = await PackageInfo.fromPlatform();
       if (mounted) setState(() => _version = 'v${info.version}');
     } catch (_) {}
-  }
-
-  Future<void> _checkUpdate() async {
-    setState(() { _checking = true; _upToDate = false; });
-    try {
-      final uri = Uri.parse('https://api.github.com/repos/louismales-a11y/BestFishBuddy/releases/latest');
-      final response = await http.get(uri).timeout(const Duration(seconds: 10));
-      if (response.statusCode == 200) {
-        final data = json.decode(response.body);
-        final tag = data['tag_name'] as String? ?? '';
-        final url = data['html_url'] as String? ?? '';
-        if (mounted && _isNewerVersion(tag, _version)) {
-          final download = await showDialog<bool>(
-            context: context, builder: (ctx) => AlertDialog(
-              title: Text(tr('updateAvailable')),
-              content: Text(trp('updateContent', {'tag': tag, 'version': _version})),
-              actions: [
-                TextButton(onPressed: () => Navigator.pop(ctx, false), child: Text(tr('later'))),
-                FilledButton(onPressed: () => Navigator.pop(ctx, true), child: Text(tr('download'))),
-              ],
-            ),
-          );
-          if (download == true && url.isNotEmpty) {
-            await launchUrl(Uri.parse(url), mode: LaunchMode.externalApplication);
-          }
-        } else {
-          setState(() => _upToDate = true);
-        }
-      }
-    } catch (_) {
-      if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text(tr('checkFailed')), behavior: SnackBarBehavior.floating),
-        );
-      }
-    }
-    if (mounted) setState(() => _checking = false);
   }
 
   @override
@@ -94,7 +37,6 @@ class _AboutScreenState extends State<AboutScreen> {
     return Scaffold(
       appBar: AppBar(
         title: Text(tr('about')),
-        actions: [helpButton(context, 'about')],
       ),
       body: ListView(
         padding: const EdgeInsets.all(24),
@@ -117,27 +59,7 @@ class _AboutScreenState extends State<AboutScreen> {
                       style: TextStyle(
                           color: theme.colorScheme.onSurface
                               .withValues(alpha: 0.5))),
-                const SizedBox(height: 8),
-                SizedBox(
-                  height: 36,
-                  child: OutlinedButton.icon(
-                    onPressed: _checking ? null : _checkUpdate,
-                    icon: _checking
-                        ? const SizedBox(width: 16, height: 16, child: CircularProgressIndicator(strokeWidth: 2))
-                        : Icon(Icons.system_update_outlined, size: 18),
-                    label: Text(
-                      _checking ? 'Checking...' :
-                      _upToDate ? 'Up to date ✓' :
-                      'Check for Updates',
-                      style: const TextStyle(fontSize: 12),
-                    ),
-                    style: OutlinedButton.styleFrom(
-                      padding: const EdgeInsets.symmetric(horizontal: 14),
-                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
-                      foregroundColor: _upToDate ? Colors.green : null,
-                    ),
-                  ),
-                ),
+
               ],
             ),
           ),
@@ -191,8 +113,8 @@ class _AboutScreenState extends State<AboutScreen> {
             ),
           ),
           const SizedBox(height: 24),
-          // ── Dev Mode Toggle (Developer build only, hidden in Jason) ──
-          if (ApiConfig.isDev && ApiConfig.appVersion != 'jason') ...[const SizedBox(height: 16),
+          // ── Dev Mode Toggle (Developer build only) ──
+          if (ApiConfig.isDev) ...[const SizedBox(height: 16),
           Card(
             color: theme.colorScheme.primary.withValues(alpha: 0.05),
             child: Padding(
@@ -241,102 +163,9 @@ class _AboutScreenState extends State<AboutScreen> {
           ),
           ],
           const SizedBox(height: 24),
-          // ── Jason Mode Toggle (Dev/Jason builds only) ──
-          if (ApiConfig.isDev)
-            Padding(
-              padding: const EdgeInsets.only(bottom: 16),
-              child: Card(
-                color: Colors.amber.shade50,
-                child: Padding(
-                  padding: const EdgeInsets.all(14),
-                  child: Column(
-                    children: [
-                      Row(
-                        children: [
-                          Icon(Icons.science, size: 20, color: Colors.amber.shade800),
-                          const SizedBox(width: 10),
-                          const Text('Jason Mode',
-                              style: TextStyle(fontWeight: FontWeight.w600)),
-                          const Spacer(),
-                          Switch(
-                            value: JasonConfig.instance.enabled,
-                            onChanged: (v) {
-                              JasonConfig.instance.setEnabled(v);
-                              setState(() {});
-                            },
-                          ),
-                        ],
-                      ),
-                      Text(
-                        JasonConfig.instance.enabled
-                            ? 'Jason fixes active: bigger buttons, better Wikipedia links'
-                            : 'Original behavior (no fixes applied)',
-                        style: TextStyle(fontSize: 11, color: Colors.amber.shade800),
-                      ),
-                    ],
-                  ),
-                ),
-              ),
-            ),
-          // ── QR Code: Download Free Version ──
-          Card(
-            child: Padding(
-              padding: const EdgeInsets.all(16),
-              child: Column(
-                children: [
-                  Row(
-                    children: [
-                      Icon(Icons.share, size: 20, color: theme.colorScheme.primary),
-                      const SizedBox(width: 10),
-                      Text(tr('shareFreeApp'),
-                          style: const TextStyle(fontWeight: FontWeight.w600)),
-                    ],
-                  ),
-                  const SizedBox(height: 12),
-                  Text(
-                    tr('scanToDownload'),
-                    style: TextStyle(fontSize: 13, color: Colors.grey.shade600),
-                    textAlign: TextAlign.center,
-                  ),
-                  const SizedBox(height: 16),
-                  Container(
-                    padding: const EdgeInsets.all(16),
-                    decoration: BoxDecoration(
-                      color: Colors.white,
-                      borderRadius: BorderRadius.circular(16),
-                      border: Border.all(color: Colors.grey.shade200),
-                    ),
-                    child: QrImageView(
-                      data: 'https://tinyurl.com/2a2kkl7r',
-                      version: QrVersions.auto,
-                      size: 180,
-                      backgroundColor: Colors.white,
-                      eyeStyle: const QrEyeStyle(
-                        eyeShape: QrEyeShape.square,
-                        color: Color(0xFF0A0E1A),
-                      ),
-                      dataModuleStyle: const QrDataModuleStyle(
-                        dataModuleShape: QrDataModuleShape.square,
-                        color: Color(0xFF0A0E1A),
-                      ),
-                    ),
-                  ),
-                  const SizedBox(height: 8),
-                  TextButton.icon(
-                    onPressed: () async {
-                      final url = Uri.parse('https://tinyurl.com/2a2kkl7r');
-                      if (await canLaunchUrl(url)) {
-                        await launchUrl(url, mode: LaunchMode.externalApplication);
-                      }
-                    },
-                    icon: const Icon(Icons.open_in_new, size: 16),
-                    label: Text(tr('openDownloadPage'), style: const TextStyle(fontSize: 13)),
-                  ),
-                ],
-              ),
-            ),
-          ),
-          const SizedBox(height: 40),
+
+
+          const SizedBox(height: 24),
         ],
       ),
     );

@@ -77,13 +77,67 @@ void showHelp(BuildContext context, String feature) {
               ),
             ),
           ],
+          const SizedBox(height: 16),
+          SizedBox(
+            width: double.infinity,
+            child: OutlinedButton.icon(
+              onPressed: () => Navigator.pop(context),
+              icon: const Icon(Icons.close, size: 18),
+              label: Text(tr('gotIt')),
+              style: OutlinedButton.styleFrom(
+                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                foregroundColor: Colors.red.shade600,
+                side: BorderSide(color: Colors.red.shade200),
+              ),
+            ),
+          ),
+          const SizedBox(height: 8),
         ],
       ),
     ),
   );
 }
 
+/// Colored, labeled help chip to place inside the page body.
+/// Use this instead of [helpButton] for better visibility.
+Widget helpChip(BuildContext context, String feature) {
+  final color = Colors.red.shade600;
+  return Padding(
+    padding: const EdgeInsets.symmetric(vertical: 6),
+    child: SizedBox(
+      width: double.infinity,
+      child: Material(
+        color: color.withValues(alpha: 0.12),
+        borderRadius: BorderRadius.circular(24),
+        child: InkWell(
+          borderRadius: BorderRadius.circular(24),
+          onTap: () => showHelp(context, feature),
+          child: Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Icon(Icons.help, size: 22, color: color),
+                const SizedBox(width: 10),
+                Text(
+                  tr('help'),
+                  style: TextStyle(
+                    fontSize: 15,
+                    fontWeight: FontWeight.w700,
+                    color: color,
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ),
+      ),
+    ),
+  );
+}
+
 /// Call this from any AppBar actions list to add a help button.
+/// Consider using [helpChip] in the page body instead.
 Widget helpButton(BuildContext context, String feature) {
   return IconButton(
     icon: const Icon(Icons.help_outline, size: 20),

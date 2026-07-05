@@ -245,8 +245,12 @@ class _TackleBoxScreenState extends State<TackleBoxScreen> {
         title: Text(tr('delete')),
         content: Text(trp('removeItem', {'item': item.name})),
         actions: [
-          helpButton(context, 'tackle_box'),
-          TextButton(
+            TextButton.icon(
+              icon: const Icon(Icons.help, size: 18),
+              label: const Text('Help'),
+              onPressed: () => showHelp(context, 'tackle_box'),
+            ),
+            TextButton(
               onPressed: () => Navigator.pop(ctx, false),
               child: Text(tr('cancel'))),
           TextButton(
@@ -281,7 +285,6 @@ class _TackleBoxScreenState extends State<TackleBoxScreen> {
       appBar: AppBar(
         title: Text(tr('tackleBox')),
         actions: [
-          helpButton(context, 'tackle_box'),
           IconButton(
             icon: const Icon(Icons.sort),
             tooltip: 'Sort',
@@ -422,6 +425,9 @@ class _TackleBoxScreenState extends State<TackleBoxScreen> {
                               ),
                             ),
                 ),
+              const SizedBox(height: 8),
+              helpChip(context, 'tackle_box'),
+              const SizedBox(height: 12),
               ],
             ),
     );

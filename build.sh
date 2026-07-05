@@ -63,8 +63,10 @@ if [ -n "$OPENWEATHER_API_KEY" ]; then
   DART_DEFINES="$DART_DEFINES --dart-define=OPENWEATHER_API_KEY=$OPENWEATHER_API_KEY"
 fi
 
-# ─── 3. Build APK ─────────────────────────────────────────────────────────
-echo "🏗️  Building APK..."
+# ─── 3. Select flavor ──────────────────────────────────────────────────────
+FLAVOR="${1:-dev}"
+echo "🏗️  Building $FLAVOR APK..."
+DART_DEFINES="$DART_DEFINES --dart-define=APP_VERSION=$FLAVOR"
 
 export PATH="$HOME/bin:$HOME/flutter/bin:$JAVA_HOME/bin:$ANDROID_HOME/cmdline-tools/latest/bin:$ANDROID_HOME/platform-tools:$PATH"
 export JAVA_HOME="$HOME/jdk-17.0.12+7"

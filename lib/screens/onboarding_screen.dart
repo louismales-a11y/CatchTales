@@ -52,12 +52,17 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
       desc: tr('onboardDescCommunityStats'),
     ),
     _OnboardPage(
+      icon: Icons.map,
+      title: tr('onboardMap'),
+      desc: tr('onboardDescMap'),
+    ),
+    _OnboardPage(
       icon: Icons.more_vert,
       title: tr('onboardMoreFeatures'),
       desc: tr('onboardDescMoreFeatures'),
     ),
     _OnboardPage(
-      icon: Icons.help_outline,
+      icon: Icons.check_circle,
       title: tr('onboardHelp'),
       desc: tr('onboardDescHelp'),
       isLast: true,
@@ -162,36 +167,66 @@ class _OnboardPage {
   });
 
   Widget build(ThemeData theme) {
-    return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 32),
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          Container(
-            width: 90,
-            height: 90,
-            decoration: BoxDecoration(
-              color: theme.colorScheme.primary.withValues(alpha: 0.1),
-              borderRadius: BorderRadius.circular(22),
+    return SingleChildScrollView(
+      child: Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 32, vertical: 16),
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Container(
+              width: 90,
+              height: 90,
+              decoration: BoxDecoration(
+                color: theme.colorScheme.primary.withValues(alpha: 0.1),
+                borderRadius: BorderRadius.circular(22),
+              ),
+              child: Icon(icon, size: 44, color: theme.colorScheme.primary),
             ),
-            child: Icon(icon, size: 44, color: theme.colorScheme.primary),
-          ),
-          const SizedBox(height: 24),
-          Text(title,
-              style: theme.textTheme.titleLarge?.copyWith(
-                fontWeight: FontWeight.w700,
-              )),
-          const SizedBox(height: 12),
-          Text(
-            desc,
-            textAlign: TextAlign.center,
-            style: TextStyle(
-              fontSize: 15,
-              height: 1.6,
-              color: theme.colorScheme.onSurface.withValues(alpha: 0.8),
+            const SizedBox(height: 24),
+            Text(title,
+                style: theme.textTheme.titleLarge?.copyWith(
+                  fontWeight: FontWeight.w700,
+                )),
+            const SizedBox(height: 12),
+            Text(
+              desc,
+              textAlign: TextAlign.center,
+              style: TextStyle(
+                fontSize: 15,
+                height: 1.6,
+                color: theme.colorScheme.onSurface.withValues(alpha: 0.8),
+              ),
             ),
-          ),
-        ],
+            if (isLast) ...[const SizedBox(height: 24),
+              Container(
+                width: double.infinity,
+                padding: const EdgeInsets.all(16),
+                decoration: BoxDecoration(
+                  color: Colors.red.shade50,
+                  borderRadius: BorderRadius.circular(16),
+                  border: Border.all(color: Colors.red.shade200),
+                ),
+                child: Row(
+                  children: [
+                    Icon(Icons.help, size: 22, color: Colors.red.shade600),
+                    const SizedBox(width: 12),
+                    Expanded(
+                      child: Text(
+                        'Need help? Tap the red \"? Help\" button\nat the bottom of any screen.',
+                        style: TextStyle(
+                          fontSize: 13,
+                          height: 1.5,
+                          color: Colors.red.shade800,
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ],
+            const SizedBox(height: 24),
+          ],
+        ),
       ),
     );
   }
