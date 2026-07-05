@@ -2,6 +2,7 @@ import 'dart:math';
 import 'dart:convert';
 import 'dart:io';
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 import 'package:flutter_map/flutter_map.dart';
 import 'package:latlong2/latlong.dart';
 import 'package:geolocator/geolocator.dart';
@@ -768,6 +769,7 @@ class MapScreenState extends State<MapScreen> {
 
   @override
   Widget build(BuildContext context) {
+    context.watch<ProService>();
     final t = Theme.of(context);
     if (_loading) return const Center(child: CircularProgressIndicator());
 
