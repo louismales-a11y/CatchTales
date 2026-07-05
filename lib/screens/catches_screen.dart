@@ -2,8 +2,10 @@ import 'dart:async';
 import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:provider/provider.dart';
+import 'package:share_plus/share_plus.dart';
+import 'package:path_provider/path_provider.dart';
 import 'package:intl/intl.dart';
+import 'package:provider/provider.dart';
 import 'package:speech_to_text/speech_to_text.dart' as stt;
 import '../services/translation_service.dart';
 import '../services/pro_service.dart';
@@ -531,6 +533,13 @@ class CatchesScreenState extends State<CatchesScreen> {
             backgroundColor: Colors.transparent,
             foregroundColor: Colors.white,
             elevation: 0,
+            actions: [
+              IconButton(
+                icon: const Icon(Icons.share, size: 20),
+                tooltip: 'Share catch',
+                onPressed: () => _shareCatchAsImage(c),
+              ),
+            ],
           ),
           body: Center(
             child: InteractiveViewer(
@@ -552,6 +561,45 @@ class CatchesScreenState extends State<CatchesScreen> {
         ),
       ),
     );
+  }
+
+  Future<void> _shareCatchAsImage(Catch c) async {
+    final dir = await getTemporaryDirectory();
+    final file = File('${dir.path}/catch_${c.id ?? DateTime.now().millisecondsSinceEpoch}.png');
+
+    if (!mounted) return;
+    showDialog(
+      context: context,
+      barrierDismissible: false,
+      builder: (_) => const Center(child: CircularProgressIndicator()),
+    );
+
+    try {
+      if (c.hasPhotos && c.primaryPhoto != null) {
+        await File(c.primaryPhoto!).copy(file.path);
+      } else {
+        await file.writeAsString('Share placeholder');
+      }
+
+      if (mounted) Navigator.pop(context);
+
+      // ignore: deprecated_member_use
+      await Share.shareXFiles([XFile(file.path)],
+          text: '${c.species} caught by ${c.angler}! 🎣'
+              '${c.weight != null ? ' - ${c.weightDisplay}' : ''}'
+              '${c.length != null ? ' - ${c.lengthDisplay}' : ''}'
+              '${c.location.isNotEmpty ? ' at ${c.location}' : ''}');
+    } catch (e) {
+      if (mounted) Navigator.pop(context);
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            behavior: SnackBarBehavior.floating,
+            content: Text('Share failed: $e'),
+          ),
+        );
+      }
+    }
   }
 
   Widget _sampleStat(IconData icon, String text) {
