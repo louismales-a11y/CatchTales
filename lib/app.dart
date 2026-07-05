@@ -195,14 +195,75 @@ class _SplashScreenTestState extends State<SplashScreenTest> {
   }
 
   Future<void> _loadVersion() async {
+    String version;
     try {
       final info = await PackageInfo.fromPlatform();
-      if (mounted) setState(() => _version = info.version);
+      version = info.version;
+      if (mounted) setState(() => _version = version);
     } catch (_) {
-      if (mounted) setState(() => _version = '1.0.0');
+      version = '1.0.0';
+      if (mounted) setState(() => _version = version);
     }
     await CloudSyncService.instance.init();
     await NotificationService.instance.init();
+    // What's new check
+    final prefs = await SharedPreferences.getInstance();
+    final lastSeen = prefs.getString('last_version_seen');
+    if (lastSeen != version) {
+      await prefs.setString('last_version_seen', version);
+      if (mounted) _showWhatsNew(version);
+    }
+  }
+
+  void _showWhatsNew(String version) {
+    showDialog(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        title: Row(
+          children: [
+            const Icon(Icons.new_releases, color: Colors.amber),
+            const SizedBox(width: 8),
+            Text('What\'s New in v$version'),
+          ],
+        ),
+        content: SingleChildScrollView(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              _whatsNewItem('Swipe to delete catches with undo'),
+              _whatsNewItem('Search/filter your catch list'),
+              _whatsNewItem('Larger photo thumbnails + full-screen viewer'),
+              _whatsNewItem('CSV & JSON data export in About screen'),
+              _whatsNewItem('Haptic feedback on key actions'),
+              _whatsNewItem('Offline indicator banner'),
+              _whatsNewItem('Rate app prompt after 5 catches'),
+              _whatsNewItem('Improved error messages throughout'),
+              _whatsNewItem('Database performance optimizations'),
+            ],
+          ),
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(ctx),
+            child: const Text('Got it!'),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _whatsNewItem(String text) {
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: 4),
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          const Text('✨ ', style: TextStyle(fontSize: 14)),
+          Expanded(child: Text(text, style: const TextStyle(fontSize: 14))),
+        ],
+      ),
+    );
   }
 
   @override
