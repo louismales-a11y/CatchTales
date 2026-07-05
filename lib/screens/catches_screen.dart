@@ -111,6 +111,30 @@ class CatchesScreenState extends State<CatchesScreen> {
             ),
           ),
         ),
+        // Error banner
+        if (cp.error != null)
+          Container(
+            width: double.infinity,
+            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+            color: Colors.red.shade800,
+            child: Row(
+              children: [
+                const Icon(Icons.error_outline, size: 16, color: Colors.white),
+                const SizedBox(width: 8),
+                Expanded(
+                  child: Text(cp.error!,
+                      style: const TextStyle(color: Colors.white, fontSize: 12)),
+                ),
+                IconButton(
+                  icon: const Icon(Icons.close, size: 16, color: Colors.white),
+                  onPressed: () => cp.loadCatches(),
+                  visualDensity: VisualDensity.compact,
+                  padding: EdgeInsets.zero,
+                  constraints: const BoxConstraints(),
+                ),
+              ],
+            ),
+          ),
         // Rate prompt banner (shown once after 5 catches)
         if (cp.pendingRatePrompt)
           Container(
