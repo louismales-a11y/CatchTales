@@ -23,6 +23,10 @@ class CommunityStatsService {
   static final CommunityStatsService instance = CommunityStatsService._();
   CommunityStatsService._();
 
+  // Nominatim rate limiting (1 req/sec)
+  DateTime _lastNominatimCall = DateTime(2000);
+  static const _nominatimMinInterval = Duration(seconds: 1);
+
   static const _collection = 'catch_stats';
 
   /// Maximum number of top species to return per state.
@@ -41,6 +45,12 @@ class CommunityStatsService {
           '&format=json'
           '&zoom=5' // zoom 5 = state/province level
       );
+      // Enforce Nominatim rate limit (1 req/sec)
+      final elapsed = DateTime.now().difference(_lastNominatimCall);
+      if (elapsed < _nominatimMinInterval) {
+        await Future.delayed(_nominatimMinInterval - elapsed);
+      }
+      _lastNominatimCall = DateTime.now();
       final response = await http.get(
         url,
         headers: {'User-Agent': 'BestFishBuddy/1.0 (community stats)'},
