@@ -1,4 +1,5 @@
 import 'dart:math';
+import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
 import 'package:flutter/material.dart';
@@ -10,6 +11,8 @@ import 'package:http/http.dart' as http;
 import 'package:path_provider/path_provider.dart';
 import 'package:path/path.dart' as p;
 import 'package:url_launcher/url_launcher.dart';
+import 'package:intl/intl.dart';
+import 'package:share_plus/share_plus.dart';
 import '../models/catch.dart';
 import '../models/favorite_spot.dart';
 import '../models/depth_reading.dart';
@@ -695,6 +698,111 @@ class MapScreenState extends State<MapScreen> {
   /// Imported GPX tracks for polyline display
   List<GpxTrack> _gpxTracks = [];
 
+  /// Track recording state
+  bool _recording = false;
+  List<GpxTrackPoint> _recordedPoints = [];
+  StreamSubscription<Position>? _positionSub;
+
+  /// Start recording GPS track
+  Future<void> _startRecording() async {
+    final perm = await Geolocator.checkPermission();
+    if (perm == LocationPermission.denied || perm == LocationPermission.deniedForever) {
+      final req = await Geolocator.requestPermission();
+      if (req == LocationPermission.denied || req == LocationPermission.deniedForever) return;
+    }
+    setState(() {
+      _recording = true;
+      _recordedPoints = [];
+    });
+    _positionSub = Geolocator.getPositionStream(
+      locationSettings: const LocationSettings(
+        accuracy: LocationAccuracy.high,
+        distanceFilter: 5, // record every 5 meters
+      ),
+    ).listen((pos) {
+      if (!_recording) return;
+      setState(() {
+        _recordedPoints.add(GpxTrackPoint(
+          latitude: pos.latitude,
+          longitude: pos.longitude,
+          elevation: pos.altitude,
+          time: DateTime.now(),
+        ));
+      });
+    });
+  }
+
+  /// Stop recording and save as GPX file
+  Future<void> _stopRecording() async {
+    await _positionSub?.cancel();
+    _positionSub = null;
+    setState(() => _recording = false);
+
+    if (_recordedPoints.length < 2) {
+      _recordedPoints = [];
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            behavior: SnackBarBehavior.floating,
+            content: const Text('Not enough points recorded (need at least 2)'),
+          ),
+        );
+      }
+      return;
+    }
+
+    // Build GPX XML
+    final buf = StringBuffer();
+    final dateStr = DateFormat('yyyy-MM-dd').format(DateTime.now());
+    final timeStr = DateFormat('HH-mm-ss').format(DateTime.now());
+    buf.writeln('<?xml version="1.0" encoding="UTF-8"?>');
+    buf.writeln('<gpx version="1.1" xmlns="http://www.topografix.com/GPX/1/1">');
+    buf.writeln('  <trk>');
+    buf.writeln('    <name>Fishing Track $dateStr $timeStr</name>');
+    buf.writeln('    <trkseg>');
+    for (final p in _recordedPoints) {
+      buf.write('      <trkpt lat="${p.latitude}" lon="${p.longitude}">');
+      if (p.elevation != null) buf.write('<ele>${p.elevation}</ele>');
+      if (p.time != null) buf.write('<time>${p.time!.toIso8601String()}</time>');
+      buf.writeln('</trkpt>');
+    }
+    buf.writeln('    </trkseg>');
+    buf.writeln('  </trk>');
+    buf.writeln('</gpx>');
+
+    // Save to downloads
+    final dir = await getTemporaryDirectory();
+    final file = File('${dir.path}/fishing_track_$dateStr\_$timeStr.gpx');
+    await file.writeAsString(buf.toString());
+
+    // Add to displayed tracks
+    final track = GpxTrack(
+      name: 'Fishing Track $dateStr',
+      points: List.from(_recordedPoints),
+    );
+    setState(() => _gpxTracks.add(track));
+
+    if (mounted) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          behavior: SnackBarBehavior.floating,
+          action: SnackBarAction(
+            label: 'Share',
+            onPressed: () async {
+              await Share.shareXFiles([XFile(file.path)],
+                  text: 'My fishing track');
+            },
+          ),
+          content: Text('Track saved: ${_recordedPoints.length} points, '
+              '${GpxService.trackDistanceKm(_recordedPoints).toStringAsFixed(2)} km'),
+        ),
+      );
+    }
+    _recordedPoints = [];
+  }
+
+  /// Show record button in panel
+
   /// Load a GPX file and display the track on the map
   Future<void> _importGpx() async {
     final result = await FilePicker.platform.pickFiles(
@@ -960,6 +1068,14 @@ class MapScreenState extends State<MapScreen> {
                       child: Column(
                         mainAxisSize: MainAxisSize.min,
                         children: [
+                      _fabLabel(
+                        _recording ? Icons.stop_circle : Icons.fiber_manual_record,
+                        _recording ? 'Stop' : 'Record',
+                        _recording ? _stopRecording : _startRecording,
+                        t,
+                        active: _recording,
+                      ),
+                      const SizedBox(height: 8),
                       _fabLabel(Icons.route, 'GPX Import', _importGpx, t),
                       const SizedBox(height: 8),
                       _fabLabel(
