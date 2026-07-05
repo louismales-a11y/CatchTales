@@ -24,6 +24,9 @@ class CatchesScreenState extends State<CatchesScreen> {
   String _voiceStatus = '';
   String _lastVoiceText = '';
 
+  // Undo support for swipe-to-delete
+  Catch? _lastDeleted;
+
   CatchesProvider get _provider => context.read<CatchesProvider>();
 
   @override
@@ -48,24 +51,30 @@ class CatchesScreenState extends State<CatchesScreen> {
 
   Future<void> _deleteCatch(Catch c) async {
     if (c.id == null) return;
-    final confirm = await showDialog<bool>(
-      context: context,
-      builder: (ctx) => AlertDialog(
-        title: Text(tr('deleteCatch')),
-        content: Text(trp('removeCatch', {'species': c.species, 'angler': c.angler})),
-        actions: [
-          TextButton(
-              onPressed: () => Navigator.pop(ctx, false),
-              child: Text(tr('cancel'))),
-          TextButton(
-              onPressed: () => Navigator.pop(ctx, true),
-              child: Text(tr('delete'), style: const TextStyle(color: Colors.red))),
-        ],
+    await _provider.deleteCatch(c.id!);
+  }
+
+  Future<void> _deleteWithUndo(Catch c, int index) async {
+    if (c.id == null) return;
+    // Store for potential undo
+    _lastDeleted = c;
+    await _provider.deleteCatch(c.id!);
+    if (!mounted) return;
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text(trp('catchDeleted', {'species': c.species})),
+        behavior: SnackBarBehavior.floating,
+        action: SnackBarAction(
+          label: tr('undo'),
+          onPressed: () async {
+            if (_lastDeleted != null) {
+              await _provider.addCatch(_lastDeleted!);
+              _lastDeleted = null;
+            }
+          },
+        ),
       ),
     );
-    if (confirm == true) {
-      await _provider.deleteCatch(c.id!);
-    }
   }
 
   @override
@@ -192,13 +201,80 @@ class CatchesScreenState extends State<CatchesScreen> {
                   itemCount: cp.catches.length,
                   itemBuilder: (context, index) {
                     final c = cp.catches[index];
-                    return _CatchCard(
+                    final isPro = ProService.instance.isPro;
+                    final card = _CatchCard(
                       catch_: c,
                       onTap: () => _editCatch(c),
                       onDelete: () => _deleteCatch(c),
+                      onPhotoTap: () => _showPhotoFullScreen(c),
+                    );
+                    if (isPro) {
+                      return Dismissible(
+                        key: ValueKey(c.id),
+                        direction: DismissDirection.endToStart,
+                        background: Container(
+                          alignment: Alignment.centerRight,
+                          padding: const EdgeInsets.only(right: 20),
+                          decoration: BoxDecoration(
+                            color: Colors.red.shade400,
+                            borderRadius: BorderRadius.circular(16),
+                          ),
+                          child: const Icon(Icons.delete_outline,
+                              color: Colors.white, size: 28),
+                        ),
+                        confirmDismiss: (_) async => true,
+                        onDismissed: (_) => _deleteWithUndo(c, index),
+                        child: card,
+                      );
+                    }
+                    return Dismissible(
+                      key: ValueKey(c.id),
+                      direction: DismissDirection.endToStart,
+                      background: Container(
+                        alignment: Alignment.centerRight,
+                        padding: const EdgeInsets.only(right: 20),
+                        decoration: BoxDecoration(
+                          color: const Color(0xFF1A237E),
+                          borderRadius: BorderRadius.circular(16),
+                        ),
+                        child: Row(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            const Icon(Icons.star, size: 20, color: Color(0xFFFFD600)),
+                            const SizedBox(width: 8),
+                            Text(tr('upgradeToPro'),
+                                style: const TextStyle(color: Colors.white, fontWeight: FontWeight.w600)),
+                          ],
+                        ),
+                      ),
+                      confirmDismiss: (_) async {
+                        // Show upgrade dialog
+                        if (!mounted) return false;
+                        await showDialog(
+                          context: context,
+                          builder: (ctx) => AlertDialog(
+                            title: Text(tr('proFeature')),
+                            content: Text(tr('upgradeToDelete')),
+                            actions: [
+                              TextButton(
+                                  onPressed: () => Navigator.pop(ctx),
+                                  child: Text(tr('cancel'))),
+                              TextButton(
+                                  onPressed: () {
+                                    Navigator.pop(ctx);
+                                    // TODO: open Pro purchase screen
+                                  },
+                                  child: Text(tr('upgrade'),
+                                      style: const TextStyle(color: Color(0xFFFFD600)))),
+                            ],
+                          ),
+                        );
+                        return false;
+                      },
+                      child: card,
                     );
                   },
-                ),
+                )
               ),
         ),
         _voiceBar(),
@@ -280,6 +356,36 @@ class CatchesScreenState extends State<CatchesScreen> {
     );
   }
 
+  void _showPhotoFullScreen(Catch c) {
+    if (!c.hasPhotos) return;
+    Navigator.of(context).push(
+      MaterialPageRoute(
+        builder: (_) => Scaffold(
+          backgroundColor: Colors.black,
+          appBar: AppBar(
+            backgroundColor: Colors.transparent,
+            foregroundColor: Colors.white,
+            elevation: 0,
+          ),
+          body: Center(
+            child: InteractiveViewer(
+              minScale: 0.5,
+              maxScale: 4.0,
+              child: c.primaryPhoto != null
+                  ? Image.file(
+                      File(c.primaryPhoto!),
+                      fit: BoxFit.contain,
+                      errorBuilder: (_, _, _) => const Icon(
+                          Icons.broken_image, color: Colors.white54, size: 64),
+                    )
+                  : const Icon(Icons.image, color: Colors.white54, size: 64),
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+
   Widget _sampleStat(IconData icon, String text) {
     return Row(
       mainAxisSize: MainAxisSize.min,
@@ -331,23 +437,25 @@ class _CatchCard extends StatelessWidget {
   final Catch catch_;
   final VoidCallback onTap;
   final VoidCallback onDelete;
+  final VoidCallback? onPhotoTap;
 
   const _CatchCard({
     required this.catch_,
     required this.onTap,
     required this.onDelete,
+    this.onPhotoTap,
   });
 
   Widget _speciesIcon(ThemeData theme) {
     return Container(
-      width: 52,
-      height: 52,
+      width: 100,
+      height: 80,
       decoration: BoxDecoration(
         color: theme.colorScheme.primary.withValues(alpha: 0.1),
         borderRadius: BorderRadius.circular(12),
       ),
       child: Icon(Icons.set_meal,
-          color: theme.colorScheme.primary, size: 26),
+          color: theme.colorScheme.primary, size: 32),
     );
   }
 
@@ -371,17 +479,23 @@ class _CatchCard extends StatelessWidget {
               Row(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  // Photo or icon
+                  // Photo or icon — bigger, tappable, with Hero
                   if (catch_.hasPhotos)
-                    ClipRRect(
-                      borderRadius: BorderRadius.circular(10),
-                      child: SizedBox(
-                        width: 52,
-                        height: 52,
-                        child: Image.file(
-                          File(catch_.primaryPhoto!),
-                          fit: BoxFit.cover,
-                          errorBuilder: (_, _, _) => _speciesIcon(theme),
+                    GestureDetector(
+                      onTap: onPhotoTap,
+                      child: Hero(
+                        tag: 'catch-photo-${catch_.id}',
+                        child: ClipRRect(
+                          borderRadius: BorderRadius.circular(12),
+                          child: SizedBox(
+                            width: 100,
+                            height: 80,
+                            child: Image.file(
+                              File(catch_.primaryPhoto!),
+                              fit: BoxFit.cover,
+                              errorBuilder: (_, _, _) => _speciesIcon(theme),
+                            ),
+                          ),
                         ),
                       ),
                     )
@@ -406,7 +520,7 @@ class _CatchCard extends StatelessWidget {
                       ],
                     ),
                   ),
-                  // Delete (Pro only)
+                  // Delete (Pro only) — kept for non-swipe access
                   if (ProService.instance.isPro)
                     IconButton(
                       icon: const Icon(Icons.delete_outline, size: 20),

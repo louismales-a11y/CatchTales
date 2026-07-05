@@ -262,6 +262,10 @@ class TranslationService extends ChangeNotifier {
       'helpBodyCommunityStats': 'Find out what\'s biting on any lake before you go!\n\n🔍 **Search a lake** — Type any lake name. Results appear as you type.\n📊 **See what\'s being caught** — Top species, best lures, weather conditions, and peak months.\n📍 **Auto-detect** — Uses your GPS to show stats for your current location and water body.\n🌎 **Browse** — Pick any state or province to explore.\n\nAll data is anonymized from fellow anglers. The more people use it, the better it gets!',
       'onboardCommunityStats': 'Community Stats',
       'onboardDescCommunityStats': '**Community Stats** (⋮ menu > Community Stats):\n  🔍 Search any lake in Canada & US\n  🎣 See what fellow anglers are catching\n  🧰 Top lures, best weather & peak months\n  📍 Auto-detect your location\n  🔒 Pro feature — helps you plan your trip!',
+      'catchDeleted': '{species} deleted',
+      'undo': 'Undo',
+      'proFeature': 'Pro Feature',
+      'upgradeToDelete': 'Swipe to delete is a Pro feature. Upgrade to delete catches.',
     },
     'fr': {
       'appTitle': 'Best Fish Buddy Pro',
