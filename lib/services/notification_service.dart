@@ -68,7 +68,7 @@ class NotificationService {
           '🎣 **Fish Together** — when a buddy joins your session, '
           'sends a chat message, or shares their GPS location\n\n'
           '🌙 **Best fishing times** — daily solunar peak reminders\n\n'
-          'You can change this anytime in Settings.',
+          'You can enable this later in the About screen.',
         ),
         actions: [
           TextButton(

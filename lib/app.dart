@@ -841,6 +841,10 @@ class _HomeScreenTestState extends State<HomeScreenTest> {
       bottomNavigationBar: NavigationBar(
         selectedIndex: _selectedIndex,
         onDestinationSelected: (i) {
+          if (i == 2 && !ProService.instance.isPro) {
+            ProService.showUpgradeDialog(context);
+            return;
+          }
           setState(() => _selectedIndex = i);
           if (i == 2) {
             _mapKey.currentState?.loadCatches();

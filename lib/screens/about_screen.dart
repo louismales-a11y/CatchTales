@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:package_info_plus/package_info_plus.dart';
+import '../services/notification_service.dart';
 import '../services/translation_service.dart';
 import '../services/pro_service.dart';
 import '../services/api_config.dart';
@@ -163,8 +164,42 @@ class _AboutScreenState extends State<AboutScreen> {
           ),
           ],
           const SizedBox(height: 24),
-
-
+          // ── Push Notifications ──
+          Card(
+            child: Padding(
+              padding: const EdgeInsets.all(14),
+              child: Column(
+                children: [
+                  Row(
+                    children: [
+                      Icon(Icons.notifications_outlined, size: 20, color: theme.colorScheme.primary),
+                      const SizedBox(width: 10),
+                      const Text('Push Notifications',
+                          style: TextStyle(fontWeight: FontWeight.w600)),
+                      const Spacer(),
+                      OutlinedButton.icon(
+                        onPressed: () =>
+                            NotificationService.instance.requestPermissionIfNeeded(context),
+                        icon: const Icon(Icons.notifications_active, size: 16),
+                        label: const Text('Enable', style: TextStyle(fontSize: 12)),
+                        style: OutlinedButton.styleFrom(
+                          padding: const EdgeInsets.symmetric(horizontal: 12),
+                          visualDensity: VisualDensity.compact,
+                        ),
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 6),
+                  Text(
+                    'Get notified for weather alerts (storms, high winds), '
+                    'best fishing times, and Fish Together session activity.',
+                    style: TextStyle(fontSize: 12, height: 1.5,
+                        color: theme.colorScheme.onSurface.withValues(alpha: 0.7)),
+                  ),
+                ],
+              ),
+            ),
+          ),
           const SizedBox(height: 24),
         ],
       ),
