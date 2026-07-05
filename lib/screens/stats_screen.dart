@@ -402,7 +402,17 @@ class _PieChart extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     context.watch<TranslationService>();
-    final colors = [Colors.cyan, Colors.pink, Colors.amber, Colors.green, Colors.purple, Colors.orange, Colors.blue, Colors.red, Colors.teal, Colors.indigo];
+    final cs = Theme.of(context).colorScheme;
+    final colors = [
+      cs.primary, cs.secondary, cs.tertiary,
+      cs.primary.withValues(alpha: 0.7),
+      cs.secondary.withValues(alpha: 0.7),
+      cs.tertiary.withValues(alpha: 0.7),
+      cs.primary.withValues(alpha: 0.5),
+      cs.secondary.withValues(alpha: 0.5),
+      cs.tertiary.withValues(alpha: 0.5),
+      cs.primary.withValues(alpha: 0.3),
+    ];
     final total = data.values.fold<int>(0, (a, b) => a + b);
     final entries = data.entries.toList();
     return Row(
