@@ -8,6 +8,8 @@ import '../services/tackle_db_service.dart';
 import '../services/spots_db_service.dart';
 import '../services/species_tally_db_service.dart';
 import '../services/solunar_service.dart';
+import '../services/tide_service.dart';
+import '../services/weather_service.dart';
 import 'forecast_screen.dart';
 import 'fish_id_screen.dart';
 import 'map_screen.dart';
@@ -28,6 +30,8 @@ class _PrepareScreenState extends State<PrepareScreen> {
   int _tackleCount = 0;
   int _spotCount = 0;
   int _rating = 0;
+  TideData? _tide;
+  String _weatherSummary = '';
 
   @override
   void initState() {
@@ -47,7 +51,7 @@ class _PrepareScreenState extends State<PrepareScreen> {
       _tackleCount = tackle.length;
       _spotCount = spots.length;
 
-      // Try solunar rating
+      // Try solunar rating, tide, and weather
       try {
         final pos = await Geolocator.getCurrentPosition(
           locationSettings: const LocationSettings(
@@ -55,6 +59,16 @@ class _PrepareScreenState extends State<PrepareScreen> {
         );
         final sol = SolunarService.getSolunarTimes(DateTime.now(), pos.latitude, pos.longitude);
         _rating = sol.rating;
+        // Load tide data
+        final tide = await TideService.instance.getTideData(pos.latitude, pos.longitude);
+        _tide = tide;
+        // Load weather summary
+        try {
+          final weather = await WeatherService.fetchWeather(pos.latitude, pos.longitude);
+          if (weather != null) {
+            _weatherSummary = '${weather['temp']}°C, ${weather['condition']}';
+          }
+        } catch (_) {}
       } catch (_) {
         final sol = SolunarService.getSolunarTimes(DateTime.now(), 0, 0);
         _rating = sol.rating;
@@ -114,14 +128,15 @@ class _PrepareScreenState extends State<PrepareScreen> {
                   key: 'weather',
                   icon: Icons.wb_sunny,
                   label: tr('checkWeather'),
-                  detail: tr('todayForecastSolunar'),
+                  detail: _weatherSummary.isNotEmpty ? _weatherSummary : tr('todayForecastSolunar'),
                   screen: const ForecastScreen(),
                 ),
                 _checkItem(
                   key: 'solunar',
                   icon: Icons.nights_stay,
                   label: tr('solunar'),
-                  detail: _rating >= 5 ? '${tr('todaysRating')}: $_rating/10' : '${tr('rating')}: $_rating/10',
+                  detail: '${_rating >= 5 ? tr('todaysRating') : tr('rating')}: $_rating/10'
+                      '${_tide != null && _tide!.events.isNotEmpty ? ' • ${_tide!.events.length} tide events' : ''}',
                   screen: const SolunarScreen(),
                   detailColor: _rating >= 7 ? Colors.green : _rating >= 5 ? Colors.amber : Colors.grey,
                 ),
