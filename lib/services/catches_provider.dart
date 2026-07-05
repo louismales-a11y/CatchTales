@@ -2,6 +2,7 @@ import 'package:flutter/foundation.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import '../models/catch.dart';
 import 'catches_db_service.dart';
+import 'cloud_sync_service.dart';
 
 /// Holds the catches list in memory and notifies listeners on changes.
 ///
@@ -61,6 +62,9 @@ class CatchesProvider extends ChangeNotifier {
     try {
       await CatchesDbService.instance.deleteCatch(id);
       await loadCatches();
+      if (CloudSyncService.instance.isAvailable) {
+        CloudSyncService.instance.uploadCatches();
+      }
       return true;
     } catch (e) {
       _error = 'Failed to delete catch: $e';
@@ -84,6 +88,10 @@ class CatchesProvider extends ChangeNotifier {
         }
       }
       await loadCatches();
+      // Background auto-sync (fire-and-forget)
+      if (CloudSyncService.instance.isAvailable) {
+        CloudSyncService.instance.uploadCatches();
+      }
       return true;
     } catch (e) {
       _error = 'Failed to add catch: $e';
@@ -107,6 +115,9 @@ class CatchesProvider extends ChangeNotifier {
     try {
       await CatchesDbService.instance.updateCatch(c);
       await loadCatches();
+      if (CloudSyncService.instance.isAvailable) {
+        CloudSyncService.instance.uploadCatches();
+      }
       return true;
     } catch (e) {
       _error = 'Failed to update catch: $e';
