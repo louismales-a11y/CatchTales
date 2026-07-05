@@ -18,6 +18,7 @@ class _ForecastScreenState extends State<ForecastScreen> {
   List<ForecastDay>? _forecast;
   Map<String, dynamic>? _current;
   TideData? _tide;
+  double? _waterTemp;
   bool _loading = true;
   String? _error;
   String _city = '';
@@ -36,14 +37,20 @@ class _ForecastScreenState extends State<ForecastScreen> {
     });
 
     try {
-      // Load tide data
+      // Load tide data and water temperature
       try {
         final pos = await Geolocator.getCurrentPosition(
           locationSettings: const LocationSettings(
             accuracy: LocationAccuracy.low, timeLimit: Duration(seconds: 5)),
         );
-        final tide = await TideService.instance.getTideData(pos.latitude, pos.longitude);
-        if (mounted) setState(() => _tide = tide);
+        final results = await Future.wait([
+          TideService.instance.getTideData(pos.latitude, pos.longitude),
+          TideService.instance.getWaterTemperature(pos.latitude, pos.longitude),
+        ]);
+        if (mounted) setState(() {
+          _tide = results[0] as TideData?;
+          _waterTemp = results[1] as double?;
+        });
       } catch (_) {}
       if (!_notifPrompted && mounted) {
         _notifPrompted = true;
@@ -237,6 +244,22 @@ class _ForecastScreenState extends State<ForecastScreen> {
                     '${_current!['pressure']} hPa'),
               ],
             ),
+            if (_waterTemp != null) ...[              const SizedBox(height: 12),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Icon(Icons.thermostat,
+                      size: 16, color: Colors.blue.shade300),
+                  const SizedBox(width: 6),
+                  Text('Water temperature: ${_waterTemp!.toStringAsFixed(1)}°C',
+                      style: TextStyle(
+                        fontSize: 13,
+                        color: Colors.blue.shade300,
+                        fontWeight: FontWeight.w500,
+                      )),
+                ],
+              ),
+            ],
           ],
         ),
       ),

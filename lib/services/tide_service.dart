@@ -29,7 +29,7 @@ class TideEvent {
   });
 }
 
-/// Fetches tide predictions from NOAA CO-OPS API.
+/// Fetches tide predictions and water temperature from NOAA CO-OPS API.
 ///
 /// Uses nearest station based on lat/lng. Data is cached for 1 hour.
 /// NOAA CO-OPS data is public domain — no API key required.
@@ -152,6 +152,47 @@ class TideService {
     if (coord is num) return coord.toDouble();
     if (coord is String) return double.tryParse(coord);
     return null;
+  }
+
+  /// Get water temperature from the nearest NOAA station.
+  Future<double?> getWaterTemperature(double lat, double lng) async {
+    try {
+      final station = await _findNearestStation(lat, lng);
+      if (station == null) return null;
+
+      final today = DateTime.now();
+      final dateStr =
+          '${today.year}${today.month.toString().padLeft(2, '0')}${today.day.toString().padLeft(2, '0')}';
+      final cacheKey = 'watertemp_${station['id']}_$dateStr';
+
+      final cached = await CacheService.instance.get<double>(cacheKey,
+          maxAge: const Duration(hours: 1));
+      if (cached != null) return cached;
+
+      final url =
+          'https://api.tidesandcurrents.noaa.gov/api/prod/datagetter'
+          '?product=water_temperature&application=BestFishBuddy'
+          '&station=${station['id']}'
+          '&begin_date=$dateStr&end_date=$dateStr'
+          '&time_zone=gmt&units=metric&format=json';
+
+      final response = await http.get(Uri.parse(url));
+      if (response.statusCode != 200) return null;
+
+      final data = json.decode(response.body) as Map;
+      final dataList = data['data'] as List? ?? [];
+      if (dataList.isEmpty) return null;
+
+      // Get the most recent reading
+      final latest = dataList.last;
+      final temp = double.tryParse(latest['v'] as String? ?? '');
+      if (temp != null) {
+        await CacheService.instance.put(cacheKey, temp);
+      }
+      return temp;
+    } catch (_) {
+      return null;
+    }
   }
 
   /// Haversine distance in km between two lat/lng points.
