@@ -888,33 +888,84 @@ class _HomeScreenTestState extends State<HomeScreenTest> {
           ),
         ],
       ),
-      body: Column(
-        children: [
-          // Offline banner
-          if (!context.watch<ConnectivityService>().isOnline)
-            Container(
-              width: double.infinity,
-              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 6),
-              color: Colors.orange.shade800,
-              child: Row(
-                children: [
-                  const Icon(Icons.wifi_off, size: 16, color: Colors.white),
-                  const SizedBox(width: 8),
-                  Text('You are offline — some features may be limited',
-                      style: const TextStyle(
-                          color: Colors.white, fontSize: 12)),
-                ],
+      body: LayoutBuilder(
+        builder: (context, constraints) {
+          final isWide = constraints.maxWidth >= 600;
+          return Row(
+            children: [
+              // NavigationRail for tablets
+              if (isWide)
+                NavigationRail(
+                  selectedIndex: _selectedIndex,
+                  onDestinationSelected: (i) {
+                    if (i == 2 && !ProService.instance.isPro) {
+                      ProService.showUpgradeDialog(context);
+                      return;
+                    }
+                    setState(() => _selectedIndex = i);
+                    if (i == 2) {
+                      _mapKey.currentState?.loadCatches();
+                    }
+                  },
+                  labelType: NavigationRailLabelType.all,
+                  destinations: [
+                    NavigationRailDestination(
+                      icon: Icon(Icons.set_meal_outlined,
+                          color: _selectedIndex == 0 ? accent : null),
+                      selectedIcon:
+                          Icon(Icons.set_meal, color: accent),
+                      label: Text(tr('catches')),
+                    ),
+                    NavigationRailDestination(
+                      icon: Icon(Icons.people_outlined,
+                          color: _selectedIndex == 1 ? accent : null),
+                      selectedIcon:
+                          Icon(Icons.people, color: accent),
+                      label: Text(tr('counter')),
+                    ),
+                    NavigationRailDestination(
+                      icon: Icon(Icons.map_outlined,
+                          color: _selectedIndex == 2 ? accent : null),
+                      selectedIcon:
+                          Icon(Icons.map, color: accent),
+                      label: Text(tr('map')),
+                    ),
+                  ],
+                ),
+              // Main content
+              Expanded(
+                child: Column(
+                  children: [
+                    // Offline banner
+                    if (!context.watch<ConnectivityService>().isOnline)
+                      Container(
+                        width: double.infinity,
+                        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 6),
+                        color: Colors.orange.shade800,
+                        child: Row(
+                          children: [
+                            const Icon(Icons.wifi_off, size: 16, color: Colors.white),
+                            const SizedBox(width: 8),
+                            Text('You are offline — some features may be limited',
+                                style: const TextStyle(
+                                    color: Colors.white, fontSize: 12)),
+                          ],
+                        ),
+                      ),
+                    Expanded(
+                      child: _screens[_selectedIndex],
+                    ),
+                    helpChip(context, _selectedIndex == 0
+                        ? 'catches'
+                        : _selectedIndex == 1
+                            ? 'counter'
+                            : 'map'),
+                  ],
+                ),
               ),
-            ),
-          Expanded(
-            child: _screens[_selectedIndex],
-          ),
-          helpChip(context, _selectedIndex == 0
-              ? 'catches'
-              : _selectedIndex == 1
-                  ? 'counter'
-                  : 'map'),
-        ],
+            ],
+          );
+        },
       ),
       floatingActionButton: _selectedIndex == 0
           ? FloatingActionButton(
@@ -941,41 +992,47 @@ class _HomeScreenTestState extends State<HomeScreenTest> {
               child: const Icon(Icons.add),
             )
           : null,
-      bottomNavigationBar: NavigationBar(
-        selectedIndex: _selectedIndex,
-        onDestinationSelected: (i) {
-          if (i == 2 && !ProService.instance.isPro) {
-            ProService.showUpgradeDialog(context);
-            return;
-          }
-          setState(() => _selectedIndex = i);
-          if (i == 2) {
-            _mapKey.currentState?.loadCatches();
-          }
+      bottomNavigationBar: LayoutBuilder(
+        builder: (context, constraints) {
+          final isWide = constraints.maxWidth >= 600;
+          if (isWide) return const SizedBox.shrink();
+          return NavigationBar(
+            selectedIndex: _selectedIndex,
+            onDestinationSelected: (i) {
+              if (i == 2 && !ProService.instance.isPro) {
+                ProService.showUpgradeDialog(context);
+                return;
+              }
+              setState(() => _selectedIndex = i);
+              if (i == 2) {
+                _mapKey.currentState?.loadCatches();
+              }
+            },
+            destinations: [
+              NavigationDestination(
+                icon: Icon(Icons.set_meal_outlined,
+                    color: _selectedIndex == 0 ? accent : null),
+                selectedIcon:
+                    Icon(Icons.set_meal, color: accent),
+                label: tr('catches'),
+              ),
+              NavigationDestination(
+                icon: Icon(Icons.people_outlined,
+                    color: _selectedIndex == 1 ? accent : null),
+                selectedIcon:
+                    Icon(Icons.people, color: accent),
+                label: tr('counter'),
+              ),
+              NavigationDestination(
+                icon: Icon(Icons.map_outlined,
+                    color: _selectedIndex == 2 ? accent : null),
+                selectedIcon:
+                    Icon(Icons.map, color: accent),
+                label: tr('map'),
+              ),
+            ],
+          );
         },
-        destinations: [
-          NavigationDestination(
-            icon: Icon(Icons.set_meal_outlined,
-                color: _selectedIndex == 0 ? accent : null),
-            selectedIcon:
-                Icon(Icons.set_meal, color: accent),
-            label: tr('catches'),
-          ),
-          NavigationDestination(
-            icon: Icon(Icons.people_outlined,
-                color: _selectedIndex == 1 ? accent : null),
-            selectedIcon:
-                Icon(Icons.people, color: accent),
-            label: tr('counter'),
-          ),
-          NavigationDestination(
-            icon: Icon(Icons.map_outlined,
-                color: _selectedIndex == 2 ? accent : null),
-            selectedIcon:
-                Icon(Icons.map, color: accent),
-            label: tr('map'),
-          ),
-        ],
       ),
       ),
     );
