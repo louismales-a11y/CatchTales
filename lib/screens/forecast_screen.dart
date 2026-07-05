@@ -6,6 +6,7 @@ import '../services/notification_service.dart';
 import '../services/translation_service.dart';
 import '../services/weather_service.dart';
 import '../services/tide_service.dart';
+import '../services/invasive_species_service.dart';
 
 class ForecastScreen extends StatefulWidget {
   const ForecastScreen({super.key});
@@ -19,6 +20,7 @@ class _ForecastScreenState extends State<ForecastScreen> {
   Map<String, dynamic>? _current;
   TideData? _tide;
   double? _waterTemp;
+  List<InvasiveSpecies> _invasive = [];
   bool _loading = true;
   String? _error;
   String _city = '';
@@ -37,7 +39,7 @@ class _ForecastScreenState extends State<ForecastScreen> {
     });
 
     try {
-      // Load tide data and water temperature
+      // Load tide data, water temperature, and invasive species
       try {
         final pos = await Geolocator.getCurrentPosition(
           locationSettings: const LocationSettings(
@@ -46,10 +48,12 @@ class _ForecastScreenState extends State<ForecastScreen> {
         final results = await Future.wait([
           TideService.instance.getTideData(pos.latitude, pos.longitude),
           TideService.instance.getWaterTemperature(pos.latitude, pos.longitude),
+          InvasiveSpeciesService.instance.checkByLocation(pos.latitude, pos.longitude),
         ]);
         if (mounted) setState(() {
           _tide = results[0] as TideData?;
           _waterTemp = results[1] as double?;
+          _invasive = InvasiveSpeciesService.instance.nearby;
         });
       } catch (_) {}
       if (!_notifPrompted && mounted) {
@@ -170,6 +174,11 @@ class _ForecastScreenState extends State<ForecastScreen> {
           // Tide data
           if (_tide != null && _tide!.events.isNotEmpty) ...[
             _buildTideCard(theme, _tide!),
+            const SizedBox(height: 20),
+          ],
+          // Invasive species alerts
+          if (_invasive.isNotEmpty) ...[
+            _buildInvasiveCard(theme, _invasive),
             const SizedBox(height: 20),
           ],
           if (_forecast != null && _forecast!.isNotEmpty) ...[
@@ -376,6 +385,66 @@ class _ForecastScreenState extends State<ForecastScreen> {
           ],
         ),
       ],
+    );
+  }
+
+  Widget _buildInvasiveCard(ThemeData theme, List<InvasiveSpecies> species) {
+    return Card(
+      child: Padding(
+        padding: const EdgeInsets.all(16),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Row(
+              children: [
+                Icon(Icons.warning_amber, size: 20, color: Colors.orange.shade700),
+                const SizedBox(width: 8),
+                Text('Invasive Species Alerts',
+                    style: theme.textTheme.titleSmall?.copyWith(
+                      fontWeight: FontWeight.w600,
+                    )),
+              ],
+            ),
+            const SizedBox(height: 8),
+            Text(
+              '${species.length} invasive ${species.length == 1 ? 'species' : 'species'} reported in this area',
+              style: TextStyle(fontSize: 12, color: Colors.grey.shade600),
+            ),
+            const SizedBox(height: 8),
+            ...species.take(3).map((s) => Padding(
+              padding: const EdgeInsets.only(bottom: 6),
+              child: Row(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Icon(Icons.warning, size: 14, color: Colors.orange.shade400),
+                  const SizedBox(width: 6),
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(s.name,
+                            style: TextStyle(
+                                fontSize: 13, fontWeight: FontWeight.w600)),
+                        Text(s.scientificName,
+                            style: TextStyle(
+                                fontSize: 11, color: Colors.grey.shade500,
+                                fontStyle: FontStyle.italic)),
+                        Text(s.impact,
+                            style: TextStyle(
+                                fontSize: 11, color: Colors.grey.shade600),
+                            maxLines: 2, overflow: TextOverflow.ellipsis),
+                      ],
+                    ),
+                  ),
+                ],
+              ),
+            )),
+            if (species.length > 3)
+              Text('+${species.length - 3} more species',
+                  style: TextStyle(fontSize: 11, color: Colors.grey.shade500)),
+          ],
+        ),
+      ),
     );
   }
 
