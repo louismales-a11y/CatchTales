@@ -83,6 +83,33 @@ class OfflineRegionService extends ChangeNotifier {
   List<OfflineRegion> _regions = [];
   List<OfflineRegion> get regions => List.unmodifiable(_regions);
 
+  // Download progress tracking
+  String? _downloadingRegionId;
+  double _downloadProgress = 0.0;
+  bool get isDownloading => _downloadingRegionId != null;
+  String? get downloadingRegionId => _downloadingRegionId;
+  double get downloadProgress => _downloadProgress;
+
+  /// Start tracking download progress for a region.
+  void startDownload(String regionId) {
+    _downloadingRegionId = regionId;
+    _downloadProgress = 0.0;
+    notifyListeners();
+  }
+
+  /// Update download progress (0.0 to 1.0).
+  void updateDownloadProgress(double progress) {
+    _downloadProgress = progress.clamp(0.0, 1.0);
+    notifyListeners();
+  }
+
+  /// Finish tracking download progress.
+  void finishDownload() {
+    _downloadingRegionId = null;
+    _downloadProgress = 1.0;
+    notifyListeners();
+  }
+
   late String _filePath;
 
   Future<void> init() async {

@@ -90,10 +90,47 @@ class _OfflineMapsScreenState extends State<OfflineMapsScreen> {
     final regions = OfflineRegionService.instance.regions;
     final totalTiles = regions.fold<int>(0, (s, r) => s + r.tileCount);
     final totalBytes = regions.fold<int>(0, (s, r) => s + r.byteSize);
+    final svc = OfflineRegionService.instance;
 
     return Scaffold(
       appBar: AppBar(title: const Text('Offline Maps')),
-      body: regions.isEmpty
+      body: Column(
+        children: [
+          // Download progress bar
+          if (svc.isDownloading)
+            Container(
+              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+              color: Theme.of(context).colorScheme.primary.withValues(alpha: 0.1),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Row(
+                    children: [
+                      const SizedBox(
+                        width: 16, height: 16,
+                        child: CircularProgressIndicator(strokeWidth: 2),
+                      ),
+                      const SizedBox(width: 10),
+                      Text('Downloading map region...',
+                          style: TextStyle(fontSize: 13, fontWeight: FontWeight.w500)),
+                    ],
+                  ),
+                  const SizedBox(height: 6),
+                  ClipRRect(
+                    borderRadius: BorderRadius.circular(4),
+                    child: LinearProgressIndicator(
+                      value: svc.downloadProgress,
+                      minHeight: 4,
+                    ),
+                  ),
+                  const SizedBox(height: 2),
+                  Text('${(svc.downloadProgress * 100).toStringAsFixed(0)}%',
+                      style: TextStyle(fontSize: 11, color: Colors.grey.shade600)),
+                ],
+              ),
+            ),
+          Expanded(
+            child: regions.isEmpty
           ? Center(
               child: Padding(
                 padding: const EdgeInsets.all(32),
@@ -227,6 +264,9 @@ class _OfflineMapsScreenState extends State<OfflineMapsScreen> {
               ],
             ),
           ),
-    );
+        ),
+      ],
+    ),
+  );
   }
 }
