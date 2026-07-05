@@ -29,6 +29,7 @@ import 'screens/community_stats_screen.dart';
 import 'screens/language_picker_screen.dart';
 import 'services/help_text.dart';
 import 'services/theme_provider.dart';
+import 'services/connectivity_service.dart';
 import 'screens/onboarding_screen.dart';
 
 // ─── 5 Color Schemes ──────────────────────────────────────────────────────
@@ -828,6 +829,22 @@ class _HomeScreenTestState extends State<HomeScreenTest> {
       ),
       body: Column(
         children: [
+          // Offline banner
+          if (!context.watch<ConnectivityService>().isOnline)
+            Container(
+              width: double.infinity,
+              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 6),
+              color: Colors.orange.shade800,
+              child: Row(
+                children: [
+                  const Icon(Icons.wifi_off, size: 16, color: Colors.white),
+                  const SizedBox(width: 8),
+                  Text('You are offline — some features may be limited',
+                      style: const TextStyle(
+                          color: Colors.white, fontSize: 12)),
+                ],
+              ),
+            ),
           Expanded(
             child: _screens[_selectedIndex],
           ),

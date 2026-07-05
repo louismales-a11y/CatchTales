@@ -8,6 +8,7 @@ import 'services/pro_service.dart';
 import 'services/api_config.dart';
 import 'services/theme_provider.dart';
 import 'services/catches_provider.dart';
+import 'services/connectivity_service.dart';
 import 'package:firebase_core/firebase_core.dart';
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -27,6 +28,8 @@ void main() async {
   if (ApiConfig.isDev && !ProService.instance.isPro) {
     await ProService.instance.unlockPro();
   }
+  // Start connectivity monitoring
+  ConnectivityService.instance.start();
 
   runApp(
     MultiProvider(
@@ -35,6 +38,7 @@ void main() async {
         ChangeNotifierProvider(create: (_) => CatchesProvider()..loadCatches()),
         ChangeNotifierProvider<TranslationService>.value(value: TranslationService.instance),
         ChangeNotifierProvider<ProService>.value(value: ProService.instance),
+        ChangeNotifierProvider<ConnectivityService>.value(value: ConnectivityService.instance),
       ],
       child: const BestFishBuddyAppTest(),
     ),
