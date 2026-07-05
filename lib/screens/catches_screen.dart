@@ -8,6 +8,7 @@ import 'package:speech_to_text/speech_to_text.dart' as stt;
 import '../services/translation_service.dart';
 import '../services/pro_service.dart';
 import '../services/catches_provider.dart';
+import '../widgets/shimmer.dart';
 import '../models/catch.dart';
 import 'add_catch_screen.dart';
 
@@ -98,7 +99,26 @@ class CatchesScreenState extends State<CatchesScreen> {
     context.watch<TranslationService>();
     final cp = context.watch<CatchesProvider>();
     if (cp.loading) {
-      return const Center(child: CircularProgressIndicator());
+      // Full layout with shimmer content
+      return Column(
+        children: [
+          Container(
+            height: 3,
+            decoration: const BoxDecoration(
+              gradient: LinearGradient(
+                colors: [Colors.green, Colors.greenAccent],
+              ),
+            ),
+          ),
+          Expanded(
+            child: ListView.builder(
+              padding: const EdgeInsets.all(12),
+              itemCount: 6,
+              itemBuilder: (_, i) => const ShimmerCatchCard(),
+            ),
+          ),
+        ],
+      );
     }
     return Column(
       children: [
