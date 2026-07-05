@@ -20,9 +20,7 @@ class PrepareScreen extends StatefulWidget {
 
 class _PrepareScreenState extends State<PrepareScreen> {
   bool _loading = true;
-  bool _hasAnglers = false;
-  bool _hasTackle = false;
-  bool _hasSpots = false;
+  Set<String> _done = {};
   int _anglerCount = 0;
   int _tackleCount = 0;
   int _spotCount = 0;
@@ -43,9 +41,6 @@ class _PrepareScreenState extends State<PrepareScreen> {
       _anglerCount = counters.length;
       _tackleCount = tackle.length;
       _spotCount = spots.length;
-      _hasAnglers = _anglerCount > 0;
-      _hasTackle = _tackleCount > 0;
-      _hasSpots = _spotCount > 0;
 
       // Try solunar rating
       try {
@@ -61,6 +56,16 @@ class _PrepareScreenState extends State<PrepareScreen> {
       }
     } catch (_) {}
     if (mounted) setState(() => _loading = false);
+  }
+
+  void _toggle(String key) {
+    setState(() {
+      if (_done.contains(key)) {
+        _done.remove(key);
+      } else {
+        _done.add(key);
+      }
+    });
   }
 
   @override
@@ -93,49 +98,47 @@ class _PrepareScreenState extends State<PrepareScreen> {
                 ),
                 const SizedBox(height: 20),
 
-                // Checklist items
+                // Checklist items — tap to check off as you go
                 _checkItem(
+                  key: 'anglers',
                   icon: Icons.people,
                   label: tr('checkAddAnglers'),
-                  done: _hasAnglers,
-                  detail: _hasAnglers ? trp('nAnglers', {'count': '$_anglerCount'}) : tr('noAnglersYet'),
-                  screen: null,
-                  onTap: _showAddAnglersHelp,
+                  detail: _anglerCount > 0 ? trp('nAnglers', {'count': '$_anglerCount'}) : tr('noAnglersYet'),
                 ),
                 _checkItem(
+                  key: 'weather',
                   icon: Icons.wb_sunny,
                   label: tr('checkWeather'),
-                  done: true,
                   detail: tr('todayForecastSolunar'),
                   screen: const ForecastScreen(),
                 ),
                 _checkItem(
+                  key: 'solunar',
                   icon: Icons.nights_stay,
                   label: tr('solunar'),
-                  done: _rating >= 5,
                   detail: _rating >= 5 ? '${tr('todaysRating')}: $_rating/10' : '${tr('rating')}: $_rating/10',
                   screen: const SolunarScreen(),
                   detailColor: _rating >= 7 ? Colors.green : _rating >= 5 ? Colors.amber : Colors.grey,
                 ),
                 _checkItem(
+                  key: 'tackle',
                   icon: Icons.inventory_2,
                   label: tr('checkTackle'),
-                  done: _hasTackle,
-                  detail: _hasTackle ? trp('nItems', {'count': '$_tackleCount'}) : tr('tackleBoxEmpty'),
+                  detail: _tackleCount > 0 ? trp('nItems', {'count': '$_tackleCount'}) : tr('tackleBoxEmpty'),
                   screen: const TackleBoxScreen(),
                 ),
                 _checkItem(
+                  key: 'fishid',
                   icon: Icons.menu_book,
                   label: tr('checkFishId'),
-                  done: true,
                   detail: tr('browseSpecies'),
                   screen: const FishIdScreen(),
                 ),
                 _checkItem(
+                  key: 'spots',
                   icon: Icons.map,
                   label: tr('checkMapSpots'),
-                  done: _hasSpots,
-                  detail: _hasSpots ? trp('nSpots', {'count': '$_spotCount'}) : tr('noSavedSpots'),
+                  detail: _spotCount > 0 ? trp('nSpots', {'count': '$_spotCount'}) : tr('noSavedSpots'),
                   screen: const MapScreen(),
                 ),
 
@@ -162,12 +165,12 @@ class _PrepareScreenState extends State<PrepareScreen> {
 
                 const SizedBox(height: 20),
 
-                // Start New Trip
+                // Start New Trip — enabled when at least one item checked
                 SizedBox(
                   width: double.infinity,
                   height: 52,
                   child: FilledButton.icon(
-                    onPressed: _hasAnglers ? _startTrip : null,
+                    onPressed: _done.isNotEmpty ? _startTrip : null,
                     icon: const Icon(Icons.play_arrow),
                     label: Text(tr('startNewTrip')),
                     style: FilledButton.styleFrom(
@@ -175,10 +178,10 @@ class _PrepareScreenState extends State<PrepareScreen> {
                     ),
                   ),
                 ),
-                if (!_hasAnglers)
+                if (_done.isEmpty)
                   Padding(
                     padding: const EdgeInsets.only(top: 6),
-                    child: Text(tr('addAnglerFirst'),
+                    child: Text('Tap items above to check them off your list',
                         textAlign: TextAlign.center,
                         style: TextStyle(fontSize: 12, color: Colors.grey.shade500)),
                   ),
@@ -214,14 +217,14 @@ class _PrepareScreenState extends State<PrepareScreen> {
   }
 
   Widget _checkItem({
+    required String key,
     required IconData icon,
     required String label,
-    required bool done,
     required String detail,
     Widget? screen,
-    VoidCallback? onTap,
     Color? detailColor,
   }) {
+    final done = _done.contains(key);
     final theme = Theme.of(context);
     return Card(
       margin: const EdgeInsets.only(bottom: 8),
@@ -244,10 +247,24 @@ class _PrepareScreenState extends State<PrepareScreen> {
             style: TextStyle(
                 fontSize: 12,
                 color: detailColor ?? theme.colorScheme.onSurface.withValues(alpha: 0.5))),
-        trailing: const Icon(Icons.chevron_right, size: 20),
-        onTap: onTap ?? (screen != null
-            ? () => Navigator.push(context, MaterialPageRoute(builder: (_) => screen))
-            : null),
+        trailing: Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            if (!done)
+              Text('Tap to check',
+                  style: TextStyle(fontSize: 11, color: Colors.grey.shade400)),
+            if (!done) const SizedBox(width: 6),
+            Icon(Icons.check_circle_outline,
+                size: 20,
+                color: done ? Colors.green : Colors.grey.shade300),
+          ],
+        ),
+        onTap: () {
+          _toggle(key);
+          if (screen != null && !done) {
+            Navigator.push(context, MaterialPageRoute(builder: (_) => screen));
+          }
+        },
       ),
     );
   }
@@ -268,6 +285,7 @@ class _PrepareScreenState extends State<PrepareScreen> {
 
   Future<void> _startTrip() async {
     await DatabaseService.instance.resetSpeciesTallies();
+    setState(() => _done.clear());
     if (mounted) {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
