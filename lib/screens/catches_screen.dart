@@ -649,23 +649,85 @@ class _CatchCard extends StatelessWidget {
                 children: [
                   // Photo or icon — bigger, tappable, with Hero
                   if (catch_.hasPhotos)
-                    GestureDetector(
-                      onTap: onPhotoTap,
-                      child: Hero(
-                        tag: 'catch-photo-${catch_.id}',
-                        child: ClipRRect(
-                          borderRadius: BorderRadius.circular(12),
-                          child: SizedBox(
-                            width: 100,
-                            height: 80,
-                            child: Image.file(
-                              File(catch_.primaryPhoto!),
-                              fit: BoxFit.cover,
-                              errorBuilder: (_, _, _) => _speciesIcon(theme),
+                    Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        GestureDetector(
+                          onTap: onPhotoTap,
+                          child: Hero(
+                            tag: 'catch-photo-${catch_.id}',
+                            child: ClipRRect(
+                              borderRadius: BorderRadius.circular(12),
+                              child: SizedBox(
+                                width: 100,
+                                height: 80,
+                                child: Image.file(
+                                  File(catch_.primaryPhoto!),
+                                  fit: BoxFit.cover,
+                                  errorBuilder: (_, _, _) => _speciesIcon(theme),
+                                ),
+                              ),
                             ),
                           ),
                         ),
-                      ),
+                        // Extra photo thumbnails
+                        if (catch_.photoPaths != null && catch_.photoPaths!.length > 1)
+                          Padding(
+                            padding: const EdgeInsets.only(top: 4),
+                            child: SizedBox(
+                              height: 36,
+                              child: ListView(
+                                scrollDirection: Axis.horizontal,
+                                children: [
+                                  for (int i = 1; i < catch_.photoPaths!.length && i < 4; i++)
+                                    Padding(
+                                      padding: const EdgeInsets.only(right: 4),
+                                      child: GestureDetector(
+                                        onTap: onPhotoTap,
+                                        child: ClipRRect(
+                                          borderRadius: BorderRadius.circular(6),
+                                          child: SizedBox(
+                                            width: 36,
+                                            height: 36,
+                                            child: Image.file(
+                                              File(catch_.photoPaths![i]),
+                                              fit: BoxFit.cover,
+                                              errorBuilder: (_, _, _) => Container(
+                                                color: theme.colorScheme.primary.withValues(alpha: 0.1),
+                                                child: Icon(Icons.set_meal,
+                                                    size: 16, color: theme.colorScheme.primary),
+                                              ),
+                                            ),
+                                          ),
+                                        ),
+                                      ),
+                                    ),
+                                  if (catch_.photoPaths!.length > 4)
+                                    GestureDetector(
+                                      onTap: onPhotoTap,
+                                      child: Container(
+                                        width: 36,
+                                        height: 36,
+                                        decoration: BoxDecoration(
+                                          color: Colors.black26,
+                                          borderRadius: BorderRadius.circular(6),
+                                        ),
+                                        child: Center(
+                                          child: Text(
+                                            '+${catch_.photoPaths!.length - 3}',
+                                            style: const TextStyle(
+                                                color: Colors.white,
+                                                fontSize: 11,
+                                                fontWeight: FontWeight.w600),
+                                          ),
+                                        ),
+                                      ),
+                                    ),
+                                ],
+                              ),
+                            ),
+                          ),
+                      ],
                     )
                   else
                     _speciesIcon(theme),
