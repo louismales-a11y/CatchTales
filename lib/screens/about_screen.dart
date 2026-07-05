@@ -1,8 +1,13 @@
+import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:package_info_plus/package_info_plus.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:share_plus/share_plus.dart';
+import 'package:path_provider/path_provider.dart';
+import 'package:intl/intl.dart';
 import 'onboarding_screen.dart';
+import '../services/catches_db_service.dart';
 import '../services/notification_service.dart';
 import '../services/translation_service.dart';
 import '../services/pro_service.dart';
@@ -36,6 +41,93 @@ class _AboutScreenState extends State<AboutScreen> {
       final info = await PackageInfo.fromPlatform();
       if (mounted) setState(() => _version = 'v${info.version}');
     } catch (_) {}
+  }
+
+  Future<void> _exportCsv() async {
+    try {
+      final catches = await CatchesDbService.instance.getCatches();
+      if (catches.isEmpty) {
+        if (!mounted) return;
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            behavior: SnackBarBehavior.floating,
+            content: const Text('No catches to export'),
+          ),
+        );
+        return;
+      }
+      // Build CSV
+      final buf = StringBuffer();
+      buf.writeln('ID,Angler,Species,Location,Lure,Weight,WeightUnit,Length,LengthUnit,'
+          'Latitude,Longitude,WeatherTemp,WeatherCondition,Notes,TripName,CaughtAt,CreatedAt');
+      for (final c in catches) {
+        final esc = (String s) => '"${s.replaceAll('"', '""')}"';
+        buf.writeln([
+          c.id?.toString() ?? '',
+          esc(c.angler),
+          esc(c.species),
+          esc(c.location),
+          esc(c.lure),
+          c.weight?.toStringAsFixed(2) ?? '',
+          c.weightUnit,
+          c.length?.toStringAsFixed(1) ?? '',
+          c.lengthUnit,
+          c.latitude?.toStringAsFixed(6) ?? '',
+          c.longitude?.toStringAsFixed(6) ?? '',
+          c.weatherTemp?.toString() ?? '',
+          esc(c.weatherCondition ?? ''),
+          esc(c.notes ?? ''),
+          esc(c.tripName ?? ''),
+          DateFormat('yyyy-MM-dd HH:mm:ss').format(c.caughtAt),
+          DateFormat('yyyy-MM-dd HH:mm:ss').format(c.createdAt),
+        ].join(','));
+      }
+      final dir = await getTemporaryDirectory();
+      final file = File('${dir.path}/bestfishbuddy_export.csv');
+      await file.writeAsString(buf.toString());
+      // ignore: deprecated_member_use
+      await Share.shareXFiles([XFile(file.path)],
+          text: 'Best Fish Buddy catch data export');
+    } catch (e) {
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          behavior: SnackBarBehavior.floating,
+          content: Text('Export failed: $e'),
+        ),
+      );
+    }
+  }
+
+  Future<void> _exportJson() async {
+    try {
+      final catches = await CatchesDbService.instance.getCatches();
+      if (catches.isEmpty) {
+        if (!mounted) return;
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            behavior: SnackBarBehavior.floating,
+            content: const Text('No catches to export'),
+          ),
+        );
+        return;
+      }
+      final jsonList = catches.map((c) => c.toMap()).toList();
+      final dir = await getTemporaryDirectory();
+      final file = File('${dir.path}/bestfishbuddy_export.json');
+      await file.writeAsString(jsonList.toString());
+      // ignore: deprecated_member_use
+      await Share.shareXFiles([XFile(file.path)],
+          text: 'Best Fish Buddy catch data export');
+    } catch (e) {
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          behavior: SnackBarBehavior.floating,
+          content: Text('Export failed: $e'),
+        ),
+      );
+    }
   }
 
   @override
@@ -121,7 +213,55 @@ class _AboutScreenState extends State<AboutScreen> {
               ),
             ),
           ),
-          const SizedBox(height: 24),
+          // ── Export Data ──
+          Card(
+            child: Padding(
+              padding: const EdgeInsets.all(14),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Row(
+                    children: [
+                      Icon(Icons.file_download,
+                          size: 20, color: theme.colorScheme.primary),
+                      const SizedBox(width: 10),
+                      const Text('Export Data',
+                          style: TextStyle(fontWeight: FontWeight.w600)),
+                    ],
+                  ),
+                  const SizedBox(height: 6),
+                  Text(
+                    'Download all your catches as CSV or JSON file.',
+                    style: TextStyle(fontSize: 12,
+                        color: theme.colorScheme.onSurface.withValues(alpha: 0.7)),
+                  ),
+                  const SizedBox(height: 10),
+                  Row(
+                    children: [
+                      Expanded(
+                        child: OutlinedButton.icon(
+                          onPressed: () => _exportCsv(),
+                          icon: const Icon(Icons.table_chart, size: 16),
+                          label: const Text('Export CSV',
+                              style: TextStyle(fontSize: 12)),
+                        ),
+                      ),
+                      const SizedBox(width: 8),
+                      Expanded(
+                        child: OutlinedButton.icon(
+                          onPressed: () => _exportJson(),
+                          icon: const Icon(Icons.code, size: 16),
+                          label: const Text('Export JSON',
+                              style: TextStyle(fontSize: 12)),
+                        ),
+                      ),
+                    ],
+                  ),
+                ],
+              ),
+            ),
+          ),
+          const SizedBox(height: 16),
           // ── Dev Mode Toggle (Developer build only) ──
           if (ApiConfig.isDev) ...[const SizedBox(height: 16),
           Card(
