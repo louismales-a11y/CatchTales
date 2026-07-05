@@ -19,7 +19,7 @@ class DatabaseService {
 
     return await openDatabase(
       path,
-      version: 10,
+      version: 11,
       onCreate: (db, version) async {
         await db.execute('''
           CREATE TABLE catches (
@@ -93,8 +93,20 @@ class DatabaseService {
             logged_at TEXT NOT NULL
           )
         ''');
+        // Performance indexes
+        await db.execute('CREATE INDEX IF NOT EXISTS idx_catches_caught_at ON catches(caught_at)');
+        await db.execute('CREATE INDEX IF NOT EXISTS idx_catches_species ON catches(species)');
+        await db.execute('CREATE INDEX IF NOT EXISTS idx_catches_angler ON catches(angler)');
+        await db.execute('CREATE INDEX IF NOT EXISTS idx_species_tallies_angler ON species_tallies(angler)');
       },
       onUpgrade: (db, oldVersion, newVersion) async {
+        // Migration to v11: add performance indexes
+        if (oldVersion < 11) {
+          try { await db.execute('CREATE INDEX IF NOT EXISTS idx_catches_caught_at ON catches(caught_at)'); } catch (_) {}
+          try { await db.execute('CREATE INDEX IF NOT EXISTS idx_catches_species ON catches(species)'); } catch (_) {}
+          try { await db.execute('CREATE INDEX IF NOT EXISTS idx_catches_angler ON catches(angler)'); } catch (_) {}
+          try { await db.execute('CREATE INDEX IF NOT EXISTS idx_species_tallies_angler ON species_tallies(angler)'); } catch (_) {}
+        }
         if (oldVersion < 6) {
           await db.execute('''
             CREATE TABLE IF NOT EXISTS tackle_items (
