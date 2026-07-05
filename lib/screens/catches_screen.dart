@@ -492,14 +492,17 @@ class CatchesScreenState extends State<CatchesScreen> {
             child: InteractiveViewer(
               minScale: 0.5,
               maxScale: 4.0,
-              child: c.primaryPhoto != null
-                  ? Image.file(
-                      File(c.primaryPhoto!),
-                      fit: BoxFit.contain,
-                      errorBuilder: (_, _, _) => const Icon(
-                          Icons.broken_image, color: Colors.white54, size: 64),
-                    )
-                  : const Icon(Icons.image, color: Colors.white54, size: 64),
+              child: Hero(
+                tag: 'catch-photo-${c.id}',
+                child: c.primaryPhoto != null
+                    ? Image.file(
+                        File(c.primaryPhoto!),
+                        fit: BoxFit.contain,
+                        errorBuilder: (_, _, _) => const Icon(
+                            Icons.broken_image, color: Colors.white54, size: 64),
+                      )
+                    : const Icon(Icons.image, color: Colors.white54, size: 64),
+              ),
             ),
           ),
         ),
