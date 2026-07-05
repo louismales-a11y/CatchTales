@@ -80,7 +80,7 @@ class _TackleCatalogScreenState extends State<TackleCatalogScreen> {
     await TackleDbService.instance.addTackleItem(item);
     if (mounted) {
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
+        SnackBar(behavior: SnackBarBehavior.floating, 
           content: Text('$name added to your tackle box'),
           duration: const Duration(seconds: 2),
         ),

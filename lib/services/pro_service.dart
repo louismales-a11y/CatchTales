@@ -128,14 +128,14 @@ class ProService extends ChangeNotifier {
     if (validated) {
       await instance.unlockPro();
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
+        SnackBar(behavior: SnackBarBehavior.floating, 
           content: Text('Pro unlocked! Thank you for your support! 🎉'),
           backgroundColor: Colors.green,
         ),
       );
     } else {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
+        SnackBar(behavior: SnackBarBehavior.floating, 
           content: Text('Invalid or already used code.'),
           backgroundColor: Colors.red,
         ),
