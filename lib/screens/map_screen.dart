@@ -19,6 +19,8 @@ import '../services/depth_db_service.dart';
 import '../services/pro_service.dart';
 import '../services/offline_region_service.dart';
 import '../services/api_config.dart';
+import '../services/gpx_service.dart';
+import 'package:file_picker/file_picker.dart';
 import 'spots_screen.dart';
 import 'offline_maps_screen.dart';
 
@@ -690,6 +692,56 @@ class MapScreenState extends State<MapScreen> {
 
   // ─── Markers ────────────────────────────────────────────────────────────
 
+  /// Imported GPX tracks for polyline display
+  List<GpxTrack> _gpxTracks = [];
+
+  /// Load a GPX file and display the track on the map
+  Future<void> _importGpx() async {
+    final result = await FilePicker.platform.pickFiles(
+      type: FileType.custom,
+      allowedExtensions: ['gpx'],
+    );
+    if (result == null || result.files.isEmpty) return;
+    final file = File(result.files.first.path!);
+    final tracks = await GpxService.instance.parseFile(file);
+    if (tracks.isEmpty) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            behavior: SnackBarBehavior.floating,
+            content: const Text('No valid tracks found in GPX file'),
+          ),
+        );
+      }
+      return;
+    }
+    setState(() => _gpxTracks = tracks);
+    // Fit map to show the imported track
+    if (tracks.isNotEmpty && tracks.first.points.isNotEmpty) {
+      final pts = tracks.first.points;
+      final lats = pts.map((p) => p.latitude);
+      final lngs = pts.map((p) => p.longitude);
+      final bounds = LatLngBounds(
+        LatLng(lats.reduce((a, b) => a < b ? a : b),
+            lngs.reduce((a, b) => a < b ? a : b)),
+        LatLng(lats.reduce((a, b) => a > b ? a : b),
+            lngs.reduce((a, b) => a > b ? a : b)),
+      );
+      _mapController.fitCamera(CameraFit.bounds(
+        bounds: bounds,
+        padding: const EdgeInsets.all(40),
+      ));
+    }
+    if (mounted) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          behavior: SnackBarBehavior.floating,
+          content: Text('Imported ${tracks.length} track(s): ${tracks.first.name}'),
+        ),
+      );
+    }
+  }
+
   List<Marker> _markers(ThemeData t) {
     final m = <Marker>[];
     for (final c in _catchesWithLocation) {
@@ -812,6 +864,20 @@ class MapScreenState extends State<MapScreen> {
                   userAgentPackageName: 'com.bestfishbuddy.bestfishbuddy',
                 ),
               ),
+            // Imported GPX track polylines
+            if (_gpxTracks.isNotEmpty)
+              for (final track in _gpxTracks)
+                PolylineLayer(
+                  polylines: [
+                    Polyline(
+                      points: track.points
+                          .map((p) => LatLng(p.latitude, p.longitude))
+                          .toList(),
+                      color: Colors.blue.shade400,
+                      strokeWidth: 3,
+                    ),
+                  ],
+                ),
             MarkerLayer(markers: _markers(t)),
             if (_weatherLayer != null)
               Opacity(
@@ -894,6 +960,8 @@ class MapScreenState extends State<MapScreen> {
                       child: Column(
                         mainAxisSize: MainAxisSize.min,
                         children: [
+                      _fabLabel(Icons.route, 'GPX Import', _importGpx, t),
+                      const SizedBox(height: 8),
                       _fabLabel(
                         _selectingRegion ? Icons.close : Icons.cloud_download,
                         _selectingRegion ? 'Cancel' : 'Offline',
