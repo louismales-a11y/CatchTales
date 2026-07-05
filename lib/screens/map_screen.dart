@@ -23,7 +23,6 @@ import '../services/pro_service.dart';
 import '../services/offline_region_service.dart';
 import '../services/api_config.dart';
 import '../services/gpx_service.dart';
-import 'package:file_picker/file_picker.dart';
 import 'spots_screen.dart';
 import 'offline_maps_screen.dart';
 
@@ -803,51 +802,59 @@ class MapScreenState extends State<MapScreen> {
 
   /// Show record button in panel
 
-  /// Load a GPX file and display the track on the map
+  /// Import a GPX file — opens a dialog to paste GPX content.
   Future<void> _importGpx() async {
-    final result = await FilePicker.platform.pickFiles(
-      type: FileType.custom,
-      allowedExtensions: ['gpx'],
-    );
-    if (result == null || result.files.isEmpty) return;
-    final file = File(result.files.first.path!);
-    final tracks = await GpxService.instance.parseFile(file);
-    if (tracks.isEmpty) {
-      if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            behavior: SnackBarBehavior.floating,
-            content: const Text('No valid tracks found in GPX file'),
+    final ctrl = TextEditingController();
+    final content = await showDialog<String>(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        title: const Text('Import GPX Track'),
+        content: SizedBox(
+          width: 400,
+          child: TextField(
+            controller: ctrl,
+            maxLines: 8,
+            decoration: const InputDecoration(
+              labelText: 'Paste GPX content',
+              hintText: '<?xml version="1.0"...',
+              border: OutlineInputBorder(),
+            ),
           ),
-        );
-      }
+        ),
+        actions: [
+          TextButton(onPressed: () => Navigator.pop(ctx), child: const Text('Cancel')),
+          FilledButton(
+            onPressed: () => Navigator.pop(ctx, ctrl.text.trim()),
+            child: const Text('Import'),
+          ),
+        ],
+      ),
+    );
+    if (content == null || content.isEmpty) return;
+    final tracks = GpxService.instance.parseString(content);
+    if (tracks.isEmpty) {
+      _showMsg('No valid tracks found in GPX content');
       return;
     }
     setState(() => _gpxTracks = tracks);
-    // Fit map to show the imported track
     if (tracks.isNotEmpty && tracks.first.points.isNotEmpty) {
       final pts = tracks.first.points;
       final lats = pts.map((p) => p.latitude);
       final lngs = pts.map((p) => p.longitude);
       final bounds = LatLngBounds(
-        LatLng(lats.reduce((a, b) => a < b ? a : b),
-            lngs.reduce((a, b) => a < b ? a : b)),
-        LatLng(lats.reduce((a, b) => a > b ? a : b),
-            lngs.reduce((a, b) => a > b ? a : b)),
+        LatLng(lats.reduce((a, b) => a < b ? a : b), lngs.reduce((a, b) => a < b ? a : b)),
+        LatLng(lats.reduce((a, b) => a > b ? a : b), lngs.reduce((a, b) => a > b ? a : b)),
       );
-      _mapController.fitCamera(CameraFit.bounds(
-        bounds: bounds,
-        padding: const EdgeInsets.all(40),
-      ));
+      _mapController.fitCamera(CameraFit.bounds(bounds: bounds, padding: const EdgeInsets.all(40)));
     }
-    if (mounted) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          behavior: SnackBarBehavior.floating,
-          content: Text('Imported ${tracks.length} track(s): ${tracks.first.name}'),
-        ),
-      );
-    }
+    _showMsg('Imported ${tracks.length} track(s): ${tracks.first.name}');
+  }
+
+  void _showMsg(String msg) {
+    if (!mounted) return;
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(behavior: SnackBarBehavior.floating, content: Text(msg)),
+    );
   }
 
   List<Marker> _markers(ThemeData t) {

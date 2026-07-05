@@ -4,9 +4,7 @@ import 'package:provider/provider.dart';
 import 'package:share_plus/share_plus.dart';
 import 'package:intl/intl.dart';
 import 'package:path_provider/path_provider.dart';
-import 'package:file_picker/file_picker.dart';
 import '../services/catches_db_service.dart';
-import '../services/gpx_service.dart';
 import '../services/translation_service.dart';
 import '../models/catch.dart';
 
@@ -140,24 +138,12 @@ class _ImportExportScreenState extends State<ImportExportScreen> {
     );
   }
 
-  /// Import a GPX file and show the track on the map.
-  Future<void> _importGpx() async {
-    final result = await FilePicker.platform.pickFiles(
-      type: FileType.custom,
-      allowedExtensions: ['gpx'],
-    );
-    if (result == null || result.files.isEmpty) return;
-    final file = File(result.files.first.path!);
-    final tracks = await GpxService.instance.parseFile(file);
-    if (tracks.isEmpty) {
-      _showMsg('No valid tracks found in GPX file');
-      return;
-    }
-    _showMsg('Imported ${tracks.length} track(s): ${tracks.first.name}');
-    // Navigate to map to show the track
-    if (mounted) {
-      Navigator.pop(context, {'tracks': tracks});
-    }
+  /// Import a GPX file.
+  /// File selection is done from the Map screen's GPX Import button.
+  /// This screen will navigate to Map for GPX import.
+  Future<void> _gotoMapForGpx() async {
+    // Navigate back and hint that GPX import is on the map screen
+    _showMsg('GPX import is available from the Map screen\'s side panel (GPX Import button)');
   }
 
   @override
@@ -249,7 +235,7 @@ class _ImportExportScreenState extends State<ImportExportScreen> {
           SizedBox(
             width: double.infinity,
             child: OutlinedButton.icon(
-              onPressed: _importGpx,
+              onPressed: _gotoMapForGpx,
               icon: const Icon(Icons.route),
               label: const Text('Import GPX File...'),
             ),
