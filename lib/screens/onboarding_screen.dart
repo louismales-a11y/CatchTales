@@ -32,19 +32,19 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
       desc: tr('onboardDescVoiceForms'),
     ),
     _OnboardPage(
+      icon: Icons.map,
+      title: tr('onboardMap'),
+      desc: tr('onboardDescMap'),
+    ),
+    _OnboardPage(
       icon: Icons.checklist,
       title: tr('onboardPrepare'),
       desc: tr('onboardDescPrepare'),
     ),
     _OnboardPage(
-      icon: Icons.cloud,
-      title: tr('onboardCloudSync'),
-      desc: tr('onboardDescCloudSync'),
-    ),
-    _OnboardPage(
-      icon: Icons.star,
-      title: tr('onboardStats'),
-      desc: tr('onboardDescStats'),
+      icon: Icons.directions_boat_filled,
+      title: tr('onboardTrips'),
+      desc: tr('onboardDescTrips'),
     ),
     _OnboardPage(
       icon: Icons.people,
@@ -52,9 +52,44 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
       desc: tr('onboardDescCommunityStats'),
     ),
     _OnboardPage(
-      icon: Icons.map,
-      title: tr('onboardMap'),
-      desc: tr('onboardDescMap'),
+      icon: Icons.wb_sunny,
+      title: tr('onboardWeather'),
+      desc: tr('onboardDescWeather'),
+    ),
+    _OnboardPage(
+      icon: Icons.nights_stay,
+      title: tr('onboardSolunar'),
+      desc: tr('onboardDescSolunar'),
+    ),
+    _OnboardPage(
+      icon: Icons.menu_book,
+      title: tr('onboardFishId'),
+      desc: tr('onboardDescFishId'),
+    ),
+    _OnboardPage(
+      icon: Icons.set_meal,
+      title: tr('onboardTackleBox'),
+      desc: tr('onboardDescTackleBox'),
+    ),
+    _OnboardPage(
+      icon: Icons.calendar_month,
+      title: tr('onboardCalendar'),
+      desc: tr('onboardDescCalendar'),
+    ),
+    _OnboardPage(
+      icon: Icons.star,
+      title: tr('onboardStats'),
+      desc: tr('onboardDescStats'),
+    ),
+    _OnboardPage(
+      icon: Icons.photo_library,
+      title: tr('onboardGallery'),
+      desc: tr('onboardDescGallery'),
+    ),
+    _OnboardPage(
+      icon: Icons.cloud,
+      title: tr('onboardCloudSync'),
+      desc: tr('onboardDescCloudSync'),
     ),
     _OnboardPage(
       icon: Icons.more_vert,
@@ -113,13 +148,16 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
                   // Page dots
-                  Row(
-                    mainAxisSize: MainAxisSize.min,
-                    children: List.generate(_pages.length, (i) {
-                      return Container(
-                        width: i == _page ? 20 : 8,
-                        height: 8,
-                        margin: const EdgeInsets.symmetric(horizontal: 3),
+                  Expanded(
+                    child: SingleChildScrollView(
+                      scrollDirection: Axis.horizontal,
+                      child: Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: List.generate(_pages.length, (i) {
+                        return Container(
+                          width: i == _page ? 16 : 6,
+                          height: 6,
+                          margin: const EdgeInsets.symmetric(horizontal: 2),
                         decoration: BoxDecoration(
                           borderRadius: BorderRadius.circular(4),
                           color: i == _page
@@ -128,6 +166,8 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
                         ),
                       );
                     }),
+                  ),
+                  ),
                   ),
                   // Next / Got it
                   FilledButton(
@@ -169,35 +209,35 @@ class _OnboardPage {
   Widget build(ThemeData theme) {
     return SingleChildScrollView(
       child: Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 32, vertical: 16),
+        padding: const EdgeInsets.fromLTRB(32, 8, 32, 32),
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
             Container(
-              width: 90,
-              height: 90,
+              width: 80,
+              height: 80,
               decoration: BoxDecoration(
                 color: theme.colorScheme.primary.withValues(alpha: 0.1),
-                borderRadius: BorderRadius.circular(22),
+                borderRadius: BorderRadius.circular(20),
               ),
-              child: Icon(icon, size: 44, color: theme.colorScheme.primary),
+              child: Icon(icon, size: 36, color: theme.colorScheme.primary),
             ),
-            const SizedBox(height: 24),
+            const SizedBox(height: 16),
             Text(title,
                 style: theme.textTheme.titleLarge?.copyWith(
                   fontWeight: FontWeight.w700,
                 )),
-            const SizedBox(height: 12),
+            const SizedBox(height: 8),
             Text(
               desc,
               textAlign: TextAlign.center,
               style: TextStyle(
-                fontSize: 15,
-                height: 1.6,
+                fontSize: 14,
+                height: 1.5,
                 color: theme.colorScheme.onSurface.withValues(alpha: 0.8),
               ),
             ),
-            if (isLast) ...[const SizedBox(height: 24),
+            if (isLast) ...[const SizedBox(height: 16),
               Container(
                 width: double.infinity,
                 padding: const EdgeInsets.all(16),
@@ -224,7 +264,7 @@ class _OnboardPage {
                 ),
               ),
             ],
-            const SizedBox(height: 24),
+            const SizedBox(height: 16),
           ],
         ),
       ),

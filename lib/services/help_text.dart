@@ -286,6 +286,33 @@ Map<String, _HelpEntry> get _helpEntries => <String, _HelpEntry>{
     tips: 'Bug reports auto-include your device model and app version so issues '
         'can be fixed faster. You control what additional info to write.',
   ),
+  'import_export': _HelpEntry(
+    icon: Icons.file_download,
+    title: 'Export & Import Data',
+    body: 'Export your catches as CSV, JSON, or KML files.\n\n'
+        '📊 **CSV (Excel/Sheets)**\n'
+        'Opens in any spreadsheet app. All fields included: species, weight, length, '
+        'GPS coordinates, weather, notes, and more.\n'
+        '• Use when: You want to analyze your data, sort by species, '
+        'or create custom reports in Excel or Google Sheets.\n\n'
+        '💾 **JSON (Backup)**\n'
+        'Raw structured data — perfect for backups or transferring to another app.\n'
+        '• Use when: You want a complete backup of all your catches, '
+        'or plan to import them into another system.\n\n'
+        '🌍 **KML (Google Earth)**\n'
+        'GPS coordinates formatted for Google Earth. See all your catch locations on a map.\n'
+        '• Only includes catches with GPS coordinates.\n'
+        '• Use when: You want to visualize where you\'ve been fishing, '
+        'plan trips around productive spots, or share locations with friends.\n\n'
+        '📅 **Date Range Filter**\n'
+        'Filter by date range to export only specific trips or time periods.\n'
+        'Useful for sharing a single trip\'s data or creating end-of-season reports.',
+  ),
+  'trips': _HelpEntry(
+    icon: Icons.directions_boat_filled,
+    title: tr('helpTrips'),
+    body: tr('helpBodyTrips'),
+  ),
   'community_stats': _HelpEntry(
     icon: Icons.people,
     title: tr('helpCommunityStats'),

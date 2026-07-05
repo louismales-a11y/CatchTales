@@ -24,6 +24,7 @@ class _TackleBoxScreenState extends State<TackleBoxScreen> {
   bool _loading = true;
   String _searchQuery = '';
   String _sortBy = 'date'; // date, name, type
+  String _typeFilter = '';
 
   final _searchCtrl = TextEditingController();
 
@@ -67,6 +68,11 @@ class _TackleBoxScreenState extends State<TackleBoxScreen> {
           item.type.toLowerCase().contains(query) ||
           item.targetSpecies.any((s) => s.toLowerCase().contains(query))
       ).toList();
+    }
+
+    // Type filter
+    if (_typeFilter.isNotEmpty) {
+      results = results.where((i) => i.type == _typeFilter).toList();
     }
 
     // Sort
@@ -375,6 +381,31 @@ class _TackleBoxScreenState extends State<TackleBoxScreen> {
                                 fontSize: 12,
                                 fontWeight: FontWeight.w600,
                                 color: theme.colorScheme.primary)),
+                      ],
+                    ),
+                  ),
+                // Type filter chips
+                if (_allItems.isNotEmpty)
+                  SingleChildScrollView(
+                    scrollDirection: Axis.horizontal,
+                    padding: const EdgeInsets.symmetric(horizontal: 16),
+                    child: Row(
+                      children: [
+                        FilterChip(
+                          label: const Text('All', style: TextStyle(fontSize: 11)),
+                          selected: _typeFilter.isEmpty,
+                          onSelected: (_) => setState(() => _typeFilter = ''),
+                          visualDensity: VisualDensity.compact,
+                        ),
+                        ..._allItems.map((i) => i.type).toSet().map((type) => Padding(
+                          padding: const EdgeInsets.only(left: 4),
+                          child: FilterChip(
+                            label: Text(type, style: const TextStyle(fontSize: 11)),
+                            selected: _typeFilter == type,
+                            onSelected: (_) => setState(() => _typeFilter = _typeFilter == type ? '' : type),
+                            visualDensity: VisualDensity.compact,
+                          ),
+                        )),
                       ],
                     ),
                   ),

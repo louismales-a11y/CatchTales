@@ -19,7 +19,7 @@ class DatabaseService {
 
     return await openDatabase(
       path,
-      version: 11,
+      version: 12,
       onCreate: (db, version) async {
         await db.execute('''
           CREATE TABLE catches (
@@ -100,6 +100,11 @@ class DatabaseService {
         await db.execute('CREATE INDEX IF NOT EXISTS idx_species_tallies_angler ON species_tallies(angler)');
       },
       onUpgrade: (db, oldVersion, newVersion) async {
+        // Migration to v12: add water conditions
+        if (oldVersion < 12) {
+          try { await db.execute('ALTER TABLE catches ADD COLUMN water_clarity TEXT DEFAULT \'\''); } catch (_) {}
+          try { await db.execute('ALTER TABLE catches ADD COLUMN flow_rate TEXT DEFAULT \'\''); } catch (_) {}
+        }
         // Migration to v11: add performance indexes
         if (oldVersion < 11) {
           try { await db.execute('CREATE INDEX IF NOT EXISTS idx_catches_caught_at ON catches(caught_at)'); } catch (_) {}

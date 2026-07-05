@@ -829,6 +829,11 @@ class _CatchCard extends StatelessWidget {
                       icon: Icons.location_on,
                       text: catch_.location,
                     ),
+                  if (catch_.tripName != null && catch_.tripName!.isNotEmpty)
+                    _DetailChip(
+                      icon: Icons.directions_boat_filled,
+                      text: catch_.tripName!,
+                    ),
                   if (catch_.lure.isNotEmpty)
                     _DetailChip(
                       icon: Icons.vpn_key,

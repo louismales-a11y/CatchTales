@@ -1,9 +1,11 @@
 import 'package:flutter/material.dart';
+import 'package:url_launcher/url_launcher.dart';
 import '../services/help_text.dart';
 import '../data/tackle_database.dart';
 import '../models/tackle_item.dart';
 import '../services/tackle_db_service.dart';
 import '../services/tackle_image_service.dart';
+import '../services/shared_tackle_images_service.dart';
 
 /// Browse all common tackle types and add them to your personal tackle box.
 class TackleCatalogScreen extends StatefulWidget {
@@ -29,6 +31,14 @@ class _TackleCatalogScreenState extends State<TackleCatalogScreen> {
 
   Future<void> _fetchImage(TackleTypeInfo info) async {
     if (_imageUrls.containsKey(info.name)) return;
+    // Check shared images from other users first
+    final sharedUrl =
+        await SharedTackleImagesService.instance.getImageUrl(info.name);
+    if (sharedUrl != null) {
+      if (mounted) setState(() => _imageUrls[info.name] = sharedUrl);
+      return;
+    }
+    // Fallback to Wikipedia search
     final url = await TackleImageService.getImageUrl(info.name);
     if (mounted) {
       setState(() => _imageUrls[info.name] = url);
@@ -95,31 +105,50 @@ class _TackleCatalogScreenState extends State<TackleCatalogScreen> {
       appBar: AppBar(title: const Text('Tackle Catalog')),
       body: ListView(
         padding: const EdgeInsets.all(12),
-        children: grouped.entries.map((entry) {
-          return Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Padding(
-                padding:
-                    const EdgeInsets.symmetric(horizontal: 8, vertical: 12),
-                child: Text(entry.key.toUpperCase(),
-                    style: const TextStyle(
-                      fontSize: 13,
-                      fontWeight: FontWeight.w700,
-                      color: Colors.grey,
-                      letterSpacing: 1.2,
+        children: [
+          ...grouped.entries.map((entry) {
+            return Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Padding(
+                  padding:
+                      const EdgeInsets.symmetric(horizontal: 8, vertical: 12),
+                  child: Text(entry.key.toUpperCase(),
+                      style: const TextStyle(
+                        fontSize: 13,
+                        fontWeight: FontWeight.w700,
+                        color: Colors.grey,
+                        letterSpacing: 1.2,
+                      )),
+                ),
+                ...entry.value.map((t) => _CatalogCard(
+                      info: t,
+                      imageUrl: _imageUrls[t.name],
+                      onImageLoad: () => _fetchImage(t),
+                      onAdd: () => _addToBox(t),
                     )),
-              ),
-              ...entry.value.map((t) => _CatalogCard(
-                    info: t,
-                    imageUrl: _imageUrls[t.name],
-                    onImageLoad: () => _fetchImage(t),
-                    onAdd: () => _addToBox(t),
-                  )),
-              const SizedBox(height: 8),
-            ],
-          );
-        }).toList(),
+                const SizedBox(height: 8),
+              ],
+            );
+          }).toList(),
+          const SizedBox(height: 8),
+          helpChip(context, 'catalog'),
+          const SizedBox(height: 4),
+          SizedBox(
+            width: double.infinity,
+            child: TextButton.icon(
+              onPressed: () {
+                final uri = Uri.parse(
+                    'mailto:BestfishBuddy@gmail.com?subject=${Uri.encodeComponent('Report wrong tackle photo')}');
+                launchUrl(uri, mode: LaunchMode.externalApplication);
+              },
+              icon: Icon(Icons.report_outlined, size: 20, color: Colors.red.shade600),
+              label: Text('Report wrong tackle photo',
+                  style: TextStyle(fontSize: 14, color: Colors.red.shade600)),
+            ),
+          ),
+          const SizedBox(height: 16),
+        ],
       ),
     );
   }
@@ -184,7 +213,7 @@ class _CatalogCard extends StatelessWidget {
           padding: const EdgeInsets.all(12),
           child: Row(
             children: [
-              // Image or emoji
+              // Image or placeholder
               Container(
                 width: 60,
                 height: 60,
@@ -199,11 +228,11 @@ class _CatalogCard extends StatelessWidget {
                         width: 60,
                         height: 60,
                         fit: BoxFit.cover,
-                        errorBuilder: (a, b, c) => _emojiIcon(theme),
+                        errorBuilder: (a, b, c) => _placeholderIcon(theme),
                         loadingBuilder: (ctx, child, progress) =>
-                            progress == null ? child : _emojiIcon(theme),
+                            progress == null ? child : _placeholderIcon(theme),
                       )
-                    : _emojiIcon(theme),
+                    : _placeholderIcon(theme),
               ),
               const SizedBox(width: 12),
               // Info
@@ -240,9 +269,10 @@ class _CatalogCard extends StatelessWidget {
     );
   }
 
-  Widget _emojiIcon(ThemeData theme) {
+  Widget _placeholderIcon(ThemeData theme) {
     return Center(
-      child: Text(info.icon, style: const TextStyle(fontSize: 28)),
+      child: Icon(Icons.add_photo_alternate_outlined,
+          size: 24, color: Colors.grey.shade400),
     );
   }
 }
@@ -424,6 +454,22 @@ class _DetailSheet extends StatelessWidget {
           ),
         ),
         const SizedBox(height: 8),
+
+        // Report wrong photo
+        if (imageUrl != null)
+          SizedBox(
+            width: double.infinity,
+            child: TextButton.icon(
+              onPressed: () {
+                final uri = Uri.parse(
+                    'mailto:BestfishBuddy@gmail.com?subject=${Uri.encodeComponent('Wrong tackle photo - ${info.name}')}');
+                launchUrl(uri, mode: LaunchMode.externalApplication);
+              },
+              icon: Icon(Icons.report_outlined, size: 20, color: Colors.red.shade600),
+              label: Text('Report wrong photo',
+                  style: TextStyle(fontSize: 14, color: Colors.red.shade600)),
+            ),
+          ),
       ],
     );
   }
@@ -436,7 +482,8 @@ class _DetailSheet extends StatelessWidget {
         borderRadius: BorderRadius.circular(16),
       ),
       child: Center(
-        child: Text(info.icon, style: const TextStyle(fontSize: 64)),
+        child: Icon(Icons.add_photo_alternate_outlined,
+            size: 56, color: Colors.grey.shade400),
       ),
     );
   }

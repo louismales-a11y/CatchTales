@@ -902,4 +902,46 @@ bestSeasons: ['spring', 'summer', 'fall'],
 bestSeasons: ['spring', 'summer', 'fall'],
         icon: '🚤',
   ),
+  // ═════════════════════════════════════════════════════════════════════
+  //  Ice Fishing
+  // ═════════════════════════════════════════════════════════════════════
+  TackleTypeInfo(
+    name: 'Bottom Bouncer',
+    category: 'Ice Fishing Rig',
+    description: 'A weighted wire rig that bounces along the bottom — keeps your bait at the perfect depth while ice fishing.',
+    targetSpecies: ['Walleye', 'Perch', 'Northern Pike', 'Lake Trout', 'Whitefish'],
+    tips: 'Designed for ice fishing tip-ups and jigging rods.\n\n'
+        'How to use:\n'
+        '• Attach to your line above the hook — the weight rides on the bottom.\n'
+        '• The wire arm bounces along, keeping bait just off the bottom.\n'
+        '• Great for walleye and perch on muddy or uneven bottoms.\n'
+        '• Tip-up setup: Use a quick-strike rig with two hooks.\n'
+        '• Jigging: Lift and drop slowly — the bottom bouncer keeps tension.\n\n'
+        'Weights: 1/4 oz for shallow (10-20 ft), 1/2-3/4 oz for deeper water.\n'
+        'Colors: Plain lead (best), painted chartreuse or glow for dark water.',
+    bestSeasons: ['winter'],
+    bestTimeOfDay: ['dawn', 'dusk'],
+    icon: '🎣',
+  ),
+  TackleTypeInfo(
+    name: 'Norwegian Hook',
+    category: 'Ice Fishing Rig',
+    description: 'A specialized treble hook rig used in ice fishing tip-ups — features a unique wire design that hooks fish as they take the bait.',
+    targetSpecies: ['Northern Pike', 'Walleye', 'Lake Trout', 'Pickerel', 'Musky'],
+    tips: 'The Norwegian hook is the go-to for tip-up ice fishing.\n\n'
+        'Why it works:\n'
+        '• Wire design opens when fish takes bait — sets the hook automatically.\n'
+        '• Holds live bait (minnows) perfectly without killing them.\n'
+        '• Two hooks increase hook-up ratio on light-biting winter fish.\n\n'
+        'Tip-up setup:\n'
+        '• Use a quick-strike rig: Norwegian hook on front, treble on back.\n'
+        '• Hook the minnow through the lips or dorsal fin.\n'
+        '• Set your tip-up so the bait hangs 1-3 ft off the bottom.\n'
+        '• When the flag goes up, let the fish run for 3-5 seconds before setting.\n\n'
+        'Sizes: #2-#4 for perch and walleye, #1/0-#2/0 for pike and lakers.\n'
+        'Color options: Red (most popular), glow-in-the-dark for dark water.',
+    bestSeasons: ['winter'],
+    bestTimeOfDay: ['dawn', 'dusk', 'night'],
+    icon: '🪝',
+  ),
 ];

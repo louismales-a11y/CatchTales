@@ -6,6 +6,7 @@ import 'package:intl/intl.dart';
 import 'package:path_provider/path_provider.dart';
 import '../services/catches_db_service.dart';
 import '../services/translation_service.dart';
+import '../services/help_text.dart';
 import '../models/catch.dart';
 
 enum ExportFormat { csv, json, kml }
@@ -138,6 +139,60 @@ class _ImportExportScreenState extends State<ImportExportScreen> {
     );
   }
 
+  Widget _formatOption(BuildContext context, ExportFormat fmt,
+      IconData icon, String title, String description) {
+    final selected = _format == fmt;
+    return InkWell(
+      borderRadius: BorderRadius.circular(12),
+      onTap: () => setState(() => _format = fmt),
+      child: Container(
+        padding: const EdgeInsets.all(12),
+        decoration: BoxDecoration(
+          borderRadius: BorderRadius.circular(12),
+          border: Border.all(
+            color: selected
+                ? Theme.of(context).colorScheme.primary
+                : Colors.grey.shade300,
+            width: selected ? 2 : 1,
+          ),
+          color: selected
+              ? Theme.of(context).colorScheme.primary.withValues(alpha: 0.05)
+              : null,
+        ),
+        child: Row(
+          children: [
+            Icon(icon, size: 22,
+                color: selected
+                    ? Theme.of(context).colorScheme.primary
+                    : Colors.grey.shade600),
+            const SizedBox(width: 12),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(title,
+                      style: TextStyle(
+                        fontWeight: FontWeight.w600,
+                        fontSize: 14,
+                        color: selected
+                            ? Theme.of(context).colorScheme.primary
+                            : null,
+                      )),
+                  const SizedBox(height: 2),
+                  Text(description,
+                      style: TextStyle(fontSize: 11, color: Colors.grey.shade600)),
+                ],
+              ),
+            ),
+            if (selected)
+              Icon(Icons.check_circle, size: 18,
+                  color: Theme.of(context).colorScheme.primary),
+          ],
+        ),
+      ),
+    );
+  }
+
   /// Import a GPX file.
   /// File selection is done from the Map screen's GPX Import button.
   /// This screen will navigate to Map for GPX import.
@@ -159,62 +214,73 @@ class _ImportExportScreenState extends State<ImportExportScreen> {
       body: ListView(
         padding: const EdgeInsets.all(20),
         children: [
-          // Format selection
+          // ── What to export ──
           Card(
             child: Padding(
               padding: const EdgeInsets.all(16),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Text('Export Format',
-                      style: theme.textTheme.titleSmall?.copyWith(fontWeight: FontWeight.w600)),
-                  const SizedBox(height: 8),
-                  SegmentedButton<ExportFormat>(
-                    segments: ExportFormat.values.map((fmt) =>
-                      ButtonSegment(value: fmt, label: Text(fmt.name.toUpperCase()))
-                    ).toList(),
-                    selected: {_format},
-                    onSelectionChanged: (v) => setState(() => _format = v.first),
+                  Row(
+                    children: [
+                      Icon(Icons.file_download, size: 20, color: theme.colorScheme.primary),
+                      const SizedBox(width: 10),
+                      const Text('Choose Format',
+                          style: TextStyle(fontWeight: FontWeight.w600)),
+                    ],
                   ),
-                  const SizedBox(height: 6),
-                  Text(_formatDesc(_format),
-                      style: TextStyle(fontSize: 12, color: Colors.grey.shade600)),
+                  const SizedBox(height: 8),
+                  _formatOption(context, ExportFormat.csv,
+                      Icons.table_chart, 'CSV (Excel/Sheets)',
+                      'Opens in Excel, Google Sheets, or any spreadsheet. All fields included. '
+                      'Best for analyzing your data, sorting, or creating custom reports.'),
+                  const SizedBox(height: 8),
+                  _formatOption(context, ExportFormat.json,
+                      Icons.code, 'JSON (Backup)',
+                      'Raw data format — perfect for backups or importing into other apps. '
+                      'Contains all catch details in a structured format.'),
+                  const SizedBox(height: 8),
+                  _formatOption(context, ExportFormat.kml,
+                      Icons.public, 'KML (Google Earth)',
+                      'See all your catch locations on a map in Google Earth. '
+                      'Only includes catches with GPS coordinates.'),
+                  const SizedBox(height: 16),
+                  Row(
+                    children: [
+                      Icon(Icons.date_range, size: 18, color: Colors.grey.shade600),
+                      const SizedBox(width: 8),
+                      Expanded(
+                        child: Text('Date range: $rangeStr',
+                            style: TextStyle(fontSize: 13, color: Colors.grey.shade700)),
+                      ),
+                      TextButton(
+                        onPressed: _pickDateRange,
+                        child: const Text('Change', style: TextStyle(fontSize: 12)),
+                      ),
+                    ],
+                  ),
+                  if (_dateRange != null)
+                    Align(
+                      alignment: Alignment.centerLeft,
+                      child: TextButton(
+                        onPressed: () => setState(() => _dateRange = null),
+                        child: const Text('Clear date filter', style: TextStyle(fontSize: 12)),
+                      ),
+                    ),
+                  const SizedBox(height: 12),
+                  SizedBox(
+                    width: double.infinity,
+                    height: 48,
+                    child: FilledButton.icon(
+                      onPressed: _exporting ? null : _export,
+                      icon: _exporting
+                          ? const SizedBox(width: 20, height: 20, child: CircularProgressIndicator(strokeWidth: 2))
+                          : const Icon(Icons.file_download),
+                      label: Text(_exporting ? 'Exporting...' : 'Export Data'),
+                    ),
+                  ),
                 ],
               ),
-            ),
-          ),
-          const SizedBox(height: 12),
-
-          // Date range
-          Card(
-            child: ListTile(
-              leading: const Icon(Icons.date_range),
-              title: const Text('Date Range'),
-              subtitle: Text(rangeStr),
-              trailing: const Icon(Icons.edit_calendar),
-              onTap: _pickDateRange,
-            ),
-          ),
-          if (_dateRange != null)
-            Center(
-              child: TextButton(
-                onPressed: () => setState(() => _dateRange = null),
-                child: const Text('Clear date filter'),
-              ),
-            ),
-
-          const SizedBox(height: 20),
-
-          // Export button
-          SizedBox(
-            width: double.infinity,
-            height: 52,
-            child: FilledButton.icon(
-              onPressed: _exporting ? null : _export,
-              icon: _exporting
-                  ? const SizedBox(width: 20, height: 20, child: CircularProgressIndicator(strokeWidth: 2))
-                  : const Icon(Icons.file_download),
-              label: Text(_exporting ? 'Exporting...' : 'Export Data'),
             ),
           ),
 
@@ -222,6 +288,9 @@ class _ImportExportScreenState extends State<ImportExportScreen> {
           const Divider(),
           const SizedBox(height: 12),
 
+          const SizedBox(height: 16),
+          helpChip(context, 'import_export'),
+          const SizedBox(height: 16),
           // Import section
           Text('Import GPS Track (GPX)',
               style: theme.textTheme.titleMedium?.copyWith(fontWeight: FontWeight.w700)),

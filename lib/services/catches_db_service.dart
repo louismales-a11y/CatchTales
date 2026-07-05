@@ -88,6 +88,38 @@ class CatchesDbService {
     return rows;
   }
 
+  // ---- Trips ----
+
+  Future<List<String>> getTripNames() async {
+    final db = await DatabaseService.instance.database;
+    final result = await db.rawQuery(
+        'SELECT DISTINCT trip_name FROM catches WHERE trip_name IS NOT NULL AND trip_name != \'\' ORDER BY trip_name');
+    return result.map((r) => r['trip_name'] as String).toList();
+  }
+
+  Future<List<Catch>> getCatchesByTrip(String tripName) async {
+    final db = await DatabaseService.instance.database;
+    final maps = await db.query('catches',
+        where: 'trip_name = ?',
+        whereArgs: [tripName],
+        orderBy: 'caught_at ASC');
+    return maps.map((m) => Catch.fromMap(m)).toList();
+  }
+
+  Future<void> renameTrip(String oldName, String newName) async {
+    final db = await DatabaseService.instance.database;
+    await db.update('catches', {'trip_name': newName},
+        where: 'trip_name = ?', whereArgs: [oldName]);
+    _invalidateCache();
+  }
+
+  Future<void> deleteTrip(String tripName) async {
+    final db = await DatabaseService.instance.database;
+    await db.update('catches', {'trip_name': null},
+        where: 'trip_name = ?', whereArgs: [tripName]);
+    _invalidateCache();
+  }
+
   // ---- Statistics ----
 
   Future<Map<String, int>> speciesBreakdown() async {

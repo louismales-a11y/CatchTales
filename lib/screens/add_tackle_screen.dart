@@ -7,6 +7,7 @@ import 'package:image_picker/image_picker.dart';
 import '../models/tackle_item.dart';
 import '../data/tackle_database.dart';
 import '../services/tackle_db_service.dart';
+import '../services/shared_tackle_images_service.dart';
 
 /// Screen to add or edit a tackle item — take a photo, pick the type,
 /// and it auto-fills target species + tips from the built-in database.
@@ -190,6 +191,13 @@ class _AddTackleScreenState extends State<AddTackleScreen> {
         return;
       }
       await TackleDbService.instance.addTackleItem(item);
+    }
+
+    // Share photo anonymously if one was taken
+    if (_photoPath != null) {
+      SharedTackleImagesService.instance.uploadAndShare(
+        item.type, _photoPath!,
+      );
     }
 
     if (mounted) {

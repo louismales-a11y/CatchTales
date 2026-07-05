@@ -18,6 +18,7 @@ import '../services/photo_backup_service.dart';
 import '../services/tts_service.dart';
 import '../services/weather_service.dart';
 import '../services/translation_service.dart';
+import '../services/trip_service.dart';
 import '../services/pro_service.dart';
 import '../services/community_stats_service.dart';
 import '../services/analytics_service.dart';
@@ -54,6 +55,8 @@ class _AddCatchScreenState extends State<AddCatchScreen> {
   String _voiceStatus = '';
   String _lastVoiceText = '';
   bool _saving = false;
+  String _waterClarity = '';
+  String _flowRate = '';
   bool _fetchingLocation = false;
   bool _fetchingWeather = false;
 
@@ -328,6 +331,7 @@ class _AddCatchScreenState extends State<AddCatchScreen> {
             : null,
         lengthUnit: _lengthUnit,
         notes: _notesCtrl.text.isNotEmpty ? _notesCtrl.text.trim() : null,
+        tripName: TripService.instance.activeTrip,
         caughtAt: _caughtAt,
       );
 
@@ -618,6 +622,32 @@ class _AddCatchScreenState extends State<AddCatchScreen> {
             ),
             const SizedBox(height: 16),
 
+            // Active trip indicator
+            if (TripService.instance.isActive)
+              Padding(
+                padding: const EdgeInsets.only(bottom: 12),
+                child: Container(
+                  padding: const EdgeInsets.all(10),
+                  decoration: BoxDecoration(
+                    color: Theme.of(context).colorScheme.primaryContainer,
+                    borderRadius: BorderRadius.circular(10),
+                  ),
+                  child: Row(
+                    children: [
+                      Icon(Icons.directions_boat_filled,
+                          size: 16, color: Theme.of(context).colorScheme.primary),
+                      const SizedBox(width: 8),
+                      Expanded(
+                        child: Text(
+                          'Trip: ${TripService.instance.activeTrip}',
+                          style: TextStyle(fontSize: 12,
+                              color: Theme.of(context).colorScheme.primary),
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ),
             // Location + Weather
             Row(
               children: [
@@ -659,6 +689,46 @@ class _AddCatchScreenState extends State<AddCatchScreen> {
                     child: CircularProgressIndicator(strokeWidth: 2),
                   ),
                 ],
+              ],
+            ),
+            const SizedBox(height: 16),
+
+            // Water conditions
+            Row(
+              children: [
+                Expanded(
+                  child: DropdownButtonFormField<String>(
+                    value: _waterClarity.isNotEmpty ? _waterClarity : null,
+                    decoration: const InputDecoration(
+                      labelText: 'Water clarity',
+                      prefixIcon: Icon(Icons.water_drop, size: 18),
+                      isDense: true,
+                    ),
+                    items: const [
+                      DropdownMenuItem(value: 'Clear', child: Text('Clear')),
+                      DropdownMenuItem(value: 'Stained', child: Text('Stained')),
+                      DropdownMenuItem(value: 'Muddy', child: Text('Muddy')),
+                    ],
+                    onChanged: (v) => setState(() => _waterClarity = v ?? ''),
+                  ),
+                ),
+                const SizedBox(width: 12),
+                Expanded(
+                  child: DropdownButtonFormField<String>(
+                    value: _flowRate.isNotEmpty ? _flowRate : null,
+                    decoration: const InputDecoration(
+                      labelText: 'Flow rate',
+                      prefixIcon: Icon(Icons.speed, size: 18),
+                      isDense: true,
+                    ),
+                    items: const [
+                      DropdownMenuItem(value: 'Slow', child: Text('Slow')),
+                      DropdownMenuItem(value: 'Moderate', child: Text('Moderate')),
+                      DropdownMenuItem(value: 'Fast', child: Text('Fast')),
+                    ],
+                    onChanged: (v) => setState(() => _flowRate = v ?? ''),
+                  ),
+                ),
               ],
             ),
             const SizedBox(height: 16),

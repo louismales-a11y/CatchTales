@@ -2,17 +2,15 @@ import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:package_info_plus/package_info_plus.dart';
-import 'package:shared_preferences/shared_preferences.dart';
 import 'package:share_plus/share_plus.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:intl/intl.dart';
-import 'onboarding_screen.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'import_export_screen.dart';
 import '../services/catches_db_service.dart';
 import '../services/notification_service.dart';
+import '../services/local_notification_service.dart';
 import '../services/translation_service.dart';
-import '../services/pro_service.dart';
-import '../services/api_config.dart';
 
 
 class AboutScreen extends StatefulWidget {
@@ -24,12 +22,21 @@ class AboutScreen extends StatefulWidget {
 
 class _AboutScreenState extends State<AboutScreen> {
   String _version = '';
+  final Map<String, bool> _reminderPrefs = {};
 
   @override
   void initState() {
     super.initState();
     _loadVersion();
     _checkNotifStatus();
+    _loadReminderPrefs();
+  }
+
+  Future<void> _loadReminderPrefs() async {
+    final prefs = await SharedPreferences.getInstance();
+    _reminderPrefs['reminder_to_log_enabled'] = prefs.getBool('reminder_to_log_enabled') ?? false;
+    _reminderPrefs['solunar_alert_enabled'] = prefs.getBool('solunar_alert_enabled') ?? false;
+    if (mounted) setState(() {});
   }
 
   Future<void> _checkNotifStatus() async {
@@ -188,10 +195,48 @@ class _AboutScreenState extends State<AboutScreen> {
       .replaceAll('"', '&quot;')
       .replaceAll('\'', '&apos;');
 
+  Widget _reminderToggle({
+    required IconData icon,
+    required String title,
+    required String subtitle,
+    required String prefKey,
+    required VoidCallback onEnable,
+    required VoidCallback onDisable,
+  }) {
+    return StatefulBuilder(
+      builder: (ctx, setSt) {
+        final enabled = _reminderPrefs[prefKey] ?? false;
+        return Row(
+          children: [
+            Icon(icon, size: 18, color: Colors.grey.shade600),
+            const SizedBox(width: 10),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(title, style: const TextStyle(fontSize: 13, fontWeight: FontWeight.w500)),
+                  Text(subtitle, style: TextStyle(fontSize: 11, color: Colors.grey.shade600)),
+                ],
+              ),
+            ),
+            Switch(
+              value: enabled,
+              onChanged: (v) async {
+                final prefs = await SharedPreferences.getInstance();
+                await prefs.setBool(prefKey, v);
+                if (v) { onEnable(); } else { onDisable(); }
+                setSt(() {});
+              },
+            ),
+          ],
+        );
+      },
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     context.watch<TranslationService>();
-    final pro = context.watch<ProService>();
     final theme = Theme.of(context);
     return Scaffold(
       appBar: AppBar(
@@ -289,105 +334,29 @@ class _AboutScreenState extends State<AboutScreen> {
                   ),
                   const SizedBox(height: 6),
                   Text(
-                    'Download all your catches as CSV or JSON file.',
+                    'Export your catches to share or back up.',
                     style: TextStyle(fontSize: 12,
                         color: theme.colorScheme.onSurface.withValues(alpha: 0.7)),
                   ),
                   const SizedBox(height: 10),
-                  Row(
-                    children: [
-                      Expanded(
-                        child: OutlinedButton.icon(
-                          onPressed: () => _exportCsv(),
-                          icon: const Icon(Icons.table_chart, size: 16),
-                          label: const Text('CSV',
-                              style: TextStyle(fontSize: 11)),
-                        ),
+                  SizedBox(
+                    width: double.infinity,
+                    child: OutlinedButton.icon(
+                      onPressed: () => Navigator.push(context,
+                          MaterialPageRoute(builder: (_) => const ImportExportScreen())),
+                      icon: const Icon(Icons.file_download, size: 18),
+                      label: const Text('Open Export Options', style: TextStyle(fontSize: 14)),
+                      style: OutlinedButton.styleFrom(
+                        padding: const EdgeInsets.symmetric(vertical: 14),
                       ),
-                      const SizedBox(width: 6),
-                      Expanded(
-                        child: OutlinedButton.icon(
-                          onPressed: () => _exportJson(),
-                          icon: const Icon(Icons.code, size: 16),
-                          label: const Text('JSON',
-                              style: TextStyle(fontSize: 11)),
-                        ),
-                      ),
-                      const SizedBox(width: 6),
-                      Expanded(
-                        child: OutlinedButton.icon(
-                          onPressed: () => _exportKml(),
-                          icon: const Icon(Icons.public, size: 16),
-                          label: const Text('KML',
-                              style: TextStyle(fontSize: 11)),
-                        ),
-                      ),
-                      const SizedBox(width: 6),
-                      Expanded(
-                        child: OutlinedButton.icon(
-                          onPressed: () => Navigator.push(context,
-                              MaterialPageRoute(builder: (_) => const ImportExportScreen())),
-                          icon: const Icon(Icons.settings, size: 16),
-                          label: const Text('More',
-                              style: TextStyle(fontSize: 11)),
-                        ),
-                      ),
-                    ],
+                    ),
                   ),
                 ],
               ),
             ),
           ),
           const SizedBox(height: 16),
-          // ── Dev Mode Toggle (Developer build only) ──
-          if (ApiConfig.isDev) ...[const SizedBox(height: 16),
-          Card(
-            color: theme.colorScheme.primary.withValues(alpha: 0.05),
-            child: Padding(
-              padding: const EdgeInsets.all(14),
-              child: Column(
-                children: [
-                  Row(
-                    children: [
-                      Icon(Icons.build, size: 20, color: theme.colorScheme.primary),
-                      const SizedBox(width: 10),
-                      const Text('Developer Options',
-                          style: TextStyle(fontWeight: FontWeight.w600)),
-                    ],
-                  ),
-                  const SizedBox(height: 8),
-                  Row(
-                    children: [
-                      Text(pro.isPro ? 'Pro Mode: ON' : 'Pro Mode: OFF',
-                          style: TextStyle(
-                            fontSize: 14,
-                            color: pro.isPro ? Colors.green.shade700 : Colors.grey.shade600,
-                            fontWeight: pro.isPro ? FontWeight.w600 : FontWeight.w400,
-                          )),
-                      const Spacer(),
-                      Switch(
-                        value: pro.isPro,
-                        onChanged: (v) async {
-                          if (v) {
-                            await ProService.instance.unlockPro();
-                          } else {
-                            await ProService.instance.resetToFree();
-                          }
-                        },
-                      ),
-                    ],
-                  ),
-                  Text(
-                    pro.isPro
-                        ? 'All Pro features unlocked ✓'
-                        : 'Free mode active — 10 catch limit, no delete',
-                    style: TextStyle(fontSize: 11, color: Colors.grey.shade600),
-                  ),
-                ],
-              ),
-            ),
-          ),
-          ],
+
           const SizedBox(height: 24),
           // ── Push Notifications ──
           Card(
@@ -459,45 +428,39 @@ class _AboutScreenState extends State<AboutScreen> {
             ),
           ),
           const SizedBox(height: 16),
-          // ── Show Walkthrough ──
+          // ── Reminder Settings ──
           Card(
             child: Padding(
               padding: const EdgeInsets.all(14),
-              child: InkWell(
-                borderRadius: BorderRadius.circular(12),
-                onTap: () async {
-                  final prefs = await SharedPreferences.getInstance();
-                  await prefs.setBool('onboarding_done', false);
-                  if (!context.mounted) return;
-                  await showDialog(
-                    context: context,
-                    barrierDismissible: false,
-                    useSafeArea: false,
-                    builder: (_) => const OnboardingScreen(),
-                  );
-                  await prefs.setBool('onboarding_done', true);
-                },
-                child: Row(
-                  children: [
-                    Icon(Icons.school, size: 22, color: theme.colorScheme.primary),
-                    const SizedBox(width: 12),
-                    Expanded(
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Text('Show Walkthrough',
-                              style: TextStyle(fontWeight: FontWeight.w600, fontSize: 14)),
-                          Text(
-                            'Replay the intro tutorial with all tips',
-                            style: TextStyle(fontSize: 12,
-                                color: theme.colorScheme.onSurface.withValues(alpha: 0.7)),
-                          ),
-                        ],
-                      ),
-                    ),
-                    const Icon(Icons.chevron_right, size: 20),
-                  ],
-                ),
+              child: Column(
+                children: [
+                  Row(
+                    children: [
+                      Icon(Icons.notifications, size: 20, color: theme.colorScheme.primary),
+                      const SizedBox(width: 10),
+                      const Text('Reminder Settings',
+                          style: TextStyle(fontWeight: FontWeight.w600)),
+                    ],
+                  ),
+                  const SizedBox(height: 8),
+                  _reminderToggle(
+                    icon: Icons.edit_calendar,
+                    title: 'Evening catch reminder',
+                    subtitle: 'Remind me to log today\'s catches at 7 PM',
+                    prefKey: 'reminder_to_log_enabled',
+                    onEnable: () => LocalNotificationService.instance.scheduleDailyReminderToLog(),
+                    onDisable: () => LocalNotificationService.instance.cancelReminderToLog(),
+                  ),
+                  const Divider(height: 16),
+                  _reminderToggle(
+                    icon: Icons.nights_stay,
+                    title: 'Solunar alert',
+                    subtitle: 'Daily notification about best fishing times at 6 AM',
+                    prefKey: 'solunar_alert_enabled',
+                    onEnable: () => LocalNotificationService.instance.scheduleSolunarAlert(),
+                    onDisable: () => LocalNotificationService.instance.cancelSolunarAlert(),
+                  ),
+                ],
               ),
             ),
           ),

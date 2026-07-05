@@ -25,11 +25,13 @@ import 'screens/about_screen.dart';
 import 'screens/cloud_sync_screen.dart';
 import 'screens/contact_screen.dart';
 import 'screens/tackle_box_screen.dart';
+import 'screens/trip_screen.dart';
 import 'screens/community_stats_screen.dart';
 import 'screens/language_picker_screen.dart';
 import 'services/help_text.dart';
 import 'services/theme_provider.dart';
 import 'services/connectivity_service.dart';
+import 'services/trip_service.dart';
 import 'screens/onboarding_screen.dart';
 
 // ─── 5 Color Schemes ──────────────────────────────────────────────────────
@@ -192,6 +194,7 @@ class _SplashScreenTestState extends State<SplashScreenTest> {
   void initState() {
     super.initState();
     _loadVersion();
+    TripService.instance.load();
   }
 
   Future<void> _loadVersion() async {
@@ -219,11 +222,13 @@ class _SplashScreenTestState extends State<SplashScreenTest> {
     showDialog(
       context: context,
       builder: (ctx) => AlertDialog(
-        title: Row(
+        title: const Row(
           children: [
-            const Icon(Icons.new_releases, color: Colors.amber),
-            const SizedBox(width: 8),
-            Text('What\'s New in v$version'),
+            Icon(Icons.new_releases, color: Colors.amber),
+            SizedBox(width: 8),
+            Expanded(
+              child: Text('What\'s New', overflow: TextOverflow.ellipsis),
+            ),
           ],
         ),
         content: SingleChildScrollView(
@@ -231,10 +236,11 @@ class _SplashScreenTestState extends State<SplashScreenTest> {
             crossAxisAlignment: CrossAxisAlignment.start,
             mainAxisSize: MainAxisSize.min,
             children: [
+              _whatsNewItem('🎣 Fishing Trips — find it in the ⋮ menu top-right'),
               _whatsNewItem('Swipe to delete catches with undo'),
               _whatsNewItem('Search/filter your catch list'),
               _whatsNewItem('Larger photo thumbnails + full-screen viewer'),
-              _whatsNewItem('CSV & JSON data export in About screen'),
+              _whatsNewItem('CSV, JSON & KML export in Import/Export screen'),
               _whatsNewItem('Haptic feedback on key actions'),
               _whatsNewItem('Offline indicator banner'),
               _whatsNewItem('Rate app prompt after 5 catches'),
@@ -612,6 +618,77 @@ class _HomeScreenTestState extends State<HomeScreenTest> {
     );
   }
 
+  void _showDevOptions(BuildContext context) {
+    final pro = context.read<ProService>();
+    showDialog(
+      context: context,
+      builder: (ctx) => StatefulBuilder(
+        builder: (ctx, setSt) => AlertDialog(
+          title: const Row(
+            children: [
+              Icon(Icons.build, size: 20),
+              SizedBox(width: 8),
+              Text('Developer Options'),
+            ],
+          ),
+          content: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Row(
+                children: [
+                  Text(pro.isPro ? 'Pro Mode: ON' : 'Pro Mode: OFF',
+                      style: TextStyle(
+                        fontSize: 14,
+                        color: pro.isPro ? Colors.green.shade700 : Colors.grey.shade600,
+                        fontWeight: pro.isPro ? FontWeight.w600 : FontWeight.w400,
+                      )),
+                  const Spacer(),
+                  Switch(
+                    value: pro.isPro,
+                    onChanged: (v) async {
+                      if (v) {
+                        await ProService.instance.unlockPro();
+                      } else {
+                        await ProService.instance.resetToFree();
+                      }
+                      setSt(() {});
+                    },
+                  ),
+                ],
+              ),
+              Text(
+                pro.isPro
+                    ? 'All Pro features unlocked \u2713'
+                    : 'Free mode active \u2014 10 catch limit, no delete',
+                style: TextStyle(fontSize: 11, color: Colors.grey.shade600),
+              ),
+            ],
+          ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.pop(ctx),
+              child: const Text('Close'),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  void _showWalkthrough(BuildContext context) {
+    SharedPreferences.getInstance().then((prefs) async {
+      await prefs.setBool('onboarding_done', false);
+      if (!context.mounted) return;
+      await showDialog(
+        context: context,
+        barrierDismissible: false,
+        useSafeArea: false,
+        builder: (_) => const OnboardingScreen(),
+      );
+      await prefs.setBool('onboarding_done', true);
+    });
+  }
+
   @override
   Widget build(BuildContext context) {
     AnalyticsService.instance.logScreen('home');
@@ -640,6 +717,9 @@ class _HomeScreenTestState extends State<HomeScreenTest> {
                 Text(ApiConfig.appDisplayName, style: TextStyle(fontSize: Theme.of(context).textTheme.titleLarge?.fontSize)),
                 Text(context.watch<ProService>().isPro ? tr('proVersion') : tr('freeVersion'),
                     style: TextStyle(fontSize: 10, color: Colors.grey.shade400)),
+                if (TripService.instance.isActive)
+                  Text('🎣 ${TripService.instance.activeTrip}',
+                      style: TextStyle(fontSize: 10, color: Colors.grey.shade400)),
               ],
             ),
           ],
@@ -655,6 +735,12 @@ class _HomeScreenTestState extends State<HomeScreenTest> {
                   Navigator.push(context,
                       MaterialPageRoute(
                           builder: (_) => const PrepareScreen()));
+                  break;
+                // ── Trips ──
+                case 'trips':
+                  Navigator.push(context,
+                      MaterialPageRoute(
+                          builder: (_) => const TripScreen()));
                   break;
                 case 'community_stats':
                   Navigator.push(context,
@@ -732,6 +818,13 @@ class _HomeScreenTestState extends State<HomeScreenTest> {
                       MaterialPageRoute(
                           builder: (_) => const ContactScreen()));
                   break;
+                // ── Admin Only ──
+                case 'walkthrough':
+                  _showWalkthrough(context);
+                  break;
+                case 'dev_options':
+                  _showDevOptions(context);
+                  break;
               }
             },
             itemBuilder: (ctx) => [
@@ -741,6 +834,16 @@ class _HomeScreenTestState extends State<HomeScreenTest> {
                 child: ListTile(
                   leading: Icon(Icons.checklist),
                   title: Text(tr('prepare')),
+                  dense: true,
+                  contentPadding: EdgeInsets.zero,
+                ),
+              ),
+              // ── Trips ──
+              PopupMenuItem(
+                value: 'trips',
+                child: ListTile(
+                  leading: Icon(Icons.directions_boat_filled, size: 20),
+                  title: const Text('Fishing Trips', style: TextStyle(fontSize: 13)),
                   dense: true,
                   contentPadding: EdgeInsets.zero,
                 ),
@@ -849,6 +952,32 @@ class _HomeScreenTestState extends State<HomeScreenTest> {
                   contentPadding: EdgeInsets.zero,
                 ),
               ),
+              // ── Admin Only ──
+              const PopupMenuDivider(),
+              const PopupMenuItem(
+                enabled: false,
+                child: Text('Admin Only',
+                    style: TextStyle(fontSize: 11, fontWeight: FontWeight.w600)),
+              ),
+              PopupMenuItem(
+                value: 'walkthrough',
+                child: ListTile(
+                  leading: Icon(Icons.school, size: 20),
+                  title: const Text('Show Walkthrough', style: TextStyle(fontSize: 13)),
+                  dense: true,
+                  contentPadding: EdgeInsets.zero,
+                ),
+              ),
+              if (ApiConfig.isDev)
+                PopupMenuItem(
+                  value: 'dev_options',
+                  child: ListTile(
+                    leading: Icon(Icons.build, size: 20),
+                    title: const Text('Developer Options', style: TextStyle(fontSize: 13)),
+                    dense: true,
+                    contentPadding: EdgeInsets.zero,
+                  ),
+                ),
               // ── Appearance ──
               PopupMenuItem(
                 value: 'dark_mode',

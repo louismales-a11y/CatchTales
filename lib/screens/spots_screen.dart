@@ -181,7 +181,7 @@ class _AddSpotScreenState extends State<_AddSpotScreen> {
         setState(() => _fetchingLocation = false);
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(behavior: SnackBarBehavior.floating,
-              content: Text('Error: $e')),
+              content: const Text('Could not get GPS location. Make sure location is enabled.')),
         );
       }
     }

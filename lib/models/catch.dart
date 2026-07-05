@@ -13,6 +13,8 @@ class Catch {
   final double? longitude;
   final String? notes;
   final String? tripName;
+  final String? waterClarity;
+  final String? flowRate;
   final double? weatherTemp;
   final String? weatherCondition;
   final DateTime caughtAt;
@@ -33,6 +35,8 @@ class Catch {
     this.longitude,
     this.notes,
     this.tripName,
+    this.waterClarity,
+    this.flowRate,
     this.weatherTemp,
     this.weatherCondition,
     DateTime? caughtAt,
@@ -75,6 +79,8 @@ class Catch {
         'longitude': longitude,
         'notes': notes,
         'trip_name': tripName,
+        'water_clarity': waterClarity,
+        'flow_rate': flowRate,
         'weather_temp': weatherTemp,
         'weather_condition': weatherCondition,
         'caught_at': caughtAt.toIso8601String(),
@@ -102,6 +108,8 @@ class Catch {
         longitude: (map['longitude'] as num?)?.toDouble(),
         notes: map['notes'] as String?,
         tripName: map['trip_name'] as String?,
+        waterClarity: map['water_clarity'] as String?,
+        flowRate: map['flow_rate'] as String?,
         weatherTemp: (map['weather_temp'] as num?)?.toDouble(),
         weatherCondition: map['weather_condition'] as String?,
         caughtAt: DateTime.parse(map['caught_at'] as String),
@@ -124,6 +132,8 @@ class Catch {
     double? longitude,
     String? notes,
     String? tripName,
+    String? waterClarity,
+    String? flowRate,
     double? weatherTemp,
     String? weatherCondition,
     DateTime? caughtAt,
@@ -144,6 +154,8 @@ class Catch {
         longitude: longitude ?? this.longitude,
         notes: notes ?? this.notes,
         tripName: tripName ?? this.tripName,
+        waterClarity: waterClarity ?? this.waterClarity,
+        flowRate: flowRate ?? this.flowRate,
         weatherTemp: weatherTemp ?? this.weatherTemp,
         weatherCondition: weatherCondition ?? this.weatherCondition,
         caughtAt: caughtAt ?? this.caughtAt,
