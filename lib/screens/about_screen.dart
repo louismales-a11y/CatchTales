@@ -7,6 +7,7 @@ import 'package:share_plus/share_plus.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:intl/intl.dart';
 import 'onboarding_screen.dart';
+import 'import_export_screen.dart';
 import '../services/catches_db_service.dart';
 import '../services/notification_service.dart';
 import '../services/translation_service.dart';
@@ -318,6 +319,16 @@ class _AboutScreenState extends State<AboutScreen> {
                           onPressed: () => _exportKml(),
                           icon: const Icon(Icons.public, size: 16),
                           label: const Text('KML',
+                              style: TextStyle(fontSize: 11)),
+                        ),
+                      ),
+                      const SizedBox(width: 6),
+                      Expanded(
+                        child: OutlinedButton.icon(
+                          onPressed: () => Navigator.push(context,
+                              MaterialPageRoute(builder: (_) => const ImportExportScreen())),
+                          icon: const Icon(Icons.settings, size: 16),
+                          label: const Text('More',
                               style: TextStyle(fontSize: 11)),
                         ),
                       ),
