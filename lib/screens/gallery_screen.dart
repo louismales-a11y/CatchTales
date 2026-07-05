@@ -1,5 +1,6 @@
 import 'dart:io';
 import 'package:flutter/material.dart';
+import 'package:flutter_staggered_grid_view/flutter_staggered_grid_view.dart';
 import '../services/help_text.dart';
 import 'package:intl/intl.dart';
 import '../models/catch.dart';
@@ -61,14 +62,11 @@ class _GalleryScreenState extends State<GalleryScreen> {
                 )
               : RefreshIndicator(
                   onRefresh: _load,
-                  child: GridView.builder(
+                  child: MasonryGridView.count(
+                    crossAxisCount: 2,
+                    mainAxisSpacing: 6,
+                    crossAxisSpacing: 6,
                     padding: const EdgeInsets.all(8),
-                    gridDelegate:
-                        const SliverGridDelegateWithFixedCrossAxisCount(
-                      crossAxisCount: 3,
-                      crossAxisSpacing: 4,
-                      mainAxisSpacing: 4,
-                    ),
                     itemCount: _catchesWithPhotos.length,
                     itemBuilder: (context, index) {
                       final c = _catchesWithPhotos[index];
@@ -95,24 +93,51 @@ class _GalleryScreenState extends State<GalleryScreen> {
   }
 }
 
-class _PhotoThumb extends StatelessWidget {
+class _PhotoThumb extends StatefulWidget {
   final Catch catch_;
   final VoidCallback onTap;
 
   const _PhotoThumb({required this.catch_, required this.onTap});
 
   @override
+  State<_PhotoThumb> createState() => _PhotoThumbState();
+}
+
+class _PhotoThumbState extends State<_PhotoThumb> {
+  double? _aspectRatio;
+
+  @override
+  void initState() {
+    super.initState();
+    _loadDimensions();
+  }
+
+  Future<void> _loadDimensions() async {
+    if (widget.catch_.primaryPhoto == null) return;
+    try {
+      final file = File(widget.catch_.primaryPhoto!);
+      if (!await file.exists()) return;
+      final decoded = await decodeImageFromList(await file.readAsBytes());
+      if (mounted && decoded.width > 0 && decoded.height > 0) {
+        setState(() => _aspectRatio = decoded.width / decoded.height);
+      }
+    } catch (_) {}
+  }
+
+  @override
   Widget build(BuildContext context) {
+    final ar = _aspectRatio ?? 1.0;
     return GestureDetector(
-      onTap: onTap,
+      onTap: widget.onTap,
       child: ClipRRect(
-        borderRadius: BorderRadius.circular(6),
+        borderRadius: BorderRadius.circular(8),
         child: Stack(
-          fit: StackFit.expand,
           children: [
-            if (catch_.primaryPhoto != null)
+            if (widget.catch_.primaryPhoto != null)
               Image.file(
-                File(catch_.primaryPhoto!),
+                File(widget.catch_.primaryPhoto!),
+                width: double.infinity,
+                height: 200 / ar.clamp(0.5, 2.0),
                 fit: BoxFit.cover,
                 errorBuilder: (_, _, _) => _placeholder(),
               )
@@ -124,7 +149,7 @@ class _PhotoThumb extends StatelessWidget {
               right: 0,
               child: Container(
                 padding:
-                    const EdgeInsets.symmetric(horizontal: 4, vertical: 3),
+                    const EdgeInsets.symmetric(horizontal: 6, vertical: 4),
                 decoration: const BoxDecoration(
                   gradient: LinearGradient(
                     begin: Alignment.bottomCenter,
@@ -133,10 +158,10 @@ class _PhotoThumb extends StatelessWidget {
                   ),
                 ),
                 child: Text(
-                  catch_.species,
+                  widget.catch_.species,
                   style: const TextStyle(
                     color: Colors.white,
-                    fontSize: 10,
+                    fontSize: 11,
                     fontWeight: FontWeight.w600,
                   ),
                   overflow: TextOverflow.ellipsis,
@@ -151,7 +176,7 @@ class _PhotoThumb extends StatelessWidget {
 
   Widget _placeholder() => Container(
         color: Colors.grey.shade200,
-        child: Icon(Icons.set_meal, color: Colors.grey.shade400),
+        child: const Icon(Icons.set_meal, color: Colors.grey),
       );
 }
 
