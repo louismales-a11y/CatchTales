@@ -130,6 +130,63 @@ class _AboutScreenState extends State<AboutScreen> {
     }
   }
 
+  Future<void> _exportKml() async {
+    try {
+      final catches = await CatchesDbService.instance.getCatches();
+      final withCoords = catches.where((c) => c.latitude != null).toList();
+      if (withCoords.isEmpty) {
+        if (!mounted) return;
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            behavior: SnackBarBehavior.floating,
+            content: const Text('No catches with GPS coordinates to export'),
+          ),
+        );
+        return;
+      }
+      final buf = StringBuffer();
+      buf.writeln('<?xml version="1.0" encoding="UTF-8"?>');
+      buf.writeln('<kml xmlns="http://www.opengis.net/kml/2.2">');
+      buf.writeln('  <Document>');
+      buf.writeln('    <name>Best Fish Buddy - Catch Locations</name>');
+      for (final c in withCoords) {
+        final dateStr = DateFormat('MMM d, yyyy').format(c.caughtAt);
+        buf.writeln('    <Placemark>');
+        buf.writeln('      <name>${_xmlEsc(c.species)} by ${_xmlEsc(c.angler)}</name>');
+        buf.writeln('      <description>${_xmlEsc(dateStr)}${c.location.isNotEmpty ? ' at ${_xmlEsc(c.location)}' : ''}'
+          '${c.weightDisplay.isNotEmpty ? ' - ${_xmlEsc(c.weightDisplay)}' : ''}'
+          '${c.lengthDisplay.isNotEmpty ? ' - ${_xmlEsc(c.lengthDisplay)}' : ''}</description>');
+        buf.writeln('      <Point>');
+        buf.writeln('        <coordinates>${c.longitude},${c.latitude},0</coordinates>');
+        buf.writeln('      </Point>');
+        buf.writeln('    </Placemark>');
+      }
+      buf.writeln('  </Document>');
+      buf.writeln('</kml>');
+      final dir = await getTemporaryDirectory();
+      final file = File('${dir.path}/bestfishbuddy_catches.kml');
+      await file.writeAsString(buf.toString());
+      // ignore: deprecated_member_use
+      await Share.shareXFiles([XFile(file.path)],
+          text: 'Best Fish Buddy catch locations');
+    } catch (e) {
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          behavior: SnackBarBehavior.floating,
+          content: Text('Export failed: $e'),
+        ),
+      );
+    }
+  }
+
+  String _xmlEsc(String s) => s
+      .replaceAll('&', '&amp;')
+      .replaceAll('<', '&lt;')
+      .replaceAll('>', '&gt;')
+      .replaceAll('"', '&quot;')
+      .replaceAll('\'', '&apos;');
+
   @override
   Widget build(BuildContext context) {
     context.watch<TranslationService>();
@@ -242,17 +299,26 @@ class _AboutScreenState extends State<AboutScreen> {
                         child: OutlinedButton.icon(
                           onPressed: () => _exportCsv(),
                           icon: const Icon(Icons.table_chart, size: 16),
-                          label: const Text('Export CSV',
-                              style: TextStyle(fontSize: 12)),
+                          label: const Text('CSV',
+                              style: TextStyle(fontSize: 11)),
                         ),
                       ),
-                      const SizedBox(width: 8),
+                      const SizedBox(width: 6),
                       Expanded(
                         child: OutlinedButton.icon(
                           onPressed: () => _exportJson(),
                           icon: const Icon(Icons.code, size: 16),
-                          label: const Text('Export JSON',
-                              style: TextStyle(fontSize: 12)),
+                          label: const Text('JSON',
+                              style: TextStyle(fontSize: 11)),
+                        ),
+                      ),
+                      const SizedBox(width: 6),
+                      Expanded(
+                        child: OutlinedButton.icon(
+                          onPressed: () => _exportKml(),
+                          icon: const Icon(Icons.public, size: 16),
+                          label: const Text('KML',
+                              style: TextStyle(fontSize: 11)),
                         ),
                       ),
                     ],
