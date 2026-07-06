@@ -13,7 +13,7 @@ class ApiConfig {
   static String get openWeatherApiKey =>
       const String.fromEnvironment(
         'OPENWEATHER_API_KEY',
-        defaultValue: '34dfeae3007957e5d3ba01a471f2bd21',
+        defaultValue: '',
       );
 
   /// Google Maps / Places API key.
