@@ -23,7 +23,9 @@ jobs:
         run: flutter pub get
 
       - name: Build release APK
-        run: flutter build apk --release
+        run: flutter build apk --release \
+          --dart-define=OPENWEATHER_API_KEY=\${{ secrets.OPENWEATHER_API_KEY }} \
+          --dart-define=GOOGLE_MAPS_API_KEY=\${{ secrets.GOOGLE_MAPS_API_KEY }}
 
       - name: Get version from tag
         id: version
