@@ -67,7 +67,7 @@ class _WaterBackgroundState extends State<WaterBackground>
         ),
         // Fish silhouettes
         if (widget.showFish)
-          _FishBuilder(controller: _controller, fishCount: 4, opacity: 0.2),
+          _FishBuilder(controller: _controller, fishCount: 5, opacity: 0.35),
         // Content on top
         if (widget.child != null) widget.child!,
       ],
@@ -108,7 +108,7 @@ class _FishBuilder extends StatelessWidget {
 
   const _FishBuilder({
     required this.controller,
-    this.fishCount = 4,
+    this.fishCount = 5,
     this.opacity = 0.15,
   });
 
