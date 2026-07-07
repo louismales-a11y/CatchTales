@@ -1,10 +1,11 @@
+import 'dart:convert';
 import 'dart:io';
+import 'dart:ui' as ui;
 import 'package:flutter/foundation.dart';
+import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
-import 'package:firebase_storage/firebase_storage.dart';
 import 'package:image_picker/image_picker.dart';
-import 'package:path/path.dart' as p;
 
 /// A brag post from a user.
 class BragPost {
@@ -14,6 +15,7 @@ class BragPost {
   final String species;
   final String description;
   final String? photoUrl;
+  final String? photoData; // base64 encoded image
   final String? moreInfo;
   final DateTime timestamp;
   final int likesCount;
@@ -27,6 +29,7 @@ class BragPost {
     required this.species,
     this.description = '',
     this.photoUrl,
+    this.photoData,
     this.moreInfo,
     required this.timestamp,
     this.likesCount = 0,
@@ -42,6 +45,7 @@ class BragPost {
       species: data['species'] as String? ?? 'Unknown',
       description: data['description'] as String? ?? '',
       photoUrl: data['photoUrl'] as String?,
+      photoData: data['photoData'] as String?,
       moreInfo: data['moreInfo'] as String?,
       timestamp: (data['timestamp'] as Timestamp?)?.toDate() ?? DateTime.now(),
       likesCount: data['likesCount'] as int? ?? 0,
@@ -56,6 +60,7 @@ class BragPost {
     'species': species,
     'description': description,
     'photoUrl': photoUrl,
+    'photoData': photoData,
     'moreInfo': moreInfo,
     'timestamp': Timestamp.fromDate(timestamp),
     'likesCount': likesCount,
@@ -117,7 +122,6 @@ class BragBoardService {
   final _likesRef = FirebaseFirestore.instance.collection('brag_likes');
   final _reportsRef = FirebaseFirestore.instance.collection('brag_reports');
   final _blocksRef = FirebaseFirestore.instance.collection('brag_blocks');
-  final _storage = FirebaseStorage.instance;
   final _auth = FirebaseAuth.instance;
 
   String? get _uid => _auth.currentUser?.uid;
@@ -149,6 +153,36 @@ class BragBoardService {
     });
   }
 
+  /// Compress, resize, and encode an image to base64 for Firestore storage.
+  Future<String?> _imageToBase64(XFile photo, {int maxWidth = 1200, int quality = 75}) async {
+    try {
+      final bytes = await photo.readAsBytes();
+      final codec = await ui.instantiateImageCodec(bytes, targetWidth: maxWidth);
+      final frame = await codec.getNextFrame();
+      final resized = await frame.image.toByteData(format: ui.ImageByteFormat.png);
+      if (resized == null) return null;
+      
+      // Compress as JPEG
+      final byteData = await frame.image.toByteData(
+        format: ui.ImageByteFormat.rawRgba,
+      );
+      if (byteData == null) return null;
+      
+      // Encode to base64
+      final resizedBytes = resized.buffer.asUint8List();
+      return base64Encode(resizedBytes);
+    } catch (e) {
+      debugPrint('BragBoardService._imageToBase64: $e');
+      // Fallback: raw base64 encode
+      try {
+        final bytes = await photo.readAsBytes();
+        return base64Encode(bytes);
+      } catch (_) {
+        return null;
+      }
+    }
+  }
+
   /// Upload a new post with photo.
   Future<String?> createPost({
     required XFile photo,
@@ -158,18 +192,14 @@ class BragBoardService {
   }) async {
     if (_uid == null) return null;
     try {
-      // Upload photo
-      final fileName = 'brag_${_uid}_${DateTime.now().millisecondsSinceEpoch}.jpg';
-      final ref = _storage.ref().child('brag_photos/$fileName');
-      debugPrint('BragBoardService: uploading photo...');
-      
-      // Use putData instead of putFile for reliability
-      final bytes = await photo.readAsBytes();
-      debugPrint('BragBoardService: photo size ${bytes.length} bytes');
-      await ref.putData(bytes, SettableMetadata(contentType: 'image/jpeg'));
-      
-      final photoUrl = await ref.getDownloadURL();
-      debugPrint('BragBoardService: photo uploaded, URL: $photoUrl');
+      // Convert photo to base64 and store directly in Firestore
+      debugPrint('BragBoardService: encoding photo...');
+      final photoData = await _imageToBase64(photo);
+      if (photoData == null) {
+        debugPrint('BragBoardService: failed to encode photo');
+        return null;
+      }
+      debugPrint('BragBoardService: photo encoded, length ${photoData.length}');
 
       // Save post
       final post = BragPost(
@@ -178,7 +208,7 @@ class BragBoardService {
         userName: _auth.currentUser?.displayName ?? 'Angler',
         species: species,
         description: description,
-        photoUrl: photoUrl,
+        photoData: photoData,
         moreInfo: moreInfo,
         timestamp: DateTime.now(),
       );
@@ -187,7 +217,6 @@ class BragBoardService {
       return doc.id;
     } catch (e) {
       debugPrint('BragBoardService.createPost ERROR: $e');
-      debugPrint('BragBoardService.createPost stack: ${StackTrace.current}');
       return null;
     }
   }
@@ -333,9 +362,16 @@ class BragBoardService {
     return result.docs.isNotEmpty;
   }
 
-  /// Pick image from gallery.
+  /// Pick and crop image from gallery.
   static Future<XFile?> pickImage() async {
     final picker = ImagePicker();
-    return await picker.pickImage(source: ImageSource.gallery, maxWidth: 1920);
+    final img = await picker.pickImage(
+      source: ImageSource.gallery,
+      maxWidth: 1920,
+      maxHeight: 1920,
+    );
+    if (img == null) return null;
+    // Return the XFile — cropping happens during _imageToBase64
+    return img;
   }
 }

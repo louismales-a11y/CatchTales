@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import '../services/brag_board_service.dart';
 import '../services/auth_service.dart';
+import '../widgets/brag_image.dart';
 
 /// Detailed view of a brag post with comments.
 class BragPostDetailScreen extends StatefulWidget {
@@ -62,12 +63,7 @@ class _BragPostDetailScreenState extends State<BragPostDetailScreen> {
               padding: const EdgeInsets.all(16),
               children: [
                 // Photo
-                if (post.photoUrl != null)
-                  ClipRRect(
-                    borderRadius: BorderRadius.circular(16),
-                    child: Image.network(post.photoUrl!, height: 300, width: double.infinity, fit: BoxFit.cover,
-                        errorBuilder: (_, __, ___) => Container(height: 300, color: Colors.grey.shade900)),
-                  ),
+                BragImage(post: post, height: 300),
                 const SizedBox(height: 16),
 
                 // Species + actions

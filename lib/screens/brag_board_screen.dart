@@ -3,6 +3,7 @@ import '../services/brag_board_service.dart';
 import '../services/auth_service.dart';
 import '../services/translation_service.dart';
 import '../widgets/water_background.dart';
+import '../widgets/brag_image.dart';
 import 'brag_post_detail_screen.dart';
 import 'new_brag_post_screen.dart';
 
@@ -191,12 +192,7 @@ class _PostCard extends StatelessWidget {
               ),
             ),
             // Photo
-            if (post.photoUrl != null)
-              ClipRRect(
-                borderRadius: BorderRadius.circular(0),
-                child: Image.network(post.photoUrl!, height: 280, width: double.infinity, fit: BoxFit.cover,
-                    errorBuilder: (_, __, ___) => Container(height: 280, color: Colors.grey.shade900, child: const Center(child: Icon(Icons.broken_image, size: 48, color: Colors.white24)))),
-              ),
+            BragImage(post: post, height: 280),
             // Species tag
             Padding(
               padding: const EdgeInsets.fromLTRB(16, 10, 16, 4),
