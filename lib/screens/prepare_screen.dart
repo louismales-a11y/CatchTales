@@ -118,6 +118,14 @@ class _PrepareScreenState extends State<PrepareScreen> {
                 const SizedBox(height: 20),
 
                 // Checklist items — tap to check off as you go
+                // ── Device Setup (first — do this before anything else) ──
+                _checkItem(
+                  key: 'device',
+                  icon: Icons.phonelink_setup,
+                  label: '📱 Device Setup',
+                  detail: 'Place phone where camera & mic work best',
+                  onTapExtra: _showDeviceSetupTip,
+                ),
                 _checkItem(
                   key: 'anglers',
                   icon: Icons.people,
@@ -161,14 +169,6 @@ class _PrepareScreenState extends State<PrepareScreen> {
                   label: tr('checkMapSpots'),
                   detail: _spotCount > 0 ? trp('nSpots', {'count': '$_spotCount'}) : tr('noSavedSpots'),
                   screen: const MapScreen(),
-                ),
-                // ── Device Setup ──
-                _checkItem(
-                  key: 'device',
-                  icon: Icons.phonelink_setup,
-                  label: 'Device Setup',
-                  detail: 'Place phone where camera & mic work best',
-                  onTapExtra: _showDeviceSetupTip,
                 ),
 
                 const SizedBox(height: 20),
