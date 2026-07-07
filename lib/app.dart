@@ -36,6 +36,7 @@ import 'screens/onboarding_screen.dart';
 import 'screens/auth_screen.dart';
 import 'screens/verify_email_screen.dart';
 import 'screens/settings_screen.dart';
+import 'screens/brag_board_screen.dart';
 import 'services/auth_service.dart';
 import 'widgets/water_background.dart';
 
@@ -832,6 +833,11 @@ class _HomeScreenTestState extends State<HomeScreenTest> {
             onSelected: (value) {
               switch (value) {
                 // ── Planning ──
+                case 'brag_board':
+                  Navigator.push(context,
+                      MaterialPageRoute(
+                          builder: (_) => _withWater(BragBoardScreen())));
+                  break;
                 case 'prepare':
                   Navigator.push(context,
                       MaterialPageRoute(
@@ -935,6 +941,17 @@ class _HomeScreenTestState extends State<HomeScreenTest> {
               }
             },
             itemBuilder: (ctx) => [
+              // ── Brag Board ──
+              const PopupMenuDivider(),
+              PopupMenuItem(
+                value: 'brag_board',
+                child: ListTile(
+                  leading: Icon(Icons.emoji_events, size: 20),
+                  title: const Text('🏆 Brag Board', style: TextStyle(fontSize: 13)),
+                  dense: true,
+                  contentPadding: EdgeInsets.zero,
+                ),
+              ),
               // ── Planning ──
               PopupMenuItem(
                 value: 'prepare',
