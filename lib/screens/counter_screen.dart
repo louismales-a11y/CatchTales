@@ -844,20 +844,20 @@ class _CounterScreenState extends State<CounterScreen> {
                           style: const TextStyle(color: Colors.white),
                           decoration: InputDecoration(
                             hintText: tr('anglerName'),
-                            hintStyle: const TextStyle(color: Colors.white38),
+                            hintStyle: TextStyle(color: const Color(0xFF76FF03).withValues(alpha: 0.5)),
                             contentPadding:
                                 const EdgeInsets.symmetric(horizontal: 14),
                             border: OutlineInputBorder(
                               borderRadius: BorderRadius.circular(12),
-                              borderSide: const BorderSide(color: Colors.white24),
+                              borderSide: const BorderSide(color: Color(0xFF76FF03), width: 1.5),
                             ),
                             enabledBorder: OutlineInputBorder(
                               borderRadius: BorderRadius.circular(12),
-                              borderSide: const BorderSide(color: Colors.white24),
+                              borderSide: const BorderSide(color: Color(0xFF76FF03), width: 1.5),
                             ),
                             focusedBorder: OutlineInputBorder(
                               borderRadius: BorderRadius.circular(12),
-                              borderSide: const BorderSide(color: Color(0xFF76FF03), width: 1.5),
+                              borderSide: const BorderSide(color: Color(0xFF76FF03), width: 2),
                             ),
                             isDense: true,
                           ),

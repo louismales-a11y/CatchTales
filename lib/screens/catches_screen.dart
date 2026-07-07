@@ -252,10 +252,9 @@ class CatchesScreenState extends State<CatchesScreen> {
                             ? Icons.search_off
                             : Icons.set_meal,
                         size: 48,
-                        color: Theme.of(context)
-                            .colorScheme
-                            .onSurface
-                            .withValues(alpha: 0.3),
+                        color: cp.searchQuery.isNotEmpty
+                            ? Colors.white54
+                            : const Color(0xFF76FF03).withValues(alpha: 0.6),
                       ),
                       const SizedBox(height: 12),
                       Text(
@@ -263,7 +262,7 @@ class CatchesScreenState extends State<CatchesScreen> {
                             ? tr('noSearchResults')
                             : tr('yourFirstCatch'),
                         style: const TextStyle(
-                            fontSize: 16, fontWeight: FontWeight.w600),
+                            fontSize: 16, fontWeight: FontWeight.w600, color: Colors.white),
                       ),
                       if (cp.searchQuery.isEmpty) ...[                        const SizedBox(height: 8),
                         Text(tr('sampleCatch'),
