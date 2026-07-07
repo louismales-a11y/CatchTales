@@ -1,6 +1,5 @@
 import 'dart:convert';
-import 'dart:io';
-import 'dart:ui' as ui;
+import 'dart:typed_data';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
@@ -153,70 +152,50 @@ class BragBoardService {
     });
   }
 
-  /// Compress, resize, and encode an image to base64 for Firestore storage.
-  Future<String?> _imageToBase64(XFile photo, {int maxWidth = 1200, int quality = 75}) async {
-    try {
-      final bytes = await photo.readAsBytes();
-      final codec = await ui.instantiateImageCodec(bytes, targetWidth: maxWidth);
-      final frame = await codec.getNextFrame();
-      final resized = await frame.image.toByteData(format: ui.ImageByteFormat.png);
-      if (resized == null) return null;
-      
-      // Compress as JPEG
-      final byteData = await frame.image.toByteData(
-        format: ui.ImageByteFormat.rawRgba,
-      );
-      if (byteData == null) return null;
-      
-      // Encode to base64
-      final resizedBytes = resized.buffer.asUint8List();
-      return base64Encode(resizedBytes);
-    } catch (e) {
-      debugPrint('BragBoardService._imageToBase64: $e');
-      // Fallback: raw base64 encode
-      try {
-        final bytes = await photo.readAsBytes();
-        return base64Encode(bytes);
-      } catch (_) {
-        return null;
-      }
-    }
-  }
+
 
   /// Upload a new post with photo.
   Future<String?> createPost({
-    required XFile photo,
+    required Uint8List imageBytes,
     required String species,
     String description = '',
     String? moreInfo,
   }) async {
     if (_uid == null) return null;
     try {
-      // Convert photo to base64 and store directly in Firestore
-      debugPrint('BragBoardService: encoding photo...');
-      final photoData = await _imageToBase64(photo);
-      if (photoData == null) {
-        debugPrint('BragBoardService: failed to encode photo');
-        return null;
-      }
+      // Encode photo to base64
+      debugPrint('BragBoardService: encoding photo, size ${imageBytes.length}');
+      final photoData = base64Encode(imageBytes);
       debugPrint('BragBoardService: photo encoded, length ${photoData.length}');
 
-      // Save post
-      final post = BragPost(
-        id: '',
-        userId: _uid!,
-        userName: _auth.currentUser?.displayName ?? 'Angler',
-        species: species,
-        description: description,
-        photoData: photoData,
-        moreInfo: moreInfo,
-        timestamp: DateTime.now(),
-      );
-      final doc = await _postsRef.add(post.toMap());
+      // Check Firestore doc size limit (1MB)
+      final docData = <String, dynamic>{
+        'userId': _uid!,
+        'userName': _auth.currentUser?.displayName ?? 'Angler',
+        'species': species,
+        'description': description,
+        'photoData': photoData,
+        'moreInfo': moreInfo,
+        'timestamp': Timestamp.fromDate(DateTime.now()),
+        'likesCount': 0,
+        'commentsCount': 0,
+      };
+      
+      final jsonStr = jsonEncode(docData);
+      if (jsonStr.length > 900 * 1024) {
+        debugPrint('BragBoardService: document too large (${jsonStr.length}), truncating photo');
+        // Truncate photo data to fit
+        final maxDataLen = photoData.length - (jsonStr.length - 900 * 1024) - 1024;
+        if (maxDataLen < 0) return null;
+        docData['photoData'] = photoData.substring(0, maxDataLen);
+      }
+
+      final doc = await _postsRef.add(docData);
       debugPrint('BragBoardService: post created with id: ${doc.id}');
       return doc.id;
     } catch (e) {
       debugPrint('BragBoardService.createPost ERROR: $e');
+      debugPrint('BragBoardService.createPost stack: ${StackTrace.current}');
       return null;
     }
   }
