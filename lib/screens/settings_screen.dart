@@ -173,20 +173,6 @@ class _SettingsScreenState extends State<SettingsScreen> {
                           );
                         },
                       ),
-                      if (!NotificationService.instance.enabled) ...[
-                        const SizedBox(width: 8),
-                        OutlinedButton.icon(
-                          onPressed: () async {
-                            await NotificationService.instance.requestPermissionIfNeeded(context, force: true);
-                          },
-                          icon: const Icon(Icons.notifications_active, size: 16),
-                          label: Text(tr('settingsEnable'), style: TextStyle(fontSize: 12)),
-                          style: OutlinedButton.styleFrom(
-                            padding: const EdgeInsets.symmetric(horizontal: 12),
-                            visualDensity: VisualDensity.compact,
-                          ),
-                        ),
-                      ],
                     ],
                   ),
                   const SizedBox(height: 6),
@@ -194,6 +180,22 @@ class _SettingsScreenState extends State<SettingsScreen> {
                     'Get notified for weather alerts, best fishing times, and Fish Together activity.',
                     style: TextStyle(fontSize: 12, height: 1.5, color: theme.colorScheme.onSurface.withValues(alpha: 0.7)),
                   ),
+                  if (!NotificationService.instance.enabled) ...[
+                    const SizedBox(height: 10),
+                    SizedBox(
+                      width: double.infinity,
+                      child: OutlinedButton.icon(
+                        onPressed: () async {
+                          await NotificationService.instance.requestPermissionIfNeeded(context, force: true);
+                        },
+                        icon: const Icon(Icons.notifications_active, size: 16),
+                        label: Text(tr('settingsEnable'), style: TextStyle(fontSize: 12)),
+                        style: OutlinedButton.styleFrom(
+                          padding: const EdgeInsets.symmetric(vertical: 12),
+                        ),
+                      ),
+                    ),
+                  ],
                 ],
               ),
             ),
