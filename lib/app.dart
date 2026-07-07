@@ -809,6 +809,12 @@ class _HomeScreenTestState extends State<HomeScreenTest> {
           Theme(
             data: Theme.of(context).copyWith(
               cardColor: const Color(0xFF0D2137),
+              textTheme: const TextTheme(
+                bodyLarge: TextStyle(color: Colors.white, fontSize: 14),
+                bodyMedium: TextStyle(color: Colors.white, fontSize: 14),
+                titleSmall: TextStyle(color: Colors.white, fontSize: 14),
+                labelLarge: TextStyle(color: Colors.white, fontSize: 14),
+              ),
               popupMenuTheme: PopupMenuThemeData(
                 color: const Color(0xFF0D2137),
                 shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
