@@ -106,11 +106,10 @@ class BestFishBuddyAppTest extends StatelessWidget {
     final def = _themes[themeName] ?? _themes.values.first;
     final dark = brightness == Brightness.dark;
 
-    final scaffoldBg =
-        dark ? const Color(0xFF060A14) : const Color(0xFFF0F4FF);
+    final scaffoldBg = Colors.transparent;
     final cardBg = dark
-        ? const Color(0xFF0E1422).withValues(alpha: 0.85)
-        : Colors.white.withValues(alpha: 0.85);
+        ? const Color(0xFF0E1422).withValues(alpha: 0.92)
+        : Colors.white.withValues(alpha: 0.92);
     final appBarBg = const Color(0xFF0A0E1A);
     final navBg = dark ? const Color(0xFF0A0E1A) : Colors.white;
     final onSurface =
