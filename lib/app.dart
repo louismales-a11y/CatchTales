@@ -39,6 +39,8 @@ import 'screens/settings_screen.dart';
 import 'services/auth_service.dart';
 import 'widgets/water_background.dart';
 
+Widget _withWater(Widget child) => WaterBackground(showFish: true, overlayOpacity: 0.6, child: child);
+
 // ─── 5 Color Schemes ──────────────────────────────────────────────────────
 
 class _ThemeDef {
@@ -829,44 +831,44 @@ class _HomeScreenTestState extends State<HomeScreenTest> {
                 case 'prepare':
                   Navigator.push(context,
                       MaterialPageRoute(
-                          builder: (_) => const PrepareScreen()));
+                          builder: (_) => _withWater(const PrepareScreen())));
                   break;
                 // ── Trips ──
                 case 'trips':
                   Navigator.push(context,
                       MaterialPageRoute(
-                          builder: (_) => const TripScreen()));
+                          builder: (_) => _withWater(const TripScreen())));
                   break;
                 case 'community_stats':
                   Navigator.push(context,
                       MaterialPageRoute(
-                          builder: (_) => const CommunityStatsScreen()));
+                          builder: (_) => _withWater(const CommunityStatsScreen())));
                   break;
                 case 'weather':
                   Navigator.push(context,
                       MaterialPageRoute(
-                          builder: (_) => const ForecastScreen()));
+                          builder: (_) => _withWater(const ForecastScreen())));
                   break;
                 case 'solunar':
                   Navigator.push(context,
                       MaterialPageRoute(
-                          builder: (_) => const SolunarScreen()));
+                          builder: (_) => _withWater(const SolunarScreen())));
                   break;
                 case 'fish_id':
                   Navigator.push(context,
                       MaterialPageRoute(
-                          builder: (_) => const FishIdScreen()));
+                          builder: (_) => _withWater(const FishIdScreen())));
                   break;
                 case 'tackle_box':
                   Navigator.push(context,
                       MaterialPageRoute(
-                          builder: (_) => const TackleBoxScreen()));
+                          builder: (_) => _withWater(const TackleBoxScreen())));
                   break;
                 // ── History ──
                 case 'calendar':
                   Navigator.push(context,
                       MaterialPageRoute(
-                          builder: (_) => const CalendarScreen()));
+                          builder: (_) => _withWater(const CalendarScreen())));
                   break;
                 case 'stats':
                   if (!ProService.instance.isPro) {
@@ -875,12 +877,12 @@ class _HomeScreenTestState extends State<HomeScreenTest> {
                   }
                   Navigator.push(context,
                       MaterialPageRoute(
-                          builder: (_) => const StatsScreen()));
+                          builder: (_) => _withWater(const StatsScreen())));
                   break;
                 case 'gallery':
                   Navigator.push(context,
                       MaterialPageRoute(
-                          builder: (_) => const GalleryScreen()));
+                          builder: (_) => _withWater(const GalleryScreen())));
                   break;
                 // ── Appearance ──
                 case 'dark_mode':
@@ -900,24 +902,24 @@ class _HomeScreenTestState extends State<HomeScreenTest> {
                   }
                   Navigator.push(context,
                       MaterialPageRoute(
-                          builder: (_) => const CloudSyncScreen()));
+                          builder: (_) => _withWater(const CloudSyncScreen())));
                   break;
                 // ── Settings ──
                 case 'settings':
                   Navigator.push(context,
                       MaterialPageRoute(
-                          builder: (_) => const SettingsScreen()));
+                          builder: (_) => _withWater(const SettingsScreen())));
                   break;
                 // ── About & Contact ──
                 case 'about':
                   Navigator.push(context,
                       MaterialPageRoute(
-                          builder: (_) => const AboutScreen()));
+                          builder: (_) => _withWater(const AboutScreen())));
                   break;
                 case 'contact':
                   Navigator.push(context,
                       MaterialPageRoute(
-                          builder: (_) => const ContactScreen()));
+                          builder: (_) => _withWater(const ContactScreen())));
                   break;
                 // ── Admin Only ──
                 case 'walkthrough':

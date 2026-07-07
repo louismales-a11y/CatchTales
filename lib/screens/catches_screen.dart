@@ -269,7 +269,7 @@ class CatchesScreenState extends State<CatchesScreen> {
                         Text(tr('sampleCatch'),
                             textAlign: TextAlign.center,
                             style: const TextStyle(
-                                fontSize: 12, color: Colors.grey)),
+                                fontSize: 12, color: Colors.white54)),
                         const SizedBox(height: 12),
                         // Sample catch card with photo
                         Card(
@@ -315,17 +315,15 @@ class CatchesScreenState extends State<CatchesScreen> {
                                         CrossAxisAlignment.start,
                                     children: [
                                       Text('Largemouth Bass',
-                                          style: Theme.of(context)
-                                              .textTheme
-                                              .titleMedium
-                                              ?.copyWith(
-                                                  fontWeight:
-                                                      FontWeight.w600)),
+                                          style: const TextStyle(
+                                              fontSize: 16,
+                                              fontWeight: FontWeight.w600,
+                                              color: Colors.white)),
                                       const SizedBox(height: 2),
                                       Text(tr('you'),
-                                          style: TextStyle(
+                                          style: const TextStyle(
                                               fontSize: 12,
-                                              color: Colors.grey.shade600)),
+                                              color: Colors.white54)),
                                       const SizedBox(height: 4),
                                       Row(
                                         children: [
@@ -341,9 +339,9 @@ class CatchesScreenState extends State<CatchesScreen> {
                                       ),
                                       const SizedBox(height: 2),
                                       Text('📍 Lake Michigan',
-                                          style: TextStyle(
-                                              fontSize: 11,
-                                              color: Colors.grey.shade500)),
+                                          style: const TextStyle(
+                                              color: Colors.white70,
+                                              fontSize: 11)),
                                     ],
                                   ),
                                 ),
