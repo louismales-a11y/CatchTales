@@ -21,6 +21,7 @@ import '../services/spots_db_service.dart';
 import '../services/depth_db_service.dart';
 import '../services/pro_service.dart';
 import '../services/offline_region_service.dart';
+import '../services/connectivity_service.dart';
 import '../services/api_config.dart';
 import '../services/gpx_service.dart';
 import 'spots_screen.dart';
@@ -425,6 +426,19 @@ class MapScreenState extends State<MapScreen> {
   Future<void> _downloadNamedRegion(
       String name, double minLat, double maxLat, double minLng, double maxLng) async {
     if (_downloading) return;
+    // Block download if WiFi-only is on and we're not on WiFi
+    if (!ConnectivityService.instance.canTransferData) {
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          behavior: SnackBarBehavior.floating,
+          content: Text(ConnectivityService.instance.wifiOnly
+              ? 'WiFi-only mode is on. Connect to WiFi to download maps.'
+              : 'No internet connection.'),
+        ),
+      );
+      return;
+    }
     setState(() { _downloading = true; _dlProgress = 0; });
 
     final regionId = 'reg_${DateTime.now().millisecondsSinceEpoch}';

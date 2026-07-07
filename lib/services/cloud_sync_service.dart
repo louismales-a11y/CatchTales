@@ -4,6 +4,7 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import '../models/catch.dart';
 import 'catches_db_service.dart';
+import 'connectivity_service.dart';
 
 /// Cloud sync status
 enum SyncStatus { disconnected, syncing, connected, error }
@@ -57,6 +58,13 @@ class CloudSyncService {
   /// Upload all catches to Firestore.
   Future<void> uploadCatches() async {
     if (!_available) return;
+    if (!ConnectivityService.instance.canTransferData) {
+      _status = SyncStatus.error;
+      _lastError = ConnectivityService.instance.wifiOnly
+          ? 'WiFi-only mode is on. Connect to WiFi to sync.'
+          : 'No internet connection.';
+      return;
+    }
     _status = SyncStatus.syncing;
     try {
       final catches = await CatchesDbService.instance.getCatches();
@@ -86,6 +94,13 @@ class CloudSyncService {
   /// Download catches from Firestore and merge into local DB.
   Future<int> downloadCatches() async {
     if (!_available) return 0;
+    if (!ConnectivityService.instance.canTransferData) {
+      _status = SyncStatus.error;
+      _lastError = ConnectivityService.instance.wifiOnly
+          ? 'WiFi-only mode is on. Connect to WiFi to sync.'
+          : 'No internet connection.';
+      return 0;
+    }
     _status = SyncStatus.syncing;
     int count = 0;
     try {

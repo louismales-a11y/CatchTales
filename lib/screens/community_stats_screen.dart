@@ -8,6 +8,7 @@ import 'package:url_launcher/url_launcher.dart';
 import '../services/api_config.dart';
 import '../services/community_stats_service.dart';
 import '../services/pro_service.dart';
+import '../services/connectivity_service.dart';
 import '../services/analytics_service.dart';
 import '../services/help_text.dart';
 
@@ -117,6 +118,7 @@ class _CommunityStatsScreenState extends State<CommunityStatsScreen> {
   Future<List<Map<String, String>>> _googlePlacesSearch(
       String query, String apiKey) async {
     if (apiKey.isEmpty) return [];
+    if (!ConnectivityService.instance.canTransferData) return [];
     try {
       final url = Uri.parse(
           'https://maps.googleapis.com/maps/api/place/textsearch/json'
@@ -133,6 +135,7 @@ class _CommunityStatsScreenState extends State<CommunityStatsScreen> {
   }
 
   Future<List<Map<String, String>>> _nominatimLakeSearch(String query) async {
+    if (!ConnectivityService.instance.canTransferData) return [];
     try {
       final url = Uri.parse(
           'https://nominatim.openstreetmap.org/search'

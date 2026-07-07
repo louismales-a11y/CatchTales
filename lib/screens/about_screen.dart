@@ -11,6 +11,7 @@ import '../services/catches_db_service.dart';
 import '../services/notification_service.dart';
 import '../services/local_notification_service.dart';
 import '../services/translation_service.dart';
+import '../services/connectivity_service.dart';
 
 
 class AboutScreen extends StatefulWidget {
@@ -459,6 +460,59 @@ class _AboutScreenState extends State<AboutScreen> {
                     prefKey: 'solunar_alert_enabled',
                     onEnable: () => LocalNotificationService.instance.scheduleSolunarAlert(),
                     onDisable: () => LocalNotificationService.instance.cancelSolunarAlert(),
+                  ),
+                ],
+              ),
+            ),
+          ),
+          const SizedBox(height: 16),
+          // ── Data Transfer Settings ──
+          Card(
+            child: Padding(
+              padding: const EdgeInsets.all(14),
+              child: Column(
+                children: [
+                  Row(
+                    children: [
+                      Icon(Icons.wifi, size: 20, color: theme.colorScheme.primary),
+                      const SizedBox(width: 10),
+                      const Text('Data Transfer',
+                          style: TextStyle(fontWeight: FontWeight.w600)),
+                    ],
+                  ),
+                  const SizedBox(height: 8),
+                  Consumer<ConnectivityService>(
+                    builder: (ctx, cs, _) {
+                      return Row(
+                        children: [
+                          Icon(
+                            cs.wifiOnly ? Icons.wifi_lock : Icons.wifi,
+                            size: 18,
+                            color: cs.wifiOnly ? Colors.orange.shade600 : Colors.grey.shade600,
+                          ),
+                          const SizedBox(width: 10),
+                          Expanded(
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Text('WiFi-only mode',
+                                    style: const TextStyle(fontSize: 13, fontWeight: FontWeight.w500)),
+                                Text(
+                                  cs.wifiOnly
+                                      ? 'Data transfers (sync, weather, maps) will only happen over WiFi'
+                                      : 'Data transfers allowed on mobile data and WiFi',
+                                  style: TextStyle(fontSize: 11, color: Colors.grey.shade600),
+                                ),
+                              ],
+                            ),
+                          ),
+                          Switch(
+                            value: cs.wifiOnly,
+                            onChanged: (v) => cs.setWifiOnly(v),
+                          ),
+                        ],
+                      );
+                    },
                   ),
                 ],
               ),

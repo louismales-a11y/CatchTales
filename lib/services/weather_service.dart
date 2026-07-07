@@ -2,12 +2,21 @@ import 'dart:convert';
 import 'package:http/http.dart' as http;
 import 'api_config.dart';
 import 'cache_service.dart';
+import 'connectivity_service.dart';
 
 class WeatherService {
-  /// Current weather at [lat], [lng]. Returns cached data if offline.
+  /// Current weather at [lat], [lng]. Returns cached data if offline or WiFi-only is on.
   static Future<Map<String, dynamic>?> fetchWeather(
       double lat, double lng) async {
     final cacheKey = 'weather_${lat.toStringAsFixed(1)}_${lng.toStringAsFixed(1)}';
+
+    // If WiFi-only mode is on and we're not on WiFi, try cache first
+    if (!ConnectivityService.instance.canTransferData) {
+      final cached = CacheService.instance.get<Map>(cacheKey, maxAge: const Duration(hours: 3));
+      if (cached != null) return cached as Map<String, dynamic>?;
+      return null;
+    }
+
     try {
       final uri = Uri.parse(
           'https://api.openweathermap.org/data/2.5/weather'
@@ -44,8 +53,12 @@ class WeatherService {
 
   /// 5-day / 3-hour forecast at [lat], [lng].
   /// Returns a list of forecast entries grouped by day.
+  /// Respects WiFi-only data transfer setting.
   static Future<List<ForecastDay>?> fetchForecast(
       double lat, double lng) async {
+    // Respect WiFi-only mode
+    if (!ConnectivityService.instance.canTransferData) return null;
+
     try {
       final uri = Uri.parse(
           'https://api.openweathermap.org/data/2.5/forecast'
