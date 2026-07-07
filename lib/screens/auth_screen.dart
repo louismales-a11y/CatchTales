@@ -20,6 +20,7 @@ class _AuthScreenState extends State<AuthScreen> {
   bool _isLogin = true;
   bool _obscurePass = true;
   bool _isLoading = false;
+  bool _termsAccepted = false;
 
   @override
   void dispose() {
@@ -31,6 +32,18 @@ class _AuthScreenState extends State<AuthScreen> {
 
   Future<void> _submit() async {
     if (!_formKey.currentState!.validate()) return;
+
+    // Check terms acceptance for sign-up
+    if (!_isLogin && !_termsAccepted) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          behavior: SnackBarBehavior.floating,
+          content: const Text('Please agree to the Terms of Service to continue.'),
+          backgroundColor: Colors.orange.shade700,
+        ),
+      );
+      return;
+    }
 
     setState(() => _isLoading = true);
     final auth = AuthService.instance;
@@ -52,7 +65,10 @@ class _AuthScreenState extends State<AuthScreen> {
     if (!mounted) return;
     setState(() => _isLoading = false);
 
-    if (!success && auth.error != null) {
+    if (success && !_isLogin) {
+      // Show email verification dialog after sign-up
+      _showEmailVerificationDialog();
+    } else if (!success && auth.error != null) {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           behavior: SnackBarBehavior.floating,
@@ -61,7 +77,35 @@ class _AuthScreenState extends State<AuthScreen> {
         ),
       );
     }
-    // If success, AuthService status change will trigger navigation
+    // If login success, AuthService status change will trigger navigation
+  }
+
+  /// Show a dialog reminding the user to verify their email.
+  Future<void> _showEmailVerificationDialog() async {
+    await showDialog(
+      context: context,
+      barrierDismissible: false,
+      builder: (ctx) => AlertDialog(
+        title: const Row(
+          children: [
+            Icon(Icons.mark_email_unread, color: Colors.amber),
+            SizedBox(width: 8),
+            Expanded(child: Text('Verify Your Email')),
+          ],
+        ),
+        content: const Text(
+          'We\'ve sent a verification link to your email. '
+          'Please check your inbox and tap the link to verify your account.\n\n'
+          'You can close this and verify later from the About screen.',
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(ctx),
+            child: const Text('OK'),
+          ),
+        ],
+      ),
+    );
   }
 
   /// Show a dialog to enter email for password reset.
@@ -281,6 +325,65 @@ class _AuthScreenState extends State<AuthScreen> {
                         },
                       ),
                     ),
+
+                    // ─── Terms checkbox (sign-up only) ───
+                    if (!_isLogin)
+                      Padding(
+                        padding: const EdgeInsets.only(bottom: 16),
+                        child: Row(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            SizedBox(
+                              width: 24,
+                              height: 24,
+                              child: Checkbox(
+                                value: _termsAccepted,
+                                onChanged: (v) => setState(() => _termsAccepted = v ?? false),
+                                fillColor: WidgetStateProperty.resolveWith((states) {
+                                  if (states.contains(WidgetState.selected)) {
+                                    return const Color(0xFF76FF03);
+                                  }
+                                  return Colors.white.withValues(alpha: 0.2);
+                                }),
+                                checkColor: const Color(0xFF003544),
+                                shape: RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.circular(4),
+                                ),
+                              ),
+                            ),
+                            const SizedBox(width: 10),
+                            Expanded(
+                              child: RichText(
+                                text: TextSpan(
+                                  style: TextStyle(
+                                    color: Colors.grey.shade300,
+                                    fontSize: 12,
+                                    height: 1.4,
+                                  ),
+                                  children: [
+                                    const TextSpan(text: 'I agree to the '),
+                                    TextSpan(
+                                      text: 'Terms of Service',
+                                      style: TextStyle(
+                                        color: const Color(0xFF00BCD4),
+                                        fontWeight: FontWeight.w600,
+                                      ),
+                                    ),
+                                    const TextSpan(text: ' and '),
+                                    TextSpan(
+                                      text: 'Privacy Policy',
+                                      style: TextStyle(
+                                        color: const Color(0xFF00BCD4),
+                                        fontWeight: FontWeight.w600,
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
 
                     // ─── Password field ───
                     Padding(

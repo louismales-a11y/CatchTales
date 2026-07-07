@@ -40,13 +40,18 @@ class AuthService extends ChangeNotifier {
   String? _logoutMessage;
   String? get logoutMessage => _logoutMessage;
 
+  /// Whether the current user's email is verified.
+  bool get emailVerified => _user?.emailVerified ?? false;
+
   /// Initialize. Checks for existing session and enforces single-device login.
   Future<void> init() async {
     try {
       final currentUser = FirebaseAuth.instance.currentUser;
       if (currentUser != null) {
-        _user = currentUser;
-        _email = currentUser.email ?? '';
+        // Reload user to get latest emailVerified status
+        await currentUser.reload();
+        _user = FirebaseAuth.instance.currentUser;
+        _email = _user?.email ?? '';
         await _loadProfile();
 
         // Single-device check: verify our local token matches Firestore
@@ -98,6 +103,9 @@ class AuthService extends ChangeNotifier {
       // Create user profile in Firestore with device token
       await _createProfile();
       await _storeDeviceToken();
+
+      // Send email verification
+      await sendEmailVerification();
 
       _status = AuthStatus.authenticated;
       notifyListeners();
@@ -337,6 +345,84 @@ class AuthService extends ChangeNotifier {
       }
     } catch (e) {
       debugPrint('AuthService._loadProfile: $e');
+    }
+  }
+
+  /// Send email verification link to the current user.
+  Future<bool> sendEmailVerification() async {
+    try {
+      final user = FirebaseAuth.instance.currentUser;
+      if (user != null && !user.emailVerified) {
+        await user.sendEmailVerification();
+        return true;
+      }
+      return false;
+    } catch (e) {
+      debugPrint('AuthService.sendEmailVerification: $e');
+      return false;
+    }
+  }
+
+  /// Refresh the current user to get latest emailVerified status.
+  Future<void> refreshEmailVerification() async {
+    try {
+      await FirebaseAuth.instance.currentUser?.reload();
+      _user = FirebaseAuth.instance.currentUser;
+      notifyListeners();
+    } catch (e) {
+      debugPrint('AuthService.refreshEmailVerification: $e');
+    }
+  }
+
+  /// Delete the current user's account and all associated data.
+  Future<bool> deleteAccount() async {
+    if (_user == null) return false;
+    try {
+      // Delete Firestore user profile
+      await FirebaseFirestore.instance
+          .collection('users')
+          .doc(_user!.uid)
+          .delete();
+
+      // Delete catches subcollection
+      final catches = await FirebaseFirestore.instance
+          .collection('users')
+          .doc(_user!.uid)
+          .collection('catches')
+          .get();
+      for (final doc in catches.docs) {
+        await doc.reference.delete();
+      }
+
+      // Delete Firebase Auth account
+      await _user!.delete();
+
+      // Clear local state
+      _user = null;
+      _status = AuthStatus.unauthenticated;
+      _isPro = false;
+      _userName = '';
+      _email = '';
+      _error = null;
+      await _clearLocalDeviceToken();
+
+      // Reset local Pro status
+      await ProService.instance.resetToFree();
+
+      notifyListeners();
+      return true;
+    } on FirebaseAuthException catch (e) {
+      if (e.code == 'requires-recent-login') {
+        _error = 'For security, please log out and log back in before deleting your account.';
+      } else {
+        _error = 'Failed to delete account: ${e.message}';
+      }
+      notifyListeners();
+      return false;
+    } catch (e) {
+      _error = 'Failed to delete account. Please try again.';
+      notifyListeners();
+      return false;
     }
   }
 

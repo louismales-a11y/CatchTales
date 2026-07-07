@@ -12,6 +12,7 @@ import '../services/notification_service.dart';
 import '../services/local_notification_service.dart';
 import '../services/translation_service.dart';
 import '../services/connectivity_service.dart';
+import '../services/auth_service.dart';
 
 
 class AboutScreen extends StatefulWidget {
@@ -518,10 +519,146 @@ class _AboutScreenState extends State<AboutScreen> {
               ),
             ),
           ),
+          // ── Delete Account ──
+          Card(
+            child: Padding(
+              padding: const EdgeInsets.all(14),
+              child: Column(
+                children: [
+                  Row(
+                    children: [
+                      Icon(Icons.delete_forever_outlined, size: 20, color: Colors.red.shade400),
+                      const SizedBox(width: 10),
+                      const Text('Delete Account',
+                          style: TextStyle(fontWeight: FontWeight.w600)),
+                    ],
+                  ),
+                  const SizedBox(height: 8),
+                  Text(
+                    'Permanently delete your account and all your data. This cannot be undone.',
+                    style: TextStyle(fontSize: 12, color: Colors.grey.shade600, height: 1.5),
+                  ),
+                  const SizedBox(height: 12),
+                  SizedBox(
+                    width: double.infinity,
+                    child: OutlinedButton.icon(
+                      onPressed: () => _confirmDeleteAccount(),
+                      icon: const Icon(Icons.warning_amber_rounded, size: 18),
+                      label: const Text('Delete My Account', style: TextStyle(fontSize: 14)),
+                      style: OutlinedButton.styleFrom(
+                        foregroundColor: Colors.red.shade700,
+                        side: BorderSide(color: Colors.red.shade300),
+                        padding: const EdgeInsets.symmetric(vertical: 14),
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ),
           const SizedBox(height: 24),
         ],
       ),
     );
+  }
+
+  Future<void> _confirmDeleteAccount() async {
+    final confirmed = await showDialog<bool>(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        title: const Row(
+          children: [
+            Icon(Icons.warning_amber_rounded, color: Colors.red, size: 24),
+            SizedBox(width: 8),
+            Text('Delete Account'),
+          ],
+        ),
+        content: const Text(
+          'Are you sure? This will permanently delete:\n\n'
+          '• Your account\n'
+          '• All your catch records\n'
+          '• Your profile and settings\n\n'
+          'This cannot be undone.',
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(ctx, false),
+            child: const Text('Cancel'),
+          ),
+          FilledButton(
+            onPressed: () => Navigator.pop(ctx, true),
+            style: FilledButton.styleFrom(
+              backgroundColor: Colors.red,
+            ),
+            child: const Text('Delete Forever'),
+          ),
+        ],
+      ),
+    );
+
+    if (confirmed != true) return;
+
+    // Final confirmation with text entry
+    final typeCtrl = TextEditingController();
+    final finalConfirm = await showDialog<bool>(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        title: const Text('Type \'delete\' to confirm'),
+        content: TextField(
+          controller: typeCtrl,
+          autofocus: true,
+          decoration: const InputDecoration(
+            hintText: 'delete',
+            border: OutlineInputBorder(),
+          ),
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(ctx, false),
+            child: const Text('Cancel'),
+          ),
+          FilledButton(
+            onPressed: () => Navigator.pop(ctx, typeCtrl.text.trim().toLowerCase() == 'delete'),
+            style: FilledButton.styleFrom(
+              backgroundColor: Colors.red,
+            ),
+            child: const Text('Confirm Delete'),
+          ),
+        ],
+      ),
+    );
+
+    if (finalConfirm != true) return;
+
+    final auth = AuthService.instance;
+    final success = await auth.deleteAccount();
+
+    if (!mounted) return;
+    if (success) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          behavior: SnackBarBehavior.floating,
+          content: const Text('Account deleted successfully.'),
+        ),
+      );
+      // Navigate back to auth screen
+      Navigator.of(context).pushAndRemoveUntil(
+        MaterialPageRoute(builder: (_) => const Scaffold(
+          body: Center(
+            child: Text('Redirecting...'),
+          ),
+        )),
+        (route) => false,
+      );
+    } else {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          behavior: SnackBarBehavior.floating,
+          content: Text(auth.error ?? 'Failed to delete account.'),
+          backgroundColor: Colors.red.shade700,
+        ),
+      );
+    }
   }
 
   Widget _bullets(List<String> items) {
