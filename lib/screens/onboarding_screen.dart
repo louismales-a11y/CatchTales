@@ -132,7 +132,7 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
               alignment: Alignment.topRight,
               child: TextButton(
                 onPressed: _done,
-                child: Text(tr('skip'), style: TextStyle(color: Colors.grey.shade500)),
+                child: Text(tr('skip'), style: const TextStyle(color: Colors.white54)),
               ),
             ),
             // Pages
@@ -164,8 +164,8 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
                         decoration: BoxDecoration(
                           borderRadius: BorderRadius.circular(4),
                           color: i == _page
-                              ? theme.colorScheme.primary
-                              : Colors.grey.shade300,
+                              ? const Color(0xFF76FF03)
+                              : Colors.white30,
                         ),
                       );
                     }),
@@ -228,17 +228,19 @@ class _OnboardPage {
             ),
             const SizedBox(height: 16),
             Text(title,
-                style: theme.textTheme.titleLarge?.copyWith(
+                style: const TextStyle(
+                  fontSize: 22,
                   fontWeight: FontWeight.w700,
+                  color: Colors.white,
                 )),
             const SizedBox(height: 8),
             Text(
               desc,
               textAlign: TextAlign.center,
-              style: TextStyle(
+              style: const TextStyle(
                 fontSize: 14,
                 height: 1.5,
-                color: theme.colorScheme.onSurface.withValues(alpha: 0.8),
+                color: Colors.white70,
               ),
             ),
             if (isLast) ...[const SizedBox(height: 16),

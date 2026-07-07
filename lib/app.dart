@@ -148,6 +148,16 @@ class BestFishBuddyAppTest extends StatelessWidget {
           letterSpacing: 1.2,
         ),
       ),
+      popupMenuTheme: PopupMenuThemeData(
+        color: const Color(0xFF0D2137),
+        elevation: 8,
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+        textStyle: const TextStyle(color: Colors.white, fontSize: 14),
+        labelTextStyle: WidgetStateProperty.resolveWith((_) {
+          return const TextStyle(color: Colors.white, fontSize: 14);
+        }),
+        iconColor: Colors.white70,
+      ),
       cardTheme: CardThemeData(
         elevation: 1,
         shadowColor: Colors.black.withValues(alpha: dark ? 0.2 : 0.08),
@@ -159,10 +169,21 @@ class BestFishBuddyAppTest extends StatelessWidget {
         margin: const EdgeInsets.symmetric(horizontal: 12, vertical: 5),
       ),
       navigationBarTheme: NavigationBarThemeData(
-        elevation: dark ? 8 : 0,
-        backgroundColor: navBg,
-        indicatorColor:
-            prim.withValues(alpha: dark ? 0.12 : 0.08),
+        elevation: 4,
+        backgroundColor: const Color(0xFF0D2137),  // Deep blue
+        indicatorColor: const Color(0xFF00BCD4).withValues(alpha: 0.25),
+        labelTextStyle: WidgetStateProperty.resolveWith((states) {
+          if (states.contains(WidgetState.selected)) {
+            return const TextStyle(fontSize: 12, fontWeight: FontWeight.w600, color: Colors.white);
+          }
+          return TextStyle(fontSize: 12, color: Colors.white.withValues(alpha: 0.6));
+        }),
+        iconTheme: WidgetStateProperty.resolveWith((states) {
+          if (states.contains(WidgetState.selected)) {
+            return const IconThemeData(color: Colors.white, size: 24);
+          }
+          return IconThemeData(color: Colors.white.withValues(alpha: 0.6), size: 24);
+        }),
       ),
     );
   }
