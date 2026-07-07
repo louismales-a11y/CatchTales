@@ -8,9 +8,6 @@ import '../services/auth_service.dart';
 import '../services/translation_service.dart';
 import 'import_export_screen.dart';
 
-/// Shortcut for translations.
-String tr(String key) => TranslationService.instance.tr(key);
-
 /// Settings screen with data transfer, notifications, export, account management.
 class SettingsScreen extends StatefulWidget {
   const SettingsScreen({super.key});

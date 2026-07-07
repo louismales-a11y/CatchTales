@@ -4,9 +4,6 @@ import '../services/auth_service.dart';
 import '../services/translation_service.dart';
 import 'verify_email_screen.dart';
 
-/// Shortcut for translations.
-String tr(String key) => TranslationService.instance.tr(key);
-
 
 /// Sign-up / Login screen shown before the main app.
 class AuthScreen extends StatefulWidget {

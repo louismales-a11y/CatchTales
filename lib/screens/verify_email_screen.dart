@@ -3,9 +3,6 @@ import 'package:provider/provider.dart';
 import '../services/auth_service.dart';
 import '../services/translation_service.dart';
 
-/// Shortcut for translations.
-String tr(String key) => TranslationService.instance.tr(key);
-
 /// Screen shown after sign-up / login requiring email verification.
 /// Blocks access to the main app until the email is verified.
 class VerifyEmailScreen extends StatefulWidget {
