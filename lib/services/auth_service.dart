@@ -48,6 +48,8 @@ class AuthService extends ChangeNotifier {
   Future<bool> checkEmailVerification() async {
     if (_user == null) return false;
     try {
+      // Force a fresh token and user reload from server
+      await _user!.getIdToken(true);
       await _user!.reload();
       _user = FirebaseAuth.instance.currentUser;
       if (_user?.emailVerified == true) {
@@ -57,6 +59,20 @@ class AuthService extends ChangeNotifier {
       }
     } catch (e) {
       debugPrint('AuthService.checkEmailVerification: $e');
+      // If reload failed, try one more time with fresh token
+      try {
+        final user = FirebaseAuth.instance.currentUser;
+        if (user != null) {
+          await user.getIdToken(true);
+          await user.reload();
+          if (user.emailVerified) {
+            _user = user;
+            _status = AuthStatus.authenticated;
+            notifyListeners();
+            return true;
+          }
+        }
+      } catch (_) {}
     }
     return false;
   }
@@ -67,7 +83,13 @@ class AuthService extends ChangeNotifier {
       final currentUser = FirebaseAuth.instance.currentUser;
       if (currentUser != null) {
         // Reload user to get latest emailVerified status
-        await currentUser.reload();
+        try {
+          await currentUser.getIdToken(true);
+          await currentUser.reload();
+        } catch (_) {
+          // Reload failed — use cached user
+          debugPrint('AuthService.init: user reload failed, using cached');
+        }
         _user = FirebaseAuth.instance.currentUser;
         _email = _user?.email ?? '';
         await _loadProfile();
@@ -398,7 +420,20 @@ class AuthService extends ChangeNotifier {
   Future<bool> sendEmailVerification() async {
     try {
       final user = FirebaseAuth.instance.currentUser;
-      if (user != null && !user.emailVerified) {
+      if (user != null) {
+        // Force refresh to get latest emailVerified status
+        try {
+          await user.getIdToken(true);
+          await user.reload();
+        } catch (_) {}
+        // Only send if still not verified
+        if (user.emailVerified) {
+          // Already verified - update local state
+          _user = FirebaseAuth.instance.currentUser;
+          _status = AuthStatus.authenticated;
+          notifyListeners();
+          return true;
+        }
         await user.sendEmailVerification();
         return true;
       }
