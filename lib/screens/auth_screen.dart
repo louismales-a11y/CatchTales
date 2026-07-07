@@ -66,8 +66,15 @@ class _AuthScreenState extends State<AuthScreen> {
     setState(() => _isLoading = false);
 
     if (success && !_isLogin) {
-      // Show email verification dialog after sign-up
-      _showEmailVerificationDialog();
+      // Show a quick snackbar about email verification
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          behavior: SnackBarBehavior.floating,
+          content: const Text('Check your email to verify your account!'),
+          backgroundColor: Colors.green.shade700,
+          duration: const Duration(seconds: 4),
+        ),
+      );
     } else if (!success && auth.error != null) {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
@@ -77,35 +84,7 @@ class _AuthScreenState extends State<AuthScreen> {
         ),
       );
     }
-    // If login success, AuthService status change will trigger navigation
-  }
-
-  /// Show a dialog reminding the user to verify their email.
-  Future<void> _showEmailVerificationDialog() async {
-    await showDialog(
-      context: context,
-      barrierDismissible: false,
-      builder: (ctx) => AlertDialog(
-        title: const Row(
-          children: [
-            Icon(Icons.mark_email_unread, color: Colors.amber),
-            SizedBox(width: 8),
-            Expanded(child: Text('Verify Your Email')),
-          ],
-        ),
-        content: const Text(
-          'We\'ve sent a verification link to your email. '
-          'Please check your inbox and tap the link to verify your account.\n\n'
-          'You can close this and verify later from the About screen.',
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(ctx),
-            child: const Text('OK'),
-          ),
-        ],
-      ),
-    );
+    // AuthService status change will trigger navigation back to main app
   }
 
   /// Show a dialog to enter email for password reset.
