@@ -161,13 +161,15 @@ class BragBoardService {
       // Upload photo
       final fileName = 'brag_${_uid}_${DateTime.now().millisecondsSinceEpoch}.jpg';
       final ref = _storage.ref().child('brag_photos/$fileName');
-      if (await photo.length() > 0) {
-        // Compress/upload
-        await ref.putFile(File(photo.path));
-      } else {
-        await ref.putData(await photo.readAsBytes());
-      }
+      debugPrint('BragBoardService: uploading photo...');
+      
+      // Use putData instead of putFile for reliability
+      final bytes = await photo.readAsBytes();
+      debugPrint('BragBoardService: photo size ${bytes.length} bytes');
+      await ref.putData(bytes, SettableMetadata(contentType: 'image/jpeg'));
+      
       final photoUrl = await ref.getDownloadURL();
+      debugPrint('BragBoardService: photo uploaded, URL: $photoUrl');
 
       // Save post
       final post = BragPost(
@@ -181,9 +183,11 @@ class BragBoardService {
         timestamp: DateTime.now(),
       );
       final doc = await _postsRef.add(post.toMap());
+      debugPrint('BragBoardService: post created with id: ${doc.id}');
       return doc.id;
     } catch (e) {
-      debugPrint('BragBoardService.createPost: $e');
+      debugPrint('BragBoardService.createPost ERROR: $e');
+      debugPrint('BragBoardService.createPost stack: ${StackTrace.current}');
       return null;
     }
   }
