@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../services/auth_service.dart';
 import '../services/translation_service.dart';
+import '../widgets/water_background.dart';
 
 /// Screen shown after sign-up / login requiring email verification.
 /// Blocks access to the main app until the email is verified.
@@ -59,21 +60,9 @@ class _VerifyEmailScreenState extends State<VerifyEmailScreen> {
     }
 
     return Scaffold(
-      body: Container(
-        width: double.infinity,
-        height: double.infinity,
-        decoration: const BoxDecoration(
-          gradient: LinearGradient(
-            begin: Alignment.topCenter,
-            end: Alignment.bottomCenter,
-            colors: [
-              Color(0xFF0A1628),
-              Color(0xFF0D2137),
-              Color(0xFF0A1A2E),
-              Color(0xFF06101E),
-            ],
-          ),
-        ),
+      body: WaterBackground(
+        showFish: true,
+        waveHeight: 35,
         child: SafeArea(
           child: Center(
             child: SingleChildScrollView(

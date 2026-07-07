@@ -37,6 +37,7 @@ import 'screens/auth_screen.dart';
 import 'screens/verify_email_screen.dart';
 import 'screens/settings_screen.dart';
 import 'services/auth_service.dart';
+import 'widgets/water_background.dart';
 
 // ─── 5 Color Schemes ──────────────────────────────────────────────────────
 
@@ -306,21 +307,12 @@ class _SplashScreenTestState extends State<SplashScreenTest> {
   Widget build(BuildContext context) {
     final tp = context.watch<ThemeProvider>();
     return Scaffold(
-      body: Container(
+      body: WaterBackground(
+        showFish: true,
+        waveHeight: 40,
+        child: Container(
         width: double.infinity,
         height: double.infinity,
-        decoration: const BoxDecoration(
-          gradient: LinearGradient(
-            begin: Alignment.topCenter,
-            end: Alignment.bottomCenter,
-            colors: [
-              Color(0xFF0A1628),
-              Color(0xFF0D2137),
-              Color(0xFF0A1A2E),
-              Color(0xFF06101E),
-            ],
-          ),
-        ),
         child: SafeArea(
           child: Column(
             children: [
@@ -470,6 +462,7 @@ class _SplashScreenTestState extends State<SplashScreenTest> {
             ],
           ),
         ),
+      ),
       ),
     );
   }
