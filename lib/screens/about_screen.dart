@@ -610,17 +610,8 @@ class _AboutScreenState extends State<AboutScreen> {
     await AuthService.instance.logout();
 
     if (!mounted) return;
-    // Navigate back to auth screen
-    Navigator.of(context).pushAndRemoveUntil(
-      MaterialPageRoute(
-        builder: (_) => const Scaffold(
-          body: Center(
-            child: Text('Logged out successfully.'),
-          ),
-        ),
-      ),
-      (route) => false,
-    );
+    // Pop back to splash screen — it will show the auth flow
+    Navigator.of(context).popUntil((route) => route.isFirst);
   }
 
   Future<void> _confirmDeleteAccount() async {
@@ -703,14 +694,7 @@ class _AboutScreenState extends State<AboutScreen> {
         ),
       );
       // Navigate back to auth screen
-      Navigator.of(context).pushAndRemoveUntil(
-        MaterialPageRoute(builder: (_) => const Scaffold(
-          body: Center(
-            child: Text('Redirecting...'),
-          ),
-        )),
-        (route) => false,
-      );
+      Navigator.of(context).popUntil((route) => route.isFirst);
     } else {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
