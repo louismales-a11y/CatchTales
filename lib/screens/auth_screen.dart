@@ -64,6 +64,66 @@ class _AuthScreenState extends State<AuthScreen> {
     // If success, AuthService status change will trigger navigation
   }
 
+  /// Show a dialog to enter email for password reset.
+  Future<void> _showForgotPasswordDialog() async {
+    final emailCtrl = TextEditingController(text: _emailCtrl.text.trim());
+    final result = await showDialog<bool>(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        title: const Text('Reset Password'),
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            const Text(
+              'Enter your email address and we\'ll send you a link to reset your password.',
+              style: TextStyle(fontSize: 14),
+            ),
+            const SizedBox(height: 16),
+            TextField(
+              controller: emailCtrl,
+              keyboardType: TextInputType.emailAddress,
+              autofocus: true,
+              decoration: const InputDecoration(
+                labelText: 'Email',
+                border: OutlineInputBorder(),
+                prefixIcon: Icon(Icons.email_outlined),
+              ),
+            ),
+          ],
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(ctx, false),
+            child: const Text('Cancel'),
+          ),
+          FilledButton(
+            onPressed: () => Navigator.pop(ctx, true),
+            child: const Text('Send Reset Link'),
+          ),
+        ],
+      ),
+    );
+
+    if (result != true || emailCtrl.text.trim().isEmpty) return;
+
+    setState(() => _isLoading = true);
+    final success = await AuthService.instance.sendPasswordResetEmail(emailCtrl.text.trim());
+    setState(() => _isLoading = false);
+
+    if (!mounted) return;
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        behavior: SnackBarBehavior.floating,
+        content: Text(
+          success
+              ? 'Password reset link sent! Check your email.'
+              : (AuthService.instance.error ?? 'Failed to send reset email.'),
+        ),
+        backgroundColor: success ? Colors.green.shade700 : Colors.red.shade700,
+      ),
+    );
+  }
+
   /// Switch between login and sign-up modes.
   void _toggleMode() {
     setState(() {
@@ -268,6 +328,31 @@ class _AuthScreenState extends State<AuthScreen> {
                         },
                       ),
                     ),
+
+                    // ─── Forgot Password (login only) ───
+                    if (_isLogin)
+                      Padding(
+                        padding: const EdgeInsets.only(bottom: 20),
+                        child: Row(
+                          mainAxisAlignment: MainAxisAlignment.end,
+                          children: [
+                            TextButton(
+                              onPressed: () => _showForgotPasswordDialog(),
+                              style: TextButton.styleFrom(
+                                padding: const EdgeInsets.symmetric(horizontal: 8),
+                              ),
+                              child: Text(
+                                'Forgot password?',
+                                style: TextStyle(
+                                  color: const Color(0xFF00BCD4),
+                                  fontSize: 13,
+                                  fontWeight: FontWeight.w500,
+                                ),
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
 
                     // ─── Submit button ───
                     SizedBox(

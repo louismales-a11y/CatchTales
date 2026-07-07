@@ -340,6 +340,33 @@ class AuthService extends ChangeNotifier {
     }
   }
 
+  /// Send a password reset email.
+  /// Returns true if the email was sent successfully.
+  Future<bool> sendPasswordResetEmail(String email) async {
+    _error = null;
+    try {
+      await FirebaseAuth.instance.sendPasswordResetEmail(email: email.trim());
+      return true;
+    } on FirebaseAuthException catch (e) {
+      switch (e.code) {
+        case 'user-not-found':
+          _error = 'No account found with this email.';
+          break;
+        case 'invalid-email':
+          _error = 'Please enter a valid email address.';
+          break;
+        default:
+          _error = 'Failed to send reset email. Please try again.';
+      }
+      notifyListeners();
+      return false;
+    } catch (e) {
+      _error = 'Failed to send reset email. Please try again.';
+      notifyListeners();
+      return false;
+    }
+  }
+
   /// Clear the last error.
   void clearError() {
     _error = null;
