@@ -108,8 +108,8 @@ class BestFishBuddyAppTest extends StatelessWidget {
 
     final scaffoldBg = Colors.transparent;
     final cardBg = dark
-        ? const Color(0xFF0E1422).withValues(alpha: 0.92)
-        : Colors.white.withValues(alpha: 0.92);
+        ? const Color(0xFF0E1422).withValues(alpha: 0.5)
+        : Colors.white.withValues(alpha: 0.45);
     final appBarBg = const Color(0xFF0A0E1A);
     final navBg = dark ? const Color(0xFF0A0E1A) : Colors.white;
     final onSurface =
@@ -168,8 +168,8 @@ class BestFishBuddyAppTest extends StatelessWidget {
         iconColor: Colors.white70,
       ),
       cardTheme: CardThemeData(
-        elevation: 1,
-        shadowColor: Colors.black.withValues(alpha: dark ? 0.2 : 0.08),
+        elevation: 0,
+        shadowColor: Colors.transparent,
         shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(16)),
         clipBehavior: Clip.antiAlias,

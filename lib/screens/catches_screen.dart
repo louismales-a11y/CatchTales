@@ -198,7 +198,7 @@ class CatchesScreenState extends State<CatchesScreen> {
           Container(
             width: double.infinity,
             padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
-            color: const Color(0xFF1A237E),
+            color: const Color(0xFF1A237E).withValues(alpha: 0.6),
             child: Row(
               children: [
                 const Icon(Icons.star, size: 16, color: Color(0xFFFFD600)),
