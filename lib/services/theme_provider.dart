@@ -14,7 +14,7 @@ class ThemeProvider extends ChangeNotifier {
   ];
 
   String _themeName = themes.first.name;
-  bool _dark = false;
+  bool _dark = true;
   bool _followSystem = false;
 
   String get themeName => _themeName;
