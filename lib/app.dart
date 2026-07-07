@@ -148,6 +148,14 @@ class BestFishBuddyAppTest extends StatelessWidget {
           letterSpacing: 1.2,
         ),
       ),
+      menuTheme: MenuThemeData(
+        style: MenuStyle(
+          backgroundColor: WidgetStateProperty.all(const Color(0xFF0D2137)),
+          elevation: WidgetStateProperty.all(8),
+          shape: WidgetStateProperty.all(RoundedRectangleBorder(borderRadius: BorderRadius.circular(12))),
+          padding: WidgetStateProperty.all(const EdgeInsets.symmetric(vertical: 4)),
+        ),
+      ),
       popupMenuTheme: PopupMenuThemeData(
         color: const Color(0xFF0D2137),
         elevation: 8,
