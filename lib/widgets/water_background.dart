@@ -15,7 +15,7 @@ class WaterBackground extends StatefulWidget {
     this.child,
     this.showFish = true,
     this.imagePath = 'assets/underwater.png',
-    this.overlayOpacity = 0.5,
+    this.overlayOpacity = 0.6,
   });
 
   @override

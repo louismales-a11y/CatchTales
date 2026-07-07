@@ -805,7 +805,23 @@ class _HomeScreenTestState extends State<HomeScreenTest> {
         ),
         actions: [
           // 3-dot menu
-          PopupMenuButton<String>(
+          Theme(
+            data: Theme.of(context).copyWith(
+              cardColor: const Color(0xFF0D2137),
+              popupMenuTheme: PopupMenuThemeData(
+                color: const Color(0xFF0D2137),
+                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                textStyle: const TextStyle(color: Colors.white, fontSize: 14),
+                iconColor: Colors.white70,
+              ),
+              menuTheme: MenuThemeData(
+                style: MenuStyle(
+                  backgroundColor: WidgetStateProperty.all(const Color(0xFF0D2137)),
+                  shape: WidgetStateProperty.all(RoundedRectangleBorder(borderRadius: BorderRadius.circular(12))),
+                ),
+              ),
+            ),
+            child: PopupMenuButton<String>(
             icon: Icon(Icons.more_vert, color: accent),
             onSelected: (value) {
               switch (value) {
@@ -1111,6 +1127,7 @@ class _HomeScreenTestState extends State<HomeScreenTest> {
               ),
             ],
           ),
+        ),
         ],
       ),
       body: LayoutBuilder(
