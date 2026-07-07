@@ -197,6 +197,32 @@ class _SplashScreenTestState extends State<SplashScreenTest> {
     super.initState();
     _loadVersion();
     TripService.instance.load();
+    // Show device-kicked message if applicable
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      final msg = AuthService.instance.logoutMessage;
+      if (msg != null && mounted) {
+        showDialog(
+          context: context,
+          barrierDismissible: false,
+          builder: (ctx) => AlertDialog(
+            title: const Row(
+              children: [
+                Icon(Icons.warning_amber_rounded, color: Colors.orange),
+                SizedBox(width: 8),
+                Text('Session Ended'),
+              ],
+            ),
+            content: Text(msg),
+            actions: [
+              TextButton(
+                onPressed: () => Navigator.pop(ctx),
+                child: const Text('OK'),
+              ),
+            ],
+          ),
+        );
+      }
+    });
   }
 
   Future<void> _loadVersion() async {

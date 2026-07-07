@@ -1,4 +1,6 @@
+import 'dart:math';
 import 'package:flutter/foundation.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'pro_service.dart';
@@ -34,7 +36,11 @@ class AuthService extends ChangeNotifier {
   String? _error;
   String? get error => _error;
 
-  /// Initialize. Checks for existing session on app start.
+  /// Message shown when kicked off by another device.
+  String? _logoutMessage;
+  String? get logoutMessage => _logoutMessage;
+
+  /// Initialize. Checks for existing session and enforces single-device login.
   Future<void> init() async {
     try {
       final currentUser = FirebaseAuth.instance.currentUser;
@@ -42,6 +48,20 @@ class AuthService extends ChangeNotifier {
         _user = currentUser;
         _email = currentUser.email ?? '';
         await _loadProfile();
+
+        // Single-device check: verify our local token matches Firestore
+        final localToken = await _getLocalDeviceToken();
+        final remoteToken = await _getRemoteDeviceToken();
+
+        if (localToken != remoteToken) {
+          debugPrint('AuthService: Device token mismatch — logging out other device session');
+          await _forceLogout(
+            'This account is being used on another device. '
+            'Please log in again on this device.'
+          );
+          return;
+        }
+
         _status = AuthStatus.authenticated;
       } else {
         _status = AuthStatus.unauthenticated;
@@ -75,8 +95,9 @@ class AuthService extends ChangeNotifier {
       // Update display name in Firebase Auth
       await _user?.updateDisplayName(name.trim());
 
-      // Create user profile in Firestore
+      // Create user profile in Firestore with device token
       await _createProfile();
+      await _storeDeviceToken();
 
       _status = AuthStatus.authenticated;
       notifyListeners();
@@ -127,6 +148,8 @@ class AuthService extends ChangeNotifier {
       _email = email.trim();
       _userName = cred.user?.displayName ?? '';
       await _loadProfile();
+      // Update device token — any new login kicks old device
+      await _storeDeviceToken();
       _status = AuthStatus.authenticated;
       notifyListeners();
       return true;
@@ -171,6 +194,7 @@ class AuthService extends ChangeNotifier {
     _userName = '';
     _email = '';
     _error = null;
+    await _clearLocalDeviceToken();
     notifyListeners();
   }
 
@@ -190,9 +214,82 @@ class AuthService extends ChangeNotifier {
     notifyListeners();
   }
 
+  /// Generate a unique device session token.
+  String _generateDeviceToken() {
+    final rand = Random.secure();
+    final bytes = List<int>.generate(32, (_) => rand.nextInt(256));
+    return bytes.map((b) => b.toRadixString(16).padLeft(2, '0')).join();
+  }
+
+  /// Store the device token locally.
+  Future<void> _storeLocalDeviceToken(String token) async {
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setString('device_session_token', token);
+  }
+
+  /// Get the local device token.
+  Future<String?> _getLocalDeviceToken() async {
+    final prefs = await SharedPreferences.getInstance();
+    return prefs.getString('device_session_token');
+  }
+
+  /// Clear the local device token.
+  Future<void> _clearLocalDeviceToken() async {
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.remove('device_session_token');
+  }
+
+  /// Get the device token stored in Firestore for this user.
+  Future<String?> _getRemoteDeviceToken() async {
+    if (_user == null) return null;
+    try {
+      final doc = await FirebaseFirestore.instance
+          .collection('users')
+          .doc(_user!.uid)
+          .get();
+      return doc.data()?['deviceSessionToken'] as String?;
+    } catch (e) {
+      debugPrint('AuthService._getRemoteDeviceToken: $e');
+      return null;
+    }
+  }
+
+  /// Generate a new device session token and store both locally and in Firestore.
+  Future<void> _storeDeviceToken() async {
+    if (_user == null) return;
+    final token = _generateDeviceToken();
+    await _storeLocalDeviceToken(token);
+    try {
+      await FirebaseFirestore.instance
+          .collection('users')
+          .doc(_user!.uid)
+          .set({'deviceSessionToken': token}, SetOptions(merge: true));
+    } catch (e) {
+      debugPrint('AuthService._storeDeviceToken: $e');
+    }
+  }
+
+  /// Force logout with a message.
+  Future<void> _forceLogout(String message) async {
+    _logoutMessage = message;
+    try {
+      await FirebaseAuth.instance.signOut();
+    } catch (_) {}
+    _user = null;
+    _status = AuthStatus.unauthenticated;
+    _isPro = false;
+    _userName = '';
+    _email = '';
+    _error = message;
+    await _clearLocalDeviceToken();
+    notifyListeners();
+  }
+
   /// Create a Firestore profile document for the new user.
   Future<void> _createProfile() async {
     if (_user == null) return;
+    final token = _generateDeviceToken();
+    await _storeLocalDeviceToken(token);
     try {
       await FirebaseFirestore.instance
           .collection('users')
@@ -201,6 +298,7 @@ class AuthService extends ChangeNotifier {
         'name': _userName,
         'email': _email,
         'isPro': false,
+        'deviceSessionToken': token,
         'createdAt': FieldValue.serverTimestamp(),
         'lastLogin': FieldValue.serverTimestamp(),
       });
