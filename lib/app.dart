@@ -34,6 +34,7 @@ import 'services/connectivity_service.dart';
 import 'services/trip_service.dart';
 import 'screens/onboarding_screen.dart';
 import 'screens/auth_screen.dart';
+import 'screens/verify_email_screen.dart';
 import 'services/auth_service.dart';
 
 // ─── 5 Color Schemes ──────────────────────────────────────────────────────
@@ -393,6 +394,18 @@ class _SplashScreenTestState extends State<SplashScreenTest> {
                           ),
                         );
                         // After returning from auth, check if they logged in
+                        if (!AuthService.instance.isLoggedIn) return;
+                      }
+
+                      // If email is not yet verified, show verification screen
+                      if (auth.status == AuthStatus.emailVerificationPending) {
+                        if (!context.mounted) return;
+                        await Navigator.of(context).push(
+                          MaterialPageRoute(
+                            builder: (_) => const VerifyEmailScreen(),
+                          ),
+                        );
+                        // If they didn't verify, block access
                         if (!AuthService.instance.isLoggedIn) return;
                       }
 

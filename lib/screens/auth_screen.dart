@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../services/auth_service.dart';
+import 'verify_email_screen.dart';
 
 
 /// Sign-up / Login screen shown before the main app.
@@ -165,6 +166,17 @@ class _AuthScreenState extends State<AuthScreen> {
     if (auth.isLoggedIn) {
       WidgetsBinding.instance.addPostFrameCallback((_) {
         if (mounted) Navigator.of(context).pop();
+      });
+    }
+
+    // Show email verification screen instead
+    if (auth.status == AuthStatus.emailVerificationPending) {
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        if (mounted) {
+          Navigator.of(context).pushReplacement(
+            MaterialPageRoute(builder: (_) => const VerifyEmailScreen()),
+          );
+        }
       });
     }
 

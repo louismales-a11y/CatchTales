@@ -6,7 +6,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'pro_service.dart';
 
 /// Authentication states
-enum AuthStatus { uninitialized, unauthenticated, authenticating, authenticated }
+enum AuthStatus { uninitialized, unauthenticated, authenticating, emailVerificationPending, authenticated }
 
 /// Handles user sign-up, login, logout, and profile management.
 /// Replaces the previous anonymous-only approach with email/password accounts.
@@ -43,6 +43,24 @@ class AuthService extends ChangeNotifier {
   /// Whether the current user's email is verified.
   bool get emailVerified => _user?.emailVerified ?? false;
 
+  /// Check if email is verified and transition to authenticated if so.
+  /// Returns true if verification is complete.
+  Future<bool> checkEmailVerification() async {
+    if (_user == null) return false;
+    try {
+      await _user!.reload();
+      _user = FirebaseAuth.instance.currentUser;
+      if (_user?.emailVerified == true) {
+        _status = AuthStatus.authenticated;
+        notifyListeners();
+        return true;
+      }
+    } catch (e) {
+      debugPrint('AuthService.checkEmailVerification: $e');
+    }
+    return false;
+  }
+
   /// Initialize. Checks for existing session and enforces single-device login.
   Future<void> init() async {
     try {
@@ -67,7 +85,12 @@ class AuthService extends ChangeNotifier {
           return;
         }
 
-        _status = AuthStatus.authenticated;
+        // If email not verified on restored session, require verification
+        if (_user?.emailVerified != true) {
+          _status = AuthStatus.emailVerificationPending;
+        } else {
+          _status = AuthStatus.authenticated;
+        }
       } else {
         _status = AuthStatus.unauthenticated;
       }
@@ -101,13 +124,27 @@ class AuthService extends ChangeNotifier {
       await _user?.updateDisplayName(name.trim());
 
       // Create user profile in Firestore with device token
-      await _createProfile();
-      await _storeDeviceToken();
+      // Gracefully handle failures — account is already created in Firebase Auth
+      try {
+        await _createProfile();
+      } catch (e) {
+        debugPrint('AuthService.signUp: profile creation failed (non-fatal): $e');
+      }
+      try {
+        await _storeDeviceToken();
+      } catch (e) {
+        debugPrint('AuthService.signUp: device token failed (non-fatal): $e');
+      }
 
-      // Send email verification
-      await sendEmailVerification();
+      // Send email verification (non-blocking, non-fatal)
+      try {
+        await sendEmailVerification();
+      } catch (e) {
+        debugPrint('AuthService.signUp: email verification failed (non-fatal): $e');
+      }
 
-      _status = AuthStatus.authenticated;
+      // Don't mark as authenticated yet — email must be verified first
+      _status = AuthStatus.emailVerificationPending;
       notifyListeners();
       return true;
     } on FirebaseAuthException catch (e) {
@@ -158,6 +195,15 @@ class AuthService extends ChangeNotifier {
       await _loadProfile();
       // Update device token — any new login kicks old device
       await _storeDeviceToken();
+
+      // Block login if email not verified
+      final user = FirebaseAuth.instance.currentUser;
+      if (user != null && !user.emailVerified) {
+        _status = AuthStatus.emailVerificationPending;
+        notifyListeners();
+        return true; // Returns true so UI shows verification screen, not error
+      }
+
       _status = AuthStatus.authenticated;
       notifyListeners();
       return true;
