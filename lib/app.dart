@@ -808,13 +808,12 @@ class _HomeScreenTestState extends State<HomeScreenTest> {
           // 3-dot menu
           Theme(
             data: Theme.of(context).copyWith(
-              cardColor: const Color(0xFF0D2137),
-              textTheme: const TextTheme(
-                bodyLarge: TextStyle(color: Colors.white, fontSize: 14),
-                bodyMedium: TextStyle(color: Colors.white, fontSize: 14),
-                titleSmall: TextStyle(color: Colors.white, fontSize: 14),
-                labelLarge: TextStyle(color: Colors.white, fontSize: 14),
+              colorScheme: Theme.of(context).colorScheme.copyWith(
+                surface: const Color(0xFF0D2137),
+                onSurface: Colors.white,
+                onSurfaceVariant: Colors.white70,
               ),
+              cardColor: const Color(0xFF0D2137),
               popupMenuTheme: PopupMenuThemeData(
                 color: const Color(0xFF0D2137),
                 shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
