@@ -35,6 +35,7 @@ import 'services/trip_service.dart';
 import 'screens/onboarding_screen.dart';
 import 'screens/auth_screen.dart';
 import 'screens/verify_email_screen.dart';
+import 'screens/settings_screen.dart';
 import 'services/auth_service.dart';
 
 // ─── 5 Color Schemes ──────────────────────────────────────────────────────
@@ -861,6 +862,12 @@ class _HomeScreenTestState extends State<HomeScreenTest> {
                       MaterialPageRoute(
                           builder: (_) => const CloudSyncScreen()));
                   break;
+                // ── Settings ──
+                case 'settings':
+                  Navigator.push(context,
+                      MaterialPageRoute(
+                          builder: (_) => const SettingsScreen()));
+                  break;
                 // ── About & Contact ──
                 case 'about':
                   Navigator.push(context,
@@ -982,6 +989,17 @@ class _HomeScreenTestState extends State<HomeScreenTest> {
                 child: ListTile(
                   leading: Icon(Icons.cloud_outlined),
                   title: Text(tr('cloudSync')),
+                  dense: true,
+                  contentPadding: EdgeInsets.zero,
+                ),
+              ),
+              // ── Settings ──
+              const PopupMenuDivider(),
+              PopupMenuItem(
+                value: 'settings',
+                child: ListTile(
+                  leading: Icon(Icons.settings_outlined),
+                  title: const Text('Settings'),
                   dense: true,
                   contentPadding: EdgeInsets.zero,
                 ),
