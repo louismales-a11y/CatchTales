@@ -22,6 +22,7 @@ class _AuthScreenState extends State<AuthScreen> {
   bool _isLogin = true;
   bool _obscurePass = true;
   bool _isLoading = false;
+  bool _rememberMe = true;
   bool _termsAccepted = false;
 
   @override
@@ -424,13 +425,38 @@ class _AuthScreenState extends State<AuthScreen> {
                       ),
                     ),
 
-                    // ─── Forgot Password (login only) ───
+                    // ─── Remember me + Forgot Password (login only) ───
                     if (_isLogin)
                       Padding(
                         padding: const EdgeInsets.only(bottom: 20),
                         child: Row(
-                          mainAxisAlignment: MainAxisAlignment.end,
                           children: [
+                            SizedBox(
+                              height: 24,
+                              child: Checkbox(
+                                value: _rememberMe,
+                                onChanged: (v) => setState(() => _rememberMe = v ?? true),
+                                fillColor: WidgetStateProperty.resolveWith((states) {
+                                  if (states.contains(WidgetState.selected)) {
+                                    return const Color(0xFF76FF03);
+                                  }
+                                  return Colors.white.withValues(alpha: 0.2);
+                                }),
+                                checkColor: const Color(0xFF003544),
+                                shape: RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.circular(4),
+                                ),
+                              ),
+                            ),
+                            const SizedBox(width: 6),
+                            Text(
+                              'Remember me',
+                              style: TextStyle(
+                                color: Colors.grey.shade300,
+                                fontSize: 13,
+                              ),
+                            ),
+                            const Spacer(),
                             TextButton(
                               onPressed: () => _showForgotPasswordDialog(),
                               style: TextButton.styleFrom(

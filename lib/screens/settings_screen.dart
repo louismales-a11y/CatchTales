@@ -123,6 +123,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
               onChanged: (v) async {
                 final prefs = await SharedPreferences.getInstance();
                 await prefs.setBool(prefKey, v);
+                _reminderPrefs[prefKey] = v;
                 if (v) { onEnable(); } else { onDisable(); }
                 setSt(() {});
               },
@@ -151,8 +152,8 @@ class _SettingsScreenState extends State<SettingsScreen> {
                     children: [
                       Icon(Icons.notifications_outlined, size: 20, color: theme.colorScheme.primary),
                       const SizedBox(width: 10),
-                      const Expanded(child: Text('Push Notifications', style: TextStyle(fontWeight: FontWeight.w600))),
-                      const SizedBox(width: 8),
+                      const Text('Push Notifications', style: TextStyle(fontWeight: FontWeight.w600), overflow: TextOverflow.ellipsis),
+                      const Spacer(),
                       StatefulBuilder(
                         builder: (ctx, setSt) {
                           final enabled = NotificationService.instance.enabled;
