@@ -3,238 +3,242 @@ import 'package:flutter/material.dart';
 
 /// Fish species types for variety.
 enum FishSpecies {
-  bass,       // Stocky, deep body
-  pike,       // Long, narrow, torpedo-shaped
-  trout,      // Streamlined, sleek
-  sunfish,    // Round, small, pan-shaped
-  catfish,    // Wide head, tapering body
+  pike,       // Long, narrow, torpedo with duckbill jaw
+  perch,      // Tall body, spiny dorsal, striped pattern (silhouette)
+  walleye,    // Large eyes, tapered, spiny/soft dorsal split
+  bass,       // Stocky, large mouth, deep body
+  sunfish,    // Round, pan-shaped, small mouth
 }
 
-/// Paints a realistic fish silhouette.
+/// Paints a realistic fish silhouette using smooth cubic bezier curves.
 class FishPainter extends CustomPainter {
   final FishSpecies species;
   final Color color;
-  final double sizeScale;
 
-  FishPainter({
-    this.species = FishSpecies.bass,
-    this.color = Colors.white,
-    this.sizeScale = 1.0,
-  });
+  FishPainter({this.species = FishSpecies.bass, this.color = Colors.white});
 
   @override
   void paint(Canvas canvas, Size size) {
-    final paint = Paint()
-      ..color = color
-      ..style = PaintingStyle.fill;
-
-    final w = size.width;
-    final h = size.height;
-    final cx = w / 2;
-    final cy = h / 2;
-    final bodyLen = w * 0.85;
-    final bodyH = h * 0.5;
+    final paint = Paint()..color = color..style = PaintingStyle.fill;
+    final s = size.width; // scale reference
 
     switch (species) {
-      case FishSpecies.bass:
-        _drawBass(canvas, paint, cx, cy, bodyLen, bodyH);
-        break;
       case FishSpecies.pike:
-        _drawPike(canvas, paint, cx, cy, bodyLen, bodyH);
+        _drawPike(canvas, paint, s);
         break;
-      case FishSpecies.trout:
-        _drawTrout(canvas, paint, cx, cy, bodyLen, bodyH);
+      case FishSpecies.perch:
+        _drawPerch(canvas, paint, s);
+        break;
+      case FishSpecies.walleye:
+        _drawWalleye(canvas, paint, s);
+        break;
+      case FishSpecies.bass:
+        _drawBass(canvas, paint, s);
         break;
       case FishSpecies.sunfish:
-        _drawSunfish(canvas, paint, cx, cy, bodyLen, bodyH);
-        break;
-      case FishSpecies.catfish:
-        _drawCatfish(canvas, paint, cx, cy, bodyLen, bodyH);
+        _drawSunfish(canvas, paint, s);
         break;
     }
   }
 
-  void _drawBass(Canvas canvas, Paint paint, double cx, double cy, double bl, double bh) {
-    final path = Path();
-    // Head (mouth at left)
-    path.moveTo(cx - bl / 2, cy);
-    // Top curve
-    path.cubicTo(
-      cx - bl * 0.3, cy - bh * 1.1,
-      cx + bl * 0.1, cy - bh * 0.9,
-      cx + bl / 2, cy - bh * 0.1,
-    );
-    // Tail top
-    path.lineTo(cx + bl / 2 + bh * 0.3, cy - bh * 0.4);
-    path.lineTo(cx + bl / 2 + bh * 0.4, cy);
-    path.lineTo(cx + bl / 2 + bh * 0.3, cy + bh * 0.4);
-    // Bottom curve back
-    path.cubicTo(
-      cx + bl * 0.1, cy + bh * 0.7,
-      cx - bl * 0.3, cy + bh * 0.9,
-      cx - bl / 2, cy,
-    );
-    path.close();
-    canvas.drawPath(path, paint);
-    // Eye
-    _drawEye(canvas, cx - bl * 0.3, cy - bh * 0.15, bh * 0.08);
+  /// ─── Pike (Esox lucius) ───
+  /// Long torpedo body, duckbill snout, forked tail, dorsal fin far back
+  void _drawPike(Canvas canvas, Paint paint, double s) {
+    final p = Path();
+    // Start at nose tip
+    p.moveTo(s * 0.02, s * 0.44);
+    // Upper jaw (duckbill)
+    p.cubicTo(s * 0.06, s * 0.38, s * 0.10, s * 0.36, s * 0.14, s * 0.40);
+    // Head top
+    p.cubicTo(s * 0.18, s * 0.35, s * 0.22, s * 0.33, s * 0.28, s * 0.34);
+    // Back to dorsal fin
+    p.cubicTo(s * 0.35, s * 0.33, s * 0.40, s * 0.34, s * 0.48, s * 0.32);
     // Dorsal fin
-    _drawDorsal(canvas, paint, cx + bl * 0.0, cy - bh * 0.8, bh * 0.3);
+    p.cubicTo(s * 0.50, s * 0.30, s * 0.52, s * 0.26, s * 0.54, s * 0.30);
+    p.cubicTo(s * 0.56, s * 0.30, s * 0.57, s * 0.31, s * 0.58, s * 0.32);
+    // Tail peduncle to upper tail fork
+    p.cubicTo(s * 0.62, s * 0.32, s * 0.68, s * 0.30, s * 0.78, s * 0.22);
+    // Upper tail lobe
+    p.cubicTo(s * 0.82, s * 0.20, s * 0.86, s * 0.18, s * 0.88, s * 0.20);
+    p.lineTo(s * 0.90, s * 0.40);
+    // Tail fork center
+    p.lineTo(s * 0.82, s * 0.44);
+    // Lower tail lobe
+    p.lineTo(s * 0.90, s * 0.56);
+    p.lineTo(s * 0.88, s * 0.76);
+    // Lower tail fork back
+    p.cubicTo(s * 0.84, s * 0.78, s * 0.80, s * 0.76, s * 0.78, s * 0.74);
+    // Lower peduncle
+    p.cubicTo(s * 0.68, s * 0.66, s * 0.62, s * 0.64, s * 0.58, s * 0.64);
+    // Anal fin
+    p.cubicTo(s * 0.56, s * 0.64, s * 0.55, s * 0.66, s * 0.54, s * 0.64);
+    // Belly
+    p.cubicTo(s * 0.48, s * 0.64, s * 0.40, s * 0.62, s * 0.35, s * 0.62);
+    // Lower jaw (duckbill)
+    p.cubicTo(s * 0.28, s * 0.62, s * 0.20, s * 0.60, s * 0.14, s * 0.56);
+    p.cubicTo(s * 0.10, s * 0.54, s * 0.06, s * 0.52, s * 0.02, s * 0.50);
+    p.close();
+    canvas.drawPath(p, paint);
+    // Operculum/gill line
+    final gill = Paint()..color = color..style = PaintingStyle.stroke..strokeWidth = 0.5;
+    canvas.drawPath(Path()..moveTo(s * 0.18, s * 0.38)..cubicTo(s * 0.20, s * 0.44, s * 0.18, s * 0.54, s * 0.16, s * 0.56), gill);
   }
 
-  void _drawPike(Canvas canvas, Paint paint, double cx, double cy, double bl, double bh) {
-    final path = Path();
-    // Long, narrow body - Pike
-    path.moveTo(cx - bl / 2, cy);
-    // Top
-    path.cubicTo(
-      cx - bl * 0.3, cy - bh * 0.6,
-      cx + bl * 0.1, cy - bh * 0.5,
-      cx + bl / 2, cy - bh * 0.1,
-    );
-    // Tail fork
-    path.lineTo(cx + bl / 2 + bh * 0.4, cy - bh * 0.5);
-    path.lineTo(cx + bl / 2 + bh * 0.5, cy);
-    path.lineTo(cx + bl / 2 + bh * 0.4, cy + bh * 0.5);
-    // Bottom
-    path.cubicTo(
-      cx + bl * 0.1, cy + bh * 0.4,
-      cx - bl * 0.3, cy + bh * 0.5,
-      cx - bl / 2, cy,
-    );
-    path.close();
-    canvas.drawPath(path, paint);
-    // Elongated jaw
-    final jawPath = Path();
-    jawPath.moveTo(cx - bl / 2, cy - bh * 0.05);
-    jawPath.lineTo(cx - bl * 0.55, cy);
-    jawPath.lineTo(cx - bl / 2, cy + bh * 0.05);
-    jawPath.close();
-    canvas.drawPath(jawPath, paint);
-    // Eye
-    _drawEye(canvas, cx - bl * 0.25, cy - bh * 0.1, bh * 0.06);
+  /// ─── Perch (Perca flavescens) ───
+  /// Tall oval body, spiny dorsal (tall front), soft dorsal (low back), dark vertical bars
+  void _drawPerch(Canvas canvas, Paint paint, double s) {
+    final p = Path();
+    p.moveTo(s * 0.04, s * 0.46);
+    // Mouth
+    p.cubicTo(s * 0.08, s * 0.40, s * 0.12, s * 0.38, s * 0.16, s * 0.40);
+    // Forehead
+    p.cubicTo(s * 0.18, s * 0.34, s * 0.22, s * 0.30, s * 0.28, s * 0.28);
+    // Spiny dorsal fin (tall, spiky)
+    p.cubicTo(s * 0.32, s * 0.22, s * 0.34, s * 0.14, s * 0.36, s * 0.10);
+    p.cubicTo(s * 0.38, s * 0.10, s * 0.40, s * 0.14, s * 0.42, s * 0.18);
+    // Dip between spiny and soft dorsal
+    p.cubicTo(s * 0.44, s * 0.20, s * 0.46, s * 0.22, s * 0.48, s * 0.20);
+    // Soft dorsal fin (lower, rounded)
+    p.cubicTo(s * 0.50, s * 0.16, s * 0.52, s * 0.14, s * 0.54, s * 0.16);
+    p.cubicTo(s * 0.56, s * 0.16, s * 0.58, s * 0.18, s * 0.60, s * 0.20);
+    // Tail peduncle
+    p.cubicTo(s * 0.64, s * 0.24, s * 0.66, s * 0.26, s * 0.70, s * 0.28);
+    // Tail fin (slightly forked)
+    p.cubicTo(s * 0.74, s * 0.24, s * 0.78, s * 0.22, s * 0.82, s * 0.24);
+    p.lineTo(s * 0.86, s * 0.44);
+    p.lineTo(s * 0.82, s * 0.62);
+    p.cubicTo(s * 0.78, s * 0.64, s * 0.74, s * 0.62, s * 0.70, s * 0.58);
+    // Lower peduncle
+    p.cubicTo(s * 0.66, s * 0.56, s * 0.64, s * 0.54, s * 0.60, s * 0.54);
+    // Anal fin
+    p.cubicTo(s * 0.58, s * 0.54, s * 0.56, s * 0.56, s * 0.54, s * 0.54);
+    p.cubicTo(s * 0.52, s * 0.56, s * 0.50, s * 0.52, s * 0.48, s * 0.56);
+    // Belly
+    p.cubicTo(s * 0.44, s * 0.58, s * 0.38, s * 0.60, s * 0.32, s * 0.60);
+    // Lower jaw
+    p.cubicTo(s * 0.26, s * 0.60, s * 0.20, s * 0.60, s * 0.16, s * 0.56);
+    p.cubicTo(s * 0.12, s * 0.54, s * 0.08, s * 0.52, s * 0.04, s * 0.50);
+    p.close();
+    canvas.drawPath(p, paint);
+    // Dark vertical bars (perch markings as notches)
+    final bar = Paint()..color = color..style = PaintingStyle.stroke..strokeWidth = 0.5;
+    for (int i = 0; i < 5; i++) {
+      final x = s * (0.22 + i * 0.10);
+      canvas.drawLine(Offset(x, s * 0.30), Offset(x, s * 0.54), bar);
+    }
   }
 
-  void _drawTrout(Canvas canvas, Paint paint, double cx, double cy, double bl, double bh) {
-    final path = Path();
-    // Streamlined body
-    path.moveTo(cx - bl / 2, cy);
-    path.cubicTo(
-      cx - bl * 0.25, cy - bh * 0.8,
-      cx + bl * 0.15, cy - bh * 0.7,
-      cx + bl / 2, cy - bh * 0.1,
-    );
-    // Tail
-    path.lineTo(cx + bl / 2 + bh * 0.35, cy - bh * 0.35);
-    path.lineTo(cx + bl / 2 + bh * 0.45, cy);
-    path.lineTo(cx + bl / 2 + bh * 0.35, cy + bh * 0.35);
-    // Bottom
-    path.cubicTo(
-      cx + bl * 0.15, cy + bh * 0.6,
-      cx - bl * 0.25, cy + bh * 0.7,
-      cx - bl / 2, cy,
-    );
-    path.close();
-    canvas.drawPath(path, paint);
-    // Adipose fin (small fin on back near tail)
-    final adiposePath = Path();
-    adiposePath.moveTo(cx + bl * 0.3, cy - bh * 0.5);
-    adiposePath.lineTo(cx + bl * 0.35, cy - bh * 0.7);
-    adiposePath.lineTo(cx + bl * 0.4, cy - bh * 0.5);
-    adiposePath.close();
-    canvas.drawPath(adiposePath, paint);
-    // Eye
-    _drawEye(canvas, cx - bl * 0.25, cy - bh * 0.1, bh * 0.07);
+  /// ─── Walleye (Sander vitreus) ───
+  /// Large eyes, tapered body, split dorsal (spiny front, soft back), white tail tip
+  void _drawWalleye(Canvas canvas, Paint paint, double s) {
+    final p = Path();
+    p.moveTo(s * 0.04, s * 0.46);
+    // Snout
+    p.cubicTo(s * 0.08, s * 0.42, s * 0.12, s * 0.40, s * 0.16, s * 0.42);
+    // Forehead
+    p.cubicTo(s * 0.20, s * 0.36, s * 0.24, s * 0.32, s * 0.30, s * 0.30);
+    // Spiny dorsal (moderate height)
+    p.cubicTo(s * 0.34, s * 0.24, s * 0.36, s * 0.16, s * 0.38, s * 0.12);
+    p.cubicTo(s * 0.40, s * 0.14, s * 0.42, s * 0.18, s * 0.44, s * 0.20);
+    // Dip
+    p.cubicTo(s * 0.46, s * 0.22, s * 0.48, s * 0.24, s * 0.50, s * 0.22);
+    // Soft dorsal
+    p.cubicTo(s * 0.52, s * 0.18, s * 0.54, s * 0.16, s * 0.56, s * 0.18);
+    p.cubicTo(s * 0.58, s * 0.20, s * 0.60, s * 0.22, s * 0.64, s * 0.26);
+    // Caudal peduncle
+    p.cubicTo(s * 0.68, s * 0.28, s * 0.72, s * 0.30, s * 0.76, s * 0.32);
+    // Tail (slightly forked, rounded)
+    p.cubicTo(s * 0.80, s * 0.28, s * 0.84, s * 0.26, s * 0.88, s * 0.28);
+    p.lineTo(s * 0.90, s * 0.44);
+    p.lineTo(s * 0.88, s * 0.60);
+    p.cubicTo(s * 0.84, s * 0.62, s * 0.80, s * 0.60, s * 0.76, s * 0.56);
+    // Lower
+    p.cubicTo(s * 0.72, s * 0.52, s * 0.68, s * 0.50, s * 0.64, s * 0.50);
+    // Anal fin
+    p.cubicTo(s * 0.62, s * 0.52, s * 0.60, s * 0.50, s * 0.58, s * 0.54);
+    // Belly
+    p.cubicTo(s * 0.52, s * 0.56, s * 0.44, s * 0.58, s * 0.36, s * 0.58);
+    // Lower jaw
+    p.cubicTo(s * 0.30, s * 0.58, s * 0.24, s * 0.58, s * 0.16, s * 0.54);
+    p.cubicTo(s * 0.12, s * 0.52, s * 0.08, s * 0.50, s * 0.04, s * 0.48);
+    p.close();
+    canvas.drawPath(p, paint);
+    // Large eye (walleye hallmark)
+    final eye = Paint()..color = color;
+    canvas.drawCircle(Offset(s * 0.18, s * 0.44), s * 0.035, eye);
   }
 
-  void _drawSunfish(Canvas canvas, Paint paint, double cx, double cy, double bl, double bh) {
-    final path = Path();
-    // Round, disc-shaped body
-    path.moveTo(cx - bl / 2, cy);
-    // Top dome
-    path.cubicTo(
-      cx - bl * 0.3, cy - bh * 1.0,
-      cx + bl * 0.2, cy - bh * 1.0,
-      cx + bl / 2, cy - bh * 0.1,
-    );
-    // Tail
-    path.lineTo(cx + bl / 2 + bh * 0.25, cy - bh * 0.3);
-    path.lineTo(cx + bl / 2 + bh * 0.35, cy);
-    path.lineTo(cx + bl / 2 + bh * 0.25, cy + bh * 0.3);
-    // Bottom
-    path.cubicTo(
-      cx + bl * 0.2, cy + bh * 0.8,
-      cx - bl * 0.3, cy + bh * 0.9,
-      cx - bl / 2, cy,
-    );
-    path.close();
-    canvas.drawPath(path, paint);
-    // Eye (proportionally larger)
-    _drawEye(canvas, cx - bl * 0.25, cy - bh * 0.1, bh * 0.12);
-    // Pectoral fin
-    final finPath = Path();
-    finPath.moveTo(cx - bl * 0.05, cy + bh * 0.1);
-    finPath.lineTo(cx + bl * 0.05, cy + bh * 0.5);
-    finPath.lineTo(cx - bl * 0.1, cy + bh * 0.15);
-    finPath.close();
-    canvas.drawPath(finPath, paint);
+  /// ─── Bass (Micropterus salmoides) ───
+  /// Large mouth, deep/compressed body, almost divided dorsal, wide tail
+  void _drawBass(Canvas canvas, Paint paint, double s) {
+    final p = Path();
+    p.moveTo(s * 0.04, s * 0.46);
+    // Large mouth
+    p.cubicTo(s * 0.08, s * 0.38, s * 0.14, s * 0.34, s * 0.18, s * 0.36);
+    // Forehead
+    p.cubicTo(s * 0.22, s * 0.30, s * 0.28, s * 0.26, s * 0.34, s * 0.24);
+    // Spiny dorsal
+    p.cubicTo(s * 0.38, s * 0.18, s * 0.40, s * 0.12, s * 0.42, s * 0.08);
+    p.cubicTo(s * 0.44, s * 0.10, s * 0.46, s * 0.14, s * 0.48, s * 0.16);
+    // Dip
+    p.cubicTo(s * 0.50, s * 0.18, s * 0.52, s * 0.20, s * 0.54, s * 0.18);
+    // Soft dorsal
+    p.cubicTo(s * 0.56, s * 0.12, s * 0.58, s * 0.10, s * 0.60, s * 0.12);
+    p.cubicTo(s * 0.62, s * 0.14, s * 0.64, s * 0.18, s * 0.66, s * 0.22);
+    // Caudal peduncle (thick)
+    p.cubicTo(s * 0.70, s * 0.26, s * 0.74, s * 0.28, s * 0.78, s * 0.30);
+    // Tail (large, slightly rounded)
+    p.cubicTo(s * 0.82, s * 0.24, s * 0.86, s * 0.22, s * 0.90, s * 0.24);
+    p.lineTo(s * 0.94, s * 0.44);
+    p.lineTo(s * 0.90, s * 0.64);
+    p.cubicTo(s * 0.86, s * 0.66, s * 0.82, s * 0.64, s * 0.78, s * 0.58);
+    // Lower
+    p.cubicTo(s * 0.74, s * 0.54, s * 0.70, s * 0.52, s * 0.66, s * 0.52);
+    // Anal fin (rounded)
+    p.cubicTo(s * 0.64, s * 0.54, s * 0.62, s * 0.52, s * 0.60, s * 0.56);
+    // Belly (deep)
+    p.cubicTo(s * 0.54, s * 0.60, s * 0.46, s * 0.62, s * 0.38, s * 0.62);
+    // Lower jaw
+    p.cubicTo(s * 0.32, s * 0.62, s * 0.24, s * 0.60, s * 0.18, s * 0.56);
+    p.cubicTo(s * 0.12, s * 0.54, s * 0.08, s * 0.52, s * 0.04, s * 0.50);
+    p.close();
+    canvas.drawPath(p, paint);
   }
 
-  void _drawCatfish(Canvas canvas, Paint paint, double cx, double cy, double bl, double bh) {
-    final path = Path();
-    // Wide head, tapering body
-    path.moveTo(cx - bl / 2, cy);
-    // Top
-    path.cubicTo(
-      cx - bl * 0.2, cy - bh * 0.7,
-      cx + bl * 0.1, cy - bh * 0.5,
-      cx + bl / 2, cy - bh * 0.1,
-    );
-    // Tail
-    path.lineTo(cx + bl / 2 + bh * 0.3, cy - bh * 0.35);
-    path.lineTo(cx + bl / 2 + bh * 0.4, cy);
-    path.lineTo(cx + bl / 2 + bh * 0.3, cy + bh * 0.35);
-    // Bottom
-    path.cubicTo(
-      cx + bl * 0.1, cy + bh * 0.4,
-      cx - bl * 0.2, cy + bh * 0.6,
-      cx - bl / 2, cy,
-    );
-    path.close();
-    canvas.drawPath(path, paint);
-    // Barbels (whiskers)
-    final barbelPaint = Paint()
-      ..color = color
-      ..style = PaintingStyle.stroke
-      ..strokeWidth = 1.0;
-    // Upper barbel
-    canvas.drawLine(
-      Offset(cx - bl * 0.45, cy - bh * 0.1),
-      Offset(cx - bl * 0.6, cy - bh * 0.3),
-      barbelPaint,
-    );
-    // Lower barbel
-    canvas.drawLine(
-      Offset(cx - bl * 0.45, cy + bh * 0.1),
-      Offset(cx - bl * 0.6, cy + bh * 0.3),
-      barbelPaint,
-    );
-    // Eye
-    _drawEye(canvas, cx - bl * 0.25, cy - bh * 0.05, bh * 0.05);
-  }
-
-  void _drawEye(Canvas canvas, double x, double y, double r) {
-    final eyePaint = Paint()..color = color;
-    canvas.drawCircle(Offset(x, y), r, eyePaint);
-  }
-
-  void _drawDorsal(Canvas canvas, Paint paint, double x, double y, double size) {
-    final path = Path();
-    path.moveTo(x - size * 0.3, y);
-    path.lineTo(x, y - size * 0.8);
-    path.lineTo(x + size * 0.3, y);
-    path.close();
-    canvas.drawPath(path, paint);
+  /// ─── Sunfish (Lepomis macrochirus) ───
+  /// Round disc body, small mouth, long dorsal, bright colors (silhouette is round)
+  void _drawSunfish(Canvas canvas, Paint paint, double s) {
+    final p = Path();
+    p.moveTo(s * 0.04, s * 0.46);
+    // Tiny mouth
+    p.cubicTo(s * 0.08, s * 0.42, s * 0.10, s * 0.40, s * 0.14, s * 0.40);
+    // Steep forehead (disc shape)
+    p.cubicTo(s * 0.18, s * 0.30, s * 0.26, s * 0.22, s * 0.34, s * 0.18);
+    // Long continuous dorsal
+    p.cubicTo(s * 0.38, s * 0.12, s * 0.42, s * 0.06, s * 0.46, s * 0.04);
+    p.cubicTo(s * 0.48, s * 0.04, s * 0.50, s * 0.06, s * 0.52, s * 0.06);
+    p.cubicTo(s * 0.54, s * 0.06, s * 0.56, s * 0.08, s * 0.58, s * 0.10);
+    // Taper to tail
+    p.cubicTo(s * 0.62, s * 0.14, s * 0.66, s * 0.18, s * 0.70, s * 0.22);
+    // Tail (small, rounded)
+    p.cubicTo(s * 0.74, s * 0.20, s * 0.78, s * 0.18, s * 0.82, s * 0.20);
+    p.lineTo(s * 0.86, s * 0.44);
+    p.lineTo(s * 0.82, s * 0.68);
+    p.cubicTo(s * 0.78, s * 0.70, s * 0.74, s * 0.68, s * 0.70, s * 0.66);
+    // Lower body
+    p.cubicTo(s * 0.66, s * 0.62, s * 0.62, s * 0.60, s * 0.58, s * 0.60);
+    // Anal fin (mirrors dorsal)
+    p.cubicTo(s * 0.54, s * 0.60, s * 0.52, s * 0.62, s * 0.50, s * 0.62);
+    p.cubicTo(s * 0.48, s * 0.64, s * 0.46, s * 0.62, s * 0.44, s * 0.64);
+    // Belly (rounded)
+    p.cubicTo(s * 0.36, s * 0.66, s * 0.28, s * 0.64, s * 0.22, s * 0.58);
+    // Lower jaw
+    p.cubicTo(s * 0.16, s * 0.54, s * 0.10, s * 0.52, s * 0.04, s * 0.50);
+    p.close();
+    canvas.drawPath(p, paint);
+    // Opercular flap (ear-like spot)
+    final flap = Paint()..color = color..style = PaintingStyle.stroke..strokeWidth = 0.5;
+    canvas.drawArc(Rect.fromCircle(center: Offset(s * 0.22, s * 0.40), radius: s * 0.03), -pi * 0.5, pi * 1.5, false, flap);
   }
 
   @override
