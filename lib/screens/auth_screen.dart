@@ -1,7 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../services/auth_service.dart';
+import '../services/translation_service.dart';
 import 'verify_email_screen.dart';
+
+/// Shortcut for translations.
+String tr(String key) => TranslationService.instance.tr(key);
 
 
 /// Sign-up / Login screen shown before the main app.
@@ -235,7 +239,7 @@ class _AuthScreenState extends State<AuthScreen> {
                     ),
                     const SizedBox(height: 6),
                     Text(
-                      _isLogin ? 'Welcome Back!' : 'Create Your Account',
+                      _isLogin ? tr('authWelcomeBack') : tr('authCreateAccount'),
                       style: const TextStyle(
                         fontSize: 16,
                         fontWeight: FontWeight.w600,
@@ -253,7 +257,7 @@ class _AuthScreenState extends State<AuthScreen> {
                           controller: _nameCtrl,
                           style: const TextStyle(color: Colors.white),
                           decoration: InputDecoration(
-                            labelText: 'Your Name',
+                            labelText: tr('authYourName'),
                             labelStyle: TextStyle(color: Colors.grey.shade400),
                             prefixIcon: Icon(Icons.person_outline,
                                 color: Colors.grey.shade400),
@@ -288,7 +292,7 @@ class _AuthScreenState extends State<AuthScreen> {
                         autocorrect: false,
                         style: const TextStyle(color: Colors.white),
                         decoration: InputDecoration(
-                          labelText: 'Email',
+                          labelText: tr('authEmail'),
                           labelStyle: TextStyle(color: Colors.grey.shade400),
                           prefixIcon:
                               Icon(Icons.email_outlined, color: Colors.grey.shade400),
@@ -384,7 +388,7 @@ class _AuthScreenState extends State<AuthScreen> {
                         obscureText: _obscurePass,
                         style: const TextStyle(color: Colors.white),
                         decoration: InputDecoration(
-                          labelText: 'Password',
+                          labelText: tr('authPassword'),
                           labelStyle: TextStyle(color: Colors.grey.shade400),
                           prefixIcon:
                               Icon(Icons.lock_outline, color: Colors.grey.shade400),
@@ -436,7 +440,7 @@ class _AuthScreenState extends State<AuthScreen> {
                                 padding: const EdgeInsets.symmetric(horizontal: 8),
                               ),
                               child: Text(
-                                'Forgot password?',
+                                tr('authForgotPassword'),
                                 style: TextStyle(
                                   color: const Color(0xFF00BCD4),
                                   fontSize: 13,
@@ -478,7 +482,7 @@ class _AuthScreenState extends State<AuthScreen> {
                                   color: Color(0xFF003544),
                                 ),
                               )
-                            : Text(_isLogin ? 'LOG IN' : 'SIGN UP'),
+                            : Text(_isLogin ? tr('authLogIn').toUpperCase() : tr('authSignUp').toUpperCase()),
                       ),
                     ),
                     const SizedBox(height: 20),
@@ -494,7 +498,7 @@ class _AuthScreenState extends State<AuthScreen> {
                         TextButton(
                           onPressed: _isLoading ? null : _toggleMode,
                           child: Text(
-                            _isLogin ? 'Sign up' : 'Log in',
+                            _isLogin ? tr('authSignUp') : tr('authLogIn'),
                             style: TextStyle(
                               color: const Color(0xFF00BCD4),
                               fontWeight: FontWeight.w600,

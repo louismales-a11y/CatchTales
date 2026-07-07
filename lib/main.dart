@@ -20,9 +20,11 @@ void main() async {
   await Firebase.initializeApp();
   // Hide system nav bar for immersive experience
   SystemChrome.setEnabledSystemUIMode(SystemUiMode.immersiveSticky);
-  // Mark this as the test version so language features are enabled
+  // Mark dev builds so language features are enabled during development
   final prefs = await SharedPreferences.getInstance();
-  await prefs.setBool('is_test', true);
+  if (ApiConfig.isDev) {
+    await prefs.setBool('is_test', true);
+  }
   // Load saved language preference
   await TranslationService.instance.loadLanguage();
   // Load Pro status

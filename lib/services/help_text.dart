@@ -279,6 +279,24 @@ Map<String, _HelpEntry> get _helpEntries => <String, _HelpEntry>{
         'and you\'re connected instantly — works across any distance! '
         'Location sharing requires GPS permission.',
   ),
+  'settings': _HelpEntry(
+    icon: Icons.settings_outlined,
+    title: 'Settings',
+    body: 'The Settings screen lets you manage your account, notifications, data, and preferences.\n\n'
+        '📢 **Push Notifications** — Enable to receive weather alerts, best fishing time reminders, '
+        'and Fish Together activity notifications.\n\n'
+        '⏰ **Reminder Settings** — Schedule daily reminders to log your catches at 7 PM, '
+        'or get a morning solunar alert at 6 AM with the best fishing times for the day.\n\n'
+        '📤 **Export Data** — Export your catches as CSV (spreadsheets), JSON (backup), '
+        'or KML (Google Earth) to share or back up your data.\n\n'
+        '📶 **WiFi-only Mode** — Toggle this on to only allow data transfers (cloud sync, '
+        'weather updates, map downloads) over WiFi, saving your mobile data.\n\n'
+        '🚪 **Log Out** — Sign out of your account. You can log back in anytime.\n\n'
+        '🗑️ **Delete Account** — Permanently delete your account and all your data. '
+        'For security, you may need to log out and log back in before deleting.',
+    tips: 'WiFi-only mode is great for saving mobile data when you\'re out on the water! '
+        'Cloud sync will queue until you\'re back on WiFi.',
+  ),
   'contact': _HelpEntry(
     icon: Icons.mail_outline,
     title: tr('helpContact'),

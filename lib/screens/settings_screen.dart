@@ -5,8 +5,11 @@ import '../services/notification_service.dart';
 import '../services/local_notification_service.dart';
 import '../services/connectivity_service.dart';
 import '../services/auth_service.dart';
-
+import '../services/translation_service.dart';
 import 'import_export_screen.dart';
+
+/// Shortcut for translations.
+String tr(String key) => TranslationService.instance.tr(key);
 
 /// Settings screen with data transfer, notifications, export, account management.
 class SettingsScreen extends StatefulWidget {
@@ -36,11 +39,11 @@ class _SettingsScreenState extends State<SettingsScreen> {
     final confirmed = await showDialog<bool>(
       context: context,
       builder: (ctx) => AlertDialog(
-        title: const Text('Log Out'),
+        title: Text(tr('settingsLogOut')),
         content: const Text('Are you sure you want to log out? You can log back in anytime.'),
         actions: [
           TextButton(onPressed: () => Navigator.pop(ctx, false), child: const Text('Cancel')),
-          FilledButton(onPressed: () => Navigator.pop(ctx, true), child: const Text('Log Out')),
+          FilledButton(onPressed: () => Navigator.pop(ctx, true), child: Text(tr('settingsLogOut'))),
         ],
       ),
     );
@@ -137,7 +140,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     return Scaffold(
-      appBar: AppBar(title: const Text('Settings')),
+      appBar: AppBar(title: Text(tr('settingsTitle'))),
       body: ListView(
         padding: const EdgeInsets.all(24),
         children: [
@@ -179,7 +182,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
                             await NotificationService.instance.requestPermissionIfNeeded(context, force: true);
                           },
                           icon: const Icon(Icons.notifications_active, size: 16),
-                          label: const Text('Enable', style: TextStyle(fontSize: 12)),
+                          label: Text(tr('settingsEnable'), style: TextStyle(fontSize: 12)),
                           style: OutlinedButton.styleFrom(
                             padding: const EdgeInsets.symmetric(horizontal: 12),
                             visualDensity: VisualDensity.compact,
@@ -209,7 +212,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
                     children: [
                       Icon(Icons.notifications, size: 20, color: theme.colorScheme.primary),
                       const SizedBox(width: 10),
-                      const Text('Reminder Settings', style: TextStyle(fontWeight: FontWeight.w600)),
+                      Text(tr('settingsReminders'), style: TextStyle(fontWeight: FontWeight.w600)),
                     ],
                   ),
                   const SizedBox(height: 8),
@@ -247,7 +250,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
                     children: [
                       Icon(Icons.file_download, size: 20, color: theme.colorScheme.primary),
                       const SizedBox(width: 10),
-                      const Text('Export Data', style: TextStyle(fontWeight: FontWeight.w600)),
+                      Text(tr('settingsExport'), style: TextStyle(fontWeight: FontWeight.w600)),
                     ],
                   ),
                   const SizedBox(height: 6),
@@ -261,7 +264,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
                     child: OutlinedButton.icon(
                       onPressed: () => Navigator.push(context, MaterialPageRoute(builder: (_) => const ImportExportScreen())),
                       icon: const Icon(Icons.file_download, size: 18),
-                      label: const Text('Open Export Options', style: TextStyle(fontSize: 14)),
+                      label: Text(tr('settingsExportOpen'), style: TextStyle(fontSize: 14)),
                       style: OutlinedButton.styleFrom(padding: const EdgeInsets.symmetric(vertical: 14)),
                     ),
                   ),
@@ -281,7 +284,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
                     children: [
                       Icon(Icons.wifi, size: 20, color: theme.colorScheme.primary),
                       const SizedBox(width: 10),
-                      const Text('Data Transfer', style: TextStyle(fontWeight: FontWeight.w600)),
+                      Text(tr('settingsDataTransfer'), style: TextStyle(fontWeight: FontWeight.w600)),
                     ],
                   ),
                   const SizedBox(height: 8),
@@ -296,7 +299,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
                             child: Column(
                               crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
-                                Text('WiFi-only mode', style: const TextStyle(fontSize: 13, fontWeight: FontWeight.w500)),
+                                Text(tr('settingsWifiOnly'), style: const TextStyle(fontSize: 13, fontWeight: FontWeight.w500)),
                                 Text(
                                   cs.wifiOnly
                                       ? 'Data transfers (sync, weather, maps) only over WiFi'
@@ -328,7 +331,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
                   const Expanded(child: Text('Log Out', style: TextStyle(fontWeight: FontWeight.w600))),
                   SizedBox(
                     height: 36,
-                    child: OutlinedButton(onPressed: _confirmLogout, child: const Text('Log Out')),
+                    child: OutlinedButton(onPressed: _confirmLogout, child: Text(tr('settingsLogOut'))),
                   ),
                 ],
               ),
@@ -346,7 +349,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
                     children: [
                       Icon(Icons.delete_forever_outlined, size: 20, color: Colors.red.shade400),
                       const SizedBox(width: 10),
-                      const Text('Delete Account', style: TextStyle(fontWeight: FontWeight.w600)),
+                      Text(tr('settingsDeleteAccount'), style: TextStyle(fontWeight: FontWeight.w600)),
                     ],
                   ),
                   const SizedBox(height: 8),
@@ -360,7 +363,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
                     child: OutlinedButton.icon(
                       onPressed: _confirmDeleteAccount,
                       icon: const Icon(Icons.warning_amber_rounded, size: 18),
-                      label: const Text('Delete My Account', style: TextStyle(fontSize: 14)),
+                      label: Text(tr('settingsDeleteBtn'), style: TextStyle(fontSize: 14)),
                       style: OutlinedButton.styleFrom(
                         foregroundColor: Colors.red.shade700,
                         side: BorderSide(color: Colors.red.shade300),

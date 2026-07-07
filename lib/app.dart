@@ -345,8 +345,8 @@ class _SplashScreenTestState extends State<SplashScreenTest> {
                 ),
               ),
               const SizedBox(height: 20),
-              const Text('Best Fish Buddy Pro',
-                  style: TextStyle(
+              Text(ApiConfig.appDisplayName,
+                  style: const TextStyle(
                     fontSize: 30,
                     fontWeight: FontWeight.w800,
                     color: Color(0xFF76FF03),
@@ -361,7 +361,9 @@ class _SplashScreenTestState extends State<SplashScreenTest> {
                     letterSpacing: 3,
                   )),
               const SizedBox(height: 2),
-              Text(context.watch<ProService>().isPro ? 'PRO-VERSION' : 'FREE-VERSION',
+              Text(context.watch<ProService>().isPro
+                  ? 'PRO-VERSION'
+                  : (ApiConfig.isDev ? 'DEV-VERSION' : 'FREE-VERSION'),
                   style: const TextStyle(
                     fontSize: 11,
                     fontWeight: FontWeight.w700,
