@@ -298,38 +298,46 @@ class _PrepareScreenState extends State<PrepareScreen> {
     VoidCallback? onTapExtra,
   }) {
     final done = _done.contains(key);
-    final theme = Theme.of(context);
-    return Card(
+    final green = const Color(0xFF76FF03);
+    return Container(
       margin: const EdgeInsets.only(bottom: 8),
+      decoration: BoxDecoration(
+        color: Colors.transparent,
+        borderRadius: BorderRadius.circular(12),
+        border: Border.all(
+          color: done ? green.withValues(alpha: 0.5) : green.withValues(alpha: 0.3),
+          width: 1.5,
+        ),
+      ),
       child: ListTile(
         leading: CircleAvatar(
           backgroundColor: done
-              ? Colors.green.withValues(alpha: 0.15)
-              : theme.colorScheme.primary.withValues(alpha: 0.08),
+              ? green.withValues(alpha: 0.2)
+              : green.withValues(alpha: 0.1),
           child: Icon(
             done ? Icons.check : icon,
-            color: done ? Colors.green : theme.colorScheme.primary,
+            color: green,
             size: 22,
           ),
         ),
         title: Text(label,
             style: TextStyle(
                 fontWeight: FontWeight.w600,
-                color: done ? Colors.green.shade700 : null)),
+                color: done ? green : Colors.white)),
         subtitle: Text(detail,
             style: TextStyle(
                 fontSize: 12,
-                color: detailColor ?? theme.colorScheme.onSurface.withValues(alpha: 0.5))),
+                color: detailColor ?? Colors.white54)),
         trailing: Row(
           mainAxisSize: MainAxisSize.min,
           children: [
             if (!done)
               Text('Tap to check',
-                  style: TextStyle(fontSize: 11, color: Colors.grey.shade400)),
+                  style: TextStyle(fontSize: 11, color: green.withValues(alpha: 0.6))),
             if (!done) const SizedBox(width: 6),
             Icon(Icons.check_circle_outline,
                 size: 20,
-                color: done ? Colors.green : Colors.grey.shade300),
+                color: done ? green : green.withValues(alpha: 0.4)),
           ],
         ),
         onTap: () {
