@@ -519,6 +519,30 @@ class _AboutScreenState extends State<AboutScreen> {
               ),
             ),
           ),
+          // ── Log Out ──
+          Card(
+            child: Padding(
+              padding: const EdgeInsets.all(14),
+              child: Row(
+                children: [
+                  Icon(Icons.logout, size: 20, color: Colors.grey.shade600),
+                  const SizedBox(width: 10),
+                  const Expanded(
+                    child: Text('Log Out',
+                        style: TextStyle(fontWeight: FontWeight.w600)),
+                  ),
+                  SizedBox(
+                    height: 36,
+                    child: OutlinedButton(
+                      onPressed: () => _confirmLogout(),
+                      child: const Text('Log Out'),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ),
+          const SizedBox(height: 16),
           // ── Delete Account ──
           Card(
             child: Padding(
@@ -559,6 +583,43 @@ class _AboutScreenState extends State<AboutScreen> {
           const SizedBox(height: 24),
         ],
       ),
+    );
+  }
+
+  Future<void> _confirmLogout() async {
+    final confirmed = await showDialog<bool>(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        title: const Text('Log Out'),
+        content: const Text('Are you sure you want to log out? You can log back in anytime.'),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(ctx, false),
+            child: const Text('Cancel'),
+          ),
+          FilledButton(
+            onPressed: () => Navigator.pop(ctx, true),
+            child: const Text('Log Out'),
+          ),
+        ],
+      ),
+    );
+
+    if (confirmed != true) return;
+
+    await AuthService.instance.logout();
+
+    if (!mounted) return;
+    // Navigate back to auth screen
+    Navigator.of(context).pushAndRemoveUntil(
+      MaterialPageRoute(
+        builder: (_) => const Scaffold(
+          body: Center(
+            child: Text('Logged out successfully.'),
+          ),
+        ),
+      ),
+      (route) => false,
     );
   }
 
