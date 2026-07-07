@@ -1149,7 +1149,13 @@ class _HomeScreenTestState extends State<HomeScreenTest> {
                         ),
                       ),
                     Expanded(
-                      child: _screens[_selectedIndex],
+                      child: _selectedIndex == 2
+                          ? _screens[2]  // Map — no background
+                          : WaterBackground(
+                              showFish: true,
+                              overlayOpacity: 0.4,
+                              child: _screens[_selectedIndex],
+                            ),
                     ),
                     helpChip(context, _selectedIndex == 0
                         ? 'catches'

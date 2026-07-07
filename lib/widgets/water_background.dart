@@ -1,5 +1,6 @@
 import 'dart:math';
 import 'package:flutter/material.dart';
+import 'fish_painter.dart';
 
 /// Full-screen underwater background image with animated fish silhouettes.
 /// Use as a Stack background behind your content.
@@ -136,7 +137,11 @@ class _FishBuilder extends StatelessWidget {
                 transform: Matrix4.identity()..setEntry(0, 0, flip ? -1.0 : 1.0),
                 child: Opacity(
                   opacity: opacity,
-                  child: Icon(Icons.set_meal, size: fishSize, color: Colors.white),
+                  child: FishSilhouette(
+                    species: FishSpecies.values[i % FishSpecies.values.length],
+                    size: fishSize,
+                    color: Colors.white,
+                  ),
                 ),
               ),
             );

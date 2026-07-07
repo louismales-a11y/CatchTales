@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import '../services/translation_service.dart';
+import '../widgets/water_background.dart';
 
 /// Shows a short walkthrough for new users.
 /// Appears only once — dismissed after swipe or tap "Got it!".
@@ -120,10 +121,12 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     return Scaffold(
-      backgroundColor: theme.scaffoldBackgroundColor,
-      body: SafeArea(
-        child: Column(
-          children: [
+      body: WaterBackground(
+        showFish: true,
+        overlayOpacity: 0.35,
+        child: SafeArea(
+          child: Column(
+            children: [
             // Skip button
             Align(
               alignment: Alignment.topRight,
@@ -188,6 +191,7 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
             ),
           ],
         ),
+      ),
       ),
     );
   }
@@ -264,7 +268,6 @@ class _OnboardPage {
                 ),
               ),
             ],
-            const SizedBox(height: 16),
           ],
         ),
       ),
