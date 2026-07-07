@@ -33,6 +33,8 @@ import 'services/theme_provider.dart';
 import 'services/connectivity_service.dart';
 import 'services/trip_service.dart';
 import 'screens/onboarding_screen.dart';
+import 'screens/auth_screen.dart';
+import 'services/auth_service.dart';
 
 // ─── 5 Color Schemes ──────────────────────────────────────────────────────
 
@@ -353,7 +355,20 @@ class _SplashScreenTestState extends State<SplashScreenTest> {
                   height: 48,
                   child: ElevatedButton.icon(
                     onPressed: () async {
+                      final auth = AuthService.instance;
                       final prefs = await SharedPreferences.getInstance();
+
+                      // If not logged in, show auth screen first
+                      if (!auth.isLoggedIn) {
+                        if (!context.mounted) return;
+                        await Navigator.of(context).push(
+                          MaterialPageRoute(
+                            builder: (_) => const AuthScreen(),
+                          ),
+                        );
+                        // After returning from auth, check if they logged in
+                        if (!AuthService.instance.isLoggedIn) return;
+                      }
 
                       // Show language picker on first launch
                       if (await TranslationService.isFirstLaunch()) {

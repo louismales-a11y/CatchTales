@@ -1,8 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:url_launcher/url_launcher.dart';
 import 'translation_service.dart';
 import 'analytics_service.dart';
+import 'auth_service.dart';
 
 /// Manages Pro/Free feature access.
 /// Currently uses SharedPreferences for testing; replace with in-app purchase later.
@@ -39,6 +41,10 @@ class ProService extends ChangeNotifier {
     _isPro = true;
     final prefs = await SharedPreferences.getInstance();
     await prefs.setBool('is_pro', true);
+    // Also update Firestore if user is logged in
+    if (AuthService.instance.isLoggedIn) {
+      await AuthService.instance.upgradeToPro();
+    }
     notifyListeners();
   }
 
@@ -59,7 +65,10 @@ class ProService extends ChangeNotifier {
   /// Check if user can view this fish species index (0-based).
   bool canViewFishSpecies(int index) => _isPro || index < freeFishIdLimit;
 
-  /// Show upgrade dialog with Pro code option.
+  /// Stripe Payment Link URL — set this after creating your link
+  static const String _payLink = 'https://pay.bestfishbuddy.net';
+
+  /// Show upgrade dialog with Stripe Pay Link + Pro code option.
   static void showUpgradeDialog(BuildContext context) {
     AnalyticsService.instance.logProUpgradePrompt();
     showDialog(
@@ -69,9 +78,8 @@ class ProService extends ChangeNotifier {
         content: const Text(
           'Unlock unlimited catches, cloud sync, advanced stats, '
           'badges, and more!\n\n'
-          'To purchase a Pro code:\n'
-          '📧 Email: BestfishBuddy@gmail.com\n\n'
-          'After payment, you will receive a code to enter below.',
+          'Upgrade instantly — pay online and receive your Pro '
+          'code via email.',
         ),
         actions: [
           TextButton(
@@ -81,6 +89,13 @@ class ProService extends ChangeNotifier {
           FilledButton(
             onPressed: () {
               Navigator.pop(ctx);
+              _launchPayLink(context);
+            },
+            child: const Text('Buy Pro — \$4.99'),
+          ),
+          TextButton(
+            onPressed: () {
+              Navigator.pop(ctx);
               _showEnterCodeDialog(context);
             },
             child: const Text('I have a Pro Code'),
@@ -88,6 +103,23 @@ class ProService extends ChangeNotifier {
         ],
       ),
     );
+  }
+
+  /// Open the Stripe Payment Link in the device browser.
+  static Future<void> _launchPayLink(BuildContext context) async {
+    final uri = Uri.parse(_payLink);
+    if (await canLaunchUrl(uri)) {
+      await launchUrl(uri, mode: LaunchMode.externalApplication);
+    } else {
+      if (context.mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            behavior: SnackBarBehavior.floating,
+            content: const Text('Could not open payment page.'),
+          ),
+        );
+      }
+    }
   }
 
   /// Show a dialog to enter a Pro license code.
