@@ -1,22 +1,20 @@
 import 'dart:math';
 import 'package:flutter/material.dart';
 
-/// Animated water background with flowing waves and fish silhouettes.
+/// Full-screen underwater background image with animated fish silhouettes.
 /// Use as a Stack background behind your content.
 class WaterBackground extends StatefulWidget {
   final Widget? child;
   final bool showFish;
-  final double waveHeight;
-  final Color waterTop;
-  final Color waterBottom;
+  final String imagePath;
+  final double overlayOpacity;
 
   const WaterBackground({
     super.key,
     this.child,
     this.showFish = true,
-    this.waveHeight = 60,
-    this.waterTop = const Color(0xFF0A1628),
-    this.waterBottom = const Color(0xFF0D2137),
+    this.imagePath = 'assets/underwater.png',
+    this.overlayOpacity = 0.5,
   });
 
   @override
@@ -32,7 +30,7 @@ class _WaterBackgroundState extends State<WaterBackground>
     super.initState();
     _controller = AnimationController(
       vsync: this,
-      duration: const Duration(seconds: 8),
+      duration: const Duration(seconds: 12),
     )..repeat();
   }
 
@@ -46,29 +44,29 @@ class _WaterBackgroundState extends State<WaterBackground>
   Widget build(BuildContext context) {
     return Stack(
       children: [
-        // Water gradient background
+        // Background image
+        Positioned.fill(
+          child: Image.asset(widget.imagePath, fit: BoxFit.cover),
+        ),
+        // Dark overlay for readability
+        Positioned.fill(
+          child: Container(
+            color: Colors.black.withValues(alpha: widget.overlayOpacity),
+          ),
+        ),
+        // Subtle animated bubbles
         Positioned.fill(
           child: AnimatedBuilder(
             animation: _controller,
             builder: (ctx, _) => CustomPaint(
-              painter: _WaterPainter(
-                waveHeight: widget.waveHeight,
-                waterTop: widget.waterTop,
-                waterBottom: widget.waterBottom,
-                progress: _controller.value,
-              ),
+              painter: _BubblePainter(progress: _controller.value),
               size: Size.infinite,
             ),
           ),
         ),
         // Fish silhouettes
-        if (widget.showFish) ...[
-          _FishAnimation(
-            controller: _controller,
-            fishCount: 3,
-            opacity: 0.15,
-          ),
-        ],
+        if (widget.showFish)
+          _FishBuilder(controller: _controller, fishCount: 4, opacity: 0.2),
         // Content on top
         if (widget.child != null) widget.child!,
       ],
@@ -76,101 +74,75 @@ class _WaterBackgroundState extends State<WaterBackground>
   }
 }
 
-/// Paints animated water waves.
-class _WaterPainter extends CustomPainter {
-  final double waveHeight;
-  final Color waterTop;
-  final Color waterBottom;
+/// Paints subtle floating bubbles.
+class _BubblePainter extends CustomPainter {
   final double progress;
-
-  _WaterPainter({
-    required this.waveHeight,
-    required this.waterTop,
-    required this.waterBottom,
-    required this.progress,
-  });
+  _BubblePainter({required this.progress});
 
   @override
   void paint(Canvas canvas, Size size) {
-    final rect = Offset.zero & size;
-    final gradient = LinearGradient(
-      begin: Alignment.topCenter,
-      end: Alignment.bottomCenter,
-      colors: [waterTop, waterBottom],
-    );
-    final paint = Paint()..shader = gradient.createShader(rect);
+    final paint = Paint()
+      ..color = Colors.white.withValues(alpha: 0.08)
+      ..style = PaintingStyle.stroke
+      ..strokeWidth = 1.0;
 
-    // Draw waves
-    final path = Path();
-    path.moveTo(0, size.height);
-
-    for (double x = 0; x <= size.width; x++) {
-      final wave1 = sin((x / size.width * 4 * pi) + (progress * 2 * pi)) * waveHeight;
-      final wave2 = sin((x / size.width * 6 * pi) + (progress * 3 * pi + 1)) * (waveHeight * 0.5);
-      final wave3 = sin((x / size.width * 2 * pi) + (progress * 1.5 * pi + 2)) * (waveHeight * 0.3);
-      final y = size.height - 60 + wave1 + wave2 + wave3;
-      path.lineTo(x, y);
+    for (int i = 0; i < 8; i++) {
+      final t = (progress + i * 0.125) % 1.0;
+      final x = size.width * (0.1 + (i * 0.1) + sin(t * 2 * pi) * 0.05);
+      final y = size.height * (1.0 - t);
+      final r = 3.0 + sin(t * pi) * 4.0;
+      canvas.drawCircle(Offset(x, y), r, paint);
     }
-
-    path.lineTo(size.width, size.height);
-    path.close();
-    canvas.drawPath(path, paint);
   }
 
   @override
-  bool shouldRepaint(_WaterPainter old) => old.progress != progress;
+  bool shouldRepaint(_BubblePainter old) => old.progress != progress;
 }
 
-/// Animated fish silhouettes swimming across the screen.
-class _FishAnimation extends StatelessWidget {
+/// Builds animated fish using a single repaint boundary.
+class _FishBuilder extends StatelessWidget {
   final AnimationController controller;
   final int fishCount;
   final double opacity;
 
-  const _FishAnimation({
+  const _FishBuilder({
     required this.controller,
-    this.fishCount = 3,
-    this.opacity = 0.12,
+    this.fishCount = 4,
+    this.opacity = 0.15,
   });
 
   @override
   Widget build(BuildContext context) {
-    final fish = List.generate(fishCount, (i) => i);
-    return Stack(
-      children: fish.map((i) {
-        final delay = i * 0.3;
-        final verticalPos = 0.2 + (i * 0.25);
-        final size = 24.0 + (i * 8.0);
-        return Positioned(
-          top: MediaQuery.of(context).size.height * verticalPos,
-          left: 0,
-          child: AnimatedBuilder(
-            animation: controller,
-            builder: (ctx, _) {
-              final t = (controller.value + delay) % 1.0;
-              final screenWidth = MediaQuery.of(context).size.width + 60;
-              final x = (t * screenWidth) - 30;
-              final flip = sin(t * 2 * pi);
-              return Opacity(
-                opacity: opacity,
-                child: Transform(
-                  alignment: Alignment.center,
-                  transform: Matrix4.identity()
-                    ..setTranslationRaw(x, 0, 0)
-                    ..setEntry(0, 0, flip > 0 ? -1.0 : 1.0)
-                    ..setEntry(1, 1, 1.0)
-                    ..setEntry(2, 2, 1.0),
-                  child: Icon(
-                    Icons.set_meal,
-                    size: size,
-                    color: Colors.white,
-                  ),
+    return AnimatedBuilder(
+      animation: controller,
+      builder: (ctx, _) {
+        final size = MediaQuery.of(context).size;
+        return Stack(
+          children: List.generate(fishCount, (i) {
+            final delay = i * 0.25;
+            final t = (controller.value + delay) % 1.0;
+            final verticalPos = 0.15 + (i * 0.2);
+            final fishSize = 20.0 + (i * 10.0);
+            final verticalBob = (i % 2 == 0) ? 0.0 : 10.0;
+            final x = (t * (size.width + 80)) - 40;
+            final y = (size.height * verticalPos) + sin(t * 4 * pi) * verticalBob;
+            final flip = cos(t * 2 * pi) > 0;
+
+            return Positioned(
+              top: y,
+              left: x,
+              child: Transform(
+                alignment: Alignment.center,
+                transform: Matrix4.identity()..setEntry(0, 0, flip ? -1.0 : 1.0),
+                child: Opacity(
+                  opacity: opacity,
+                  child: Icon(Icons.set_meal, size: fishSize, color: Colors.white),
                 ),
-              );
-            },
-          ),
+              ),
+            );
+          }),
         );
-      }).toList(),
+      },
     );
   }
 }

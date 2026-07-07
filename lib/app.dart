@@ -309,7 +309,7 @@ class _SplashScreenTestState extends State<SplashScreenTest> {
     return Scaffold(
       body: WaterBackground(
         showFish: true,
-        waveHeight: 40,
+        
         child: Container(
         width: double.infinity,
         height: double.infinity,

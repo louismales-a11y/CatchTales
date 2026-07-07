@@ -186,7 +186,7 @@ class _AuthScreenState extends State<AuthScreen> {
     return Scaffold(
       body: WaterBackground(
         showFish: true,
-        waveHeight: 35,
+        
         child: SafeArea(
           child: Center(
             child: SingleChildScrollView(
