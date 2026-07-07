@@ -297,6 +297,29 @@ Map<String, _HelpEntry> get _helpEntries => <String, _HelpEntry>{
     tips: 'WiFi-only mode is great for saving mobile data when you\'re out on the water! '
         'Cloud sync will queue until you\'re back on WiFi.',
   ),
+  'hands_free': _HelpEntry(
+    icon: Icons.phonelink_setup,
+    title: 'Hands-Free Setup',
+    body: 'Get the most out of voice controls and the selfie camera by setting up your device thoughtfully.\n\n'
+        '📱 **Easy Reach**\n'
+        'Place your phone where you can reach it while holding a catch — within arm\'s length. '
+        'You should be able to tap the screen or speak a command without putting down your rod.\n\n'
+        '📸 **Camera Aim**\n'
+        'Point the camera at the spot where you\'ll hold up fish for photos. '
+        'Test the angle: when you hold a catch up, the camera should see both you and the fish. '
+        'Adjust the phone\'s tilt so it\'s not shooting up your nose or pointing at the sky.\n\n'
+        '🎤 **Voice Pickup**\n'
+        'Make sure the phone can hear you over wind, waves, engine noise, or auger. '
+        'Say \"record\" from your fishing position — if it doesn\'t respond, move the phone closer.\n\n'
+        '🎯 **Test Before You Fish**\n'
+        'Try different locations before you start:\n'
+        '  • On a boat — dash, console, cupholder, or a RAM mount\n'
+        '  • Ice fishing — on the shelter bench, a bucket, or hung from a string\n'
+        '  • Shore fishing — propped on a rock, in a pack, or on a tripod\n\n'
+        'A minute of setup saves frustration later. Find your spot and get the most out of Best Fish Buddy!',
+    tips: 'If voice isn\'t working, try moving the phone closer or using a windscreen. '
+        'For photos, a small tripod or phone mount with a gooseneck arm gives you the best angles.',
+  ),
   'contact': _HelpEntry(
     icon: Icons.mail_outline,
     title: tr('helpContact'),

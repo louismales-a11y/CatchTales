@@ -162,6 +162,14 @@ class _PrepareScreenState extends State<PrepareScreen> {
                   detail: _spotCount > 0 ? trp('nSpots', {'count': '$_spotCount'}) : tr('noSavedSpots'),
                   screen: const MapScreen(),
                 ),
+                // ── Device Setup ──
+                _checkItem(
+                  key: 'device',
+                  icon: Icons.phonelink_setup,
+                  label: 'Device Setup',
+                  detail: 'Place phone where camera & mic work best',
+                  onTapExtra: _showDeviceSetupTip,
+                ),
 
                 const SizedBox(height: 20),
 
@@ -211,6 +219,49 @@ class _PrepareScreenState extends State<PrepareScreen> {
             ),
           ),
           helpChip(context, 'prepare'),
+        ],
+      ),
+    );
+  }
+
+  void _showDeviceSetupTip() {
+    showDialog(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        title: const Row(
+          children: [
+            Icon(Icons.phonelink_setup, size: 24),
+            SizedBox(width: 8),
+            Expanded(child: Text('Hands-Free Setup')),
+          ],
+        ),
+        content: const SingleChildScrollView(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Text(
+                'Place your device where it works best for you:\n\n'
+                '🎣 **Easy Reach**\n'
+                'Within arm\'s length while holding a catch\n\n'
+                '📸 **Camera Aim**\n'
+                'Pointed at the spot where you\'ll hold up fish for photos\n\n'
+                '🎤 **Voice Pickup**\n'
+                'Close enough to hear \"record\", \"save\", etc. over wind or engine\n\n'
+                '🎯 **Test Before Fishing**\n'
+                'Try different spots on the boat, in your ice shelter, '
+                'or on shore to find what works best.\n\n'
+                'A minute of setup saves frustration later!',
+                style: TextStyle(fontSize: 14, height: 1.6),
+              ),
+            ],
+          ),
+        ),
+        actions: [
+          FilledButton(
+            onPressed: () => Navigator.pop(ctx),
+            child: Text('Got it!'),
+          ),
         ],
       ),
     );
