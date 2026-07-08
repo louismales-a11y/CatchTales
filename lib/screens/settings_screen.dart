@@ -6,7 +6,7 @@ import '../services/local_notification_service.dart';
 import '../services/connectivity_service.dart';
 import '../services/auth_service.dart';
 import '../services/translation_service.dart';
-import '../services/fish_background_service.dart';
+import '../services/skin_service.dart';
 import 'import_export_screen.dart';
 
 /// Settings screen with data transfer, notifications, export, account management.
@@ -321,31 +321,41 @@ class _SettingsScreenState extends State<SettingsScreen> {
           ),
           const SizedBox(height: 16),
 
-          // ── Swimming Fish Background ──
+          // ── App Skin ──
           Card(
             child: Padding(
               padding: const EdgeInsets.all(14),
-              child: Row(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Icon(Icons.set_meal, size: 20, color: theme.colorScheme.primary),
-                  const SizedBox(width: 10),
-                  Expanded(
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
+                  Row(
+                    children: [
+                      Icon(Icons.palette_outlined, size: 20, color: theme.colorScheme.primary),
+                      const SizedBox(width: 10),
+                      const Text('App Skin', style: TextStyle(fontWeight: FontWeight.w600)),
+                    ],
+                  ),
+                  const SizedBox(height: 12),
+                  ValueListenableBuilder<String>(
+                    valueListenable: SkinService.instance,
+                    builder: (ctx, skin, _) => Column(
                       children: [
-                        const Text('Swimming Fish', style: TextStyle(fontWeight: FontWeight.w600)),
-                        Text(
-                          'Animated fish in the background',
-                          style: TextStyle(fontSize: 12, color: Colors.grey.shade600),
+                        _SkinOption(
+                          icon: Icons.water_drop,
+                          title: 'Fancy',
+                          subtitle: 'Underwater background with swimming fish. Dark mode only.',
+                          selected: skin == 'fancy',
+                          onTap: () => SkinService.instance.setSkin('fancy'),
+                        ),
+                        const SizedBox(height: 8),
+                        _SkinOption(
+                          icon: Icons.dark_mode,
+                          title: 'Classic',
+                          subtitle: 'Plain background with light/dark mode toggle.',
+                          selected: skin == 'classic',
+                          onTap: () => SkinService.instance.setSkin('classic'),
                         ),
                       ],
-                    ),
-                  ),
-                  ValueListenableBuilder<bool>(
-                    valueListenable: FishBackgroundService.instance,
-                    builder: (ctx, enabled, _) => Switch(
-                      value: enabled,
-                      onChanged: (v) => FishBackgroundService.instance.setEnabled(v),
                     ),
                   ),
                 ],
@@ -411,6 +421,67 @@ class _SettingsScreenState extends State<SettingsScreen> {
           ),
           const SizedBox(height: 24),
         ],
+      ),
+    );
+  }
+}
+
+/// A selectable skin option card.
+class _SkinOption extends StatelessWidget {
+  final IconData icon;
+  final String title;
+  final String subtitle;
+  final bool selected;
+  final VoidCallback onTap;
+
+  const _SkinOption({
+    required this.icon,
+    required this.title,
+    required this.subtitle,
+    required this.selected,
+    required this.onTap,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    return InkWell(
+      onTap: onTap,
+      borderRadius: BorderRadius.circular(12),
+      child: Container(
+        padding: const EdgeInsets.all(12),
+        decoration: BoxDecoration(
+          borderRadius: BorderRadius.circular(12),
+          border: Border.all(
+            color: selected ? const Color(0xFF76FF03) : Colors.grey.shade700,
+            width: selected ? 2 : 1,
+          ),
+          color: selected ? const Color(0xFF76FF03).withValues(alpha: 0.08) : Colors.transparent,
+        ),
+        child: Row(
+          children: [
+            Icon(icon, size: 22, color: selected ? const Color(0xFF76FF03) : Colors.grey.shade500),
+            const SizedBox(width: 12),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(title,
+                    style: TextStyle(
+                      fontWeight: FontWeight.w600,
+                      fontSize: 14,
+                      color: selected ? const Color(0xFF76FF03) : null,
+                    ),
+                  ),
+                  const SizedBox(height: 2),
+                  Text(subtitle, style: TextStyle(fontSize: 11, color: Colors.grey.shade500)),
+                ],
+              ),
+            ),
+            if (selected)
+              const Icon(Icons.check_circle, size: 20, color: Color(0xFF76FF03)),
+          ],
+        ),
       ),
     );
   }

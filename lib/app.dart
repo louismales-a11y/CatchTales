@@ -41,8 +41,11 @@ import 'services/auth_service.dart';
 import 'widgets/water_background.dart';
 
 import 'screens/brag_admin_screen.dart';
+import 'services/skin_service.dart';
 
-Widget _withWater(Widget child) => WaterBackground(showFish: true, overlayOpacity: 0.6, child: child);
+Widget _withWater(Widget child) => SkinService.instance.isClassic
+    ? child
+    : WaterBackground(showFish: true, overlayOpacity: 0.6, child: child);
 
 // ─── 5 Color Schemes ──────────────────────────────────────────────────────
 
@@ -98,9 +101,9 @@ class BestFishBuddyAppTest extends StatelessWidget {
       checkerboardOffscreenLayers: false,
       checkerboardRasterCacheImages: false,
       showPerformanceOverlay: false,
-      theme: _buildTheme(tp.themeName, Brightness.dark),
+      theme: _buildTheme(tp.themeName, SkinService.instance.isClassic ? Brightness.light : Brightness.dark),
       darkTheme: _buildTheme(tp.themeName, Brightness.dark),
-      themeMode: ThemeMode.dark,
+      themeMode: SkinService.instance.isClassic ? tp.themeMode : ThemeMode.dark,
       home: const SplashScreenTest(),
     );
   }
@@ -109,10 +112,17 @@ class BestFishBuddyAppTest extends StatelessWidget {
     final def = _themes[themeName] ?? _themes.values.first;
     final dark = brightness == Brightness.dark;
 
-    final scaffoldBg = Colors.transparent;
-    final cardBg = dark
-        ? const Color(0xFF0E1422).withValues(alpha: 0.5)
-        : Colors.white.withValues(alpha: 0.45);
+    final isFancy = SkinService.instance.isFancy;
+    final scaffoldBg = isFancy
+        ? Colors.transparent
+        : (dark ? const Color(0xFF060A14) : const Color(0xFFF0F4FF));
+    final cardBg = isFancy
+        ? (dark
+            ? const Color(0xFF0E1422).withValues(alpha: 0.5)
+            : Colors.white.withValues(alpha: 0.45))
+        : (dark
+            ? const Color(0xFF0E1422).withValues(alpha: 0.85)
+            : Colors.white.withValues(alpha: 0.85));
     final appBarBg = const Color(0xFF0A0E1A);
     final navBg = dark ? const Color(0xFF0A0E1A) : Colors.white;
     final onSurface =
@@ -524,6 +534,81 @@ class _HomeScreenTestState extends State<HomeScreenTest> {
     MapScreen(key: _mapKey),
   ];
 
+  void _showThemePicker(BuildContext context, ThemeProvider tp) {
+    showModalBottomSheet(
+      context: context,
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+      ),
+      builder: (ctx) {
+        final theme = Theme.of(ctx);
+        return SafeArea(
+          child: Padding(
+            padding: const EdgeInsets.fromLTRB(20, 12, 20, 24),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Center(
+                  child: Container(
+                    width: 40, height: 4,
+                    margin: const EdgeInsets.only(bottom: 16),
+                    decoration: BoxDecoration(
+                      color: Colors.grey.shade300,
+                      borderRadius: BorderRadius.circular(2),
+                    ),
+                  ),
+                ),
+                Text(tr('chooseTheme'),
+                    style: theme.textTheme.titleMedium?.copyWith(fontWeight: FontWeight.w700)),
+                const SizedBox(height: 12),
+                ...ThemeProvider.themes.map((t) {
+                  final active = tp.themeName == t.name;
+                  return ListTile(
+                    leading: CircleAvatar(
+                      backgroundColor: t.accent, radius: 18,
+                      child: active
+                          ? const Icon(Icons.check, color: Colors.white, size: 20)
+                          : Icon(t.icon, color: Colors.white, size: 20),
+                    ),
+                    title: Text(t.name,
+                        style: TextStyle(
+                          fontWeight: active ? FontWeight.w700 : FontWeight.w400,
+                          color: active ? t.accent : theme.colorScheme.onSurface,
+                        )),
+                    trailing: active
+                        ? Icon(Icons.check_circle, color: t.accent, size: 22) : null,
+                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                    onTap: () { tp.setTheme(t.name); Navigator.pop(ctx); },
+                  );
+                }),
+                const Divider(height: 4),
+                SwitchListTile(
+                  title: const Text('Follow system'),
+                  subtitle: tp.followSystem
+                      ? Text('Uses your device settings', style: TextStyle(fontSize: 11, color: Colors.grey.shade500))
+                      : null,
+                  secondary: Icon(Icons.settings_brightness, color: theme.colorScheme.primary),
+                  value: tp.followSystem,
+                  onChanged: (v) { tp.setFollowSystem(v); Navigator.pop(ctx); },
+                ),
+                SwitchListTile(
+                  title: Text(tr('darkMode')),
+                  secondary: Icon(
+                    tp.isDark ? Icons.dark_mode : Icons.light_mode,
+                    color: tp.followSystem ? Colors.grey : theme.colorScheme.primary,
+                  ),
+                  value: tp.followSystem ? false : tp.isDark,
+                  onChanged: tp.followSystem ? null : (_) { tp.toggleDark(); Navigator.pop(ctx); },
+                ),
+              ],
+            ),
+          ),
+        );
+      },
+    );
+  }
+
   void _showLanguagePicker(BuildContext context) {
     showModalBottomSheet(
       context: context,
@@ -849,6 +934,13 @@ class _HomeScreenTestState extends State<HomeScreenTest> {
                           builder: (_) => _withWater(const ContactScreen())));
                   break;
                 // ── Admin Only ──
+                // ── Appearance (Classic skin only) ──
+                case 'dark_mode':
+                  if (!SkinService.instance.isFancy) tp.toggleDark();
+                  break;
+                case 'theme':
+                  if (!SkinService.instance.isFancy) _showThemePicker(context, tp);
+                  break;
                 case 'dev_options':
                   _showDevOptions(context);
                   break;
@@ -1002,6 +1094,31 @@ class _HomeScreenTestState extends State<HomeScreenTest> {
                   contentPadding: EdgeInsets.zero,
                 ),
               ),
+              // ── Appearance (Classic skin only) ──
+              if (SkinService.instance.isClassic)
+                PopupMenuItem(
+                  value: 'dark_mode',
+                  child: ListTile(
+                    leading: Icon(tp.followSystem
+                        ? Icons.settings_brightness
+                        : (tp.isDark ? Icons.light_mode : Icons.dark_mode)),
+                    title: Text(tp.followSystem
+                        ? 'System (${tr('darkMode')})'
+                        : (tp.isDark ? tr('lightMode') : tr('darkMode'))),
+                    dense: true,
+                    contentPadding: EdgeInsets.zero,
+                  ),
+                ),
+              if (SkinService.instance.isClassic)
+                PopupMenuItem(
+                  value: 'theme',
+                  child: ListTile(
+                    leading: Icon(Icons.palette_outlined, color: accent),
+                    title: Text(tr('theme')),
+                    dense: true,
+                    contentPadding: EdgeInsets.zero,
+                  ),
+                ),
               // ── Developer Options ──
               if (ApiConfig.isDev)
                 PopupMenuItem(

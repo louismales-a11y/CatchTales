@@ -12,7 +12,7 @@ import 'services/connectivity_service.dart';
 import 'services/tts_service.dart';
 import 'services/local_notification_service.dart';
 import 'services/auth_service.dart';
-import 'services/fish_background_service.dart';
+import 'services/skin_service.dart';
 import 'package:firebase_core/firebase_core.dart';
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -42,8 +42,8 @@ void main() async {
   TtsService.instance.init();
   // Initialize local notifications
   LocalNotificationService.instance.init();
-  // Load fish background preference
-  await FishBackgroundService.instance.load();
+  // Load skin preference
+  await SkinService.instance.load();
 
   runApp(
     MultiProvider(

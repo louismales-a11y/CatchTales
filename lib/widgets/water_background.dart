@@ -1,6 +1,6 @@
 import 'dart:math';
 import 'package:flutter/material.dart';
-import '../services/fish_background_service.dart';
+import '../services/skin_service.dart';
 
 /// Full-screen underwater background with animated fish silhouettes.
 /// Each fish swims independently — when one exits left, it respawns
@@ -54,30 +54,38 @@ class _WaterBackgroundState extends State<WaterBackground>
 
   @override
   Widget build(BuildContext context) {
+    final isFancy = widget.showFish && SkinService.instance.isFancy;
     return Stack(
       children: [
-        // Background image
-        Positioned.fill(
-          child: Image.asset(widget.imagePath, fit: BoxFit.cover),
-        ),
-        // Dark overlay for readability
-        Positioned.fill(
-          child: Container(
-            color: Colors.black.withValues(alpha: widget.overlayOpacity),
+        // Background (underwater image for Fancy, solid dark for Classic)
+        if (isFancy)
+          Positioned.fill(
+            child: Image.asset(widget.imagePath, fit: BoxFit.cover),
+          )
+        else
+          Positioned.fill(
+            child: Container(color: const Color(0xFF0A0E1A)),
           ),
-        ),
-        // Bubbles
-        Positioned.fill(
-          child: AnimatedBuilder(
-            animation: _controller,
-            builder: (ctx, _) => CustomPaint(
-              painter: _BubblePainter(progress: _controller.value),
-              size: Size.infinite,
+        // Dark overlay for readability (Fancy only)
+        if (isFancy)
+          Positioned.fill(
+            child: Container(
+              color: Colors.black.withValues(alpha: widget.overlayOpacity),
             ),
           ),
-        ),
-        // Fish — each on its own independent timer
-        if (widget.showFish && FishBackgroundService.instance.value)
+        // Bubbles (Fancy only)
+        if (isFancy)
+          Positioned.fill(
+            child: AnimatedBuilder(
+              animation: _controller,
+              builder: (ctx, _) => CustomPaint(
+                painter: _BubblePainter(progress: _controller.value),
+                size: Size.infinite,
+              ),
+            ),
+          ),
+        // Fish (Fancy only)
+        if (isFancy)
           Positioned.fill(
             child: AnimatedBuilder(
               animation: _controller,
