@@ -40,6 +40,8 @@ import 'screens/brag_board_screen.dart';
 import 'services/auth_service.dart';
 import 'widgets/water_background.dart';
 
+import 'screens/brag_admin_screen.dart';
+
 Widget _withWater(Widget child) => WaterBackground(showFish: true, overlayOpacity: 0.6, child: child);
 
 // ─── 5 Color Schemes ──────────────────────────────────────────────────────
@@ -96,9 +98,9 @@ class BestFishBuddyAppTest extends StatelessWidget {
       checkerboardOffscreenLayers: false,
       checkerboardRasterCacheImages: false,
       showPerformanceOverlay: false,
-      theme: _buildTheme(tp.themeName, Brightness.light),
+      theme: _buildTheme(tp.themeName, Brightness.dark),
       darkTheme: _buildTheme(tp.themeName, Brightness.dark),
-      themeMode: tp.themeMode,
+      themeMode: ThemeMode.dark,
       home: const SplashScreenTest(),
     );
   }
@@ -177,6 +179,10 @@ class BestFishBuddyAppTest extends StatelessWidget {
         color: cardBg,
         surfaceTintColor: Colors.transparent,
         margin: const EdgeInsets.symmetric(horizontal: 12, vertical: 5),
+      ),
+      dialogTheme: DialogThemeData(
+        backgroundColor: const Color(0xFF0D2137),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
       ),
       navigationBarTheme: NavigationBarThemeData(
         elevation: 4,
@@ -518,114 +524,6 @@ class _HomeScreenTestState extends State<HomeScreenTest> {
     MapScreen(key: _mapKey),
   ];
 
-  void _showThemePicker(BuildContext context, ThemeProvider tp) {
-    showModalBottomSheet(
-      context: context,
-      shape: const RoundedRectangleBorder(
-        borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
-      ),
-      builder: (ctx) {
-        final theme = Theme.of(ctx);
-        return SafeArea(
-          child: Padding(
-            padding: const EdgeInsets.fromLTRB(20, 12, 20, 24),
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Center(
-                  child: Container(
-                    width: 40,
-                    height: 4,
-                    margin: const EdgeInsets.only(bottom: 16),
-                    decoration: BoxDecoration(
-                      color: Colors.grey.shade300,
-                      borderRadius: BorderRadius.circular(2),
-                    ),
-                  ),
-                ),
-                Text(tr('chooseTheme'),
-                    style: theme.textTheme.titleMedium?.copyWith(
-                  fontWeight: FontWeight.w700,
-                )),
-                const SizedBox(height: 12),
-                // Theme tiles
-                ...ThemeProvider.themes.map((t) {
-                  final active = tp.themeName == t.name;
-                  return ListTile(
-                    leading: CircleAvatar(
-                      backgroundColor: t.accent,
-                      radius: 18,
-                      child: active
-                          ? const Icon(Icons.check,
-                              color: Colors.white, size: 20)
-                          : Icon(t.icon,
-                              color: Colors.white, size: 20),
-                    ),
-                    title: Text(t.name,
-                        style: TextStyle(
-                          fontWeight:
-                              active ? FontWeight.w700 : FontWeight.w400,
-                          color: active
-                              ? t.accent
-                              : theme.colorScheme.onSurface,
-                        )),
-                    trailing: active
-                        ? Icon(Icons.check_circle,
-                            color: t.accent, size: 22)
-                        : null,
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(12),
-                    ),
-                    onTap: () {
-                      tp.setTheme(t.name);
-                      Navigator.pop(ctx);
-                    },
-                  );
-                }),
-                const Divider(height: 4),
-                // Follow system toggle
-                SwitchListTile(
-                  title: const Text('Follow system'),
-                  subtitle: tp.followSystem
-                      ? Text('Uses your device settings',
-                          style: TextStyle(fontSize: 11, color: Colors.grey.shade500))
-                      : null,
-                  secondary: Icon(
-                    Icons.settings_brightness,
-                    color: theme.colorScheme.primary,
-                  ),
-                  value: tp.followSystem,
-                  onChanged: (v) {
-                    tp.setFollowSystem(v);
-                    Navigator.pop(ctx);
-                  },
-                ),
-                // Manual dark mode toggle (disabled when following system)
-                SwitchListTile(
-                  title: Text(tr('darkMode')),
-                  secondary: Icon(
-                    tp.isDark ? Icons.dark_mode : Icons.light_mode,
-                    color: tp.followSystem
-                        ? Colors.grey
-                        : theme.colorScheme.primary,
-                  ),
-                  value: tp.followSystem ? false : tp.isDark,
-                  onChanged: tp.followSystem
-                      ? null
-                      : (_) {
-                          tp.toggleDark();
-                          Navigator.pop(ctx);
-                        },
-                ),
-              ],
-            ),
-          ),
-        );
-      },
-    );
-  }
-
   void _showLanguagePicker(BuildContext context) {
     showModalBottomSheet(
       context: context,
@@ -715,6 +613,32 @@ class _HomeScreenTestState extends State<HomeScreenTest> {
           content: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
+              SizedBox(
+                width: double.infinity,
+                child: OutlinedButton.icon(
+                  onPressed: () {
+                    Navigator.pop(ctx);
+                    Navigator.push(context, MaterialPageRoute(builder: (_) => BragAdminScreen()));
+                  },
+                  icon: const Icon(Icons.shield_outlined, size: 18),
+                  label: const Text('🛡️ Brag Board Admin'),
+                  style: OutlinedButton.styleFrom(foregroundColor: Colors.red.shade400, side: BorderSide(color: Colors.red.shade400)),
+                ),
+              ),
+              const SizedBox(height: 8),
+              SizedBox(
+                width: double.infinity,
+                child: OutlinedButton.icon(
+                  onPressed: () {
+                    Navigator.pop(ctx);
+                    _showWalkthrough(context);
+                  },
+                  icon: const Icon(Icons.school, size: 18),
+                  label: const Text('Show Walkthrough'),
+                  style: OutlinedButton.styleFrom(foregroundColor: Colors.blue.shade400, side: BorderSide(color: Colors.blue.shade400)),
+                ),
+              ),
+              const SizedBox(height: 12),
               Row(
                 children: [
                   Text(pro.isPro ? 'Pro Mode: ON' : 'Pro Mode: OFF',
@@ -894,13 +818,6 @@ class _HomeScreenTestState extends State<HomeScreenTest> {
                       MaterialPageRoute(
                           builder: (_) => _withWater(const GalleryScreen())));
                   break;
-                // ── Appearance ──
-                case 'dark_mode':
-                  tp.toggleDark();
-                  break;
-                case 'theme':
-                  _showThemePicker(context, tp);
-                  break;
                 case 'language':
                   _showLanguagePicker(context);
                   break;
@@ -932,27 +849,14 @@ class _HomeScreenTestState extends State<HomeScreenTest> {
                           builder: (_) => _withWater(const ContactScreen())));
                   break;
                 // ── Admin Only ──
-                case 'walkthrough':
-                  _showWalkthrough(context);
-                  break;
                 case 'dev_options':
                   _showDevOptions(context);
                   break;
               }
             },
             itemBuilder: (ctx) => [
-              // ── Brag Board ──
+              // ── Planning (always first) ──
               const PopupMenuDivider(),
-              PopupMenuItem(
-                value: 'brag_board',
-                child: ListTile(
-                  leading: Icon(Icons.emoji_events, size: 20),
-                  title: const Text('🏆 Brag Board', style: TextStyle(fontSize: 13)),
-                  dense: true,
-                  contentPadding: EdgeInsets.zero,
-                ),
-              ),
-              // ── Planning ──
               PopupMenuItem(
                 value: 'prepare',
                 child: ListTile(
@@ -972,11 +876,22 @@ class _HomeScreenTestState extends State<HomeScreenTest> {
                   contentPadding: EdgeInsets.zero,
                 ),
               ),
+              // ── Community Stats ──
               PopupMenuItem(
                 value: 'community_stats',
                 child: ListTile(
                   leading: Icon(Icons.people),
                   title: const Text('Community Stats'),
+                  dense: true,
+                  contentPadding: EdgeInsets.zero,
+                ),
+              ),
+              // ── Brag Board ──
+              PopupMenuItem(
+                value: 'brag_board',
+                child: ListTile(
+                  leading: Icon(Icons.emoji_events, size: 20),
+                  title: const Text('🏆 Brag Board', style: TextStyle(fontSize: 13)),
                   dense: true,
                   contentPadding: EdgeInsets.zero,
                 ),
@@ -1087,57 +1002,17 @@ class _HomeScreenTestState extends State<HomeScreenTest> {
                   contentPadding: EdgeInsets.zero,
                 ),
               ),
-              // ── Admin Only ──
-              const PopupMenuDivider(),
-              const PopupMenuItem(
-                enabled: false,
-                child: Text('Admin Only',
-                    style: TextStyle(fontSize: 11, fontWeight: FontWeight.w600)),
-              ),
-              PopupMenuItem(
-                value: 'walkthrough',
-                child: ListTile(
-                  leading: Icon(Icons.school, size: 20),
-                  title: const Text('Show Walkthrough', style: TextStyle(fontSize: 13)),
-                  dense: true,
-                  contentPadding: EdgeInsets.zero,
-                ),
-              ),
+              // ── Developer Options ──
               if (ApiConfig.isDev)
                 PopupMenuItem(
                   value: 'dev_options',
                   child: ListTile(
                     leading: Icon(Icons.build, size: 20),
-                    title: const Text('Developer Options', style: TextStyle(fontSize: 13)),
+                    title: const Text('🛠️ Developer Options', style: TextStyle(fontSize: 13)),
                     dense: true,
                     contentPadding: EdgeInsets.zero,
                   ),
                 ),
-              // ── Appearance ──
-              PopupMenuItem(
-                value: 'dark_mode',
-                child: ListTile(
-                  leading: Icon(tp.followSystem
-                      ? Icons.settings_brightness
-                      : (tp.isDark
-                          ? Icons.light_mode
-                          : Icons.dark_mode)),
-                  title: Text(tp.followSystem
-                      ? 'System (${tr('darkMode')})'
-                      : (tp.isDark ? tr('lightMode') : tr('darkMode'))),
-                  dense: true,
-                  contentPadding: EdgeInsets.zero,
-                ),
-              ),
-              PopupMenuItem(
-                value: 'theme',
-                child: ListTile(
-                  leading: Icon(Icons.palette_outlined, color: accent),
-                  title: Text(tr('theme')),
-                  dense: true,
-                  contentPadding: EdgeInsets.zero,
-                ),
-              ),
               PopupMenuItem(
                 value: 'language',
                 child: ListTile(

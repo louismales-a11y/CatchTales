@@ -102,6 +102,16 @@ class _CounterScreenState extends State<CounterScreen> {
         // This takes priority over everything else.
         if (_pendingCount > 0) {
           final t = text.trim().toLowerCase();
+          // New "caught" command → process it instead of treating as pending response
+          if (t.contains('caught') && RegExp(r'caught\s+\S{3,}').hasMatch(t)) {
+            _pendingCount = 0; // clear pending
+            isWaked = true;
+            status = ' (⚙️ processing!)';
+            _lastCommand = text;
+            _parseCommand(text);
+            setState(() => _liveTranscription = text + status);
+            return;
+          }
           if (t == 'no' || t == 'nope' || t == 'nah' ||
               t.startsWith('tally') || t == 'just tally' ||
               t == 'keep going' || t == 'next fish') {
@@ -396,18 +406,24 @@ class _CounterScreenState extends State<CounterScreen> {
     // ── Admin commands (no angler needed) ──
     // Handle pending "Record this fish?" prompt
     if (_pendingCount > 0) {
-      _pendingCount = 0; // clear regardless
-      // "yes" → open catch form
-      if (cmd == 'yes' || cmd == 'yeah' || cmd == 'yep' || cmd == 'yup' ||
-          cmd.startsWith('record') || cmd.startsWith('log') ||
-          cmd == 'add to catches' || cmd == 'save catch' ||
-          cmd == 'sure' || cmd == 'ok') {
-        _openCatchForm(_pendingAngler!, _pendingSpecies!, 1);
-        return;
+      // New "caught" command → process it instead of treating as pending response
+      if (cmd.contains('caught') && RegExp(r'caught\s+\S{3,}').hasMatch(cmd)) {
+        _pendingCount = 0;
+        // Continue below to process normally
+      } else {
+        _pendingCount = 0; // clear regardless
+        // "yes" → open catch form
+        if (cmd == 'yes' || cmd == 'yeah' || cmd == 'yep' || cmd == 'yup' ||
+            cmd.startsWith('record') || cmd.startsWith('log') ||
+            cmd == 'add to catches' || cmd == 'save catch' ||
+            cmd == 'sure' || cmd == 'ok') {
+          _openCatchForm(_pendingAngler!, _pendingSpecies!, 1);
+          return;
+        }
+        // Anything else → just tally
+        setState(() => _liveTranscription = '✅ Just tally — ready for next fish');
+        return; // always return — don't reprocess as a fish command
       }
-      // Anything else → just tally
-      setState(() => _liveTranscription = '✅ Just tally — ready for next fish');
-      return; // always return — don't reprocess as a fish command
     }
     if (cmd.startsWith('help') || cmd == 'what can i say' || cmd == 'commands') {
       _showVoiceFeedback('Say "fish buddy [name] caught [species]" or "add [name]" to add angler, "reset" for new trip, "remove [name]" to delete');

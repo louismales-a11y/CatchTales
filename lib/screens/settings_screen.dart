@@ -6,6 +6,7 @@ import '../services/local_notification_service.dart';
 import '../services/connectivity_service.dart';
 import '../services/auth_service.dart';
 import '../services/translation_service.dart';
+import '../services/fish_background_service.dart';
 import 'import_export_screen.dart';
 
 /// Settings screen with data transfer, notifications, export, account management.
@@ -22,10 +23,10 @@ class _SettingsScreenState extends State<SettingsScreen> {
   @override
   void initState() {
     super.initState();
-    _loadReminderPrefs();
+    _loadPrefs();
   }
 
-  Future<void> _loadReminderPrefs() async {
+  Future<void> _loadPrefs() async {
     final prefs = await SharedPreferences.getInstance();
     _reminderPrefs['reminder_to_log_enabled'] = prefs.getBool('reminder_to_log_enabled') ?? false;
     _reminderPrefs['solunar_alert_enabled'] = prefs.getBool('solunar_alert_enabled') ?? false;
@@ -313,6 +314,39 @@ class _SettingsScreenState extends State<SettingsScreen> {
                         ],
                       );
                     },
+                  ),
+                ],
+              ),
+            ),
+          ),
+          const SizedBox(height: 16),
+
+          // ── Swimming Fish Background ──
+          Card(
+            child: Padding(
+              padding: const EdgeInsets.all(14),
+              child: Row(
+                children: [
+                  Icon(Icons.set_meal, size: 20, color: theme.colorScheme.primary),
+                  const SizedBox(width: 10),
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        const Text('Swimming Fish', style: TextStyle(fontWeight: FontWeight.w600)),
+                        Text(
+                          'Animated fish in the background',
+                          style: TextStyle(fontSize: 12, color: Colors.grey.shade600),
+                        ),
+                      ],
+                    ),
+                  ),
+                  ValueListenableBuilder<bool>(
+                    valueListenable: FishBackgroundService.instance,
+                    builder: (ctx, enabled, _) => Switch(
+                      value: enabled,
+                      onChanged: (v) => FishBackgroundService.instance.setEnabled(v),
+                    ),
                   ),
                 ],
               ),

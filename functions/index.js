@@ -291,3 +291,56 @@ exports.createProCode = functions.https.onCall(async (data, context) => {
 //
 // Done! When a customer pays, the webhook fires, creates a Pro code,
 // saves it to Firestore, and emails the customer.
+
+// ---------------------------------------------------------------------------
+// Brag Board Report Notification
+// Fires when a new brag_reports document is created, emails the admin.
+// ---------------------------------------------------------------------------
+exports.onBragReport = functions.firestore
+  .onDocumentCreated('brag_reports/{reportId}', async (event) => {
+    const report = event.data?.data();
+    if (!report) return;
+
+    const targetType = report.targetType || 'unknown';
+    const targetId = report.targetId || 'unknown';
+    const reason = report.reason || 'Not specified';
+    const reporterId = report.reporterId || 'anonymous';
+
+    // Build a helpful email
+    const subject = `[BFB Report] ${targetType} reported for: ${reason}`;
+    const body = `
+A new brag board report has been submitted:
+
+  Target Type: ${targetType}
+  Target ID:   ${targetId}
+  Reason:      ${reason}
+  Reporter:    ${reporterId} (anonymous to reporter, visible to you)
+
+To view this report in Firebase Console:
+https://console.firebase.google.com/project/bestfishbuddy-bcd7e/firestore/data/brag_reports/${event.params.reportId}
+
+To view the reported content in Firebase Console:
+https://console.firebase.google.com/project/bestfishbuddy-bcd7e/firestore/data/brag_${targetType === 'post' ? 'posts' : 'comments'}/${targetId}
+
+To manage the reporting user in Firebase Auth:
+https://console.firebase.google.com/project/bestfishbuddy-bcd7e/authentication/users
+    `.trim();
+
+    // Send via nodemailer using the configured Gmail
+    const transporter = nodemailer.createTransport({
+      service: 'gmail',
+      auth: { user: gmailUser.value(), pass: gmailPass.value() },
+    });
+
+    try {
+      await transporter.sendMail({
+        from: gmailUser.value(),
+        to: gmailUser.value(), // sends to yourself (bestfishbuddy@gmail.com)
+        subject,
+        text: body,
+      });
+      console.log(`Report email sent for ${targetType} ${targetId}`);
+    } catch (e) {
+      console.error('Failed to send report email:', e);
+    }
+  });

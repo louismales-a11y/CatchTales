@@ -133,6 +133,31 @@ class AuthService extends ChangeNotifier {
     _error = null;
     notifyListeners();
 
+    final lowerName = name.trim().toLowerCase();
+
+    // Claim username atomically — prevents duplicates
+    final usernameRef = FirebaseFirestore.instance.collection('usernames').doc(lowerName);
+    try {
+      await FirebaseFirestore.instance.runTransaction((txn) async {
+        final existing = await txn.get(usernameRef);
+        if (existing.exists) {
+          throw FirebaseAuthException(
+            code: 'username-taken',
+            message: 'The username \"$name\" is already taken. Please choose another.',
+          );
+        }
+        // Reserve it with a temp placeholder — real uid written after Auth account
+        txn.set(usernameRef, {'reserved': true, 'reservedAt': FieldValue.serverTimestamp()});
+      });
+    } on FirebaseAuthException {
+      rethrow;
+    } catch (e) {
+      _error = 'Could not check username availability. Please try again.';
+      _status = AuthStatus.unauthenticated;
+      notifyListeners();
+      return false;
+    }
+
     try {
       final cred = await FirebaseAuth.instance.createUserWithEmailAndPassword(
         email: email.trim(),
@@ -142,11 +167,13 @@ class AuthService extends ChangeNotifier {
       _email = email.trim();
       _userName = name.trim();
 
+      // Finalize username claim with real userId
+      await usernameRef.set({'uid': _user!.uid, 'name': _userName, 'createdAt': FieldValue.serverTimestamp()});
+
       // Update display name in Firebase Auth
-      await _user?.updateDisplayName(name.trim());
+      await _user?.updateDisplayName(_userName);
 
       // Create user profile in Firestore with device token
-      // Gracefully handle failures — account is already created in Firebase Auth
       try {
         await _createProfile();
       } catch (e) {
@@ -170,8 +197,14 @@ class AuthService extends ChangeNotifier {
       notifyListeners();
       return true;
     } on FirebaseAuthException catch (e) {
+      // Clean up reserved username on failure
+      try { await usernameRef.delete(); } catch (_) {}
+
       _status = AuthStatus.unauthenticated;
       switch (e.code) {
+        case 'username-taken':
+          _error = e.message ?? 'Username already taken.';
+          break;
         case 'email-already-in-use':
           _error = 'An account with this email already exists.';
           break;
@@ -190,6 +223,9 @@ class AuthService extends ChangeNotifier {
       notifyListeners();
       return false;
     } catch (e) {
+      // Clean up reserved username on failure
+      try { await usernameRef.delete(); } catch (_) {}
+
       _status = AuthStatus.unauthenticated;
       _error = 'Sign-up failed. Please try again.';
       notifyListeners();
@@ -459,6 +495,14 @@ class AuthService extends ChangeNotifier {
   Future<bool> deleteAccount() async {
     if (_user == null) return false;
     try {
+      // Free up the username for others
+      final lowerName = _userName.trim().toLowerCase();
+      if (lowerName.isNotEmpty) {
+        try {
+          await FirebaseFirestore.instance.collection('usernames').doc(lowerName).delete();
+        } catch (_) {}
+      }
+
       // Delete Firestore user profile
       await FirebaseFirestore.instance
           .collection('users')

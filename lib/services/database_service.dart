@@ -19,7 +19,7 @@ class DatabaseService {
 
     return await openDatabase(
       path,
-      version: 12,
+      version: 13,
       onCreate: (db, version) async {
         await db.execute('''
           CREATE TABLE catches (
@@ -39,6 +39,8 @@ class DatabaseService {
             weather_condition TEXT,
             notes TEXT,
             trip_name TEXT,
+            water_clarity TEXT DEFAULT '',
+            flow_rate TEXT DEFAULT '',
             caught_at TEXT NOT NULL,
             created_at TEXT NOT NULL
           )
@@ -100,7 +102,12 @@ class DatabaseService {
         await db.execute('CREATE INDEX IF NOT EXISTS idx_species_tallies_angler ON species_tallies(angler)');
       },
       onUpgrade: (db, oldVersion, newVersion) async {
-        // Migration to v12: add water conditions
+        // Migration to v13: ensure water condition columns exist
+        if (oldVersion < 13) {
+          try { await db.execute('ALTER TABLE catches ADD COLUMN water_clarity TEXT DEFAULT \'\''); } catch (_) {}
+          try { await db.execute('ALTER TABLE catches ADD COLUMN flow_rate TEXT DEFAULT \'\''); } catch (_) {}
+        }
+        // Legacy migration
         if (oldVersion < 12) {
           try { await db.execute('ALTER TABLE catches ADD COLUMN water_clarity TEXT DEFAULT \'\''); } catch (_) {}
           try { await db.execute('ALTER TABLE catches ADD COLUMN flow_rate TEXT DEFAULT \'\''); } catch (_) {}

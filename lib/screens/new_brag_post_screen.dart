@@ -1,9 +1,7 @@
 import 'dart:io';
-import 'dart:typed_data';
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
 import '../services/brag_board_service.dart';
-import '../widgets/water_background.dart';
 
 /// Screen to create a new brag post with photo.
 class NewBragPostScreen extends StatefulWidget {
@@ -18,7 +16,6 @@ class _NewBragPostScreenState extends State<NewBragPostScreen> {
   final _descCtrl = TextEditingController();
   final _infoCtrl = TextEditingController();
   XFile? _image;
-  Uint8List? _imageBytes;
   bool _uploading = false;
 
   @override
@@ -31,13 +28,7 @@ class _NewBragPostScreenState extends State<NewBragPostScreen> {
 
   Future<void> _pickImage() async {
     final img = await BragBoardService.pickImage();
-    if (img != null) {
-      final bytes = await img.readAsBytes();
-      setState(() {
-        _image = img;
-        _imageBytes = bytes;
-      });
-    }
+    if (img != null) setState(() => _image = img);
   }
 
   Future<void> _submit() async {
@@ -55,9 +46,8 @@ class _NewBragPostScreenState extends State<NewBragPostScreen> {
       return;
     }
     setState(() => _uploading = true);
-    final bytes = _imageBytes ?? await _image!.readAsBytes();
     final id = await BragBoardService.instance.createPost(
-      imageBytes: bytes,
+      photo: _image!,
       species: species,
       description: _descCtrl.text.trim(),
       moreInfo: _infoCtrl.text.trim().isEmpty ? null : _infoCtrl.text.trim(),
@@ -97,9 +87,7 @@ class _NewBragPostScreenState extends State<NewBragPostScreen> {
               child: _image != null
                   ? ClipRRect(
                       borderRadius: BorderRadius.circular(16),
-                      child: _imageBytes != null
-                          ? Image.memory(_imageBytes!, width: double.infinity, height: 260, fit: BoxFit.cover)
-                          : Image.file(File(_image!.path), width: double.infinity, height: 260, fit: BoxFit.cover),
+                      child: Image.file(File(_image!.path), width: double.infinity, height: 260, fit: BoxFit.cover),
                     )
                   : const Column(
                       mainAxisAlignment: MainAxisAlignment.center,

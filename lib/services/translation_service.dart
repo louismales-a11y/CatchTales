@@ -121,6 +121,8 @@ class TranslationService extends ChangeNotifier {
       'onboardRecordCatch': 'Record a Catch',
       'onboardVoiceForms': 'Voice in Forms',
       'onboardPrepare': 'Prepare for Fishing',
+      'onboardFishBg': 'Swimming Fish Background',
+      'onboardDescFishBg': 'In Settings you can toggle Swimming Fish ON/OFF. Classic (no fish) or Fancy (animated fish across the background).',
       'onboardCloudSync': 'Cloud Sync & Fish Together',
       'onboardStats': 'Stats, Badges & Achievements',
       'onboardMap': '🗺️ Map Tools',

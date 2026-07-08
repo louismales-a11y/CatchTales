@@ -1,10 +1,9 @@
 import 'dart:convert';
-import 'dart:typed_data';
 import 'package:flutter/foundation.dart';
-import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:image_picker/image_picker.dart';
+import 'auth_service.dart';
 
 /// A brag post from a user.
 class BragPost {
@@ -14,7 +13,7 @@ class BragPost {
   final String species;
   final String description;
   final String? photoUrl;
-  final String? photoData; // base64 encoded image
+  final String? photoData; // base64 encoded image (legacy, new posts use photoUrl)
   final String? moreInfo;
   final DateTime timestamp;
   final int likesCount;
@@ -152,26 +151,59 @@ class BragBoardService {
     });
   }
 
+  /// Check if the current user is banned (supports temporary bans).
+  Future<bool> _isBanned() async {
+    if (_uid == null) return false;
+    try {
+      final doc = await FirebaseFirestore.instance.collection('users').doc(_uid!).get();
+      final data = doc.data();
+      if (data == null) return false;
+      // Lifetime ban
+      if (data['banned'] == true && data['bannedUntil'] == null) return true;
+      // Temporary ban — check if expired
+      final until = data['bannedUntil'] as Timestamp?;
+      if (until != null) {
+        if (until.toDate().isAfter(DateTime.now())) return true;
+        // Ban expired — auto-unban
+        await doc.reference.update({'banned': false, 'bannedUntil': null});
+      }
+      return false;
+    } catch (_) {
+      return false;
+    }
+  }
 
-
-  /// Upload a new post with photo.
+  /// Upload a new post with photo as base64 in Firestore.
   Future<String?> createPost({
-    required Uint8List imageBytes,
+    required XFile photo,
     required String species,
     String description = '',
     String? moreInfo,
   }) async {
     if (_uid == null) return null;
+    if (await _isBanned()) {
+      debugPrint('BragBoardService: user is banned, cannot post');
+      return null;
+    }
     try {
-      // Encode photo to base64
-      debugPrint('BragBoardService: encoding photo, size ${imageBytes.length}');
-      final photoData = base64Encode(imageBytes);
-      debugPrint('BragBoardService: photo encoded, length ${photoData.length}');
+      // Read compressed photo bytes (ImagePicker already applied maxWidth/maxHeight/imageQuality)
+      debugPrint('BragBoardService: reading photo bytes...');
+      final imageBytes = await photo.readAsBytes();
+      debugPrint('BragBoardService: read ${imageBytes.length} bytes');
 
-      // Check Firestore doc size limit (1MB)
-      final docData = <String, dynamic>{
+      // Encode to base64
+      final photoData = base64Encode(imageBytes);
+      debugPrint('BragBoardService: base64 length ${photoData.length}');
+
+      // Use the user's permanent profile name (set at sign-up)
+      final userName = AuthService.instance.userName.isNotEmpty
+          ? AuthService.instance.userName
+          : (_auth.currentUser?.displayName ?? 'Angler');
+
+      // Build doc (compressed to ~45KB base64, well under 1MB Firestore limit)
+      final doc = await _postsRef.add({
         'userId': _uid!,
-        'userName': _auth.currentUser?.displayName ?? 'Angler',
+        'userName': userName,
         'species': species,
         'description': description,
         'photoData': photoData,
@@ -179,23 +211,11 @@ class BragBoardService {
         'timestamp': Timestamp.fromDate(DateTime.now()),
         'likesCount': 0,
         'commentsCount': 0,
-      };
-      
-      final jsonStr = jsonEncode(docData);
-      if (jsonStr.length > 900 * 1024) {
-        debugPrint('BragBoardService: document too large (${jsonStr.length}), truncating photo');
-        // Truncate photo data to fit
-        final maxDataLen = photoData.length - (jsonStr.length - 900 * 1024) - 1024;
-        if (maxDataLen < 0) return null;
-        docData['photoData'] = photoData.substring(0, maxDataLen);
-      }
-
-      final doc = await _postsRef.add(docData);
+      });
       debugPrint('BragBoardService: post created with id: ${doc.id}');
       return doc.id;
     } catch (e) {
       debugPrint('BragBoardService.createPost ERROR: $e');
-      debugPrint('BragBoardService.createPost stack: ${StackTrace.current}');
       return null;
     }
   }
@@ -266,6 +286,10 @@ class BragBoardService {
     String? parentId,
   }) async {
     if (_uid == null) return false;
+    if (await _isBanned()) {
+      debugPrint('BragBoardService: user is banned, cannot comment');
+      return false;
+    }
     try {
       final comment = BragComment(
         id: '',
@@ -302,12 +326,13 @@ class BragBoardService {
   // ─── Reports & Blocks ─────────────────────────────────────────
 
   /// Report a post or comment.
-  Future<void> report(String targetType, String targetId, {String? reason}) async {
+  Future<void> report(String targetType, String targetId, {String? reason, String? targetUserId}) async {
     if (_uid == null) return;
     try {
       await _reportsRef.add({
         'targetType': targetType,
         'targetId': targetId,
+        'targetUserId': targetUserId ?? '',
         'reporterId': _uid,
         'reason': reason ?? 'Inappropriate',
         'timestamp': FieldValue.serverTimestamp(),
@@ -341,16 +366,14 @@ class BragBoardService {
     return result.docs.isNotEmpty;
   }
 
-  /// Pick and crop image from gallery.
+  /// Pick image from gallery with compression to fit Firestore.
   static Future<XFile?> pickImage() async {
     final picker = ImagePicker();
-    final img = await picker.pickImage(
+    return picker.pickImage(
       source: ImageSource.gallery,
-      maxWidth: 1920,
-      maxHeight: 1920,
+      maxWidth: 1024,
+      maxHeight: 1024,
+      imageQuality: 70,
     );
-    if (img == null) return null;
-    // Return the XFile — cropping happens during _imageToBase64
-    return img;
   }
 }

@@ -93,6 +93,11 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
       desc: tr('onboardDescCloudSync'),
     ),
     _OnboardPage(
+      icon: Icons.set_meal,
+      title: tr('onboardFishBg'),
+      desc: tr('onboardDescFishBg'),
+    ),
+    _OnboardPage(
       icon: Icons.more_vert,
       title: tr('onboardMoreFeatures'),
       desc: tr('onboardDescMoreFeatures'),

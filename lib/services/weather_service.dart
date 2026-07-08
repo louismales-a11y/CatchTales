@@ -12,8 +12,8 @@ class WeatherService {
 
     // If WiFi-only mode is on and we're not on WiFi, try cache first
     if (!ConnectivityService.instance.canTransferData) {
-      final cached = CacheService.instance.get<Map>(cacheKey, maxAge: const Duration(hours: 3));
-      if (cached != null) return cached as Map<String, dynamic>?;
+      final cached = await CacheService.instance.get<Map>(cacheKey, maxAge: const Duration(hours: 3));
+      if (cached != null) return Map<String, dynamic>.from(cached);
       return null;
     }
 
@@ -46,7 +46,8 @@ class WeatherService {
       }
     } catch (_) {
       // Offline — try cache
-      return CacheService.instance.get<Map>(cacheKey, maxAge: const Duration(hours: 3)) as Map<String, dynamic>?;
+      final cached = await CacheService.instance.get<Map>(cacheKey, maxAge: const Duration(hours: 3));
+      return cached != null ? Map<String, dynamic>.from(cached) : null;
     }
     return null;
   }

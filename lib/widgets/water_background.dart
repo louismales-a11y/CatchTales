@@ -1,9 +1,10 @@
 import 'dart:math';
 import 'package:flutter/material.dart';
-import 'fish_painter.dart';
+import '../services/fish_background_service.dart';
 
-/// Full-screen underwater background image with animated fish silhouettes.
-/// Use as a Stack background behind your content.
+/// Full-screen underwater background with animated fish silhouettes.
+/// Each fish swims independently — when one exits left, it respawns
+/// on the right with new random size/position/speed.
 class WaterBackground extends StatefulWidget {
   final Widget? child;
   final bool showFish;
@@ -25,14 +26,24 @@ class WaterBackground extends StatefulWidget {
 class _WaterBackgroundState extends State<WaterBackground>
     with SingleTickerProviderStateMixin {
   late AnimationController _controller;
+  late List<_AnimatedFish> _fish;
+
+  final _fishPaths = [
+    'assets/fish1.png',
+    'assets/fish2.png',
+    'assets/fish3.png',
+    'assets/fish4.png',
+    'assets/fish5.png',
+  ];
 
   @override
   void initState() {
     super.initState();
     _controller = AnimationController(
       vsync: this,
-      duration: const Duration(seconds: 12),
+      duration: const Duration(seconds: 60),
     )..repeat();
+    _fish = List.generate(8, (_) => _AnimatedFish());
   }
 
   @override
@@ -55,7 +66,7 @@ class _WaterBackgroundState extends State<WaterBackground>
             color: Colors.black.withValues(alpha: widget.overlayOpacity),
           ),
         ),
-        // Subtle animated bubbles
+        // Bubbles
         Positioned.fill(
           child: AnimatedBuilder(
             animation: _controller,
@@ -65,13 +76,85 @@ class _WaterBackgroundState extends State<WaterBackground>
             ),
           ),
         ),
-        // Fish silhouettes
-        if (widget.showFish)
-          _FishBuilder(controller: _controller, fishCount: 5, opacity: 0.35),
+        // Fish — each on its own independent timer
+        if (widget.showFish && FishBackgroundService.instance.value)
+          Positioned.fill(
+            child: AnimatedBuilder(
+              animation: _controller,
+              builder: (ctx, _) {
+                final size = MediaQuery.of(context).size;
+                return Stack(
+                  children: _fish.map((f) {
+                    f.update();
+                    final x = size.width * (1.0 - f.progress) - f.fishSize * 0.5;
+                    final y = size.height * f.verticalPos +
+                        sin(f.progress * f.bobFreq * 6.28) * f.bobAmplitude;
+                    if (x < -f.fishSize || x > size.width + f.fishSize) {
+                      return const SizedBox.shrink();
+                    }
+                    return Positioned(
+                      left: x,
+                      top: y,
+                      child: Opacity(
+                        opacity: f.opacity,
+                        child: Image.asset(
+                          _fishPaths[f.imageIndex % _fishPaths.length],
+                          width: f.fishSize,
+                          height: f.fishSize * 0.6,
+                          fit: BoxFit.contain,
+                          color: Colors.white,
+                          colorBlendMode: BlendMode.difference,
+                        ),
+                      ),
+                    );
+                  }).toList(),
+                );
+              },
+            ),
+          ),
         // Content on top
         if (widget.child != null) widget.child!,
       ],
     );
+  }
+}
+
+/// One fish with its own independent animation state.
+class _AnimatedFish {
+  double progress;       // 0 = right edge, 1 = left edge
+  late double verticalPos;
+  late double fishSize;
+  late double opacity;
+  late double bobFreq;
+  late double bobAmplitude;
+  late double speed;
+  late int imageIndex;
+
+  static final _rand = Random();
+  static int _nextIndex = 0;
+
+  _AnimatedFish() : progress = _rand.nextDouble() {
+    _randomize();
+    imageIndex = _nextIndex++;
+  }
+
+  void _randomize() {
+    verticalPos = 0.03 + _rand.nextDouble() * 0.9;
+    fishSize = 25 + _rand.nextDouble() * 70;
+    opacity = 0.08 + _rand.nextDouble() * 0.25;
+    bobFreq = 1.5 + _rand.nextDouble() * 4;
+    bobAmplitude = 4 + _rand.nextDouble() * 12;
+    speed = 0.0004 + _rand.nextDouble() * 0.003;
+  }
+
+  /// Called every animation frame. Advances the fish across the screen.
+  void update() {
+    progress += speed;
+    if (progress >= 1.0) {
+      // Exited left — respawn on right with fresh random params
+      progress = 0.0;
+      _randomize();
+    }
   }
 }
 
@@ -98,56 +181,4 @@ class _BubblePainter extends CustomPainter {
 
   @override
   bool shouldRepaint(_BubblePainter old) => old.progress != progress;
-}
-
-/// Builds animated fish using a single repaint boundary.
-class _FishBuilder extends StatelessWidget {
-  final AnimationController controller;
-  final int fishCount;
-  final double opacity;
-
-  const _FishBuilder({
-    required this.controller,
-    this.fishCount = 5,
-    this.opacity = 0.15,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    return AnimatedBuilder(
-      animation: controller,
-      builder: (ctx, _) {
-        final size = MediaQuery.of(context).size;
-        return Stack(
-          children: List.generate(fishCount, (i) {
-            final delay = i * 0.25;
-            final t = (controller.value + delay) % 1.0;
-            final verticalPos = 0.15 + (i * 0.2);
-            final fishSize = 20.0 + (i * 10.0);
-            final verticalBob = (i % 2 == 0) ? 0.0 : 10.0;
-            final x = (t * (size.width + 80)) - 40;
-            final y = (size.height * verticalPos) + sin(t * 4 * pi) * verticalBob;
-            final flip = cos(t * 2 * pi) > 0;
-
-            return Positioned(
-              top: y,
-              left: x,
-              child: Transform(
-                alignment: Alignment.center,
-                transform: Matrix4.identity()..setEntry(0, 0, flip ? -1.0 : 1.0),
-                child: Opacity(
-                  opacity: opacity,
-                  child: FishSilhouette(
-                    species: FishSpecies.values[i % FishSpecies.values.length],
-                    size: fishSize,
-                    color: Colors.white,
-                  ),
-                ),
-              ),
-            );
-          }),
-        );
-      },
-    );
-  }
 }

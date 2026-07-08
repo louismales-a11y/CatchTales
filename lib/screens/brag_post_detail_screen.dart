@@ -42,7 +42,7 @@ class _BragPostDetailScreenState extends State<BragPostDetailScreen> {
   }
 
   void _reportComment(BragComment comment) {
-    _service.report('comment', comment.id);
+    _service.report('comment', comment.id, targetUserId: comment.userId);
     ScaffoldMessenger.of(context).showSnackBar(
       const SnackBar(behavior: SnackBarBehavior.floating, content: Text('Comment reported. Thank you.')),
     );
@@ -121,6 +121,22 @@ class _BragPostDetailScreenState extends State<BragPostDetailScreen> {
                   ),
                 ],
 
+                // Report this post
+                Align(
+                  alignment: Alignment.centerRight,
+                  child: TextButton.icon(
+                    onPressed: () {
+                      _service.report('post', post.id, reason: 'Inappropriate', targetUserId: post.userId);
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        const SnackBar(behavior: SnackBarBehavior.floating, content: Text('Report submitted. Thank you.')),
+                      );
+                    },
+                    icon: Icon(Icons.flag_outlined, size: 14, color: Colors.red.shade400),
+                    label: Text('Report this post', style: TextStyle(fontSize: 12, color: Colors.red.shade400)),
+                    style: TextButton.styleFrom(padding: EdgeInsets.zero, minimumSize: Size.zero, tapTargetSize: MaterialTapTargetSize.shrinkWrap),
+                  ),
+                ),
+
                 const Divider(height: 32),
 
                 // Comments header
@@ -131,6 +147,12 @@ class _BragPostDetailScreenState extends State<BragPostDetailScreen> {
                 StreamBuilder<List<BragComment>>(
                   stream: _service.streamComments(post.id),
                   builder: (ctx, snap) {
+                    if (snap.hasError) {
+                      return const Padding(
+                        padding: EdgeInsets.symmetric(vertical: 24),
+                        child: Text('Could not load comments', textAlign: TextAlign.center, style: TextStyle(color: Colors.white38)),
+                      );
+                    }
                     if (!snap.hasData) return const Center(child: CircularProgressIndicator());
                     final comments = snap.data!;
                     // Separate top-level from replies
@@ -237,6 +259,11 @@ class _BragPostDetailScreenState extends State<BragPostDetailScreen> {
                       });
                     },
                     child: Text('Reply', style: TextStyle(fontSize: 12, color: Colors.grey.shade400)),
+                  ),
+                  const SizedBox(width: 12),
+                  GestureDetector(
+                    onTap: () => _reportComment(comment),
+                    child: Text('Report', style: TextStyle(fontSize: 12, color: Colors.red.shade400)),
                   ),
                 ],
               ),

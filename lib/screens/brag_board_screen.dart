@@ -44,7 +44,7 @@ class _BragBoardScreenState extends State<BragBoardScreen> {
                 title: const Text('Report'),
                 onTap: () {
                   Navigator.pop(ctx);
-                  _service.report('post', post.id, reason: 'Inappropriate');
+                  _service.report('post', post.id, reason: 'Inappropriate', targetUserId: post.userId);
                   ScaffoldMessenger.of(context).showSnackBar(
                     const SnackBar(behavior: SnackBarBehavior.floating, content: Text('Reported. Thank you.')),
                   );
@@ -234,6 +234,22 @@ class _PostCard extends StatelessWidget {
                   if (post.moreInfo != null)
                     Icon(Icons.info_outline, size: 16, color: Colors.grey.shade500),
                 ],
+              ),
+            ),
+            // Report link
+            Padding(
+              padding: const EdgeInsets.only(right: 16, bottom: 4),
+              child: Align(
+                alignment: Alignment.centerRight,
+                child: GestureDetector(
+                  onTap: () {
+                    BragBoardService.instance.report('post', post.id, reason: 'Inappropriate', targetUserId: post.userId);
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      const SnackBar(behavior: SnackBarBehavior.floating, content: Text('Report submitted. Thank you.')),
+                    );
+                  },
+                  child: Text('Report', style: TextStyle(color: Colors.red.shade400, fontSize: 11, fontWeight: FontWeight.w500)),
+                ),
               ),
             ),
           ],

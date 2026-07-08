@@ -27,8 +27,9 @@ class PhotoBackupService {
           .child('photos')
           .child('$id.jpg');
 
-      await ref.putFile(file);
-      return await ref.getDownloadURL();
+      // Fail fast if Storage is unavailable (Spark plan)
+      await ref.putFile(file).timeout(const Duration(seconds: 5));
+      return await ref.getDownloadURL().timeout(const Duration(seconds: 5));
     } catch (e) {
       debugPrint('PhotoBackupService.uploadPhoto failed: $e');
       return null; // Photo stays local
