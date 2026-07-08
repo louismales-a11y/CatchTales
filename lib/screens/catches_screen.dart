@@ -261,14 +261,14 @@ class CatchesScreenState extends State<CatchesScreen> {
                         cp.searchQuery.isNotEmpty
                             ? tr('noSearchResults')
                             : tr('yourFirstCatch'),
-                        style: const TextStyle(
-                            fontSize: 16, fontWeight: FontWeight.w600, color: Colors.white),
+                        style: TextStyle(
+                            fontSize: 16, fontWeight: FontWeight.w600, color: Theme.of(context).colorScheme.onSurface),
                       ),
                       if (cp.searchQuery.isEmpty) ...[                        const SizedBox(height: 8),
                         Text(tr('sampleCatch'),
                             textAlign: TextAlign.center,
-                            style: const TextStyle(
-                                fontSize: 12, color: Colors.white54)),
+                            style: TextStyle(
+                                fontSize: 12, color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.6))),
                         const SizedBox(height: 12),
                         // Sample catch card with photo
                         Card(

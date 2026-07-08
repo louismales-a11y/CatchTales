@@ -53,6 +53,11 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
       desc: tr('onboardDescCommunityStats'),
     ),
     _OnboardPage(
+      icon: Icons.emoji_events,
+      title: tr('onboardBragBoard'),
+      desc: tr('onboardDescBragBoard'),
+    ),
+    _OnboardPage(
       icon: Icons.wb_sunny,
       title: tr('onboardWeather'),
       desc: tr('onboardDescWeather'),
@@ -93,7 +98,7 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
       desc: tr('onboardDescCloudSync'),
     ),
     _OnboardPage(
-      icon: Icons.set_meal,
+      icon: Icons.water_drop,
       title: tr('onboardFishBg'),
       desc: tr('onboardDescFishBg'),
     ),

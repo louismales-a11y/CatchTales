@@ -95,7 +95,9 @@ class BestFishBuddyAppTest extends StatelessWidget {
   Widget build(BuildContext context) {
     final tp = context.watch<ThemeProvider>();
     context.watch<TranslationService>();
-    return MaterialApp(
+    return ValueListenableBuilder<String>(
+      valueListenable: SkinService.instance,
+      builder: (ctx, skin, _) => MaterialApp(
       title: ApiConfig.appDisplayName,
       debugShowCheckedModeBanner: false,
       checkerboardOffscreenLayers: false,
@@ -105,6 +107,7 @@ class BestFishBuddyAppTest extends StatelessWidget {
       darkTheme: _buildTheme(tp.themeName, Brightness.dark),
       themeMode: SkinService.instance.isClassic ? tp.themeMode : ThemeMode.dark,
       home: const SplashScreenTest(),
+    ),
     );
   }
 
@@ -125,8 +128,9 @@ class BestFishBuddyAppTest extends StatelessWidget {
             : Colors.white.withValues(alpha: 0.85));
     final appBarBg = const Color(0xFF0A0E1A);
     final navBg = dark ? const Color(0xFF0A0E1A) : Colors.white;
-    final onSurface =
-        dark ? const Color(0xFFE0E6F0) : const Color(0xFF0A0E1A);
+    final onSurface = isFancy
+        ? (dark ? const Color(0xFFE0E6F0) : const Color(0xFF0A0E1A))
+        : (dark ? const Color(0xFFE0E6F0) : const Color(0xFF1A1F36));
 
     final prim = dark ? _lighten(def.primary) : def.primary;
     final onPrim = dark ? def.primary.darken() : Colors.white;
@@ -149,6 +153,17 @@ class BestFishBuddyAppTest extends StatelessWidget {
         onSurface: onSurface,
       ),
       scaffoldBackgroundColor: scaffoldBg,
+      textTheme: TextTheme(
+        bodyLarge: TextStyle(color: onSurface),
+        bodyMedium: TextStyle(color: onSurface),
+        bodySmall: TextStyle(color: onSurface),
+        labelLarge: TextStyle(color: onSurface),
+        labelMedium: TextStyle(color: onSurface),
+        labelSmall: TextStyle(color: onSurface),
+        titleLarge: TextStyle(color: onSurface),
+        titleMedium: TextStyle(color: onSurface),
+        titleSmall: TextStyle(color: onSurface),
+      ),
       appBarTheme: AppBarTheme(
         centerTitle: false,
         elevation: 0,
@@ -245,6 +260,7 @@ class _SplashScreenTestState extends State<SplashScreenTest> {
   @override
   void initState() {
     super.initState();
+    SkinService.instance.addListener(() { if (mounted) setState(() {}); });
     _loadVersion();
     TripService.instance.load();
     // Show device-kicked message if applicable
@@ -527,6 +543,22 @@ class _HomeScreenTestState extends State<HomeScreenTest> {
   int _selectedIndex = 0;
   final _catchesKey = GlobalKey<CatchesScreenState>();
   final _mapKey = GlobalKey<MapScreenState>();
+
+  @override
+  void initState() {
+    super.initState();
+    SkinService.instance.addListener(_onSkinChanged);
+  }
+
+  @override
+  void dispose() {
+    SkinService.instance.removeListener(_onSkinChanged);
+    super.dispose();
+  }
+
+  void _onSkinChanged() {
+    if (mounted) setState(() {});
+  }
 
   List<Widget> get _screens => [
     CatchesScreen(key: _catchesKey),
@@ -934,6 +966,13 @@ class _HomeScreenTestState extends State<HomeScreenTest> {
                           builder: (_) => _withWater(const ContactScreen())));
                   break;
                 // ── Admin Only ──
+                // ── Skin Toggle ──
+                case 'skin_dream':
+                  SkinService.instance.setSkin('fancy');
+                  break;
+                case 'skin_classic':
+                  SkinService.instance.setSkin('classic');
+                  break;
                 // ── Appearance (Classic skin only) ──
                 case 'dark_mode':
                   if (!SkinService.instance.isFancy) tp.toggleDark();
@@ -1070,6 +1109,40 @@ class _HomeScreenTestState extends State<HomeScreenTest> {
                 child: ListTile(
                   leading: Icon(Icons.settings_outlined),
                   title: const Text('Settings'),
+                  dense: true,
+                  contentPadding: EdgeInsets.zero,
+                ),
+              ),
+              // ── Skin mode ──
+              const PopupMenuDivider(),
+              const PopupMenuItem(
+                enabled: false,
+                height: 28,
+                child: Padding(
+                  padding: EdgeInsets.only(left: 14),
+                  child: Text('Skin mode', style: TextStyle(fontSize: 11, fontWeight: FontWeight.w600, color: Colors.grey)),
+                ),
+              ),
+              PopupMenuItem(
+                value: 'skin_dream',
+                child: ListTile(
+                  leading: Icon(Icons.water_drop, size: 20, color: Colors.blue.shade400),
+                  title: const Text('Dream', style: TextStyle(fontSize: 13)),
+                  trailing: SkinService.instance.isFancy
+                      ? Icon(Icons.check, size: 18, color: Colors.blue.shade400)
+                      : null,
+                  dense: true,
+                  contentPadding: EdgeInsets.zero,
+                ),
+              ),
+              PopupMenuItem(
+                value: 'skin_classic',
+                child: ListTile(
+                  leading: Icon(Icons.dark_mode, size: 20, color: Colors.grey.shade500),
+                  title: const Text('Classic', style: TextStyle(fontSize: 13)),
+                  trailing: SkinService.instance.isClassic
+                      ? Icon(Icons.check, size: 18, color: Colors.grey.shade400)
+                      : null,
                   dense: true,
                   contentPadding: EdgeInsets.zero,
                 ),

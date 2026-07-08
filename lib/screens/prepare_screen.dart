@@ -298,46 +298,48 @@ class _PrepareScreenState extends State<PrepareScreen> {
     VoidCallback? onTapExtra,
   }) {
     final done = _done.contains(key);
-    final green = const Color(0xFF76FF03);
+    final theme = Theme.of(context);
+    final accent = theme.colorScheme.primary;
+    final textColor = theme.colorScheme.onSurface;
     return Container(
       margin: const EdgeInsets.only(bottom: 8),
       decoration: BoxDecoration(
         color: Colors.transparent,
         borderRadius: BorderRadius.circular(12),
         border: Border.all(
-          color: done ? green.withValues(alpha: 0.5) : green.withValues(alpha: 0.3),
+          color: done ? accent.withValues(alpha: 0.5) : accent.withValues(alpha: 0.3),
           width: 1.5,
         ),
       ),
       child: ListTile(
         leading: CircleAvatar(
           backgroundColor: done
-              ? green.withValues(alpha: 0.2)
-              : green.withValues(alpha: 0.1),
+              ? accent.withValues(alpha: 0.2)
+              : accent.withValues(alpha: 0.1),
           child: Icon(
             done ? Icons.check : icon,
-            color: green,
+            color: accent,
             size: 22,
           ),
         ),
         title: Text(label,
             style: TextStyle(
                 fontWeight: FontWeight.w600,
-                color: done ? green : Colors.white)),
+                color: done ? accent : textColor)),
         subtitle: Text(detail,
             style: TextStyle(
                 fontSize: 12,
-                color: detailColor ?? Colors.white54)),
+                color: detailColor ?? textColor.withValues(alpha: 0.6))),
         trailing: Row(
           mainAxisSize: MainAxisSize.min,
           children: [
             if (!done)
               Text('Tap to check',
-                  style: TextStyle(fontSize: 11, color: green.withValues(alpha: 0.6))),
+                  style: TextStyle(fontSize: 11, color: accent.withValues(alpha: 0.6))),
             if (!done) const SizedBox(width: 6),
             Icon(Icons.check_circle_outline,
                 size: 20,
-                color: done ? green : green.withValues(alpha: 0.4)),
+                color: done ? accent : accent.withValues(alpha: 0.4)),
           ],
         ),
         onTap: () {

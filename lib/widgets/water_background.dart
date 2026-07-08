@@ -2,9 +2,9 @@ import 'dart:math';
 import 'package:flutter/material.dart';
 import '../services/skin_service.dart';
 
-/// Full-screen underwater background with animated fish silhouettes.
-/// Each fish swims independently — when one exits left, it respawns
-/// on the right with new random size/position/speed.
+/// Full-screen underwater background.
+/// Classic skin: CustomPainter fish (old look) + light/dark toggle
+/// Fancy skin: PNG fish + dark mode locked
 class WaterBackground extends StatefulWidget {
   final Widget? child;
   final bool showFish;
@@ -26,7 +26,7 @@ class WaterBackground extends StatefulWidget {
 class _WaterBackgroundState extends State<WaterBackground>
     with SingleTickerProviderStateMixin {
   late AnimationController _controller;
-  late List<_AnimatedFish> _fish;
+  late List<_AnimatedFish> _fancyFish;
 
   final _fishPaths = [
     'assets/fish1.png',
@@ -43,7 +43,7 @@ class _WaterBackgroundState extends State<WaterBackground>
       vsync: this,
       duration: const Duration(seconds: 60),
     )..repeat();
-    _fish = List.generate(8, (_) => _AnimatedFish());
+    _fancyFish = List.generate(8, (_) => _AnimatedFish());
   }
 
   @override
@@ -54,70 +54,40 @@ class _WaterBackgroundState extends State<WaterBackground>
 
   @override
   Widget build(BuildContext context) {
-    final isFancy = widget.showFish && SkinService.instance.isFancy;
+    // Classic skin: no background, no fish, no bubbles — just the child
+    if (!SkinService.instance.isFancy) {
+      return widget.child ?? const SizedBox.shrink();
+    }
+    // Fancy skin: underwater background + fish + bubbles
+    final isFancy = widget.showFish;
     return Stack(
       children: [
-        // Background (underwater image for Fancy, solid dark for Classic)
-        if (isFancy)
-          Positioned.fill(
-            child: Image.asset(widget.imagePath, fit: BoxFit.cover),
-          )
-        else
-          Positioned.fill(
-            child: Container(color: const Color(0xFF0A0E1A)),
+        // Background underwater image
+        Positioned.fill(
+          child: Image.asset(widget.imagePath, fit: BoxFit.cover),
+        ),
+        // Dark overlay for readability
+        Positioned.fill(
+          child: Container(
+            color: Colors.black.withValues(alpha: widget.overlayOpacity),
           ),
-        // Dark overlay for readability (Fancy only)
-        if (isFancy)
-          Positioned.fill(
-            child: Container(
-              color: Colors.black.withValues(alpha: widget.overlayOpacity),
+        ),
+        // Bubbles
+        Positioned.fill(
+          child: AnimatedBuilder(
+            animation: _controller,
+            builder: (ctx, _) => CustomPaint(
+              painter: _BubblePainter(progress: _controller.value),
+              size: Size.infinite,
             ),
           ),
-        // Bubbles (Fancy only)
-        if (isFancy)
+        ),
+        // Fish
+        if (widget.showFish)
           Positioned.fill(
             child: AnimatedBuilder(
               animation: _controller,
-              builder: (ctx, _) => CustomPaint(
-                painter: _BubblePainter(progress: _controller.value),
-                size: Size.infinite,
-              ),
-            ),
-          ),
-        // Fish (Fancy only)
-        if (isFancy)
-          Positioned.fill(
-            child: AnimatedBuilder(
-              animation: _controller,
-              builder: (ctx, _) {
-                final size = MediaQuery.of(context).size;
-                return Stack(
-                  children: _fish.map((f) {
-                    f.update();
-                    final x = size.width * (1.0 - f.progress) - f.fishSize * 0.5;
-                    final y = size.height * f.verticalPos +
-                        sin(f.progress * f.bobFreq * 6.28) * f.bobAmplitude;
-                    if (x < -f.fishSize || x > size.width + f.fishSize) {
-                      return const SizedBox.shrink();
-                    }
-                    return Positioned(
-                      left: x,
-                      top: y,
-                      child: Opacity(
-                        opacity: f.opacity,
-                        child: Image.asset(
-                          _fishPaths[f.imageIndex % _fishPaths.length],
-                          width: f.fishSize,
-                          height: f.fishSize * 0.6,
-                          fit: BoxFit.contain,
-                          color: Colors.white,
-                          colorBlendMode: BlendMode.difference,
-                        ),
-                      ),
-                    );
-                  }).toList(),
-                );
-              },
+              builder: (ctx, _) => _buildFancyFish(),
             ),
           ),
         // Content on top
@@ -125,11 +95,44 @@ class _WaterBackgroundState extends State<WaterBackground>
       ],
     );
   }
+
+  /// Fancy skin: PNG fish swimming right-to-left, independent timers.
+  Widget _buildFancyFish() {
+    final size = MediaQuery.of(context).size;
+    return Stack(
+      children: _fancyFish.map((f) {
+        f.update();
+        final x = size.width * (1.0 - f.progress) - f.fishSize * 0.5;
+        final y = size.height * f.verticalPos +
+            sin(f.progress * f.bobFreq * 6.28) * f.bobAmplitude;
+        if (x < -f.fishSize || x > size.width + f.fishSize) {
+          return const SizedBox.shrink();
+        }
+        return Positioned(
+          left: x,
+          top: y,
+          child: Opacity(
+            opacity: f.opacity,
+            child: Image.asset(
+              _fishPaths[f.imageIndex % _fishPaths.length],
+              width: f.fishSize,
+              height: f.fishSize * 0.6,
+              fit: BoxFit.contain,
+              color: Colors.white,
+              colorBlendMode: BlendMode.difference,
+            ),
+          ),
+        );
+      }).toList(),
+    );
+  }
+
+
 }
 
-/// One fish with its own independent animation state.
+/// Fancy skin fish state.
 class _AnimatedFish {
-  double progress;       // 0 = right edge, 1 = left edge
+  double progress;
   late double verticalPos;
   late double fishSize;
   late double opacity;
@@ -155,11 +158,9 @@ class _AnimatedFish {
     speed = 0.0004 + _rand.nextDouble() * 0.003;
   }
 
-  /// Called every animation frame. Advances the fish across the screen.
   void update() {
     progress += speed;
     if (progress >= 1.0) {
-      // Exited left — respawn on right with fresh random params
       progress = 0.0;
       _randomize();
     }
