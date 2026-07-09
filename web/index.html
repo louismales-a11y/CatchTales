@@ -8,6 +8,9 @@
   <link rel="icon" type="image/x-icon" href="favicon.ico?v=2">
   <link rel="icon" type="image/png" sizes="192x192" href="icon-192.png">
   <link rel="apple-touch-icon" href="icon-192.png">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Bungee&family=Luckiest+Guy&display=swap" rel="stylesheet">
   <style>
     * { margin: 0; padding: 0; box-sizing: border-box; }
     body {
@@ -35,7 +38,7 @@
     header { padding: 24px 0; display: flex; align-items: center; justify-content: space-between; border-bottom: 1px solid rgba(255,255,255,0.06); }
     .header-logo { display: flex; align-items: center; gap: 10px; text-decoration: none; }
     .header-logo img { width: 32px; height: 32px; border-radius: 6px; }
-    .header-logo span { font-size: 1.1em; font-weight: 700; color: #76FF03; letter-spacing: 1px; }
+    .header-logo span { font-size: 1.2em; font-weight: 700; color: #76FF03; letter-spacing: 1px; font-family: 'Bungee', sans-serif; }
     header nav a { color: #B0C4DE; text-decoration: none; font-size: 15px; margin-left: 22px; transition: color 0.2s; position: relative; }
     header nav a:hover { color: #76FF03; }
     header nav a::after { content: ''; position: absolute; bottom: -4px; left: 0; width: 0; height: 2px; background: #76FF03; transition: width 0.2s; }
@@ -46,16 +49,19 @@
     .hero-logo { width: 90px; height: 90px; border-radius: 22px; box-shadow: 0 0 50px rgba(0,188,212,0.3); margin-bottom: 16px; animation: float 3s ease-in-out infinite; }
     @keyframes float { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-8px); } }
     .hero h1 {
-      font-size: 3.2em; font-weight: 800;
+      font-size: 3.5em; font-weight: 400;
+      font-family: 'Luckiest Guy', cursive;
       background: linear-gradient(135deg, #76FF03 0%, #00BCD4 50%, #76FF03 100%);
       background-size: 200% auto;
       -webkit-background-clip: text;
       -webkit-text-fill-color: transparent;
       animation: shimmer 3s ease-in-out infinite;
       letter-spacing: 2px;
+      text-shadow: 3px 3px 0 rgba(0,0,0,0.3), 6px 6px 0 rgba(0,0,0,0.1);
+      line-height: 1.2;
     }
     @keyframes shimmer { 0%, 100% { background-position: 0% center; } 50% { background-position: 100% center; } }
-    .hero .tagline { font-size: 0.9em; letter-spacing: 6px; color: #fff; opacity: 0.4; margin-bottom: 12px; }
+    .hero .tagline { font-size: 0.9em; letter-spacing: 6px; color: #fff; opacity: 0.5; margin-bottom: 12px; font-family: 'Bungee', sans-serif; }
     .hero .sub { font-size: 1.1em; color: #B0C4DE; max-width: 520px; margin: 0 auto 28px; line-height: 1.7; }
 
     .btn { display: inline-flex; align-items: center; gap: 8px; padding: 14px 32px; border-radius: 12px; font-size: 16px; font-weight: 600; text-decoration: none; transition: all 0.3s; cursor: pointer; }
