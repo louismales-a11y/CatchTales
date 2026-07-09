@@ -51,14 +51,20 @@
     .hero h1 {
       font-size: 3.5em; font-weight: 400;
       font-family: 'Luckiest Guy', cursive;
-      background: linear-gradient(135deg, #76FF03 0%, #00BCD4 50%, #76FF03 100%);
-      background-size: 200% auto;
-      -webkit-background-clip: text;
-      -webkit-text-fill-color: transparent;
-      animation: shimmer 3s ease-in-out infinite;
+      color: #FFFFFF;
       letter-spacing: 2px;
-      text-shadow: 3px 3px 0 rgba(0,0,0,0.3), 6px 6px 0 rgba(0,0,0,0.1);
       line-height: 1.2;
+      /* Thick navy outline + lime fill */
+      text-shadow:
+        3px 3px 0 #0D2137,
+        -1px -1px 0 #0D2137,
+        1px -1px 0 #0D2137,
+        -1px 1px 0 #0D2137,
+        1px 1px 0 #0D2137,
+        4px 4px 0 #0A1628,
+        5px 5px 0 #0A1628,
+        6px 6px 0 rgba(0,0,0,0.3),
+        7px 7px 4px rgba(0,0,0,0.2);
     }
     @keyframes shimmer { 0%, 100% { background-position: 0% center; } 50% { background-position: 100% center; } }
     .hero .tagline { font-size: 0.9em; letter-spacing: 6px; color: #fff; opacity: 0.5; margin-bottom: 12px; font-family: 'Bungee', sans-serif; }
