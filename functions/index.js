@@ -309,7 +309,7 @@ exports.onBragReport = functions.firestore
     const reporterId = report.reporterId || 'anonymous';
 
     // Build a helpful email
-    const subject = `[BFB Report] ${targetType} reported for: ${reason}`;
+    const subject = `[CatchTales Report] ${targetType} reported for: ${reason}`;
     const body = `
 A new brag board report has been submitted:
 
@@ -328,9 +328,11 @@ To manage the reporting user in Firebase Auth:
 https://console.firebase.google.com/project/catchtales-prod/authentication/users
     `.trim();
 
-    // Send via nodemailer using the configured Gmail
+    // Send via nodemailer using Yahoo SMTP
     const transporter = nodemailer.createTransport({
-      service: 'gmail',
+      host: 'smtp.mail.yahoo.com',
+      port: 465,
+      secure: true,
       auth: { user: emailUser.value(), pass: emailPass.value() },
     });
 

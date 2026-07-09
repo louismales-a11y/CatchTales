@@ -150,20 +150,19 @@ class _AboutScreenState extends State<AboutScreen> {
   Future<void> _openUrl(String url) async {
     final uri = Uri.parse(url);
     try {
-      if (await canLaunchUrl(uri)) {
-        await launchUrl(uri, mode: LaunchMode.externalApplication);
-        return;
-      }
-    } catch (_) {}
-    // Fallback — just copy to clipboard
-    await Clipboard.setData(ClipboardData(text: url));
-    if (!mounted) return;
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        behavior: SnackBarBehavior.floating,
-        content: Text('Link copied: $url'),
-      ),
-    );
+      await launchUrl(uri, mode: LaunchMode.externalApplication);
+      return;
+    } catch (_) {
+      // Fallback — just copy to clipboard
+      await Clipboard.setData(ClipboardData(text: url));
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          behavior: SnackBarBehavior.floating,
+          content: Text('Link copied: $url'),
+        ),
+      );
+    }
   }
 
   Widget _bullets(List<String> items) {
