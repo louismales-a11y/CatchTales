@@ -11,7 +11,14 @@ service cloud.firestore {
       allow create, update, delete: if false;  // only cloud function (admin SDK) can write
     }
 
-    // Existing app collections - keep your existing rules
+    // Usernames collection — anyone can check if a name exists (needed before sign-up)
+    match /usernames/{name} {
+      allow read: if true;
+      allow create, update: if request.auth != null && request.auth.uid == resource.data.uid;
+      allow delete: if false;
+    }
+
+    // Existing app collections - require auth
     match /{document=**} {
       allow read, write: if request.auth != null;
     }

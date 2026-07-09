@@ -138,7 +138,7 @@ class TranslationService extends ChangeNotifier {
       'onboardDescCloudSync': '**Cloud Sync** (\u22ee menu > Cloud Sync):\n  \u2601\ufe0f Back up catches to the cloud\n  \u2b06\ufe0f Upload / \u2b07\ufe0f Download / \ud83d\udd17 Connect\n  \ud83d\udcf8 Photos auto-backup to cloud storage\n  \ud83d\udd10 Anonymous auth — no login needed\n\n**Fish Together** (from Cloud Sync screen):\n  \ud83c\udfa3 Start a session, share code with a buddy\n  \ud83d\udcac Real-time chat while fishing\n  \ud83d\udccd Share GPS location for emergencies\n  \ud83d\udea8 Emergency alerts with directions',
       'onboardDescStats': '**Statistics** (\u22ee menu > Statistics):\n  \ud83d\udcca Charts, breakdowns, trends\n  \ud83c\udfc6 Personal records & insights\n  \u2b50 Badges: First Catch, Master Angler, \n     Species Collector, Big Catch & more\n  \ud83d\udce4 Share your stats as an image\n\n**Offline Mode:**\n  \u2601\ufe0f Weather data cached for offline use\n  \ud83d\udd14 Push notifications for weather alerts',
       'onboardDescMoreFeatures': 'Tap the ⋮ menu (top-right) for:\n  🎣 Prepare for Fishing checklist\n  🌤️ Weather & 5-day forecast\n  🌙 Solunar w/ wind, gusts & marine\n  🐟 Fish ID Field Guide\n  👥 Community Stats (Pro)\n  🎣 Tackle Box & Catalog\n  📅 Calendar / 📊 Statistics & Badges\n  🖼️ Photo Gallery / 🌓 Dark mode\n  ℹ️ About & Contact / 💬 Suggest / 🐛 Report\n  ☁️ Cloud Sync & Fish Together',
-      'onboardDescHelp': 'Tap \u2753 (top-right) on any screen\nfor detailed help on that feature.\n\n\ud83d\udcf1 **Check for Updates** on the About screen\nto see if a newer version is available.\n\nHave a great fishing trip! \ud83c\udfa3',
+      'onboardDescHelp': 'Tap the **?** banner at the bottom on any screen\nfor detailed help on that feature.\n\n\ud83d\udcf1 **Check for Updates** on the About screen\nto see if a newer version is available.\n\nHave a great fishing trip! \ud83c\udfa3',
       'checkAddAnglers': 'Add Anglers',
       'checkWeather': 'Check Weather',
       'checkTackle': 'Set Up Tackle',
@@ -570,7 +570,7 @@ class TranslationService extends ChangeNotifier {
       'onboardDescCloudSync': '**Cloud Sync** (⋮ menu > Sync) :\n  ☁️ Sauvegarder les prises dans le cloud\n  ⬆️ Envoyer / ⬇️ Télécharger / 🔗 Connecter\n  📸 Photos auto-sauvegardées\n  🔐 Connexion anonyme — pas de login\n\n**Pêcher ensemble** :\n  🎣 Démarrer une session, partager le code\n  💬 Chat en temps réel\n  📍 Partager la position GPS\n  🚨 Alertes d\'urgence',
       'onboardDescStats': '**Statistiques** (⋮ menu > Stats) :\n  📊 Graphiques, tendances\n  🏆 Records personnels\n  ⭐ Badges : Première prise, Maître pêcheur,\n     Collectionneur, Gros lot & plus\n  📤 Partager vos stats en image\n\n**Mode hors-ligne :**\n  ☁️ Météo en cache\n  🔔 Notifications push',
       'onboardDescMoreFeatures': 'Appuyez sur ⋮ (en haut à droite) pour :\n  🎣 Préparer la pêche\n  🌤️ Météo & prévisions 5 jours\n  🌙 Meilleurs moments (vent, rafales, mer)\n  🐟 Guide des poissons\n  🎣 Boîte à pêche & Catalogue\n  📅 Calendrier / 📊 Statistiques & Badges\n  🖼️ Galerie photos / 🌓 Mode sombre\n  ℹ️ À propos & Contact / 💬 Suggérer / 🐛 Signaler\n  ☁️ Sync & Pêcher ensemble',
-      'onboardDescHelp': 'Appuyez sur ❓ (en haut à droite)\npour de l\'aide sur chaque écran.\n\n📱 **Vérifier les mises à jour** dans À propos\npour voir si une nouvelle version est dispo.\n\nBonne pêche ! 🎣',
+      'onboardDescHelp': 'Appuyez sur la bannière **?** en bas\npour de l\'aide sur chaque écran.\n\n📱 **Vérifier les mises à jour** dans À propos\npour voir si une nouvelle version est dispo.\n\nBonne pêche ! 🎣',
       'checkAddAnglers': 'Ajouter des pêcheurs',
       'checkWeather': 'Vérifier la météo',
       'checkTackle': 'Préparer l\'équipement',
@@ -885,7 +885,7 @@ class TranslationService extends ChangeNotifier {
       'onboardDescCloudSync': '**Sincronización** (⋮ menú > Sincronización):\n  ☁️ Respaldar capturas en la nube\n  ⬆️ Subir / ⬇️ Descargar / 🔗 Conectar\n  📸 Fotos respaldadas automáticamente\n  🔐 Inicio anónimo — sin inicio de sesión\n\n**Pescar juntos:**\n  🎣 Iniciar sesión, compartir código\n  💬 Chat en tiempo real\n  📍 Compartir ubicación GPS\n  🚨 Alertas de emergencia',
       'onboardDescStats': '**Estadísticas** (⋮ menú > Estadísticas):\n  📊 Gráficos, tendencias\n  🏆 Récords personales\n  ⭐ Insignias: Primera captura, Maestro pescador,\n     Coleccionista, Gran captura y más\n  📤 Compartir estadísticas como imagen\n\n**Modo sin conexión:**\n  ☁️ Clima en caché\n  🔔 Notificaciones push',
       'onboardDescMoreFeatures': 'Toca el menú ⋮ (arriba a la derecha) para:\n  🎣 Preparar pesca\n  🌤️ Clima y pronóstico 5 días\n  🌙 Mejores momentos (viento, ráfagas, mar)\n  🐟 Guía de peces\n  🎣 Caja de pesca y catálogo\n  📅 Calendario / 📊 Estadísticas e insignias\n  🖼️ Galería de fotos / 🌓 Modo oscuro\n  ℹ️ Acerca de y contacto / 💬 Sugerir / 🐛 Reportar\n  ☁️ Sincronización y pescar juntos',
-      'onboardDescHelp': 'Toca ❓ (arriba a la derecha)\npara obtener ayuda en cada pantalla.\n\n📱 **Buscar actualizaciones** en Acerca de\npara ver si hay una nueva versión disponible.\n\n¡Buena pesca! 🎣',
+      'onboardDescHelp': 'Toca el banner **?** en la parte inferior\npara obtener ayuda en cada pantalla.\n\n📱 **Buscar actualizaciones** en Acerca de\npara ver si hay una nueva versión disponible.\n\n¡Buena pesca! 🎣',
 
 
       // ── Pro/Free version strings ──
@@ -1145,7 +1145,7 @@ class TranslationService extends ChangeNotifier {
       'onboardDescCloudSync': '**Cloud-Sync** (⋮ Menü > Cloud-Sync):\n  ☁️ Fänge in der Cloud sichern\n  ⬆️ Hochladen / ⬇️ Herunterladen / 🔗 Verbinden\n  📸 Fotos automatisch sichern\n  🔐 Anonyme Anmeldung — kein Login nötig\n\n**Gemeinsam angeln:**\n  🎣 Sitzung starten, Code teilen\n  💬 Echtzeit-Chat\n  📍 GPS-Standort teilen\n  🚨 Notfallwarnungen',
       'onboardDescStats': '**Statistiken** (⋮ Menü > Statistiken):\n  📊 Diagramme, Trends\n  🏆 Persönliche Rekorde\n  ⭐ Abzeichen: Erster Fang, Meisterangler,\n     Sammler, Großer Fang und mehr\n  📤 Statistiken als Bild teilen\n\n**Offline-Modus:**\n  ☁️ Wetter zwischengespeichert\n  🔔 Push-Benachrichtigungen',
       'onboardDescMoreFeatures': 'Tippe auf das ⋮ Menü (oben rechts) für:\n  🎣 Angeln vorbereiten\n  🌤️ Wetter & 5-Tage-Vorhersage\n  🌙 Beste Angelzeit (Wind, Böen, See)\n  🐟 Fischführer\n  🎣 Angelkiste & Katalog\n  📅 Kalender / 📊 Statistiken & Abzeichen\n  🖼️ Galerie / 🌓 Dunkelmodus\n  ℹ️ Über & Kontakt / 💬 Vorschlagen / 🐛 Melden\n  ☁️ Cloud-Sync & Gemeinsam angeln',
-      'onboardDescHelp': 'Tippe auf ❓ (oben rechts)\nfür Hilfe zu jeder Funktion.\n\n📱 **Auf Updates prüfen** unter Über\num zu sehen, ob eine neuere Version verfügbar ist.\n\nPetri Heil! 🎣',
+      'onboardDescHelp': 'Tippe auf das **?**-Banner unten\nfür Hilfe zu jeder Funktion.\n\n📱 **Auf Updates prüfen** unter Über\num zu sehen, ob eine neuere Version verfügbar ist.\n\nPetri Heil! 🎣',
 
 
       // ── Pro/Free version strings ──
@@ -1404,7 +1404,7 @@ class TranslationService extends ChangeNotifier {
       'onboardDescCloudSync': '**Хмарна синхронізація** (⋮ меню > Хмарна синхронізація):\n  ☁️ Резервне копіювання уловів у хмару\n  ⬆️ Вивантажити / ⬇️ Завантажити / 🔗 Підключити\n  📸 Фото автоматично зберігаються\n  🔐 Анонімний вхід — без логіну\n\n**Рибалка разом:**\n  🎣 Почати сесію, поділитися кодом\n  💬 Чат у реальному часі\n  📍 Поділитися GPS-місцезнаходженням\n  🚨 Екстрені сповіщення',
       'onboardDescStats': '**Статистика** (⋮ меню > Статистика):\n  📊 Діаграми, тенденції\n  🏆 Особисті рекорди\n  ⭐ Значки: Перший улов, Майстер-рибалка,\n     Колекціонер, Великий улов та інші\n  📤 Поділитися статистикою як зображення\n\n**Офлайн-режим:**\n  ☁️ Погода кешується\n  🔔 Push-сповіщення',
       'onboardDescMoreFeatures': 'Натисніть меню ⋮ (угорі праворуч) для:\n  🎣 Підготуватися до риболовлі\n  🌤️ Погода та прогноз на 5 днів\n  🌙 Найкращий час (вітер, пориви, море)\n  🐟 Путівник по рибах\n  🎣 Рибальська скринька та каталог\n  📅 Календар / 📊 Статистика та значки\n  🖼️ Галерея / 🌓 Темний режим\n  ℹ️ Про додаток та контакт / 💬 Запропонувати / 🐛 Повідомити\n  ☁️ Хмарна синхронізація та рибалка разом',
-      'onboardDescHelp': 'Натисніть ❓ (угорі праворуч)\nдля отримання довідки на кожному екрані.\n\n📱 **Перевірити оновлення** в розділі Про додаток\nщоб дізнатися, чи доступна новіша версія.\n\nВдалої риболовлі! 🎣',
+      'onboardDescHelp': 'Натисніть банер **?** внизу\nдля отримання довідки на кожному екрані.\n\n📱 **Перевірити оновлення** в розділі Про додаток\nщоб дізнатися, чи доступна новіша версія.\n\nВдалої риболовлі! 🎣',
 
 
       // ── Pro/Free version strings ──
