@@ -34,17 +34,17 @@ jobs:
       - name: Rename APK
         run: |
           cp build/app/outputs/flutter-apk/app-release.apk \
-            build/app/outputs/flutter-apk/BestFishBuddy-v${{ env.VERSION }}.apk
+            build/app/outputs/flutter-apk/CatchTales-v${{ env.VERSION }}.apk
 
       - name: Create Release & Upload APK
         uses: softprops/action-gh-release@v2
         with:
           name: v${{ env.VERSION }}
           body: |
-            BestFishBuddy v${{ env.VERSION }}
+            CatchTales v${{ env.VERSION }}
             
             Download the APK below to install on your Android device.
-          files: build/app/outputs/flutter-apk/BestFishBuddy-v${{ env.VERSION }}.apk
+          files: build/app/outputs/flutter-apk/CatchTales-v${{ env.VERSION }}.apk
           fail_on_unmatched_files: true
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

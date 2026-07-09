@@ -21,7 +21,7 @@ void main(List<String> args) {
 
   print('''
 ╔══════════════════════════════════════════════════╗
-║         Best Fish Buddy - Pro License Codes      ║
+║         CatchTales - Pro License Codes      ║
 ║         Batch: $batch                           ║
 ╚══════════════════════════════════════════════════╝
 ''');

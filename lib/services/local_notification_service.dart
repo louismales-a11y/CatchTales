@@ -49,8 +49,8 @@ class LocalNotificationService {
   }) async {
     if (!_initialized) await init();
     const androidDetails = AndroidNotificationDetails(
-      'best_fish_buddy',
-      'Best Fish Buddy',
+      'catch_tales',
+      'CatchTales',
       channelDescription: 'Fishing reminders and alerts',
       importance: Importance.high,
       priority: Priority.high,
@@ -77,7 +77,7 @@ class LocalNotificationService {
     }
 
     const androidDetails = AndroidNotificationDetails(
-      'best_fish_buddy_reminder',
+      'catch_tales_reminder',
       'Catch Reminder',
       channelDescription: 'Daily reminder to log your catches',
       importance: Importance.defaultImportance,
@@ -105,7 +105,7 @@ class LocalNotificationService {
     if (!_initialized) await init();
 
     const androidDetails = AndroidNotificationDetails(
-      'best_fish_buddy_solunar',
+      'catch_tales_solunar',
       'Best Fishing Times',
       channelDescription: 'Daily solunar best fishing time alerts',
       importance: Importance.defaultImportance,

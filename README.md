@@ -1,4 +1,4 @@
-# bestfishbuddy
+# CatchTales
 
 A new Flutter project.
 

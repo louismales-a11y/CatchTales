@@ -1,7 +1,7 @@
 /// App branding & contact info for the About screen.
 ///
 /// Design studio: Maison Louis Design
-/// Contact: BestfishBuddy@gmail.com
+/// Contact: catchtales@yahoo.com
 class AppIdentity {
   AppIdentity._();
 
@@ -9,11 +9,11 @@ class AppIdentity {
   static const String studioName = 'Maison Louis Design';
 
   /// Support / contact email
-  static const String email = 'BestfishBuddy@gmail.com';
+  static const String email = 'catchtales@yahoo.com';
 
   /// App description for About screen
   static const String description =
-      'Best Fish Buddy — your hands-free fishing companion.\n'
+      'CatchTales — your hands-free fishing companion.\n'
       'Track catches by voice, snap selfies with your fish, '
       'and never lose a fishing memory.\n\n'
       'Designed with ❤️ by Maison Louis Design';

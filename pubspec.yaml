@@ -1,5 +1,5 @@
-name: bestfishbuddy
-description: "Best Fish Buddy - Canada/US Edition. A fishing companion app for North American waters."
+name: catchtales
+description: "CatchTales - Canada/US Edition. A fishing companion app for North American waters."
 # The following line prevents the package from being accidentally published to
 # pub.dev using `flutter pub publish`. This is preferred for private packages.
 publish_to: 'none' # Remove this line if you wish to publish to pub.dev

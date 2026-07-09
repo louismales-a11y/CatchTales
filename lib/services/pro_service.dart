@@ -66,7 +66,7 @@ class ProService extends ChangeNotifier {
   bool canViewFishSpecies(int index) => _isPro || index < freeFishIdLimit;
 
   /// Stripe Payment Link URL — set this after creating your link
-  static const String _payLink = 'https://pay.bestfishbuddy.net';
+  static const String _payLink = 'https://pay.catchtales.com';
 
   /// Show upgrade dialog with Stripe Pay Link + Pro code option.
   static void showUpgradeDialog(BuildContext context) {

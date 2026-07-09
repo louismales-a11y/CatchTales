@@ -89,13 +89,13 @@ BEGIN
     BEGIN
         BLOCK "040904e4"
         BEGIN
-            VALUE "CompanyName", "com.bestfishbuddy" "\0"
-            VALUE "FileDescription", "bestfishbuddy" "\0"
+            VALUE "CompanyName", "com.catchtales" "\0"
+            VALUE "FileDescription", "catchtales" "\0"
             VALUE "FileVersion", VERSION_AS_STRING "\0"
-            VALUE "InternalName", "bestfishbuddy" "\0"
-            VALUE "LegalCopyright", "Copyright (C) 2026 com.bestfishbuddy. All rights reserved." "\0"
-            VALUE "OriginalFilename", "bestfishbuddy.exe" "\0"
-            VALUE "ProductName", "bestfishbuddy" "\0"
+            VALUE "InternalName", "catchtales" "\0"
+            VALUE "LegalCopyright", "Copyright (C) 2026 catchtales. All rights reserved." "\0"
+            VALUE "OriginalFilename", "catchtales.exe" "\0"
+            VALUE "ProductName", "catchtales" "\0"
             VALUE "ProductVersion", VERSION_AS_STRING "\0"
         END
     END

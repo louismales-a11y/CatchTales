@@ -975,14 +975,14 @@ class MapScreenState extends State<MapScreen> {
           children: [
             TileLayer(
               urlTemplate: 'https://tile.openstreetmap.org/{z}/{x}/{y}.png',
-              userAgentPackageName: 'com.bestfishbuddy.bestfishbuddy',
+              userAgentPackageName: 'com.catchtales.catchtales',
             ),
             if (_showNauticalChart)
               Opacity(
                 opacity: 0.8,
                 child: TileLayer(
                   urlTemplate: 'https://tiles.openseamap.org/seamark/{z}/{x}/{y}.png',
-                  userAgentPackageName: 'com.bestfishbuddy.bestfishbuddy',
+                  userAgentPackageName: 'com.catchtales.catchtales',
                 ),
               ),
             if (_showDepth)
@@ -990,7 +990,7 @@ class MapScreenState extends State<MapScreen> {
                 opacity: 0.7,
                 child: TileLayer(
                   urlTemplate: 'https://tiles.openseamap.org/depth/{z}/{x}/{y}.png',
-                  userAgentPackageName: 'com.bestfishbuddy.bestfishbuddy',
+                  userAgentPackageName: 'com.catchtales.catchtales',
                 ),
               ),
             // Imported GPX track polylines
@@ -1014,7 +1014,7 @@ class MapScreenState extends State<MapScreen> {
                 child: TileLayer(
                   urlTemplate:
                       'https://tile.openweathermap.org/map/$_weatherLayer/{z}/{x}/{y}.png?appid=${ApiConfig.openWeatherApiKey}',
-                  userAgentPackageName: 'com.bestfishbuddy.bestfishbuddy',
+                  userAgentPackageName: 'com.catchtales.catchtales',
                 ),
               ),
           ],

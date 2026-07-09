@@ -47,7 +47,7 @@ class _ContactScreenState extends State<ContactScreen> {
     final screen = MediaQuery.of(context).size;
     return '''
 --- Auto-generated ---
-App: Best Fish Buddy $version
+App: CatchTales $version
 Device: $_deviceInfo
 Screen: ${screen.width.toInt()}x${screen.height.toInt()}
 Locale: ${WidgetsBinding.instance.platformDispatcher.locale.toLanguageTag()}

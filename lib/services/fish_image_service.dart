@@ -102,7 +102,7 @@ class FishImageService {
   // ── Internals ────────────────────────────────────────────────────────
 
   static final _headers = {
-    'User-Agent': 'BestFishBuddy/1.0 (fishing-log-app)',
+    'User-Agent': 'CatchTales/1.0 (fishing-log-app)',
     'Accept': 'application/json',
   };
 

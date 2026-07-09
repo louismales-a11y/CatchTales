@@ -1,4 +1,4 @@
-# Best Fish Buddy — Complete UX Enhancement Analysis
+# CatchTales — Complete UX Enhancement Analysis
 
 Generated: 2026-07-05
 Target: Dev version v1.9.14
@@ -7,7 +7,7 @@ Target: Dev version v1.9.14
 
 ## 📋 Executive Summary
 
-After analyzing all 28 screens, 23 services, 7 models, and supporting data files (~23,000 lines of Dart), this document breaks down every UX enhancement opportunity found in the Best Fish Buddy developer version.
+After analyzing all 28 screens, 23 services, 7 models, and supporting data files (~23,000 lines of Dart), this document breaks down every UX enhancement opportunity found in the CatchTales developer version.
 
 ---
 
@@ -98,7 +98,7 @@ Photos display at 52×52 pixels — tiny. No full-screen viewer. No shared-eleme
 
 **What to do:**
 - Add `in_app_purchase` package
-- Create `ProStoreService` with SKU `bestfishbuddy_pro_lifetime`
+- Create `ProStoreService` with SKU `catchtales_pro_lifetime`
 - Add restore purchases button
 - Offer 7-day free trial
 
@@ -365,4 +365,4 @@ Default 1 req/sec — multiple users could get blocked. No queue/backoff.
 
 ---
 
-*Best Fish Buddy — For Bragging Rights! 🎣*
+*CatchTales — For Bragging Rights! 🎣*

@@ -42,11 +42,11 @@ class ApiConfig {
   static String get appDisplayName {
     switch (appVersion) {
       case 'pro':
-        return 'Best Fish Buddy Pro';
+        return 'CatchTales Pro';
       case 'free':
-        return 'Best Fish Buddy Free';
+        return 'CatchTales';
       default:
-        return 'Best Fish Buddy Dev';
+        return 'CatchTales Dev';
     }
   }
 }

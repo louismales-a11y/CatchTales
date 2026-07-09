@@ -133,7 +133,7 @@ class InvasiveSpeciesService extends ChangeNotifier {
           '&format=json'
           '&zoom=5&addressdetails=1');
       final response = await http.get(url,
-          headers: {'User-Agent': 'BestFishBuddy/1.0'});
+          headers: {'User-Agent': 'CatchTales/1.0'});
       if (response.statusCode == 200) {
         final data = json.decode(response.body) as Map;
         final address = data['address'] as Map?;

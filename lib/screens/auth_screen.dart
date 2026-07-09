@@ -216,7 +216,7 @@ class _AuthScreenState extends State<AuthScreen> {
                     ),
                     const SizedBox(height: 20),
                     Text(
-                      'Best Fish Buddy',
+                      'CatchTales',
                       style: TextStyle(
                         fontSize: 26,
                         fontWeight: FontWeight.w800,

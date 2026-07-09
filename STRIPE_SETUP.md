@@ -1,4 +1,4 @@
-# 🐟 Best Fish Buddy — Stripe Payment Link Setup
+# 🐟 CatchTales — Stripe Payment Link Setup
 
 This guide walks you through setting up automatic Pro code delivery using **Stripe Payment Links** + **Firebase Cloud Functions**.
 
@@ -8,7 +8,7 @@ This guide walks you through setting up automatic Pro code delivery using **Stri
 
 ```
 User clicks "Buy Pro" in app
-        ↓  opens pay.bestfishbuddy.net
+        ↓  opens pay.catchtales.com
 Stripe Payment Link (hosted checkout page)
         ↓  user pays $4.99
 Stripe sends webhook to Firebase Cloud Function
@@ -39,7 +39,7 @@ User opens app → enters code → Pro unlocked! 🎉
 ## Step 2: Create a Product & Price in Stripe
 
 1. In Stripe Dashboard → **Products** → **Add Product**
-2. **Name:** `Best Fish Buddy Pro`
+2. **Name:** `CatchTales Pro`
 3. **Description:** `Unlock unlimited catches, cloud sync, advanced stats, badges, and more!`
 4. **Price:** `$4.99` (or whatever you choose)
 5. Click **Save**
@@ -82,7 +82,7 @@ cd ..
 firebase functions:config:set stripe.secret="sk_live_xxxxxxxxxxxxx"
 firebase functions:config:set stripe.webhook_secret="whsec_xxxxxxxxxxxxx"
 firebase functions:config:set stripe.price_id="price_xxxxxxxxxxxxx"
-firebase functions:config:set gmail.email="bestfishbuddy@gmail.com"
+firebase functions:config:set gmail.email="catchtales@yahoo.com"
 firebase functions:config:set gmail.password="your-16-char-gmail-app-password"
 
 # 6. Deploy the functions
@@ -119,7 +119,7 @@ firebase deploy --only functions
 ## Step 6: Create the Payment Link
 
 1. In Stripe Dashboard → **Payment Links** → **Create Payment Link**
-2. **Product:** Select "Best Fish Buddy Pro" ($4.99)
+2. **Product:** Select "CatchTales Pro" ($4.99)
 3. **Customer information:** Toggle **Collect email address** ON (required!)
 4. **Confirmation page:** 
    - Check ✅ **Show payment confirmation**
@@ -130,7 +130,7 @@ firebase deploy --only functions
 
 ---
 
-## Step 7: Set Up pay.bestfishbuddy.net
+## Step 7: Set Up pay.catchtales.com
 
 While on the phone with GoDaddy, tell them to set up a **subdomain redirect**:
 
@@ -139,7 +139,7 @@ While on the phone with GoDaddy, tell them to set up a **subdomain redirect**:
    - **Target/Value:** `buy.stripe.com`
    - **TTL:** 600 (or default)
 2. Or set up a **Domain Redirect (Forwarding)**:
-   - **From:** `pay.bestfishbuddy.net`
+   - **From:** `pay.catchtales.com`
    - **To:** `https://buy.stripe.com/xxxxx` (your Stripe Payment Link)
    - **Type:** Permanent (301)
    - **Forward settings:** Forward only (or with masking if needed)
@@ -154,14 +154,14 @@ Once you have your Stripe Payment Link URL, update it in `pro_service.dart`:
 
 ```dart
 // In lib/services/pro_service.dart — find this line:
-static const String _payLink = 'https://pay.bestfishbuddy.net';
+static const String _payLink = 'https://pay.catchtales.com';
 
-// Either keep it as pay.bestfishbuddy.net (if DNS works) OR
+// Either keep it as pay.catchtales.com (if DNS works) OR
 // replace with the direct Stripe link:
 static const String _payLink = 'https://buy.stripe.com/xxxxx';
 ```
 
-If `pay.bestfishbuddy.net` isn't working yet (DNS propagation), using the direct Stripe link as a fallback is fine — you can switch later.
+If `pay.catchtales.com` isn't working yet (DNS propagation), using the direct Stripe link as a fallback is fine — you can switch later.
 
 ---
 
@@ -212,7 +212,7 @@ Check Firestore console → `pro_licenses` collection — the document should ex
 
 ```
 ┌─────────────────┐     opens      ┌──────────────────────┐
-│  App             │ ──────────→   │  pay.bestfishbuddy.net│
+│  App             │ ──────────→   │  pay.catchtales.com│
 │  (User taps Buy) │               │  (Stripe Payment Link)│
 └─────────────────┘               └──────────┬───────────┘
                                               │ user pays $4.99

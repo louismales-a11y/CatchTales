@@ -76,13 +76,13 @@ flutter build apk --release $DART_DEFINES
 
 # ─── 4. Rename output APK ─────────────────────────────────────────────────
 APK_SRC="build/app/outputs/flutter-apk/app-release.apk"
-APK_DST="build/app/outputs/flutter-apk/BestFishBuddy-v${NEW_VERSION}.apk"
+APK_DST="build/app/outputs/flutter-apk/CatchTales-v${NEW_VERSION}.apk"
 
 cp "$APK_SRC" "$APK_DST"
-ln -sf "BestFishBuddy-v${NEW_VERSION}.apk" "build/app/outputs/flutter-apk/BestFishBuddy.apk"
+ln -sf "CatchTales-v${NEW_VERSION}.apk" "build/app/outputs/flutter-apk/CatchTales.apk"
 
 echo ""
-echo "✅ BestFishBuddy v$NEW_VERSION built!"
+echo "✅ CatchTales v$NEW_VERSION built!"
 echo "   📱 $APK_DST"
 ls -lh "$APK_DST"
-echo "   📎 build/app/outputs/flutter-apk/BestFishBuddy.apk -> BestFishBuddy-v${NEW_VERSION}.apk"
+echo "   📎 build/app/outputs/flutter-apk/CatchTales.apk -> CatchTales-v${NEW_VERSION}.apk"

@@ -1,21 +1,21 @@
 {
   "project_info": {
-    "project_number": "649755574010",
-    "project_id": "bestfishbuddy-bcd7e",
-    "storage_bucket": "bestfishbuddy-bcd7e.firebasestorage.app"
+    "project_number": "883108283866",
+    "project_id": "catchtales-prod",
+    "storage_bucket": "catchtales-prod.firebasestorage.app"
   },
   "client": [
     {
       "client_info": {
-        "mobilesdk_app_id": "1:649755574010:android:7c5fd250214d9da3b81343",
+        "mobilesdk_app_id": "1:883108283866:android:6013886e5360c285662ce3",
         "android_client_info": {
-          "package_name": "com.bestfishbuddy.bestfishbuddy"
+          "package_name": "com.catchtales.catchtales"
         }
       },
       "oauth_client": [],
       "api_key": [
         {
-          "current_key": "AIzaSyAJdZ8AQ008frEUWDPtjrzPo5hKv5ykxyc"
+          "current_key": "AIzaSyBSAXvYCrHF5DjQGp-ISkY92QKoy-acJTw"
         }
       ],
       "services": {
@@ -26,15 +26,15 @@
     },
     {
       "client_info": {
-        "mobilesdk_app_id": "1:649755574010:android:7c5fd250214d9da3b81344",
+        "mobilesdk_app_id": "1:883108283866:android:0743bf722bffddf6662ce3",
         "android_client_info": {
-          "package_name": "com.bestfishbuddy.bestfishbuddy.dev"
+          "package_name": "com.catchtales.catchtales.dev"
         }
       },
       "oauth_client": [],
       "api_key": [
         {
-          "current_key": "AIzaSyAJdZ8AQ008frEUWDPtjrzPo5hKv5ykxyc"
+          "current_key": "AIzaSyBSAXvYCrHF5DjQGp-ISkY92QKoy-acJTw"
         }
       ],
       "services": {

@@ -18,7 +18,7 @@ class WikipediaFishInfo {
 /// No API key required.
 class WikipediaService {
   static const _headers = {
-    'User-Agent': 'BestFishBuddy/1.0 (fishing-log-app)',
+    'User-Agent': 'CatchTales/1.0 (fishing-log-app)',
     'Accept': 'application/json',
   };
 

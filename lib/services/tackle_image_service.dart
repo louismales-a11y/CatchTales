@@ -20,7 +20,7 @@ class TackleImageService {
   /// Search Wikipedia for a page about this lure, get its thumbnail image.
   static Future<String?> _searchWikipedia(String query) async {
     const headers = {
-      'User-Agent': 'BestFishBuddy/1.0 (fishing-log-app)',
+      'User-Agent': 'CatchTales/1.0 (fishing-log-app)',
       'Accept': 'application/json',
     };
 

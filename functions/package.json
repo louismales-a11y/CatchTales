@@ -1,6 +1,6 @@
 {
-  "name": "bestfishbuddy-stripe-functions",
-  "description": "Stripe Payment Link webhook for Best Fish Buddy Pro code delivery",
+  "name": "catchtales-stripe-functions",
+  "description": "Stripe Payment Link webhook for CatchTales Pro code delivery",
   "version": "1.0.0",
   "scripts": {
     "serve": "firebase emulators:start --only functions",

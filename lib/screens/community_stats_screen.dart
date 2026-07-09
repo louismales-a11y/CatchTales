@@ -144,7 +144,7 @@ class _CommunityStatsScreenState extends State<CommunityStatsScreen> {
           '&limit=8'
           '&countrycodes=us,ca');
       final resp = await http.get(url,
-          headers: {'User-Agent': 'BestFishBuddy/1.0'}).timeout(const Duration(seconds: 5));
+          headers: {'User-Agent': 'CatchTales/1.0'}).timeout(const Duration(seconds: 5));
       if (resp.statusCode != 200) return [];
       final data = jsonDecode(resp.body) as List<dynamic>;
       final results = <Map<String, String>>[];
@@ -357,7 +357,7 @@ class _CommunityStatsScreenState extends State<CommunityStatsScreen> {
     try {
       final url = Uri.parse('https://nominatim.openstreetmap.org/reverse'
           '?lat=${lat.toStringAsFixed(4)}&lon=${lng.toStringAsFixed(4)}&format=json&zoom=5');
-      final resp = await http.get(url, headers: {'User-Agent': 'BestFishBuddy/1.0'}).timeout(const Duration(seconds: 5));
+      final resp = await http.get(url, headers: {'User-Agent': 'CatchTales/1.0'}).timeout(const Duration(seconds: 5));
       if (resp.statusCode != 200) return null;
       final data = jsonDecode(resp.body) as Map<String, dynamic>;
       final addr = data['address'] as Map<String, dynamic>?;
@@ -373,7 +373,7 @@ class _CommunityStatsScreenState extends State<CommunityStatsScreen> {
     try {
       final url = Uri.parse('https://nominatim.openstreetmap.org/reverse'
           '?lat=${lat.toStringAsFixed(4)}&lon=${lng.toStringAsFixed(4)}&format=json&zoom=10');
-      final resp = await http.get(url, headers: {'User-Agent': 'BestFishBuddy/1.0'}).timeout(const Duration(seconds: 5));
+      final resp = await http.get(url, headers: {'User-Agent': 'CatchTales/1.0'}).timeout(const Duration(seconds: 5));
       if (resp.statusCode != 200) return null;
       final data = jsonDecode(resp.body) as Map<String, dynamic>;
       final addr = data['address'] as Map<String, dynamic>?;

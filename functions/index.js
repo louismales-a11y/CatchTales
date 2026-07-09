@@ -12,7 +12,7 @@ const db = admin.firestore();
 // ---------------------------------------------------------------------------
 // Set these via: firebase functions:config:set stripe.secret="sk_live_..."
 //                                stripe.webhook_secret="whsec_..."
-//                                gmail.email="bestfishbuddy@gmail.com"
+//                                email.user="catchtales@yahoo.com"
 //                                gmail.password="<app-password>"
 // ---------------------------------------------------------------------------
 const stripeSecretKey = functions.params.defineString('STRIPE_SECRET', {
@@ -21,11 +21,11 @@ const stripeSecretKey = functions.params.defineString('STRIPE_SECRET', {
 const stripeWebhookSecret = functions.params.defineString('STRIPE_WEBHOOK_SECRET', {
   default: process.env.STRIPE_WEBHOOK_SECRET || '',
 });
-const gmailUser = functions.params.defineString('GMAIL_USER', {
-  default: process.env.GMAIL_USER || 'bestfishbuddy@gmail.com',
+const emailUser = functions.params.defineString('EMAIL_USER', {
+  default: process.env.EMAIL_USER || 'catchtales@yahoo.com',
 });
-const gmailPass = functions.params.defineString('GMAIL_PASS', {
-  default: process.env.GMAIL_PASS || '',
+const emailPass = functions.params.defineString('EMAIL_PASS', {
+  default: process.env.EMAIL_PASS || '',
 });
 
 // Pro code price in cents (e.g., $4.99 = 499)
@@ -37,14 +37,16 @@ const stripePriceId = functions.params.defineString('STRIPE_PRICE_ID', {
 });
 
 // ---------------------------------------------------------------------------
-// Nodemailer transporter (Gmail SMTP)
+// Nodemailer transporter (Yahoo SMTP)
 // ---------------------------------------------------------------------------
 function createTransporter() {
   return nodemailer.createTransport({
-    service: 'gmail',
+    host: 'smtp.mail.yahoo.com',
+    port: 465,
+    secure: true,
     auth: {
-      user: gmailUser.value(),
-      pass: gmailPass.value(),
+      user: emailUser.value(),
+      pass: emailPass.value(),
     },
   });
 }
@@ -81,13 +83,13 @@ async function sendProCodeEmail(recipientEmail, proCode, customerName) {
   const greeting = customerName ? `Hi ${customerName},` : 'Hi there,';
   
   const mailOptions = {
-    from: `"Best Fish Buddy" <${gmailUser.value()}>`,
+    from: `"CatchTales" <${emailUser.value()}>`,
     to: recipientEmail,
-    subject: 'Your Best Fish Buddy Pro Code',
+    subject: 'Your CatchTales Pro Code',
     html: `
       <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
         <div style="background: #0D47A1; color: white; padding: 20px; text-align: center; border-radius: 8px 8px 0 0;">
-          <h1 style="margin: 0;">🐟 Best Fish Buddy</h1>
+          <h1 style="margin: 0;">🐟 CatchTales</h1>
         </div>
         <div style="padding: 30px; background: #f8f9fa; border: 1px solid #ddd; border-radius: 0 0 8px 8px;">
           <p>${greeting}</p>
@@ -101,13 +103,13 @@ async function sendProCodeEmail(recipientEmail, proCode, customerName) {
           </div>
           <p>To activate Pro:</p>
           <ol>
-            <li>Open Best Fish Buddy</li>
+            <li>Open CatchTales</li>
             <li>Tap the <strong>Upgrade to Pro</strong> button (or go to Settings)</li>
             <li>Choose <strong>"I have a Pro Code"</strong></li>
             <li>Enter the code above</li>
           </ol>
           <p style="color: #666; font-size: 12px; margin-top: 30px;">
-            If you didn't make this purchase, please ignore this email or contact us at bestfishbuddy@gmail.com
+            If you didn't make this purchase, please ignore this email or contact us at catchtales@yahoo.com
           </p>
         </div>
       </div>
@@ -263,7 +265,7 @@ exports.createProCode = functions.https.onCall(async (data, context) => {
 // To create a Payment Link in Stripe that calls our webhook:
 //
 // 1. Go to https://dashboard.stripe.com/products → Add Product
-//    - Name: "Best Fish Buddy Pro"
+//    - Name: "CatchTales Pro"
 //    - Price: $4.99 (or whatever you choose)
 //    - Copy the Price ID (starts with "price_...")
 //
@@ -317,25 +319,25 @@ A new brag board report has been submitted:
   Reporter:    ${reporterId} (anonymous to reporter, visible to you)
 
 To view this report in Firebase Console:
-https://console.firebase.google.com/project/bestfishbuddy-bcd7e/firestore/data/brag_reports/${event.params.reportId}
+https://console.firebase.google.com/project/catchtales-prod/firestore/data/brag_reports/${event.params.reportId}
 
 To view the reported content in Firebase Console:
-https://console.firebase.google.com/project/bestfishbuddy-bcd7e/firestore/data/brag_${targetType === 'post' ? 'posts' : 'comments'}/${targetId}
+https://console.firebase.google.com/project/catchtales-prod/firestore/data/brag_${targetType === 'post' ? 'posts' : 'comments'}/${targetId}
 
 To manage the reporting user in Firebase Auth:
-https://console.firebase.google.com/project/bestfishbuddy-bcd7e/authentication/users
+https://console.firebase.google.com/project/catchtales-prod/authentication/users
     `.trim();
 
     // Send via nodemailer using the configured Gmail
     const transporter = nodemailer.createTransport({
       service: 'gmail',
-      auth: { user: gmailUser.value(), pass: gmailPass.value() },
+      auth: { user: emailUser.value(), pass: emailPass.value() },
     });
 
     try {
       await transporter.sendMail({
-        from: gmailUser.value(),
-        to: gmailUser.value(), // sends to yourself (bestfishbuddy@gmail.com)
+        from: emailUser.value(),
+        to: emailUser.value(), // sends to yourself (catchtales@yahoo.com)
         subject,
         text: body,
       });

@@ -1,4 +1,4 @@
-package com.bestfishbuddy.bestfishbuddy
+package com.catchtales.catchtales
 
 import io.flutter.embedding.android.FlutterActivity
 

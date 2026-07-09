@@ -73,7 +73,7 @@ class _ImportExportScreenState extends State<ImportExportScreen> {
   }
 
   Future<void> _exportCsv(List<Catch> catches, Directory dir, String dateStr) async {
-    final file = File('${dir.path}/bestfishbuddy_export_$dateStr.csv');
+    final file = File('${dir.path}/catchtales_export_$dateStr.csv');
     final buf = StringBuffer();
     buf.writeln('ID,Angler,Species,Location,Lure,Weight,WeightUnit,Length,LengthUnit,'
         'Latitude,Longitude,WeatherTemp,WeatherCondition,Notes,TripName,CaughtAt,CreatedAt');
@@ -92,13 +92,13 @@ class _ImportExportScreenState extends State<ImportExportScreen> {
       ].join(','));
     }
     await file.writeAsString(buf.toString());
-    await Share.shareXFiles([XFile(file.path)], text: 'Best Fish Buddy CSV export');
+    await Share.shareXFiles([XFile(file.path)], text: 'CatchTales CSV export');
   }
 
   Future<void> _exportJson(List<Catch> catches, Directory dir, String dateStr) async {
-    final file = File('${dir.path}/bestfishbuddy_export_$dateStr.json');
+    final file = File('${dir.path}/catchtales_export_$dateStr.json');
     await file.writeAsString(catches.map((c) => c.toMap()).toList().toString());
-    await Share.shareXFiles([XFile(file.path)], text: 'Best Fish Buddy JSON export');
+    await Share.shareXFiles([XFile(file.path)], text: 'CatchTales JSON export');
   }
 
   Future<void> _exportKml(List<Catch> catches, Directory dir, String dateStr) async {
@@ -107,11 +107,11 @@ class _ImportExportScreenState extends State<ImportExportScreen> {
       _showMsg('No catches with GPS coordinates to export as KML');
       return;
     }
-    final file = File('${dir.path}/bestfishbuddy_export_$dateStr.kml');
+    final file = File('${dir.path}/catchtales_export_$dateStr.kml');
     final buf = StringBuffer();
     buf.writeln('<?xml version="1.0" encoding="UTF-8"?>');
     buf.writeln('<kml xmlns="http://www.opengis.net/kml/2.2">');
-    buf.writeln('  <Document><name>Best Fish Buddy Catches</name>');
+    buf.writeln('  <Document><name>CatchTales Catches</name>');
     for (final c in withCoords) {
       final d = DateFormat('MMM d, yyyy').format(c.caughtAt);
       buf.writeln('    <Placemark>');
@@ -124,7 +124,7 @@ class _ImportExportScreenState extends State<ImportExportScreen> {
     }
     buf.writeln('  </Document></kml>');
     await file.writeAsString(buf.toString());
-    await Share.shareXFiles([XFile(file.path)], text: 'Best Fish Buddy KML export');
+    await Share.shareXFiles([XFile(file.path)], text: 'CatchTales KML export');
   }
 
   String _esc(String s) => s

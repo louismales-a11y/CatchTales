@@ -108,11 +108,11 @@ class _AboutScreenState extends State<AboutScreen> {
               padding: const EdgeInsets.all(16),
               child: Column(
                 children: [
-                  _linkTile(Icons.privacy_tip_outlined, 'Privacy Policy', () => _openUrl('https://www.bestfishbuddy.com/privacy/')),
+                  _linkTile(Icons.privacy_tip_outlined, 'Privacy Policy', () => _openUrl('https://catchtales.com/privacy')),
                   const Divider(height: 1),
-                  _linkTile(Icons.description_outlined, 'Terms of Service', () => _openUrl('https://www.bestfishbuddy.com/')),
+                  _linkTile(Icons.description_outlined, 'Terms of Service', () => _openUrl('https://catchtales.com/terms')),
                   const Divider(height: 1),
-                  _linkTile(Icons.mail_outline, 'Contact Us', () => _openUrl('mailto:BestfishBuddy@gmail.com')),
+                  _linkTile(Icons.mail_outline, 'Contact Us', () => _openUrl('mailto:catchtales@yahoo.com')),
                 ],
               ),
             ),

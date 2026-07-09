@@ -139,7 +139,7 @@ class _TackleCatalogScreenState extends State<TackleCatalogScreen> {
             child: TextButton.icon(
               onPressed: () {
                 final uri = Uri.parse(
-                    'mailto:BestfishBuddy@gmail.com?subject=${Uri.encodeComponent('Report wrong tackle photo')}');
+                    'mailto:catchtales@yahoo.com?subject=${Uri.encodeComponent('Report wrong tackle photo')}');
                 launchUrl(uri, mode: LaunchMode.externalApplication);
               },
               icon: Icon(Icons.report_outlined, size: 20, color: Colors.red.shade600),
@@ -462,7 +462,7 @@ class _DetailSheet extends StatelessWidget {
             child: TextButton.icon(
               onPressed: () {
                 final uri = Uri.parse(
-                    'mailto:BestfishBuddy@gmail.com?subject=${Uri.encodeComponent('Wrong tackle photo - ${info.name}')}');
+                    'mailto:catchtales@yahoo.com?subject=${Uri.encodeComponent('Wrong tackle photo - ${info.name}')}');
                 launchUrl(uri, mode: LaunchMode.externalApplication);
               },
               icon: Icon(Icons.report_outlined, size: 20, color: Colors.red.shade600),

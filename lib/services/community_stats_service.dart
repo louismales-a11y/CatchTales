@@ -53,7 +53,7 @@ class CommunityStatsService {
       _lastNominatimCall = DateTime.now();
       final response = await http.get(
         url,
-        headers: {'User-Agent': 'BestFishBuddy/1.0 (community stats)'},
+        headers: {'User-Agent': 'CatchTales/1.0 (community stats)'},
       ).timeout(const Duration(seconds: 5));
 
       if (response.statusCode != 200) return null;
@@ -365,7 +365,7 @@ class CommunityStatsService {
           '&format=json'
           '&zoom=10');
       final response = await http
-          .get(url, headers: {'User-Agent': 'BestFishBuddy/1.0'})
+          .get(url, headers: {'User-Agent': 'CatchTales/1.0'})
           .timeout(const Duration(seconds: 4));
       if (response.statusCode != 200) return null;
       final data = jsonDecode(response.body) as Map<String, dynamic>;

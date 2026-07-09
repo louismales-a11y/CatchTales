@@ -1,9 +1,9 @@
 import 'package:flutter_test/flutter_test.dart';
-import 'package:bestfishbuddy/app.dart';
+import 'package:catchtales/app.dart';
 
 void main() {
   testWidgets('App launches smoke test', (WidgetTester tester) async {
-    await tester.pumpWidget(const BestFishBuddyAppTest());
-    expect(find.text('Best Fish Buddy'), findsWidgets);
+    await tester.pumpWidget(const CatchTalesApp());
+    expect(find.text('CatchTales'), findsWidgets);
   });
 }

@@ -88,8 +88,8 @@ const _themes = <String, _ThemeDef>{
   ),
 };
 
-class BestFishBuddyAppTest extends StatelessWidget {
-  const BestFishBuddyAppTest({super.key});
+class CatchTalesApp extends StatelessWidget {
+  const CatchTalesApp({super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -106,7 +106,7 @@ class BestFishBuddyAppTest extends StatelessWidget {
       theme: _buildTheme(tp.themeName, SkinService.instance.isClassic ? Brightness.light : Brightness.dark),
       darkTheme: _buildTheme(tp.themeName, Brightness.dark),
       themeMode: SkinService.instance.isClassic ? tp.themeMode : ThemeMode.dark,
-      home: const SplashScreenTest(),
+      home: const SplashScreen(),
     ),
     );
   }
@@ -247,14 +247,14 @@ extension on Color {
 }
 
 // ─── Splash Screen (Test version with language picker) ────────────────────────
-class SplashScreenTest extends StatefulWidget {
-  const SplashScreenTest({super.key});
+class SplashScreen extends StatefulWidget {
+  const SplashScreen({super.key});
 
   @override
-  State<SplashScreenTest> createState() => _SplashScreenTestState();
+  State<SplashScreen> createState() => _SplashScreenState();
 }
 
-class _SplashScreenTestState extends State<SplashScreenTest> {
+class _SplashScreenState extends State<SplashScreen> {
   String _version = '';
 
   @override
@@ -494,7 +494,7 @@ class _SplashScreenTestState extends State<SplashScreenTest> {
                       if (!context.mounted) return;
                       Navigator.of(context).pushReplacement(
                         PageRouteBuilder(
-                          pageBuilder: (_, _, _) => const HomeScreenTest(),
+                          pageBuilder: (_, _, _) => const HomeScreen(),
                           transitionsBuilder:
                               (_, animation, _, child) =>
                                   FadeTransition(
@@ -533,14 +533,14 @@ class _SplashScreenTestState extends State<SplashScreenTest> {
 }
 
 // ─── Home / Navigation Shell (Test version with translations) ──────────────────
-class HomeScreenTest extends StatefulWidget {
-  const HomeScreenTest({super.key});
+class HomeScreen extends StatefulWidget {
+  const HomeScreen({super.key});
 
   @override
-  State<HomeScreenTest> createState() => _HomeScreenTestState();
+  State<HomeScreen> createState() => _HomeScreenState();
 }
 
-class _HomeScreenTestState extends State<HomeScreenTest> {
+class _HomeScreenState extends State<HomeScreen> {
   int _selectedIndex = 0;
   final _catchesKey = GlobalKey<CatchesScreenState>();
   final _mapKey = GlobalKey<MapScreenState>();

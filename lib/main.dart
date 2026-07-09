@@ -55,7 +55,7 @@ void main() async {
         ChangeNotifierProvider<ConnectivityService>.value(value: ConnectivityService.instance),
         ChangeNotifierProvider<AuthService>.value(value: AuthService.instance),
       ],
-      child: const BestFishBuddyAppTest(),
+      child: const CatchTalesApp(),
     ),
   );
 }

@@ -170,7 +170,7 @@ class CatchesScreenState extends State<CatchesScreen> {
                 const SizedBox(width: 8),
                 Expanded(
                   child: Text(
-                    'Enjoying Best Fish Buddy? Rate us! ⭐',
+                    'Enjoying CatchTales? Rate us! ⭐',
                     style: const TextStyle(fontSize: 13,
                         fontWeight: FontWeight.w500),
                   ),

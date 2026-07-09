@@ -59,7 +59,7 @@ class TideService {
 
       final url =
           'https://api.tidesandcurrents.noaa.gov/api/prod/datagetter'
-          '?product=predictions&application=BestFishBuddy'
+          '?product=predictions&application=CatchTales'
           '&station=${station['id']}'
           '&begin_date=$dateStr&end_date=$dateStr'
           '&datum=MLLW&time_zone=gmt&units=metric&format=json';
@@ -171,7 +171,7 @@ class TideService {
 
       final url =
           'https://api.tidesandcurrents.noaa.gov/api/prod/datagetter'
-          '?product=water_temperature&application=BestFishBuddy'
+          '?product=water_temperature&application=CatchTales'
           '&station=${station['id']}'
           '&begin_date=$dateStr&end_date=$dateStr'
           '&time_zone=gmt&units=metric&format=json';

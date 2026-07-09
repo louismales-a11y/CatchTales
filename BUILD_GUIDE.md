@@ -1,4 +1,4 @@
-# Best Fish Buddy - Build Guide
+# CatchTales - Build Guide
 
 ## 📱 Download Latest APK (Android)
 https://tinyurl.com/bfree1914
@@ -16,8 +16,8 @@ You need a **Windows PC** with:
 2. **Clone the repo**
    ```cmd
    cd C:\Projects
-   git clone https://github.com/louismales-a11y/BestFishBuddy.git
-   cd BestFishBuddy
+   git clone https://github.com/louismales-a11y/CatchTales.git
+   cd CatchTales
    ```
 
 3. **Get dependencies**
@@ -47,8 +47,8 @@ You need a **Mac** with:
 ### 2. Clone & Setup
 ```bash
 cd ~/Projects
-git clone https://github.com/louismales-a11y/BestFishBuddy.git
-cd BestFishBuddy
+git clone https://github.com/louismales-a11y/CatchTales.git
+cd CatchTales
 flutter pub get
 ```
 
@@ -56,7 +56,7 @@ flutter pub get
 The Android `google-services.json` is already in the repo. For iOS you need:
 
 1. Go to **Firebase Console** → Project Settings → **Add app** → **iOS**
-2. Bundle ID: `com.bestfishbuddy.bestfishbuddy`
+2. Bundle ID: `com.catchtales.catchtales`
 3. Download `GoogleService-Info.plist`
 4. Place it in: `ios/Runner/GoogleService-Info.plist`
 5. Also add it in Xcode: open `ios/Runner.xcworkspace` → add file to Runner target
@@ -87,4 +87,4 @@ For Windows, Firebase Auth works but Firestore needs the config.
 
 ## ❓ Help
 Each screen in the app has a ❓ button (top-right) with detailed help.
-Or email: **BestfishBuddy@gmail.com**
+Or email: **catchtales@yahoo.com**

@@ -316,7 +316,7 @@ Map<String, _HelpEntry> get _helpEntries => <String, _HelpEntry>{
         '  • On a boat — dash, console, cupholder, or a RAM mount\n'
         '  • Ice fishing — on the shelter bench, a bucket, or hung from a string\n'
         '  • Shore fishing — propped on a rock, in a pack, or on a tripod\n\n'
-        'A minute of setup saves frustration later. Find your spot and get the most out of Best Fish Buddy!',
+        'A minute of setup saves frustration later. Find your spot and get the most out of CatchTales!',
     tips: 'If voice isn\'t working, try moving the phone closer or using a windscreen. '
         'For photos, a small tripod or phone mount with a gooseneck arm gives you the best angles.',
   ),

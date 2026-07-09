@@ -15,7 +15,7 @@ class DatabaseService {
 
   Future<Database> _initDB() async {
     final dbPath = await getDatabasesPath();
-    final path = p.join(dbPath, 'bestfishbuddy.db');
+    final path = p.join(dbPath, 'catchtales.db');
 
     return await openDatabase(
       path,
