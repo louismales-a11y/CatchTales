@@ -468,27 +468,27 @@ class _SplashScreenState extends State<SplashScreen> {
                         if (!AuthService.instance.isLoggedIn) return;
                       }
 
-                      // Show language picker on first launch
+                      // Show language picker on first launch — full screen
                       if (await TranslationService.isFirstLaunch()) {
                         if (!context.mounted) return;
-                        await showDialog(
-                          context: context,
-                          barrierDismissible: false,
-                          useSafeArea: false,
-                          builder: (_) => LanguagePickerScreen(
-                            onComplete: () => Navigator.of(context).pop(),
+                        await Navigator.of(context).push(
+                          MaterialPageRoute(
+                            fullscreenDialog: true,
+                            builder: (_) => LanguagePickerScreen(
+                              onComplete: () => Navigator.of(context).pop(),
+                            ),
                           ),
                         );
                       }
 
-                      // Show onboarding first (if first launch)
+                      // Show onboarding first (if first launch) — full screen
                       if (!(prefs.getBool('onboarding_done') ?? false)) {
                         if (!context.mounted) return;
-                        await showDialog(
-                          context: context,
-                          barrierDismissible: false,
-                          useSafeArea: false,
-                          builder: (_) => const OnboardingScreen(),
+                        await Navigator.of(context).push(
+                          MaterialPageRoute(
+                            fullscreenDialog: true,
+                            builder: (_) => const OnboardingScreen(),
+                          ),
                         );
                       }
                       if (!context.mounted) return;
