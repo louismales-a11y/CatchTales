@@ -3,37 +3,122 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>CatchTales - Terms of Service</title>
+  <title>Terms of Service — CatchTales</title>
+  <meta name="description" content="CatchTales Terms of Service">
   <style>
-    body { font-family: -apple-system, BlinkMacSystemFont, sans-serif; max-width: 720px; margin: 0 auto; padding: 24px; line-height: 1.6; color: #e0e6f0; background: #0a0e1a; }
-    h1, h2 { color: #76ff03; }
-    a { color: #00bcd4; }
-    hr { border: none; border-top: 1px solid #1a2a4a; margin: 24px 0; }
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      color: #FFFFFF; line-height: 1.7; overflow-x: hidden;
+      background: #0A1628;
+    }
+    .underwater-bg { position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; z-index: 0; overflow: hidden; }
+    .underwater-bg img.bg { width: 100%; height: 100%; object-fit: cover; opacity: 0.4; }
+    .underwater-bg .overlay { position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: rgba(10,22,40,0.6); z-index: 1; pointer-events: none; }
+    .content { position: relative; z-index: 3; max-width: 800px; margin: 0 auto; padding: 0 24px; }
+
+    header { padding: 24px 0; display: flex; align-items: center; justify-content: space-between; border-bottom: 1px solid rgba(255,255,255,0.06); }
+    .header-logo { display: flex; align-items: center; gap: 10px; }
+    .header-logo img { width: 32px; height: 32px; border-radius: 6px; }
+    .header-logo span { font-size: 1.1em; font-weight: 700; color: #76FF03; letter-spacing: 1px; }
+    header nav a { color: #B0C4DE; text-decoration: none; font-size: 15px; margin-left: 20px; transition: color 0.2s; }
+    header nav a:hover { color: #76FF03; }
+
+    .page-title { padding: 40px 0 20px; text-align: center; }
+    .page-title h1 { font-size: 2em; color: #76FF03; }
+    .page-title p { color: #B0C4DE; font-size: 0.9em; margin-top: 4px; }
+
+    .legal-content { background: rgba(14,20,34,0.5); backdrop-filter: blur(12px); border: 1px solid rgba(255,255,255,0.06); border-radius: 16px; padding: 32px; margin-bottom: 20px; }
+    .legal-content h2 { font-size: 1.2em; color: #fff; margin: 20px 0 10px; }
+    .legal-content h2:first-child { margin-top: 0; }
+    .legal-content p { font-size: 15px; color: #B0C4DE; margin-bottom: 10px; }
+    .legal-content ul { margin: 8px 0 12px; padding-left: 24px; }
+    .legal-content li { font-size: 14px; color: #99B0CC; margin-bottom: 6px; }
+    .legal-content a { color: #00BCD4; }
+    .legal-content hr { border: none; border-top: 1px solid rgba(255,255,255,0.08); margin: 24px 0; }
+
+    footer { padding: 30px 0; border-top: 1px solid rgba(255,255,255,0.06); text-align: center; margin-top: 40px; }
+    footer .links { display: flex; gap: 28px; justify-content: center; flex-wrap: wrap; margin-bottom: 14px; }
+    footer .links a { color: #B0C4DE; text-decoration: none; font-size: 20px; transition: color 0.2s; }
+    footer .links a:hover { color: #00BCD4; }
+    footer .copy { color: #99B0CC; font-size: 16px; }
+
+    @media (max-width: 600px) {
+      header nav a { margin-left: 10px; font-size: 13px; }
+    }
   </style>
 </head>
 <body>
-  <h1>CatchTales Terms of Service</h1>
-  <p><em>Last updated: July 2026</em></p>
+  <div class="underwater-bg">
+    <img src="underwater.jpg" alt="" class="bg">
+    <div class="overlay"></div>
+  </div>
 
-  <h2>1. Acceptance of Terms</h2>
-  <p>By downloading, installing, or using CatchTales, you agree to these Terms.</p>
+  <div class="content">
+    <header>
+      <div class="header-logo">
+        <img src="logo.png" alt="CatchTales"><span>CatchTales</span>
+      </div>
+      <nav>
+        <a href="/">Home</a>
+        <a href="features">Features</a>
+        <a href="about">About</a>
+        <a href="privacy">Privacy</a>
+        <a href="terms">Terms</a>
+      </nav>
+    </header>
 
-  <h2>2. Description of Service</h2>
-  <p>CatchTales is a fishing companion app for recording catches, voice commands, Brag Board, cloud sync, and Fish Together sessions.</p>
+    <div class="page-title">
+      <h1>Terms of Service</h1>
+      <p>Last updated: July 2026</p>
+    </div>
 
-  <h2>3. User Accounts</h2>
-  <p>You must be 13+ to use the App. One person per account.</p>
+    <div class="legal-content">
+      <h2>1. Acceptance of Terms</h2>
+      <p>By downloading, installing, or using CatchTales ("the App"), you agree to be bound by these Terms of Service. If you do not agree, do not use the App.</p>
 
-  <h2>4. Pro Version</h2>
-  <p>Pro licenses are one-time purchases, non-transferable and non-refundable.</p>
+      <h2>2. Description of Service</h2>
+      <p>CatchTales is a fishing companion app that allows users to record and track fishing catches with photos, GPS location, and weather data; use voice commands; share catch photos on the Brag Board; synchronize data across devices; and fish together with friends in real-time sessions.</p>
 
-  <h2>5. User Content</h2>
-  <p>You retain ownership of your data. Prohibited: illegal catches, harassment, spam.</p>
+      <h2>3. User Accounts</h2>
+      <ul>
+        <li>You are responsible for maintaining the confidentiality of your account credentials</li>
+        <li>You must be at least 13 years of age to use the App</li>
+        <li>One person per account — sharing accounts is not permitted</li>
+      </ul>
 
-  <h2>6. Contact</h2>
-  <p><strong>Email</strong>: catchtales@yahoo.com</p>
+      <h2>4. Pro Version</h2>
+      <p>CatchTales offers a free version with limited features and a Pro version with full access. Pro licenses are one-time purchases tied to your account and are non-transferable and non-refundable.</p>
 
-  <hr>
-  <p><a href="/">Back to CatchTales</a></p>
+      <h2>5. User Content</h2>
+      <ul>
+        <li>You retain ownership of your catch data and photos</li>
+        <li>By posting on the Brag Board, you grant CatchTales a non-exclusive license to display your content within the App</li>
+        <li>Prohibited content: illegal catches, harassment, spam, or inappropriate material</li>
+      </ul>
+
+      <h2>6. Acceptable Use</h2>
+      <p>You agree not to use the App for any illegal purpose, interfere with the services, attempt to circumvent feature restrictions, upload malicious content, or harass other users.</p>
+
+      <h2>7. Disclaimer of Warranties</h2>
+      <p>The App is provided "as is" without warranty of any kind. Catch conditions, weather data, and fishing predictions are for reference only.</p>
+
+      <hr>
+      <p><strong>Contact</strong>: <a href="mailto:catchtales@yahoo.com">catchtales@yahoo.com</a></p>
+      <p><strong>Design Studio</strong>: Maison Louis Design</p>
+    </div>
+
+    <footer>
+      <div class="links">
+        <a href="/">Home</a>
+        <a href="features">Features</a>
+        <a href="about">About</a>
+        <a href="privacy">Privacy Policy</a>
+        <a href="terms">Terms of Service</a>
+        <a href="mailto:catchtales@yahoo.com">Contact Us</a>
+      </div>
+      <p class="copy">© 2026 Maison Louis Design — Made with ❤️ for anglers everywhere 🎣</p>
+    </footer>
+  </div>
 </body>
 </html>
