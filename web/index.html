@@ -23,40 +23,43 @@
       z-index: 0;
       overflow: hidden;
     }
+    .underwater-bg .overlay {
+      position: absolute;
+      top: 0; left: 0;
+      width: 100%; height: 100%;
+      background: rgba(10, 22, 40, 0.55);
+      z-index: 1;
+      pointer-events: none;
+    }
     .underwater-bg img.bg {
       width: 100%; height: 100%;
       object-fit: cover;
       opacity: 0.5;
     }
-    .overlay {
-      position: fixed;
-      top: 0; left: 0;
-      width: 100vw; height: 100vh;
-      background: rgba(10, 22, 40, 0.55);
-      z-index: 1;
-    }
 
     /* ─── Swimming Fish ─── */
-    .fish-swim {
+    .swim-fish {
       position: absolute;
       z-index: 2;
-      opacity: 0.4;
+      opacity: 0.35;
       animation: swim linear infinite;
       pointer-events: none;
     }
-    .fish-swim {
-      transform: scaleX(-1); /* all face left */
+    .swim-fish img {
+      width: 100%; height: auto;
+      transform: scaleX(-1);
+      mix-blend-mode: multiply;
+
     }
-    .fish-swim.f1 { width: 80px; top: 15%; animation-duration: 22s; }
-    .fish-swim.f2 { width: 60px; top: 35%; animation-duration: 28s; animation-delay: -5s; }
-    .fish-swim.f3 { width: 100px; top: 55%; animation-duration: 18s; animation-delay: -12s; }
-    .fish-swim.f4 { width: 70px; top: 70%; animation-duration: 25s; animation-delay: -8s; }
-    .fish-swim.f5 { width: 90px; top: 85%; animation-duration: 20s; animation-delay: -3s; }
-    .fish-swim img { width: 100%; height: auto; display: block; }
+    .swim-fish.f1 { width: 80px; top: 15%; animation-duration: 20s; }
+    .swim-fish.f2 { width: 60px; top: 30%; animation-duration: 26s; animation-delay: -4s; }
+    .swim-fish.f3 { width: 100px; top: 50%; animation-duration: 16s; animation-delay: -10s; }
+    .swim-fish.f4 { width: 65px; top: 68%; animation-duration: 24s; animation-delay: -7s; }
+    .swim-fish.f5 { width: 85px; top: 82%; animation-duration: 18s; animation-delay: -2s; }
 
     @keyframes swim {
-      0% { left: calc(100vw + 120px); }
-      100% { left: -120px; }
+      0% { left: calc(100vw + 80px); }
+      100% { left: -140px; }
     }
 
     /* ─── Content ─── */
@@ -222,15 +225,20 @@
   <!-- Underwater Background -->
   <div class="underwater-bg">
     <img src="underwater.jpg" alt="" class="bg">
+    <div class="overlay"></div>
+    <div class="swim-fish f1"><img src="fish1.png" alt=""></div>
+    <div class="swim-fish f2"><img src="fish2.png" alt=""></div>
+    <div class="swim-fish f3"><img src="fish3.png" alt=""></div>
+    <div class="swim-fish f4"><img src="fish4.png" alt=""></div>
+    <div class="swim-fish f5"><img src="fish5.png" alt=""></div>
   </div>
-  <div class="overlay"></div>
 
   <!-- Swimming Fish -->
-  <img src="fish1.png" class="fish-swim f1" alt="">
-  <img src="fish2.png" class="fish-swim f2" alt="">
-  <img src="fish3.png" class="fish-swim f3" alt="">
-  <img src="fish4.png" class="fish-swim f4" alt="">
-  <img src="fish5.png" class="fish-swim f5" alt="">
+  <div class="swim-fish f1"><img src="fish1.png" alt=""></div>
+  <div class="swim-fish f2"><img src="fish2.png" alt=""></div>
+  <div class="swim-fish f3"><img src="fish3.png" alt=""></div>
+  <div class="swim-fish f4"><img src="fish4.png" alt=""></div>
+  <div class="swim-fish f5"><img src="fish5.png" alt=""></div>
 
   <!-- Content -->
   <div class="content">
