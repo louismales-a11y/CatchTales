@@ -12,7 +12,7 @@ const db = admin.firestore();
 // ---------------------------------------------------------------------------
 // Set these via: firebase functions:config:set stripe.secret="sk_live_..."
 //                                stripe.webhook_secret="whsec_..."
-//                                email.user="catchtales@yahoo.com"
+//                                email.user="louis.males@gmail.com"
 //                                gmail.password="<app-password>"
 // ---------------------------------------------------------------------------
 const stripeSecretKey = functions.params.defineString('STRIPE_SECRET', {
@@ -22,7 +22,7 @@ const stripeWebhookSecret = functions.params.defineString('STRIPE_WEBHOOK_SECRET
   default: process.env.STRIPE_WEBHOOK_SECRET || '',
 });
 const emailUser = functions.params.defineString('EMAIL_USER', {
-  default: process.env.EMAIL_USER || 'catchtales@yahoo.com',
+  default: process.env.EMAIL_USER || 'louis.males@gmail.com',
 });
 const emailPass = functions.params.defineString('EMAIL_PASS', {
   default: process.env.EMAIL_PASS || '',
@@ -37,13 +37,11 @@ const stripePriceId = functions.params.defineString('STRIPE_PRICE_ID', {
 });
 
 // ---------------------------------------------------------------------------
-// Nodemailer transporter (Yahoo SMTP)
+// Nodemailer transporter (Gmail SMTP)
 // ---------------------------------------------------------------------------
 function createTransporter() {
   return nodemailer.createTransport({
-    host: 'smtp.mail.yahoo.com',
-    port: 465,
-    secure: true,
+    service: 'gmail',
     auth: {
       user: emailUser.value(),
       pass: emailPass.value(),
@@ -109,7 +107,7 @@ async function sendProCodeEmail(recipientEmail, proCode, customerName) {
             <li>Enter the code above</li>
           </ol>
           <p style="color: #666; font-size: 12px; margin-top: 30px;">
-            If you didn't make this purchase, please ignore this email or contact us at catchtales@yahoo.com
+            If you didn't make this purchase, please ignore this email or contact us at louis.males@gmail.com
           </p>
         </div>
       </div>
@@ -328,18 +326,16 @@ To manage the reporting user in Firebase Auth:
 https://console.firebase.google.com/project/catchtales-prod/authentication/users
     `.trim();
 
-    // Send via nodemailer using Yahoo SMTP
+    // Send via nodemailer using Gmail SMTP
     const transporter = nodemailer.createTransport({
-      host: 'smtp.mail.yahoo.com',
-      port: 465,
-      secure: true,
+      service: 'gmail',
       auth: { user: emailUser.value(), pass: emailPass.value() },
     });
 
     try {
       await transporter.sendMail({
         from: emailUser.value(),
-        to: emailUser.value(), // sends to yourself (catchtales@yahoo.com)
+        to: emailUser.value(), // sends to yourself (louis.males@gmail.com)
         subject,
         text: body,
       });
