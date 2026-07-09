@@ -22,6 +22,11 @@ class ApiConfig {
   static String get googleMapsApiKey =>
       const String.fromEnvironment('GOOGLE_MAPS_API_KEY');
 
+  /// Google Gemini API key for AI features.
+  /// Set via --dart-define=GEMINI_API_KEY=... or pass password-store.
+  static String get geminiApiKey =>
+      const String.fromEnvironment('GEMINI_API_KEY', defaultValue: '');
+
   // ─── App Version ────────────────────────────────────────────────
 
   /// Which build variant this is: 'dev', 'pro', or 'free'.

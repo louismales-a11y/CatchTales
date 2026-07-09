@@ -8,6 +8,8 @@ import 'package:share_plus/share_plus.dart';
 import '../services/help_text.dart';
 import '../services/pro_service.dart';
 import '../services/translation_service.dart';
+import '../services/ai_service.dart';
+import '../services/catches_provider.dart';
 import 'package:fl_chart/fl_chart.dart';
 import '../models/catch.dart';
 import '../services/badge_service.dart' as badges;
@@ -83,6 +85,90 @@ class _StatsScreenState extends State<StatsScreen> {
     } catch (_) {}
   }
 
+  Future<void> _askAI() async {
+    final ctrl = TextEditingController();
+    final question = await showDialog<String>(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        title: const Row(
+          children: [
+            Icon(Icons.auto_awesome, color: Colors.amber),
+            SizedBox(width: 8),
+            Text('Ask AI'),
+          ],
+        ),
+        content: TextField(
+          controller: ctrl,
+          autofocus: true,
+          decoration: const InputDecoration(
+            hintText: 'e.g. What\'s my best species?',
+            border: OutlineInputBorder(),
+          ),
+          textInputAction: TextInputAction.send,
+          onSubmitted: (v) => Navigator.pop(ctx, v.trim()),
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(ctx),
+            child: const Text('Cancel'),
+          ),
+          FilledButton(
+            onPressed: () => Navigator.pop(ctx, ctrl.text.trim()),
+            child: const Text('Ask'),
+          ),
+        ],
+      ),
+    );
+
+    if (question == null || question.isEmpty || !context.mounted) return;
+
+    final catches = context.read<CatchesProvider>().catches;
+
+    showDialog(
+      context: context,
+      barrierDismissible: false,
+      builder: (_) => const Center(
+        child: Card(
+          child: Padding(
+            padding: EdgeInsets.all(24),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                CircularProgressIndicator(),
+                SizedBox(height: 16),
+                Text('AI is analyzing your data...'),
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
+
+    final answer = await AIService.instance.askInsight(question, catches);
+    if (!context.mounted) return;
+    Navigator.pop(context);
+
+    showDialog(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        title: const Row(
+          children: [
+            Icon(Icons.auto_awesome, color: Colors.amber),
+            SizedBox(width: 8),
+            Expanded(child: Text('AI Insight', overflow: TextOverflow.ellipsis)),
+          ],
+        ),
+        content: Text(answer ?? 'No answer available.'),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(ctx),
+            child: const Text('Close'),
+          ),
+        ],
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     context.watch<TranslationService>();
@@ -113,6 +199,12 @@ class _StatsScreenState extends State<StatsScreen> {
               icon: const Icon(Icons.share),
               tooltip: 'Share stats',
               onPressed: _shareStats,
+            ),
+          if (AIService.instance.isAvailable)
+            IconButton(
+              icon: const Icon(Icons.auto_awesome, color: Colors.amber),
+              tooltip: 'Ask AI about your catches',
+              onPressed: _askAI,
             ),
         ],
       ),

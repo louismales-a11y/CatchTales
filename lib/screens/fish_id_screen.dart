@@ -9,6 +9,8 @@ import '../services/translation_service.dart';
 import '../services/analytics_service.dart';
 import '../services/fish_image_service.dart';
 import '../services/fish_db_service.dart';
+import '../services/ai_service.dart';
+import 'package:image_picker/image_picker.dart';
 import '../models/fish_data.dart';
 import '../models/fish_status.dart';
 import '../data/fish_database.dart';
@@ -161,7 +163,119 @@ class _FishIdScreenState extends State<FishIdScreen> {
     }
   }
 
-  @override
+  Future<void> _aiIdentifyFish(BuildContext context) async {
+    final picker = ImagePicker();
+    final source = await showDialog<ImageSource>(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        title: const Text('AI Fish ID'),
+        content: const Text('Take a photo of the fish to identify it using AI.'),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(ctx, ImageSource.camera),
+            child: const Text('📷 Camera'),
+          ),
+          TextButton(
+            onPressed: () => Navigator.pop(ctx, ImageSource.gallery),
+            child: const Text('🖼️ Gallery'),
+          ),
+          TextButton(
+            onPressed: () => Navigator.pop(ctx),
+            child: const Text('Cancel'),
+          ),
+        ],
+      ),
+    );
+    if (source == null || !context.mounted) return;
+
+    final XFile? image = await picker.pickImage(source: source, maxWidth: 1024);
+    if (image == null || !context.mounted) return;
+
+    // Show loading
+    showDialog(
+      context: context,
+      barrierDismissible: false,
+      builder: (_) => const Center(
+        child: Card(
+          child: Padding(
+            padding: EdgeInsets.all(24),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                CircularProgressIndicator(),
+                SizedBox(height: 16),
+                Text('AI is identifying the fish...'),
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
+
+    try {
+      final result = await AIService.instance.identifyFish(File(image.path));
+      if (!context.mounted) return;
+      Navigator.pop(context); // dismiss loading
+
+      if (result != null && result.species.isNotEmpty) {
+        showDialog(
+          context: context,
+          builder: (ctx) => AlertDialog(
+            title: Row(
+              children: [
+                const Icon(Icons.auto_awesome, color: Colors.amber),
+                const SizedBox(width: 8),
+                Expanded(child: Text(result.species)),
+              ],
+            ),
+            content: Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                if (result.scientificName.isNotEmpty)
+                  Text(result.scientificName,
+                      style: TextStyle(fontStyle: FontStyle.italic, color: Colors.grey.shade400)),
+                const SizedBox(height: 8),
+                if (result.description.isNotEmpty) Text(result.description),
+                const SizedBox(height: 8),
+                Text('Confidence: ${(result.confidence * 100).toStringAsFixed(0)}%',
+                    style: TextStyle(fontSize: 12, color: Colors.grey.shade500)),
+              ],
+            ),
+            actions: [
+              TextButton(
+                onPressed: () {
+                  Navigator.pop(ctx);
+                  // Search for this species
+                  _searchCtrl.text = result.species;
+                  _searchQuery = result.species.toLowerCase();
+                  setState(() {});
+                },
+                child: const Text('Search in guide'),
+              ),
+              TextButton(
+                onPressed: () => Navigator.pop(ctx),
+                child: const Text('Close'),
+              ),
+            ],
+          ),
+        );
+      } else {
+        _showError('Could not identify the fish. Try a clearer photo.');
+      }
+    } catch (e) {
+      if (context.mounted) Navigator.pop(context);
+      _showError('AI Fish ID failed: $e');
+    }
+  }
+
+  void _showError(String message) {
+    if (!mounted) return;
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(behavior: SnackBarBehavior.floating, content: Text(message)),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     AnalyticsService.instance.logScreen('fish_id');
@@ -188,6 +302,12 @@ class _FishIdScreenState extends State<FishIdScreen> {
             tooltip: 'Add a fish',
             onPressed: _openAddFish,
           ),
+          if (AIService.instance.isAvailable)
+            IconButton(
+              icon: const Icon(Icons.auto_awesome, color: Colors.amber),
+              tooltip: 'AI Fish ID',
+              onPressed: () => _aiIdentifyFish(context),
+            ),
 
         ],
       ),

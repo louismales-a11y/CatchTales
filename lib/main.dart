@@ -13,6 +13,7 @@ import 'services/tts_service.dart';
 import 'services/local_notification_service.dart';
 import 'services/auth_service.dart';
 import 'services/skin_service.dart';
+import 'services/ai_service.dart';
 import 'package:firebase_core/firebase_core.dart';
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -44,6 +45,9 @@ void main() async {
   LocalNotificationService.instance.init();
   // Load skin preference
   await SkinService.instance.load();
+
+  // Initialize AI service (non-blocking)
+  AIService.instance.init();
 
   runApp(
     MultiProvider(

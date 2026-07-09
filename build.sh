@@ -67,6 +67,13 @@ fi
 FLAVOR="${1:-dev}"
 echo "🏗️  Building $FLAVOR APK..."
 DART_DEFINES="$DART_DEFINES --dart-define=APP_VERSION=$FLAVOR"
+if [ -n "$GEMINI_API_KEY" ]; then
+  echo "🤖 Gemini AI key found"
+  DART_DEFINES="$DART_DEFINES --dart-define=GEMINI_API_KEY=$GEMINI_API_KEY"
+else
+  echo "⚠️  GEMINI_API_KEY not set. AI features disabled."
+  echo "   Set it as an env var or create a .env file."
+fi
 
 export PATH="$HOME/bin:$HOME/flutter/bin:$JAVA_HOME/bin:$ANDROID_HOME/cmdline-tools/latest/bin:$ANDROID_HOME/platform-tools:$PATH"
 export JAVA_HOME="$HOME/jdk-17.0.12+7"
