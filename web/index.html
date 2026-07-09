@@ -1,46 +1,279 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
-  <!--
-    If you are serving your web app in a path other than the root, change the
-    href value below to reflect the base path you are serving from.
-
-    The path provided below has to start and end with a slash "/" in order for
-    it to work correctly.
-
-    For more details:
-    * https://developer.mozilla.org/en-US/docs/Web/HTML/Element/base
-
-    This is a placeholder for base href that will be replaced by the value of
-    the `--base-href` argument provided to `flutter build`.
-  -->
-  <base href="$FLUTTER_BASE_HREF">
-
   <meta charset="UTF-8">
-  <meta content="IE=Edge" http-equiv="X-UA-Compatible">
-  <meta name="description" content="A new Flutter project.">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>CatchTales — For Bragging Rights!</title>
+  <meta name="description" content="CatchTales - Your hands-free fishing companion. Track catches by voice, AI fish ID, weather, solunar, and more.">
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      background: linear-gradient(180deg, #0A1628 0%, #0D2137 30%, #0A1628 70%, #060E1A 100%);
+      color: #E0E6F0;
+      line-height: 1.6;
+    }
 
-  <!-- iOS meta tags & icons -->
-  <meta name="mobile-web-app-capable" content="yes">
-  <meta name="apple-mobile-web-app-status-bar-style" content="black">
-  <meta name="apple-mobile-web-app-title" content="CatchTales">
-  <link rel="apple-touch-icon" href="icons/Icon-192.png">
+    .container { max-width: 960px; margin: 0 auto; padding: 0 24px; }
 
-  <!-- Favicon -->
-  <link rel="icon" type="image/png" href="favicon.png"/>
+    /* Header */
+    header {
+      padding: 24px 0;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      border-bottom: 1px solid rgba(255,255,255,0.06);
+    }
+    .header-logo { display: flex; align-items: center; gap: 10px; }
+    .header-logo img { width: 36px; height: 36px; border-radius: 8px; }
+    .header-logo span { font-size: 1.2em; font-weight: 700; color: #76FF03; letter-spacing: 1px; }
+    header nav a {
+      color: #8899AA;
+      text-decoration: none;
+      font-size: 14px;
+      margin-left: 20px;
+      transition: color 0.2s;
+    }
+    header nav a:hover { color: #76FF03; }
 
-  <title>CatchTales</title>
-  <link rel="manifest" href="manifest.json">
+    /* Hero */
+    .hero {
+      padding: 80px 0 60px;
+      text-align: center;
+    }
+    .hero-logo {
+      width: 120px; height: 120px; border-radius: 28px;
+      box-shadow: 0 0 60px rgba(0, 188, 212, 0.3);
+      margin-bottom: 24px;
+    }
+    .hero h1 {
+      font-size: 3em; font-weight: 800; color: #76FF03;
+      letter-spacing: 2px; margin-bottom: 8px;
+    }
+    .hero .tagline {
+      font-size: 1.1em; letter-spacing: 6px; color: #fff;
+      opacity: 0.7; margin-bottom: 16px;
+    }
+    .hero .sub {
+      font-size: 1.1em; color: #8899AA; max-width: 500px; margin: 0 auto 32px;
+    }
+    .hero-buttons { display: flex; gap: 16px; justify-content: center; flex-wrap: wrap; }
+    .btn {
+      display: inline-flex; align-items: center; gap: 8px;
+      padding: 14px 32px; border-radius: 12px;
+      font-size: 16px; font-weight: 600; text-decoration: none;
+      transition: all 0.2s;
+    }
+    .btn-primary {
+      background: #00BCD4; color: #003544;
+    }
+    .btn-primary:hover { background: #26C6DA; transform: translateY(-2px); }
+    .btn-secondary {
+      background: transparent; color: #00BCD4;
+      border: 2px solid #00BCD4;
+    }
+    .btn-secondary:hover { background: rgba(0,188,212,0.1); transform: translateY(-2px); }
+
+    /* Features */
+    .features {
+      padding: 80px 0;
+    }
+    .section-title {
+      text-align: center; font-size: 2em; font-weight: 700;
+      color: #fff; margin-bottom: 48px;
+    }
+    .section-title span { color: #76FF03; }
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+      gap: 24px;
+    }
+    .card {
+      background: rgba(255,255,255,0.04);
+      border: 1px solid rgba(255,255,255,0.08);
+      border-radius: 16px;
+      padding: 32px 24px;
+      transition: all 0.2s;
+    }
+    .card:hover {
+      background: rgba(255,255,255,0.07);
+      transform: translateY(-4px);
+      border-color: rgba(0,188,212,0.3);
+    }
+    .card .icon { font-size: 2.5em; margin-bottom: 12px; }
+    .card h3 { font-size: 1.1em; color: #fff; margin-bottom: 8px; }
+    .card p { font-size: 14px; color: #8899AA; }
+    .card.ai { border-color: rgba(255,193,7,0.3); }
+    .card.ai .icon { filter: drop-shadow(0 0 8px rgba(255,193,7,0.3)); }
+
+    /* Download */
+    .download {
+      padding: 60px 0;
+      text-align: center;
+      background: rgba(0,188,212,0.04);
+      border-radius: 24px;
+      margin-bottom: 40px;
+    }
+    .download h2 { font-size: 1.8em; color: #fff; margin-bottom: 12px; }
+    .download p { color: #8899AA; margin-bottom: 24px; }
+
+    /* Footer */
+    footer {
+      padding: 40px 0;
+      border-top: 1px solid rgba(255,255,255,0.06);
+      text-align: center;
+    }
+    footer .links { display: flex; gap: 24px; justify-content: center; flex-wrap: wrap; margin-bottom: 16px; }
+    footer .links a { color: #8899AA; text-decoration: none; font-size: 14px; transition: color 0.2s; }
+    footer .links a:hover { color: #00BCD4; }
+    footer .copy { color: #556; font-size: 12px; }
+
+    /* Responsive */
+    @media (max-width: 600px) {
+      .hero h1 { font-size: 2em; }
+      .hero { padding: 40px 0; }
+      .features { padding: 40px 0; }
+      header nav a { margin-left: 12px; font-size: 13px; }
+    }
+  </style>
 </head>
 <body>
-  <!--
-    You can customize the "flutter_bootstrap.js" script.
-    This is useful to provide a custom configuration to the Flutter loader
-    or to give the user feedback during the initialization process.
+  <div class="container">
+    <!-- Header -->
+    <header>
+      <div class="header-logo">
+        <img src="logo.png" alt="CatchTales">
+        <span>CatchTales</span>
+      </div>
+      <nav>
+        <a href="#features">Features</a>
+        <a href="#download">Download</a>
+        <a href="privacy">Privacy</a>
+        <a href="terms">Terms</a>
+      </nav>
+    </header>
 
-    For more details:
-    * https://docs.flutter.dev/platform-integration/web/initialization
-  -->
-  <script src="flutter_bootstrap.js" async></script>
+    <!-- Hero -->
+    <section class="hero">
+      <img src="logo.png" alt="CatchTales" class="hero-logo">
+      <h1>CatchTales</h1>
+      <p class="tagline">FOR BRAGGING RIGHTS!</p>
+      <p class="sub">Your hands-free fishing companion. Track catches by voice, identify fish with AI, and never lose a fishing memory.</p>
+      <div class="hero-buttons">
+        <a href="#download" class="btn btn-primary">📲 Download APK</a>
+        <a href="https://github.com/louismales-a11y/CatchTales" class="btn btn-secondary">🐙 View on GitHub</a>
+      </div>
+    </section>
+
+    <!-- Features -->
+    <section class="features" id="features">
+      <h2 class="section-title">Everything You Need to <span>Fish Smarter</span></h2>
+      <div class="grid">
+
+        <div class="card ai">
+          <div class="icon">🐟</div>
+          <h3>✨ AI Fish ID</h3>
+          <p>Snap a photo and AI identifies the species instantly. No more guessing!</p>
+        </div>
+
+        <div class="card">
+          <div class="icon">🎤</div>
+          <h3>Voice Recording</h3>
+          <p>Log catches hands-free. Just say "caught a 5lb largemouth" and it's done.</p>
+        </div>
+
+        <div class="card">
+          <div class="icon">🌤️</div>
+          <h3>Weather &amp; Solunar</h3>
+          <p>5-day forecast, solunar best fishing times, wind, and marine conditions.</p>
+        </div>
+
+        <div class="card">
+          <div class="icon">🗺️</div>
+          <h3>Interactive Map</h3>
+          <p>See all your catches plotted on a map with nautical charts, depth contours, and weather overlays.</p>
+        </div>
+
+        <div class="card ai">
+          <div class="icon">🤖</div>
+          <h3>✨ AI Lake Insights</h3>
+          <p>"What's the best lure for pike?" — AI analyzes your catch data and answers instantly.</p>
+        </div>
+
+        <div class="card">
+          <div class="icon">🏆</div>
+          <h3>Brag Board</h3>
+          <p>Share photos, like and comment on catches. Show off your biggest fish!</p>
+        </div>
+
+        <div class="card">
+          <div class="icon">📊</div>
+          <h3>Stats &amp; Badges</h3>
+          <p>Detailed statistics, personal records, achievement badges, and shareable charts.</p>
+        </div>
+
+        <div class="card">
+          <div class="icon">☁️</div>
+          <h3>Cloud Sync</h3>
+          <p>Back up your catches, sync across devices, and fish together with friends in real-time.</p>
+        </div>
+
+        <div class="card ai">
+          <div class="icon">🎣</div>
+          <h3>✨ AI Tackle Picks</h3>
+          <p>Get smart lure recommendations based on species, weather, season, and water conditions.</p>
+        </div>
+
+        <div class="card">
+          <div class="icon">🎯</div>
+          <h3>Tackle Box</h3>
+          <p>Catalog your lures and gear. Get weather-aware recommendations for today's pick.</p>
+        </div>
+
+        <div class="card">
+          <div class="icon">🌙</div>
+          <h3>Best Fishing Times</h3>
+          <p>Solunar predictions with major/minor periods, moon phase, and daily ratings.</p>
+        </div>
+
+        <div class="card">
+          <div class="icon">🤳</div>
+          <h3>Selfie Camera</h3>
+          <p>Built-in selfie camera with countdown timer. Perfect catch photos every time.</p>
+        </div>
+
+      </div>
+    </section>
+
+    <!-- AI Badge -->
+    <section style="text-align: center; padding: 20px 0 60px;">
+      <div style="display: inline-block; background: rgba(255,193,7,0.1); border: 1px solid rgba(255,193,7,0.2); border-radius: 12px; padding: 20px 32px;">
+        <span style="font-size: 1.5em;">🤖</span>
+        <p style="color: #FFC107; font-weight: 600; margin-top: 8px;">Powered by Google Gemini AI</p>
+        <p style="color: #8899AA; font-size: 13px;">Fish ID • Lake Insights • Smart Tackle • Smart Voice</p>
+      </div>
+    </section>
+
+    <!-- Download -->
+    <section class="download" id="download">
+      <h2>📲 Get CatchTales</h2>
+      <p>Download the latest APK and start tracking your catches today.</p>
+      <div class="hero-buttons">
+        <a href="https://github.com/louismales-a11y/CatchTales/releases" class="btn btn-primary">⬇️ Download APK</a>
+        <a href="https://github.com/louismales-a11y/CatchTales-Free/releases" class="btn btn-secondary">🆓 Try Free Version</a>
+      </div>
+    </section>
+
+    <!-- Footer -->
+    <footer>
+      <div class="links">
+        <a href="privacy">Privacy Policy</a>
+        <a href="terms">Terms of Service</a>
+        <a href="mailto:catchtales@yahoo.com">Contact Us</a>
+        <a href="https://github.com/louismales-a11y/CatchTales">GitHub</a>
+      </div>
+      <p class="copy">© 2026 Maison Louis Design — Made with ❤️ for anglers everywhere 🎣</p>
+    </footer>
+  </div>
 </body>
 </html>
