@@ -40,6 +40,9 @@ if [ -z "$OPENWEATHER_API_KEY" ] && command -v pass &>/dev/null; then
 fi
 
 # Legacy .env fallback (only if pass didn't have the key)
+if [ -z "$GEMINI_API_KEY" ] && [ -f .env ]; then
+  GEMINI_API_KEY=${GEMINI_API_KEY:-$(grep "^GEMINI_API_KEY=" .env | cut -d= -f2-)}
+fi
 if [ -f .env ]; then
   if [ -z "$GOOGLE_MAPS_API_KEY" ]; then
     GOOGLE_MAPS_API_KEY=${GOOGLE_MAPS_API_KEY:-$(grep '^GOOGLE_MAPS_API_KEY=' .env | cut -d= -f2-)}
