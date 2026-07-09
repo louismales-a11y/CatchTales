@@ -217,7 +217,10 @@ Text to parse: "$text"
   /// Example: "what's the best lure for pike at lake erie?"
   Future<String?> askInsight(String question, List<Catch> catches) async {
     if (!_ensureReady()) return null;
-    if (catches.isEmpty) return 'No catch data to analyze yet. Start fishing! 🎣';
+    // If no catches, answer based on general fishing knowledge
+    if (catches.isEmpty) {
+      // Fall through to general knowledge answer
+    }
 
     _isLoading = true;
     _lastError = null;
