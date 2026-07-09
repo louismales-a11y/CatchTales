@@ -20,6 +20,7 @@ import '../services/weather_service.dart';
 import '../services/translation_service.dart';
 import '../services/trip_service.dart';
 import '../services/pro_service.dart';
+import '../services/ai_service.dart';
 import '../services/community_stats_service.dart';
 import '../services/analytics_service.dart';
 import 'selfie_camera_screen.dart';
@@ -533,7 +534,64 @@ class _AddCatchScreenState extends State<AddCatchScreen> {
       return;
     }
 
+    // AI Smart Voice — natural language parsing for complex voice commands
+    if (AIService.instance.isAvailable) {
+      _processVoiceWithAI(text);
+      return;
+    }
+
     setState(() => _voiceStatus = '❓ Unrecognized: \"$text\"');
+  }
+
+  Future<void> _processVoiceWithAI(String text) async {
+    setState(() => _voiceStatus = '🤖 AI parsing...');
+
+    final result = await AIService.instance.parseVoice(text);
+    if (!mounted) return;
+
+    if (result == null) {
+      setState(() => _voiceStatus = '❓ Could not understand');
+      return;
+    }
+
+    bool filled = false;
+
+    if (result.angler != null && result.angler!.isNotEmpty) {
+      _anglerCtrl.text = result.angler!;
+      filled = true;
+    }
+    if (result.species != null && result.species!.isNotEmpty) {
+      _speciesCtrl.text = result.species!;
+      filled = true;
+    }
+    if (result.weight != null) {
+      if (result.weightUnit == 'kg') _useMetric = true;
+      else if (result.weightUnit == 'lb') _useMetric = false;
+      _weightCtrl.text = result.weight!.toStringAsFixed(1);
+      filled = true;
+    }
+    if (result.length != null) {
+      if (result.lengthUnit == 'cm') _useMetric = true;
+      else if (result.lengthUnit == 'in' || result.lengthUnit == 'inches') _useMetric = false;
+      _lengthCtrl.text = result.length!.toStringAsFixed(1);
+      filled = true;
+    }
+    if (result.location != null && result.location!.isNotEmpty) {
+      _locationCtrl.text = result.location!;
+      filled = true;
+    }
+    if (result.lure != null && result.lure!.isNotEmpty) {
+      _lureCtrl.text = result.lure!;
+      filled = true;
+    }
+    if (result.notes != null && result.notes!.isNotEmpty) {
+      _notesCtrl.text = result.notes!;
+      filled = true;
+    }
+
+    setState(() {
+      _voiceStatus = filled ? '✅ AI filled form' : '❌ Could not parse voice';
+    });
   }
 
   @override

@@ -10,6 +10,7 @@ import '../services/tackle_recommender.dart';
 import '../services/weather_service.dart';
 import '../services/tackle_image_service.dart';
 import '../services/tackle_db_service.dart';
+import '../services/ai_service.dart';
 import 'tackle_detail_screen.dart';
 
 class TodaysPickScreen extends StatefulWidget {
@@ -133,6 +134,68 @@ class _TodaysPickScreenState extends State<TodaysPickScreen> {
     _generate();
   }
 
+  Future<void> _getAIRecommendations() async {
+    showDialog(
+      context: context,
+      barrierDismissible: false,
+      builder: (_) => const Center(
+        child: Card(
+          child: Padding(
+            padding: EdgeInsets.all(24),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                CircularProgressIndicator(),
+                SizedBox(height: 16),
+                Text('AI is analyzing conditions...'),
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
+
+    final result = await AIService.instance.recommendTackle(
+      species: _selectedSpecies,
+      temperature: _weather?['temp']?.toDouble(),
+      weatherCondition: _weather?['condition'],
+      season: _season,
+      waterType: _weather?['water_type'],
+    );
+
+    if (!context.mounted) return;
+    Navigator.pop(context); // dismiss loading
+
+    if (result == null) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(behavior: SnackBarBehavior.floating, content: const Text('AI recommendations unavailable')),
+      );
+      return;
+    }
+
+    showDialog(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        title: const Row(
+          children: [
+            Icon(Icons.auto_awesome, color: Colors.amber),
+            SizedBox(width: 8),
+            Expanded(child: Text('AI Tackle Picks', overflow: TextOverflow.ellipsis)),
+          ],
+        ),
+        content: SingleChildScrollView(
+          child: Text(result),
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(ctx),
+            child: const Text('Close'),
+          ),
+        ],
+      ),
+    );
+  }
+
   Future<void> _generate() async {
     if (_selectedSpecies.isEmpty) return;
     setState(() {
@@ -192,7 +255,16 @@ class _TodaysPickScreenState extends State<TodaysPickScreen> {
     final _ = MediaQuery.of(context).padding.bottom;
 
     return Scaffold(
-      appBar: AppBar(title: const Text("Today's Pick"),
+      appBar: AppBar(
+        title: const Text("Today's Pick"),
+        actions: [
+          if (AIService.instance.isAvailable && _selectedSpecies.isNotEmpty)
+            IconButton(
+              icon: const Icon(Icons.auto_awesome, color: Colors.amber),
+              tooltip: 'AI Tackle Recommendations',
+              onPressed: _getAIRecommendations,
+            ),
+        ],
 ),
       body: ListView(
         padding: const EdgeInsets.all(16),
