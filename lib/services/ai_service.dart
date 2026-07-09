@@ -40,7 +40,7 @@ class AIService extends ChangeNotifier {
 
     try {
       _model = GenerativeModel(
-        model: 'gemini-2.0-flash', // Fast & free tier
+        model: 'gemini-2.5-flash', // Fast & free tier
         apiKey: apiKey,
         safetySettings: [
           SafetySetting(HarmCategory.harassment, HarmBlockThreshold.high),
