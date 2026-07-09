@@ -71,7 +71,7 @@ npm install -g firebase-tools
 firebase login
 
 # 3. Navigate to your project
-cd ~/BestFishBuddy
+cd ~/CatchTales
 
 # 4. Install function dependencies
 cd functions
@@ -93,7 +93,7 @@ After deploying, you'll see output like:
 
 ```
 ✔  functions[stripeWebhook(gen2)]: Successful create operation.
-  Function URL (stripeWebhook): https://stripeWebhook-<region>-bestfishbuddy-bcd7e.cloudfunctions.net/stripeWebhook
+  Function URL (stripeWebhook): https://stripeWebhook-<region>-catchtales-prod.cloudfunctions.net/stripeWebhook
 ```
 
 📋 **Copy this Function URL** — you'll need it in the next step.
@@ -251,7 +251,7 @@ Check Firestore console → `pro_licenses` collection — the document should ex
 | `functions/index.js` | Stripe webhook handler + Pro code generator |
 | `functions/package.json` | Node.js dependencies |
 | `firebase.json` | Firebase Functions config |
-| `.firebaserc` | Project alias (`bestfishbuddy-bcd7e`) |
+| `.firebaserc` | Project alias (`catchtales-prod`) |
 | `lib/services/pro_service.dart` | Updated with Pay Link button |
 
 ---
