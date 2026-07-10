@@ -1,4 +1,6 @@
+import 'dart:io';
 import 'package:flutter/material.dart';
+import 'package:share_plus/share_plus.dart';
 import '../services/brag_board_service.dart';
 import '../services/auth_service.dart';
 import '../widgets/brag_image.dart';
@@ -48,6 +50,23 @@ class _BragPostDetailScreenState extends State<BragPostDetailScreen> {
     );
   }
 
+  Future<void> _sharePost() async {
+    final post = widget.post;
+    final buffer = StringBuffer();
+    buffer.writeln('🐟 ${post.species}');
+    if (post.description.isNotEmpty) buffer.writeln('📍 ${post.description}');
+    if (post.moreInfo != null && post.moreInfo!.isNotEmpty) buffer.writeln('ℹ️ ${post.moreInfo}');
+    buffer.writeln('');
+    buffer.writeln('Shared from CatchTales — catchtales.app');
+
+    await SharePlus.instance.share(
+      ShareParams(
+        text: buffer.toString(),
+        title: 'Catch of the day: ${post.species}',
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     final post = widget.post;
@@ -55,7 +74,16 @@ class _BragPostDetailScreenState extends State<BragPostDetailScreen> {
     final isOwner = AuthService.instance.user?.uid == post.userId;
 
     return Scaffold(
-      appBar: AppBar(title: Text('${post.userName}\'s Catch')),
+      appBar: AppBar(
+        title: Text('${post.userName}\'s Catch'),
+        actions: [
+          IconButton(
+            icon: const Icon(Icons.share_outlined),
+            tooltip: 'Share',
+            onPressed: _sharePost,
+          ),
+        ],
+      ),
       body: Column(
         children: [
           Expanded(

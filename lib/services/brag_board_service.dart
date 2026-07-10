@@ -1,8 +1,10 @@
 import 'dart:convert';
+import 'dart:typed_data';
 import 'package:flutter/foundation.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:image_picker/image_picker.dart';
+import 'package:image/image.dart' as img_lib;
 import 'auth_service.dart';
 
 /// A brag post from a user.
@@ -128,26 +130,59 @@ class BragBoardService {
 
   /// Stream of all posts ordered by newest first.
   Stream<List<BragPost>> streamPosts({int limit = 50}) {
+    return _streamPosts(_postsRef.orderBy('timestamp', descending: true), limit: limit);
+  }
+
+  /// Stream of posts sorted by hotness (likes + comments, recent first).
+  Stream<List<BragPost>> streamHotPosts({int limit = 50, int hours = 24}) {
+    final cutoff = DateTime.now().subtract(Duration(hours: hours));
+    return _streamPosts(
+      _postsRef
+          .where('timestamp', isGreaterThan: Timestamp.fromDate(cutoff))
+          .orderBy('timestamp', descending: true),
+      limit: limit,
+      sortBy: (a, b) {
+        final scoreA = a.likesCount + a.commentsCount * 2;
+        final scoreB = b.likesCount + b.commentsCount * 2;
+        if (scoreA != scoreB) return scoreB.compareTo(scoreA);
+        return b.timestamp.compareTo(a.timestamp);
+      },
+    );
+  }
+
+  /// Internal stream builder with optional client-side sort.
+  Stream<List<BragPost>> _streamPosts(
+    Query query, {
+    int limit = 50,
+    int Function(BragPost a, BragPost b)? sortBy,
+  }) {
     final userId = _uid;
-    return _postsRef
-        .orderBy('timestamp', descending: true)
+    return query
         .limit(limit)
         .snapshots()
         .asyncMap((snap) async {
       final posts = <BragPost>[];
       for (final doc in snap.docs) {
-        final data = doc.data();
-        bool liked = false;
-        if (userId != null) {
-          final likeDoc = await _likesRef
-              .where('postId', isEqualTo: doc.id)
-              .where('userId', isEqualTo: userId)
-              .get();
-          liked = likeDoc.docs.isNotEmpty;
+        try {
+          final data = doc.data() as Map<String, dynamic>? ?? <String, dynamic>{};
+          bool liked = false;
+          if (userId != null) {
+            final likeDoc = await _likesRef
+                .where('postId', isEqualTo: doc.id)
+                .where('userId', isEqualTo: userId)
+                .get();
+            liked = likeDoc.docs.isNotEmpty;
+          }
+          posts.add(BragPost.fromMap(doc.id, data, likedByMe: liked));
+        } catch (e) {
+          debugPrint('BragBoardService.streamPosts: error processing post ${doc.id}: $e');
         }
-        posts.add(BragPost.fromMap(doc.id, data, likedByMe: liked));
       }
+      if (sortBy != null) posts.sort(sortBy);
       return posts;
+    }).handleError((e) {
+      debugPrint('BragBoardService.streamPosts error: $e');
+      return <BragPost>[];
     });
   }
 
@@ -186,13 +221,15 @@ class BragBoardService {
       return null;
     }
     try {
-      // Read compressed photo bytes (ImagePicker already applied maxWidth/maxHeight/imageQuality)
       debugPrint('BragBoardService: reading photo bytes...');
       final imageBytes = await photo.readAsBytes();
-      debugPrint('BragBoardService: read ${imageBytes.length} bytes');
+
+      // Compress: resize to 1024px max, JPEG quality 70
+      final compressed = _compressImage(imageBytes);
+      debugPrint('BragBoardService: compressed ${imageBytes.length} -> ${compressed.length} bytes');
 
       // Encode to base64
-      final photoData = base64Encode(imageBytes);
+      final photoData = base64Encode(compressed);
       debugPrint('BragBoardService: base64 length ${photoData.length}');
 
       // Use the user's permanent profile name (set at sign-up)
@@ -223,24 +260,28 @@ class BragBoardService {
   /// Toggle like on a post.
   Future<void> toggleLike(String postId) async {
     if (_uid == null) return;
-    final existing = await _likesRef
-        .where('postId', isEqualTo: postId)
-        .where('userId', isEqualTo: _uid)
-        .get();
-    if (existing.docs.isNotEmpty) {
-      await existing.docs.first.reference.delete();
-      await _postsRef.doc(postId).update({
-        'likesCount': FieldValue.increment(-1),
-      });
-    } else {
-      await _likesRef.add({
-        'postId': postId,
-        'userId': _uid,
-        'timestamp': FieldValue.serverTimestamp(),
-      });
-      await _postsRef.doc(postId).update({
-        'likesCount': FieldValue.increment(1),
-      });
+    try {
+      final existing = await _likesRef
+          .where('postId', isEqualTo: postId)
+          .where('userId', isEqualTo: _uid)
+          .get();
+      if (existing.docs.isNotEmpty) {
+        await existing.docs.first.reference.delete();
+        await _postsRef.doc(postId).update({
+          'likesCount': FieldValue.increment(-1),
+        });
+      } else {
+        await _likesRef.add({
+          'postId': postId,
+          'userId': _uid,
+          'timestamp': FieldValue.serverTimestamp(),
+        });
+        await _postsRef.doc(postId).update({
+          'likesCount': FieldValue.increment(1),
+        });
+      }
+    } catch (e) {
+      debugPrint('BragBoardService.toggleLike: $e');
     }
   }
 
@@ -359,11 +400,37 @@ class BragBoardService {
   /// Check if user has blocked another.
   Future<bool> isBlocked(String userId) async {
     if (_uid == null) return false;
-    final result = await _blocksRef
-        .where('blockerId', isEqualTo: _uid)
-        .where('blockedId', isEqualTo: userId)
-        .get();
-    return result.docs.isNotEmpty;
+    try {
+      final result = await _blocksRef
+          .where('blockerId', isEqualTo: _uid)
+          .where('blockedId', isEqualTo: userId)
+          .get();
+      return result.docs.isNotEmpty;
+    } catch (e) {
+      debugPrint('BragBoardService.isBlocked: $e');
+      return false;
+    }
+  }
+
+  /// Compress image bytes: resize to max 1024px, JPEG quality 70.
+  static Uint8List _compressImage(Uint8List bytes) {
+    final decoded = img_lib.decodeImage(bytes);
+    if (decoded == null) return bytes;
+
+    img_lib.Image resized;
+    if (decoded.width > 1024 || decoded.height > 1024) {
+      final scale = 1024.0 /
+          (decoded.width > decoded.height ? decoded.width : decoded.height);
+      resized = img_lib.copyResize(
+        decoded,
+        width: (decoded.width * scale).round(),
+        height: (decoded.height * scale).round(),
+      );
+    } else {
+      resized = decoded;
+    }
+
+    return Uint8List.fromList(img_lib.encodeJpg(resized, quality: 70));
   }
 
   /// Pick image from gallery with compression to fit Firestore.

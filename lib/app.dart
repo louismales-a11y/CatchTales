@@ -330,10 +330,14 @@ class _SplashScreenState extends State<SplashScreen> {
             crossAxisAlignment: CrossAxisAlignment.start,
             mainAxisSize: MainAxisSize.min,
             children: [
+              _whatsNewItem('🏆 Brag Board now in bottom nav!'),
+              _whatsNewItem('🔥 Trending/Hot toggle — most engaged posts'),
+              _whatsNewItem('🏅 Species badges — rare fish get special badges'),
+              _whatsNewItem('📤 Share posts to social media'),
+              _whatsNewItem('📸 Interactive photo cropping'),
               _whatsNewItem('🤖 AI Fish ID — identify species from photos!'),
               _whatsNewItem('🤖 AI Lake Insights — ask questions about your catches'),
               _whatsNewItem('🤖 AI Tackle Picks — smart lure recommendations'),
-              _whatsNewItem('🏆 Brag Board — share catch photos, like & comment!'),
               _whatsNewItem('🌊 Dream skin — animated fish & underwater background'),
               _whatsNewItem('🎨 Classic skin — light/dark mode with theme picker'),
               _whatsNewItem('🛡️ Brag Board admin panel (dev builds)'),
@@ -565,6 +569,7 @@ class _HomeScreenState extends State<HomeScreen> {
   List<Widget> get _screens => [
     CatchesScreen(key: _catchesKey),
     CounterScreen(),
+    const BragBoardScreen(),
     MapScreen(key: _mapKey),
   ];
 
@@ -876,11 +881,6 @@ class _HomeScreenState extends State<HomeScreen> {
             onSelected: (value) {
               switch (value) {
                 // ── Planning ──
-                case 'brag_board':
-                  Navigator.push(context,
-                      MaterialPageRoute(
-                          builder: (_) => _withWater(BragBoardScreen())));
-                  break;
                 case 'prepare':
                   Navigator.push(context,
                       MaterialPageRoute(
@@ -1015,16 +1015,6 @@ class _HomeScreenState extends State<HomeScreen> {
                 child: ListTile(
                   leading: Icon(Icons.people),
                   title: const Text('Community Stats'),
-                  dense: true,
-                  contentPadding: EdgeInsets.zero,
-                ),
-              ),
-              // ── Brag Board ──
-              PopupMenuItem(
-                value: 'brag_board',
-                child: ListTile(
-                  leading: Icon(Icons.emoji_events, size: 20),
-                  title: const Text('🏆 Brag Board', style: TextStyle(fontSize: 13)),
                   dense: true,
                   contentPadding: EdgeInsets.zero,
                 ),
@@ -1230,12 +1220,12 @@ class _HomeScreenState extends State<HomeScreen> {
                 NavigationRail(
                   selectedIndex: _selectedIndex,
                   onDestinationSelected: (i) {
-                    if (i == 2 && !ProService.instance.isPro) {
+                    if (i == 3 && !ProService.instance.isPro) {
                       ProService.showUpgradeDialog(context);
                       return;
                     }
                     setState(() => _selectedIndex = i);
-                    if (i == 2) {
+                    if (i == 3) {
                       _mapKey.currentState?.loadCatches();
                     }
                   },
@@ -1256,8 +1246,15 @@ class _HomeScreenState extends State<HomeScreen> {
                       label: Text(tr('counter')),
                     ),
                     NavigationRailDestination(
-                      icon: Icon(Icons.map_outlined,
+                      icon: Icon(Icons.emoji_events_outlined,
                           color: _selectedIndex == 2 ? accent : null),
+                      selectedIcon:
+                          Icon(Icons.emoji_events, color: accent),
+                      label: const Text('Brag Board'),
+                    ),
+                    NavigationRailDestination(
+                      icon: Icon(Icons.map_outlined,
+                          color: _selectedIndex == 3 ? accent : null),
                       selectedIcon:
                           Icon(Icons.map, color: accent),
                       label: Text(tr('map')),
@@ -1285,19 +1282,20 @@ class _HomeScreenState extends State<HomeScreen> {
                         ),
                       ),
                     Expanded(
-                      child: _selectedIndex == 2
-                          ? _screens[2]  // Map — no background
+                      child: _selectedIndex == 3
+                          ? _screens[3]  // Map — no background
                           : WaterBackground(
                               showFish: true,
                               overlayOpacity: 0.4,
                               child: _screens[_selectedIndex],
                             ),
                     ),
-                    helpChip(context, _selectedIndex == 0
-                        ? 'catches'
-                        : _selectedIndex == 1
-                            ? 'counter'
-                            : 'map'),
+                    helpChip(context, [
+                      if (_selectedIndex == 0) 'catches',
+                      if (_selectedIndex == 1) 'counter',
+                      if (_selectedIndex == 2) 'brag_board',
+                      if (_selectedIndex == 3) 'map',
+                    ].first),
                   ],
                 ),
               ),
@@ -1337,12 +1335,12 @@ class _HomeScreenState extends State<HomeScreen> {
           return NavigationBar(
             selectedIndex: _selectedIndex,
             onDestinationSelected: (i) {
-              if (i == 2 && !ProService.instance.isPro) {
+              if (i == 3 && !ProService.instance.isPro) {
                 ProService.showUpgradeDialog(context);
                 return;
               }
               setState(() => _selectedIndex = i);
-              if (i == 2) {
+              if (i == 3) {
                 _mapKey.currentState?.loadCatches();
               }
             },
@@ -1362,8 +1360,15 @@ class _HomeScreenState extends State<HomeScreen> {
                 label: tr('counter'),
               ),
               NavigationDestination(
-                icon: Icon(Icons.map_outlined,
+                icon: Icon(Icons.emoji_events_outlined,
                     color: _selectedIndex == 2 ? accent : null),
+                selectedIcon:
+                    Icon(Icons.emoji_events, color: accent),
+                label: 'Brag Board',
+              ),
+              NavigationDestination(
+                icon: Icon(Icons.map_outlined,
+                    color: _selectedIndex == 3 ? accent : null),
                 selectedIcon:
                     Icon(Icons.map, color: accent),
                 label: tr('map'),

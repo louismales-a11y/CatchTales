@@ -362,4 +362,19 @@ Map<String, _HelpEntry> get _helpEntries => <String, _HelpEntry>{
         'fellow anglers — no personal information or exact locations are shared. '
         'Results improve as more anglers record their catches!',
   ),
+  'brag_board': _HelpEntry(
+    icon: Icons.emoji_events,
+    title: '🏆 Brag Board',
+    body: 'Share your catches with the CatchTales community!\n\n'
+        '📸 **Post a Catch** — Tap the camera icon to add a photo, species, location, '
+        'and more info. You can crop the photo to remove unwanted background.\n\n'
+        '❤️ **Like & Comment** — Tap a post to open details, then like or comment. '
+        'Reply to comments by tapping "Reply".\n\n'
+        '🔥 **Trending** — Toggle between Latest and Hot to see the most engaged posts.\n\n'
+        '🏅 **Species Badges** — Rare or trophy fish get special badges like 👑 Trophy or 🦕 Ancient.\n\n'
+        '📤 **Share** — Open a post and tap the share icon to share it outside the app.\n\n'
+        '🚩 **Report** — Long-press a post or use the menu to report inappropriate content.',
+    tips: 'Be respectful! The brag board is a community space. '
+        'Report any content that violates fishing etiquette or is inappropriate.',
+  ),
 };

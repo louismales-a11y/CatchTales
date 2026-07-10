@@ -344,3 +344,111 @@ https://console.firebase.google.com/project/catchtales-prod/authentication/users
       console.error('Failed to send report email:', e);
     }
   });
+
+// ---------------------------------------------------------------------------
+// Brag Board Push Notifications
+// Fires when a like or comment is added to a brag post.
+// Sends an FCM push notification to the post owner.
+// ---------------------------------------------------------------------------
+exports.onBragLike = functions.firestore
+  .onDocumentCreated('brag_likes/{likeId}', async (event) => {
+    const like = event.data?.data();
+    if (!like) return;
+
+    const postId = like.postId;
+    const likerId = like.userId;
+    if (!postId || !likerId) return;
+
+    try {
+      // Get the post to find the owner
+      const postDoc = await db.collection('brag_posts').doc(postId).get();
+      if (!postDoc.exists) return;
+      const post = postDoc.data();
+      const ownerId = post?.userId;
+      if (!ownerId || ownerId === likerId) return; // don't notify self-likes
+
+      // Get the liker's name
+      const likerDoc = await db.collection('users').doc(likerId).get();
+      const likerName = likerDoc.data()?.name || 'Someone';
+
+      // Get the owner's FCM token
+      const ownerDoc = await db.collection('users').doc(ownerId).get();
+      const fcmToken = ownerDoc.data()?.fcm_token;
+      if (!fcmToken) return;
+
+      // Send via Firebase Admin SDK FCM
+      const message = {
+        token: fcmToken,
+        notification: {
+          title: '👍 New Like',
+          body: `${likerName} liked your catch photo!`,
+        },
+        data: {
+          type: 'brag_like',
+          postId: postId,
+          route: '/brag-board',
+        },
+        android: {
+          priority: 'high',
+        },
+      };
+
+      await admin.messaging().send(message);
+      console.log(`Like notification sent to ${ownerId} for post ${postId}`);
+    } catch (e) {
+      console.error('Failed to send like notification:', e.message);
+    }
+  });
+
+exports.onBragComment = functions.firestore
+  .onDocumentCreated('brag_comments/{commentId}', async (event) => {
+    const comment = event.data?.data();
+    if (!comment) return;
+
+    const postId = comment.postId;
+    const commenterId = comment.userId;
+    if (!postId || !commenterId) return;
+
+    try {
+      // Get the post to find the owner
+      const postDoc = await db.collection('brag_posts').doc(postId).get();
+      if (!postDoc.exists) return;
+      const post = postDoc.data();
+      const ownerId = post?.userId;
+      if (!ownerId || ownerId === commenterId) return; // don't notify own comments
+
+      // Get the commenter's name
+      const commenterDoc = await db.collection('users').doc(commenterId).get();
+      const commenterName = commenterDoc.data()?.name || 'Someone';
+
+      // Truncate comment text
+      const text = (comment.text || '').substring(0, 80);
+
+      // Get the owner's FCM token
+      const ownerDoc = await db.collection('users').doc(ownerId).get();
+      const fcmToken = ownerDoc.data()?.fcm_token;
+      if (!fcmToken) return;
+
+      // Send via Firebase Admin SDK FCM
+      const message = {
+        token: fcmToken,
+        notification: {
+          title: '💬 New Comment',
+          body: `${commenterName}: ${text}`,
+        },
+        data: {
+          type: 'brag_comment',
+          postId: postId,
+          route: '/brag-board',
+        },
+        android: {
+          priority: 'high',
+        },
+      };
+
+      await admin.messaging().send(message);
+      console.log(`Comment notification sent to ${ownerId} for post ${postId}`);
+    } catch (e) {
+      console.error('Failed to send comment notification:', e.message);
+    }
+  });

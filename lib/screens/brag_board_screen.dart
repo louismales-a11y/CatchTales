@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import '../services/brag_board_service.dart';
 import '../services/auth_service.dart';
 import '../services/translation_service.dart';
+import '../services/help_text.dart';
 import '../widgets/water_background.dart';
 import '../widgets/brag_image.dart';
 import 'brag_post_detail_screen.dart';
@@ -17,6 +18,21 @@ class BragBoardScreen extends StatefulWidget {
 
 class _BragBoardScreenState extends State<BragBoardScreen> {
   final _service = BragBoardService.instance;
+  late Stream<List<BragPost>> _postsStream;
+  bool _showHot = false;
+
+  @override
+  void initState() {
+    super.initState();
+    _postsStream = _service.streamPosts();
+  }
+
+  void _toggleFeed() {
+    setState(() {
+      _showHot = !_showHot;
+      _postsStream = _showHot ? _service.streamHotPosts() : _service.streamPosts();
+    });
+  }
 
   void _showPostMenu(BragPost post) {
     final isOwner = AuthService.instance.user?.uid == post.userId;
@@ -96,6 +112,12 @@ class _BragBoardScreenState extends State<BragBoardScreen> {
       appBar: AppBar(
         title: const Text('🏆 Brag Board'),
         actions: [
+          // Hot/Latest toggle
+          IconButton(
+            icon: Icon(_showHot ? Icons.whatshot : Icons.access_time),
+            tooltip: _showHot ? 'Trending now' : 'Latest',
+            onPressed: _toggleFeed,
+          ),
           IconButton(
             icon: const Icon(Icons.add_a_photo_outlined),
             tooltip: 'Share your catch',
@@ -104,7 +126,7 @@ class _BragBoardScreenState extends State<BragBoardScreen> {
         ],
       ),
       body: StreamBuilder<List<BragPost>>(
-        stream: _service.streamPosts(),
+        stream: _postsStream,
         builder: (ctx, snap) {
           if (snap.hasError) {
             return Center(child: Text('Something went wrong\n${snap.error}', textAlign: TextAlign.center));
@@ -133,10 +155,17 @@ class _BragBoardScreenState extends State<BragBoardScreen> {
               ),
             );
           }
-          return ListView.builder(
-            padding: const EdgeInsets.all(12),
-            itemCount: posts.length,
-            itemBuilder: (ctx, i) => _PostCard(post: posts[i], onMenu: () => _showPostMenu(posts[i])),
+          return Column(
+            children: [
+              Expanded(
+                child: ListView.builder(
+                  padding: const EdgeInsets.all(12),
+                  itemCount: posts.length,
+                  itemBuilder: (ctx, i) => _PostCard(post: posts[i], onMenu: () => _showPostMenu(posts[i])),
+                ),
+              ),
+              helpChip(context, 'brag_board'),
+            ],
           );
         },
       ),
@@ -204,7 +233,13 @@ class _PostCard extends StatelessWidget {
                       color: const Color(0xFF76FF03).withValues(alpha: 0.15),
                       borderRadius: BorderRadius.circular(12),
                     ),
-                    child: Text('🐟 ${post.species}', style: const TextStyle(fontSize: 12, fontWeight: FontWeight.w600, color: Color(0xFF76FF03))),
+                    child: Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Text('🐟 ${post.species}', style: const TextStyle(fontSize: 12, fontWeight: FontWeight.w600, color: Color(0xFF76FF03))),
+                  if (_rareBadge(post.species) != null) ...[const SizedBox(width: 4), _rareBadge(post.species)!],
+                ],
+              ),
                   ),
                   if (post.description.isNotEmpty) ...[
                     const SizedBox(width: 8),
@@ -265,5 +300,43 @@ class _PostCard extends StatelessWidget {
     if (diff.inHours < 24) return '${diff.inHours}h ago';
     if (diff.inDays < 7) return '${diff.inDays}d ago';
     return '${dt.month}/${dt.day}';
+  }
+
+  /// Show a badge for rare/noteworthy species.
+  Widget? _rareBadge(String species) {
+    const rare = <String, Map<String, String>>{
+      'muskellunge': {'emoji': '👑', 'label': 'Trophy'},
+      'muskie': {'emoji': '👑', 'label': 'Trophy'},
+      'lake sturgeon': {'emoji': '🦕', 'label': 'Ancient'},
+      'sturgeon': {'emoji': '🦕', 'label': 'Ancient'},
+      'golden trout': {'emoji': '✨', 'label': 'Rare'},
+      'peacock bass': {'emoji': '🌈', 'label': 'Exotic'},
+      'tarpon': {'emoji': '🏅', 'label': 'Trophy'},
+      'bonefish': {'emoji': '⚡', 'label': 'Speedster'},
+      'permit': {'emoji': '🎯', 'label': 'Prized'},
+      'atlantic salmon': {'emoji': '🌟', 'label': 'Prized'},
+      'steelhead': {'emoji': '💪', 'label': 'Fighter'},
+      'brook trout': {'emoji': '🎨', 'label': 'Native'},
+      'tiger trout': {'emoji': '🐯', 'label': 'Rare'},
+      'arctic char': {'emoji': '❄️', 'label': 'Arctic'},
+    };
+    final key = species.toLowerCase().trim();
+    for (final entry in rare.entries) {
+      if (key.contains(entry.key)) {
+        final info = entry.value;
+        return Container(
+          padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+          decoration: BoxDecoration(
+            color: Colors.amber.shade800.withValues(alpha: 0.3),
+            borderRadius: BorderRadius.circular(8),
+          ),
+          child: Text(
+            '${info['emoji']} ${info['label']}',
+            style: TextStyle(fontSize: 10, fontWeight: FontWeight.w700, color: Colors.amber.shade200),
+          ),
+        );
+      }
+    }
+    return null;
   }
 }
