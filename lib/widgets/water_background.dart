@@ -29,11 +29,11 @@ class _WaterBackgroundState extends State<WaterBackground>
   late List<_AnimatedFish> _fancyFish;
 
   final _fishPaths = [
-    'assets/fish1.png',
-    'assets/fish2.png',
-    'assets/fish3.png',
-    'assets/fish4.png',
-    'assets/fish5.png',
+    'assets/tfish1.png',
+    'assets/tfish2.png',
+    'assets/tfish3.png',
+    'assets/tfish4.png',
+    'assets/tfish5.png',
   ];
 
   @override
@@ -118,8 +118,6 @@ class _WaterBackgroundState extends State<WaterBackground>
               width: f.fishSize,
               height: f.fishSize * 0.6,
               fit: BoxFit.contain,
-              color: Colors.white,
-              colorBlendMode: BlendMode.difference,
             ),
           ),
         );
@@ -152,7 +150,7 @@ class _AnimatedFish {
   void _randomize() {
     verticalPos = 0.03 + _rand.nextDouble() * 0.9;
     fishSize = 25 + _rand.nextDouble() * 70;
-    opacity = 0.08 + _rand.nextDouble() * 0.25;
+    opacity = 0.5 + _rand.nextDouble() * 0.35;
     bobFreq = 1.5 + _rand.nextDouble() * 4;
     bobAmplitude = 4 + _rand.nextDouble() * 12;
     speed = 0.0004 + _rand.nextDouble() * 0.003;
