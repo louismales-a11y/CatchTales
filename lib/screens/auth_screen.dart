@@ -1,8 +1,14 @@
+import 'dart:async';
+import 'dart:io';
+import 'dart:typed_data';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'package:image_picker/image_picker.dart';
+import 'package:path_provider/path_provider.dart';
 import '../services/auth_service.dart';
 import '../services/translation_service.dart';
 import '../widgets/water_background.dart';
+import '../widgets/crop_screen.dart';
 import 'verify_email_screen.dart';
 
 
@@ -25,7 +31,7 @@ class _AuthScreenState extends State<AuthScreen> {
   bool _isLoading = false;
   bool _rememberMe = true;
   bool _termsAccepted = false;
-
+  File? _profilePhoto;
   @override
   void dispose() {
     _nameCtrl.dispose();
@@ -53,17 +59,49 @@ class _AuthScreenState extends State<AuthScreen> {
     final auth = AuthService.instance;
 
     bool success;
-    if (_isLogin) {
-      success = await auth.login(
-        email: _emailCtrl.text.trim(),
-        password: _passCtrl.text,
-      );
-    } else {
-      success = await auth.signUp(
-        email: _emailCtrl.text.trim(),
-        password: _passCtrl.text,
-        name: _nameCtrl.text.trim(),
-      );
+    try {
+      if (_isLogin) {
+        debugPrint('AuthScreen: attempting login...');
+        success = await auth.login(
+          email: _emailCtrl.text.trim(),
+          password: _passCtrl.text,
+        ).timeout(const Duration(seconds: 20));
+        debugPrint('AuthScreen: login result: $success');
+      } else {
+        debugPrint('AuthScreen: attempting signUp...');
+        debugPrint('AuthScreen: signUp called, _profilePhoto=$_profilePhoto');
+        success = await auth.signUp(
+          email: _emailCtrl.text.trim(),
+          password: _passCtrl.text,
+          name: _nameCtrl.text.trim(),
+          profilePhoto: _profilePhoto,
+        ).timeout(const Duration(seconds: 30));
+        debugPrint('AuthScreen: signUp result: $success');
+      }
+    } on TimeoutException {
+      success = false;
+      debugPrint('AuthScreen: TIMEOUT during auth operation');
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            behavior: SnackBarBehavior.floating,
+            content: const Text('Connection timed out. Please try again.'),
+            backgroundColor: Colors.red.shade700,
+          ),
+        );
+      }
+    } catch (e) {
+      success = false;
+      debugPrint('AuthScreen: error during auth: $e');
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            behavior: SnackBarBehavior.floating,
+            content: Text('Error: $e'),
+            backgroundColor: Colors.red.shade700,
+          ),
+        );
+      }
     }
 
     if (!mounted) return;
@@ -235,6 +273,92 @@ class _AuthScreenState extends State<AuthScreen> {
                       ),
                     ),
                     const SizedBox(height: 36),
+
+                    // ─── Profile Photo (sign-up only) ───
+                    if (!_isLogin)
+                      Padding(
+                        padding: const EdgeInsets.only(bottom: 20),
+                        child: Column(
+                          children: [
+                            GestureDetector(
+                              onTap: () async {
+                                final picker = ImagePicker();
+                                final photo = await picker.pickImage(
+                                  source: ImageSource.gallery,
+                                  maxWidth: 4096,
+                                  maxHeight: 4096,
+                                  imageQuality: 80,
+                                );
+                                if (photo != null) {
+                                  final bytes = await File(photo.path).readAsBytes();
+                                  final croppedBytes = await Navigator.push<Uint8List>(
+                                    context,
+                                    MaterialPageRoute(
+                                      builder: (_) => CropScreen(imageBytes: bytes),
+                                    ),
+                                  );
+                                  if (croppedBytes != null) {
+                                    final dir = await getTemporaryDirectory();
+                                    final croppedFile = File('${dir.path}/profile_crop.jpg');
+                                    await croppedFile.writeAsBytes(croppedBytes);
+                                    setState(() => _profilePhoto = croppedFile);
+                                  } else {
+                                    setState(() => _profilePhoto = File(photo.path));
+                                  }
+                                }
+                              },
+                              child: Container(
+                                width: 100,
+                                height: 100,
+                                decoration: BoxDecoration(
+                                  shape: BoxShape.circle,
+                                  color: Colors.white.withValues(alpha: 0.08),
+                                  border: Border.all(
+                                    color: const Color(0xFF00BCD4).withValues(alpha: 0.3),
+                                    width: 2,
+                                  ),
+                                ),
+                                child: _profilePhoto != null
+                                    ? ClipRRect(
+                                        borderRadius: BorderRadius.circular(50),
+                                        child: Image.file(
+                                          _profilePhoto!,
+                                          width: 100,
+                                          height: 100,
+                                          fit: BoxFit.cover,
+                                        ),
+                                      )
+                                    : const Column(
+                                        mainAxisAlignment: MainAxisAlignment.center,
+                                        children: [
+                                          Icon(
+                                            Icons.camera_alt_outlined,
+                                            size: 32,
+                                            color: Colors.white54,
+                                          ),
+                                          SizedBox(height: 4),
+                                          Text(
+                                            'Add Photo',
+                                            style: TextStyle(
+                                              fontSize: 11,
+                                              color: Colors.white54,
+                                            ),
+                                          ),
+                                        ],
+                                      ),
+                              ),
+                            ),
+                            const SizedBox(height: 8),
+                            Text(
+                              'Profile photo (optional)',
+                              style: TextStyle(
+                                fontSize: 12,
+                                color: Colors.grey.shade500,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
 
                     // ─── Name field (sign-up only) ───
                     if (!_isLogin)

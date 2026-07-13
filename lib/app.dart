@@ -330,14 +330,10 @@ class _SplashScreenState extends State<SplashScreen> {
             crossAxisAlignment: CrossAxisAlignment.start,
             mainAxisSize: MainAxisSize.min,
             children: [
-              _whatsNewItem('🏆 Brag Board now in bottom nav!'),
-              _whatsNewItem('🔥 Trending/Hot toggle — most engaged posts'),
-              _whatsNewItem('🏅 Species badges — rare fish get special badges'),
-              _whatsNewItem('📤 Share posts to social media'),
-              _whatsNewItem('📸 Interactive photo cropping'),
               _whatsNewItem('🤖 AI Fish ID — identify species from photos!'),
               _whatsNewItem('🤖 AI Lake Insights — ask questions about your catches'),
               _whatsNewItem('🤖 AI Tackle Picks — smart lure recommendations'),
+              _whatsNewItem('🏆 Brag Board — share catch photos, like & comment!'),
               _whatsNewItem('🌊 Dream skin — animated fish & underwater background'),
               _whatsNewItem('🎨 Classic skin — light/dark mode with theme picker'),
               _whatsNewItem('🛡️ Brag Board admin panel (dev builds)'),
@@ -569,7 +565,7 @@ class _HomeScreenState extends State<HomeScreen> {
   List<Widget> get _screens => [
     CatchesScreen(key: _catchesKey),
     CounterScreen(),
-    const BragBoardScreen(),
+    BragBoardScreen(),
     MapScreen(key: _mapKey),
   ];
 
@@ -854,6 +850,36 @@ class _HomeScreenState extends State<HomeScreen> {
           ],
         ),
         actions: [
+          // User profile avatar (when logged in)
+          Consumer<AuthService>(
+            builder: (ctx, auth, _) {
+              if (!auth.isLoggedIn) return const SizedBox.shrink();
+              return Padding(
+                padding: const EdgeInsets.only(right: 4),
+                child: GestureDetector(
+                  onTap: () {
+                    Navigator.push(context,
+                      MaterialPageRoute(builder: (_) => _withWater(const SettingsScreen())));
+                  },
+                  child: CircleAvatar(
+                    radius: 16,
+                    backgroundColor: accent.withValues(alpha: 0.2),
+                    backgroundImage: AuthService.imageProviderFor(auth.profilePhotoUrl),
+                    child: auth.profilePhotoUrl.isEmpty
+                        ? Text(
+                            auth.userName.isNotEmpty ? auth.userName[0].toUpperCase() : '?',
+                            style: TextStyle(
+                              fontWeight: FontWeight.w700,
+                              fontSize: 14,
+                              color: accent,
+                            ),
+                          )
+                        : null,
+                  ),
+                ),
+              );
+            },
+          ),
           // 3-dot menu
           Theme(
             data: Theme.of(context).copyWith(
@@ -881,6 +907,11 @@ class _HomeScreenState extends State<HomeScreen> {
             onSelected: (value) {
               switch (value) {
                 // ── Planning ──
+                case 'brag_board':
+                  Navigator.push(context,
+                      MaterialPageRoute(
+                          builder: (_) => _withWater(BragBoardScreen())));
+                  break;
                 case 'prepare':
                   Navigator.push(context,
                       MaterialPageRoute(
@@ -1015,6 +1046,16 @@ class _HomeScreenState extends State<HomeScreen> {
                 child: ListTile(
                   leading: Icon(Icons.people),
                   title: const Text('Community Stats'),
+                  dense: true,
+                  contentPadding: EdgeInsets.zero,
+                ),
+              ),
+              // ── Brag Board ──
+              PopupMenuItem(
+                value: 'brag_board',
+                child: ListTile(
+                  leading: Icon(Icons.emoji_events, size: 20),
+                  title: const Text('🏆 Brag Board', style: TextStyle(fontSize: 13)),
                   dense: true,
                   contentPadding: EdgeInsets.zero,
                 ),
@@ -1290,12 +1331,11 @@ class _HomeScreenState extends State<HomeScreen> {
                               child: _screens[_selectedIndex],
                             ),
                     ),
-                    helpChip(context, [
-                      if (_selectedIndex == 0) 'catches',
-                      if (_selectedIndex == 1) 'counter',
-                      if (_selectedIndex == 2) 'brag_board',
-                      if (_selectedIndex == 3) 'map',
-                    ].first),
+                    helpChip(context, _selectedIndex == 0
+                        ? 'catches'
+                        : _selectedIndex == 1
+                            ? 'counter'
+                            : 'map'),
                   ],
                 ),
               ),

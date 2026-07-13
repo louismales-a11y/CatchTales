@@ -1,5 +1,8 @@
+import 'dart:convert';
+
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:http/http.dart' as http;
 import 'package:provider/provider.dart';
 import 'package:package_info_plus/package_info_plus.dart';
 import 'package:url_launcher/url_launcher.dart';
@@ -16,6 +19,8 @@ class AboutScreen extends StatefulWidget {
 
 class _AboutScreenState extends State<AboutScreen> {
   String _version = '';
+  bool _checking = false;
+  bool _upToDate = false;
 
   @override
   void initState() {
@@ -28,6 +33,56 @@ class _AboutScreenState extends State<AboutScreen> {
       final info = await PackageInfo.fromPlatform();
       if (mounted) setState(() => _version = 'v${info.version}');
     } catch (_) {}
+  }
+
+  /// Compare two version strings like "v1.8.12" and "v1.8.6".
+  bool _isNewerVersion(String tag, String current) {
+    final tagParts = tag.replaceAll('v', '').split('.').map((e) => int.tryParse(e) ?? 0).toList();
+    final curParts = current.replaceAll('v', '').split('.').map((e) => int.tryParse(e) ?? 0).toList();
+    for (int i = 0; i < 3; i++) {
+      final t = i < tagParts.length ? tagParts[i] : 0;
+      final c = i < curParts.length ? curParts[i] : 0;
+      if (t > c) return true;
+      if (t < c) return false;
+    }
+    return false;
+  }
+
+  Future<void> _checkUpdate() async {
+    setState(() { _checking = true; _upToDate = false; });
+    try {
+      final uri = Uri.parse('https://api.github.com/repos/louismales-a11y/CatchTales-Dev/releases/latest');
+      final response = await http.get(uri).timeout(const Duration(seconds: 10));
+      if (response.statusCode == 200) {
+        final data = json.decode(response.body);
+        final tag = data['tag_name'] as String? ?? '';
+        final url = data['html_url'] as String? ?? '';
+        if (mounted && _isNewerVersion(tag, _version)) {
+          final download = await showDialog<bool>(
+            context: context, builder: (ctx) => AlertDialog(
+              title: Text(tr('updateAvailable')),
+              content: Text(trp('updateContent', {'tag': tag, 'version': _version})),
+              actions: [
+                TextButton(onPressed: () => Navigator.pop(ctx, false), child: Text(tr('later'))),
+                FilledButton(onPressed: () => Navigator.pop(ctx, true), child: Text(tr('download'))),
+              ],
+            ),
+          );
+          if (download == true && url.isNotEmpty) {
+            await launchUrl(Uri.parse(url), mode: LaunchMode.externalApplication);
+          }
+        } else {
+          setState(() => _upToDate = true);
+        }
+      }
+    } catch (_) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text(tr('checkFailed')), behavior: SnackBarBehavior.floating),
+        );
+      }
+    }
+    if (mounted) setState(() => _checking = false);
   }
 
   @override
@@ -52,6 +107,27 @@ class _AboutScreenState extends State<AboutScreen> {
                     style: theme.textTheme.titleLarge?.copyWith(fontWeight: FontWeight.w800)),
                 if (_version.isNotEmpty)
                   Text(_version, style: TextStyle(color: theme.colorScheme.onSurface.withValues(alpha: 0.5))),
+                const SizedBox(height: 8),
+                SizedBox(
+                  height: 36,
+                  child: OutlinedButton.icon(
+                    onPressed: _checking ? null : _checkUpdate,
+                    icon: _checking
+                        ? const SizedBox(width: 16, height: 16, child: CircularProgressIndicator(strokeWidth: 2))
+                        : Icon(Icons.system_update_outlined, size: 18),
+                    label: Text(
+                      _checking ? 'Checking...' :
+                      _upToDate ? tr('upToDate') + ' ✓' :
+                      tr('checkUpdate'),
+                      style: const TextStyle(fontSize: 12),
+                    ),
+                    style: OutlinedButton.styleFrom(
+                      padding: const EdgeInsets.symmetric(horizontal: 14),
+                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+                      foregroundColor: _upToDate ? Colors.green : null,
+                    ),
+                  ),
+                ),
               ],
             ),
           ),
@@ -124,7 +200,7 @@ class _AboutScreenState extends State<AboutScreen> {
           Center(
             child: Column(
               children: [
-                Image.asset('assets/contact-logo.png', height: 50, width: 50, fit: BoxFit.contain),
+                Image.asset('assets/contact_logo.png', height: 50, width: 50, fit: BoxFit.contain),
                 const SizedBox(height: 6),
                 Text('Maison Louis Design', style: TextStyle(fontSize: 12, color: Colors.grey.shade500)),
               ],

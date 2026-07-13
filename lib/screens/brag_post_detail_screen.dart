@@ -1,6 +1,4 @@
-import 'dart:io';
 import 'package:flutter/material.dart';
-import 'package:share_plus/share_plus.dart';
 import '../services/brag_board_service.dart';
 import '../services/auth_service.dart';
 import '../widgets/brag_image.dart';
@@ -50,39 +48,42 @@ class _BragPostDetailScreenState extends State<BragPostDetailScreen> {
     );
   }
 
-  Future<void> _sharePost() async {
-    final post = widget.post;
-    final buffer = StringBuffer();
-    buffer.writeln('🐟 ${post.species}');
-    if (post.description.isNotEmpty) buffer.writeln('📍 ${post.description}');
-    if (post.moreInfo != null && post.moreInfo!.isNotEmpty) buffer.writeln('ℹ️ ${post.moreInfo}');
-    buffer.writeln('');
-    buffer.writeln('Shared from CatchTales — catchtales.app');
-
-    await SharePlus.instance.share(
-      ShareParams(
-        text: buffer.toString(),
-        title: 'Catch of the day: ${post.species}',
-      ),
-    );
-  }
-
   @override
   Widget build(BuildContext context) {
     final post = widget.post;
     final theme = Theme.of(context);
-    final isOwner = AuthService.instance.user?.uid == post.userId;
+    final auth = AuthService.instance;
+    final isOwner = auth.user?.uid == post.userId ||
+        (auth.userName.isNotEmpty && auth.userName == post.userName);
 
     return Scaffold(
       appBar: AppBar(
         title: Text('${post.userName}\'s Catch'),
-        actions: [
-          IconButton(
-            icon: const Icon(Icons.share_outlined),
-            tooltip: 'Share',
-            onPressed: _sharePost,
-          ),
-        ],
+        actions: isOwner
+            ? [
+                IconButton(
+                  icon: const Icon(Icons.delete_outline, color: Colors.red),
+                  tooltip: 'Delete Post',
+                  onPressed: () async {
+                    final ok = await showDialog<bool>(
+                      context: context,
+                      builder: (ctx) => AlertDialog(
+                        title: const Text('Delete Post'),
+                        content: const Text('Are you sure? This cannot be undone.'),
+                        actions: [
+                          TextButton(onPressed: () => Navigator.pop(ctx, false), child: const Text('Cancel')),
+                          FilledButton(onPressed: () => Navigator.pop(ctx, true), style: FilledButton.styleFrom(backgroundColor: Colors.red), child: const Text('Delete')),
+                        ],
+                      ),
+                    );
+                    if (ok == true && context.mounted) {
+                      await BragBoardService.instance.deletePost(post.id, post.userId, postUserName: post.userName);
+                      if (context.mounted) Navigator.pop(context);
+                    }
+                  },
+                ),
+              ]
+            : null,
       ),
       body: Column(
         children: [
@@ -94,21 +95,39 @@ class _BragPostDetailScreenState extends State<BragPostDetailScreen> {
                 BragImage(post: post, height: 300),
                 const SizedBox(height: 16),
 
-                // Species + actions
+                // User header + species
                 Row(
                   children: [
+                    CircleAvatar(
+                      radius: 16,
+                      backgroundColor: theme.colorScheme.primary.withValues(alpha: 0.2),
+                      backgroundImage: AuthService.imageProviderFor(post.profilePhotoUrl),
+                      child: post.profilePhotoUrl.isEmpty
+                          ? Text(post.userName.isNotEmpty ? post.userName[0].toUpperCase() : '?',
+                              style: TextStyle(fontWeight: FontWeight.w700, fontSize: 13, color: theme.colorScheme.primary))
+                          : null,
+                    ),
+                    const SizedBox(width: 10),
+                    Text(post.userName, style: const TextStyle(fontWeight: FontWeight.w600, fontSize: 15)),
+                    const Spacer(),
                     Container(
                       padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
                       decoration: BoxDecoration(color: const Color(0xFF76FF03).withValues(alpha: 0.15), borderRadius: BorderRadius.circular(14)),
-                      child: Text('🐟 ${post.species}', style: const TextStyle(fontWeight: FontWeight.w600, color: Color(0xFF76FF03))),
+                      child: Text('🐟 ${post.species}', style: TextStyle(fontWeight: FontWeight.w600, color: Color(0xFF76FF03))),
                     ),
-                    const Spacer(),
+                  ],
+                ),
+                const SizedBox(height: 8),
+
+                // Like & comment actions
+                Row(
+                  children: [
                     IconButton(
                       icon: Icon(post.likedByMe ? Icons.favorite : Icons.favorite_border, color: post.likedByMe ? Colors.red : null),
                       onPressed: () => _service.toggleLike(post.id),
                     ),
                     Text('${post.likesCount}', style: TextStyle(color: Colors.grey.shade500)),
-                    const SizedBox(width: 8),
+                    const SizedBox(width: 16),
                     Icon(Icons.chat_bubble_outline, color: Colors.grey.shade500),
                     const SizedBox(width: 4),
                     Text('${post.commentsCount}', style: TextStyle(color: Colors.grey.shade500)),
@@ -254,7 +273,11 @@ class _BragPostDetailScreenState extends State<BragPostDetailScreen> {
                 children: [
                   CircleAvatar(radius: 12,
                     backgroundColor: Theme.of(context).colorScheme.primary.withValues(alpha: 0.2),
-                    child: Text(comment.userName[0].toUpperCase(), style: TextStyle(fontSize: 10, fontWeight: FontWeight.w700, color: Theme.of(context).colorScheme.primary)),
+                    backgroundImage: AuthService.imageProviderFor(comment.profilePhotoUrl),
+                    child: comment.profilePhotoUrl.isEmpty
+                        ? Text(comment.userName[0].toUpperCase(),
+                            style: TextStyle(fontSize: 10, fontWeight: FontWeight.w700, color: Theme.of(context).colorScheme.primary))
+                        : null,
                   ),
                   const SizedBox(width: 8),
                   Text(comment.userName, style: const TextStyle(fontWeight: FontWeight.w600, fontSize: 13)),
@@ -349,6 +372,15 @@ class _BragPostDetailScreenState extends State<BragPostDetailScreen> {
             children: [
               Row(
                 children: [
+                  CircleAvatar(radius: 10,
+                    backgroundColor: Theme.of(context).colorScheme.primary.withValues(alpha: 0.2),
+                    backgroundImage: AuthService.imageProviderFor(r.profilePhotoUrl),
+                    child: r.profilePhotoUrl.isEmpty
+                        ? Text(r.userName[0].toUpperCase(),
+                            style: TextStyle(fontSize: 9, fontWeight: FontWeight.w700, color: Theme.of(context).colorScheme.primary))
+                        : null,
+                  ),
+                  const SizedBox(width: 6),
                   Text(r.userName, style: const TextStyle(fontWeight: FontWeight.w600, fontSize: 12)),
                   const Spacer(),
                   PopupMenuButton<String>(

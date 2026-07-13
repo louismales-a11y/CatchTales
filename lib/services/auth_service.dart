@@ -1,5 +1,9 @@
+import 'dart:convert';
 import 'dart:math';
+import 'dart:io';
 import 'package:flutter/foundation.dart';
+import 'package:flutter/material.dart';
+import 'package:image/image.dart' as img;
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
@@ -31,6 +35,9 @@ class AuthService extends ChangeNotifier {
 
   String _email = '';
   String get email => _email;
+
+  String _profilePhotoUrl = '';
+  String get profilePhotoUrl => _profilePhotoUrl;
 
   /// Error message from last failed operation.
   String? _error;
@@ -128,6 +135,7 @@ class AuthService extends ChangeNotifier {
     required String email,
     required String password,
     required String name,
+    File? profilePhoto,
   }) async {
     _status = AuthStatus.authenticating;
     _error = null;
@@ -135,19 +143,34 @@ class AuthService extends ChangeNotifier {
 
     final lowerName = name.trim().toLowerCase();
 
-    // Claim username atomically — prevents duplicates
+        // Claim username atomically — prevents duplicates
     final usernameRef = FirebaseFirestore.instance.collection('usernames').doc(lowerName);
     try {
       await FirebaseFirestore.instance.runTransaction((txn) async {
         final existing = await txn.get(usernameRef);
         if (existing.exists) {
-          throw FirebaseAuthException(
-            code: 'username-taken',
-            message: 'The username \"$name\" is already taken. Please choose another.',
-          );
+          final data = existing.data()!;
+          final uid = data['uid'] as String?;
+          // If reserved but no uid yet (stale from a crash), allow re-use
+          if (uid == null || uid.isEmpty) {
+            // Stale reservation — overwrite it
+            txn.set(usernameRef, {'reserved': true, 'reservedAt': FieldValue.serverTimestamp()});
+          } else {
+            // Check if the owning user's Firestore profile still exists
+            final userDoc = await txn.get(FirebaseFirestore.instance.collection('users').doc(uid));
+            if (userDoc.exists) {
+              throw FirebaseAuthException(
+                code: 'username-taken',
+                message: 'The username "$name" is already taken. Please choose another.',
+              );
+            }
+            // User profile deleted — username is orphaned, allow re-use
+            txn.set(usernameRef, {'reserved': true, 'reservedAt': FieldValue.serverTimestamp()});
+          }
+        } else {
+          // Reserve it with a temp placeholder — real uid written after Auth account
+          txn.set(usernameRef, {'reserved': true, 'reservedAt': FieldValue.serverTimestamp()});
         }
-        // Reserve it with a temp placeholder — real uid written after Auth account
-        txn.set(usernameRef, {'reserved': true, 'reservedAt': FieldValue.serverTimestamp()});
       });
     } on FirebaseAuthException {
       rethrow;
@@ -168,7 +191,12 @@ class AuthService extends ChangeNotifier {
       _userName = name.trim();
 
       // Finalize username claim with real userId
-      await usernameRef.set({'uid': _user!.uid, 'name': _userName, 'createdAt': FieldValue.serverTimestamp()});
+      await usernameRef.set({
+        'uid': _user!.uid,
+        'name': _userName,
+        'email': _email,
+        'createdAt': FieldValue.serverTimestamp(),
+      });
 
       // Update display name in Firebase Auth
       await _user?.updateDisplayName(_userName);
@@ -190,6 +218,19 @@ class AuthService extends ChangeNotifier {
         await sendEmailVerification();
       } catch (e) {
         debugPrint('AuthService.signUp: email verification failed (non-fatal): $e');
+      }
+
+      // Upload profile photo if provided (before returning, so URL is saved)
+      if (profilePhoto != null) {
+        debugPrint('AuthService.signUp: profilePhoto file exists=${profilePhoto.existsSync()} path=${profilePhoto.path}');
+        try {
+          final url = await uploadProfilePhoto(profilePhoto);
+          debugPrint('AuthService.signUp: upload result url=$url');
+        } catch (e) {
+          debugPrint('AuthService.signUp: profile photo upload failed (non-fatal): $e');
+        }
+      } else {
+        debugPrint('AuthService.signUp: profilePhoto is NULL');
       }
 
       // Don't mark as authenticated yet — email must be verified first
@@ -251,6 +292,18 @@ class AuthService extends ChangeNotifier {
       _email = email.trim();
       _userName = cred.user?.displayName ?? '';
       await _loadProfile();
+
+      // Ensure username document has email (for new sign-ups and existing users)
+      final lowerName = _userName.trim().toLowerCase();
+      if (lowerName.isNotEmpty && _email.isNotEmpty) {
+        try {
+          await FirebaseFirestore.instance
+              .collection('usernames')
+              .doc(lowerName)
+              .set({'email': _email}, SetOptions(merge: true));
+        } catch (_) {}
+      }
+
       // Update device token — any new login kicks old device
       await _storeDeviceToken();
 
@@ -410,6 +463,7 @@ class AuthService extends ChangeNotifier {
         'name': _userName,
         'email': _email,
         'isPro': false,
+        'profilePhotoUrl': _profilePhotoUrl,
         'deviceSessionToken': token,
         'createdAt': FieldValue.serverTimestamp(),
         'lastLogin': FieldValue.serverTimestamp(),
@@ -432,6 +486,7 @@ class AuthService extends ChangeNotifier {
         _isPro = data['isPro'] == true;
         _userName = data['name'] as String? ?? _user?.displayName ?? '';
         _email = data['email'] as String? ?? _user?.email ?? '';
+        _profilePhotoUrl = data['profilePhotoUrl'] as String? ?? '';
 
         // Sync Pro status with local ProService
         if (_isPro && !ProService.instance.isPro) {
@@ -551,6 +606,40 @@ class AuthService extends ChangeNotifier {
     }
   }
 
+  /// Delete the current unverified user account and go back to sign-in.
+  /// Called when the user cancels email verification during sign-up.
+  Future<void> cancelSignUp() async {
+    if (_user != null) {
+      try {
+        // Delete the username reservation
+        final lowerName = _userName.trim().toLowerCase();
+        if (lowerName.isNotEmpty) {
+          try {
+            await FirebaseFirestore.instance.collection('usernames').doc(lowerName).delete();
+          } catch (_) {}
+        }
+        // Delete the Firestore user profile
+        try {
+          await FirebaseFirestore.instance.collection('users').doc(_user!.uid).delete();
+        } catch (_) {}
+        // Delete the Firebase Auth account
+        await _user!.delete();
+      } catch (e) {
+        debugPrint('AuthService.cancelSignUp: $e');
+      }
+    }
+    _user = null;
+    _status = AuthStatus.unauthenticated;
+    _isPro = false;
+    _userName = '';
+    _email = '';
+    _profilePhotoUrl = '';
+    _error = null;
+    await _clearLocalDeviceToken();
+    await ProService.instance.resetToFree();
+    notifyListeners();
+  }
+
   /// Send a password reset email.
   /// Returns true if the email was sent successfully.
   Future<bool> sendPasswordResetEmail(String email) async {
@@ -576,6 +665,68 @@ class AuthService extends ChangeNotifier {
       notifyListeners();
       return false;
     }
+  }
+
+  /// Update the user's profile photo URL in Firestore.
+  Future<void> updateProfilePhotoUrl(String url) async {
+    _profilePhotoUrl = url;
+    if (_user != null) {
+      try {
+        await FirebaseFirestore.instance
+            .collection('users')
+            .doc(_user!.uid)
+            .update({'profilePhotoUrl': url});
+      } catch (e) {
+        debugPrint('AuthService.updateProfilePhotoUrl: $e');
+      }
+    }
+    notifyListeners();
+  }
+
+  /// Upload a profile photo using base64 encoding into Firestore.
+  /// Resizes to 256x256 to stay well under Firestore's 1MB limit.
+  /// Returns the data URL, or null if failed.
+  Future<String?> uploadProfilePhoto(File file) async {
+    if (_user == null) return null;
+    try {
+      final bytes = await file.readAsBytes();
+      // Decode, resize to 256x256, re-encode as JPEG quality 70
+      final original = img.decodeImage(bytes);
+      if (original == null) {
+        debugPrint('AuthService.uploadProfilePhoto: could not decode image');
+        return null;
+      }
+      final resized = img.copyResize(original, width: 256, height: 256);
+      final outBytes = img.encodeJpg(resized, quality: 70);
+      final b64 = base64Encode(outBytes);
+      final dataUrl = 'data:image/jpeg;base64,$b64';
+      await updateProfilePhotoUrl(dataUrl);
+      debugPrint('AuthService.uploadProfilePhoto: SUCCESS (${outBytes.length} bytes)');
+      return dataUrl;
+    } catch (e) {
+      debugPrint('AuthService.uploadProfilePhoto: FAILED: $e');
+      return null;
+    }
+  }
+
+  /// Return the correct [ImageProvider] for a profile photo URL.
+  /// Supports both regular http/https URLs and base64 data URIs.
+  static ImageProvider? imageProviderFor(String url) {
+    if (url.isEmpty) return null;
+    if (url.startsWith('data:image')) {
+      // base64 data URI — decode and use MemoryImage
+      try {
+        final comma = url.indexOf(',');
+        if (comma < 0) return null;
+        final b64 = url.substring(comma + 1);
+        final bytes = base64Decode(b64);
+        return MemoryImage(bytes);
+      } catch (e) {
+        debugPrint('AuthService.imageProviderFor: $e');
+        return null;
+      }
+    }
+    return NetworkImage(url);
   }
 
   /// Clear the last error.

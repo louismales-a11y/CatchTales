@@ -100,6 +100,12 @@ class _VerifyEmailScreenState extends State<VerifyEmailScreen> {
                     textAlign: TextAlign.center,
                     style: const TextStyle(fontSize: 13, color: Colors.white38, height: 1.4),
                   ),
+                  const SizedBox(height: 6),
+                  Text(
+                    'Don\'t see it? Check your spam/junk folder.',
+                    textAlign: TextAlign.center,
+                    style: const TextStyle(fontSize: 12, color: Colors.amber, height: 1.4),
+                  ),
                   const SizedBox(height: 36),
                   SizedBox(
                     width: double.infinity, height: 52,
@@ -139,6 +145,15 @@ class _VerifyEmailScreenState extends State<VerifyEmailScreen> {
                   TextButton(
                     onPressed: () async => await AuthService.instance.logout(),
                     child: Text(tr('verifyUseDifferent'), style: TextStyle(color: Colors.grey.shade500, fontSize: 13)),
+                  ),
+                  const SizedBox(height: 4),
+                  TextButton.icon(
+                    onPressed: () async {
+                      await AuthService.instance.cancelSignUp();
+                      if (context.mounted) Navigator.of(context).pop();
+                    },
+                    icon: const Icon(Icons.arrow_back, size: 16, color: Colors.red),
+                    label: Text('Cancel Sign-Up', style: TextStyle(color: Colors.red.shade400, fontSize: 13)),
                   ),
                 ],
               ),

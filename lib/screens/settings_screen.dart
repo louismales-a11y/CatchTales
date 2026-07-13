@@ -1,12 +1,17 @@
+import 'dart:io';
+import 'dart:typed_data';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:image_picker/image_picker.dart';
+import 'package:path_provider/path_provider.dart';
 import '../services/notification_service.dart';
 import '../services/local_notification_service.dart';
 import '../services/connectivity_service.dart';
 import '../services/auth_service.dart';
 import '../services/translation_service.dart';
 import '../services/skin_service.dart';
+import '../widgets/crop_screen.dart';
 import 'import_export_screen.dart';
 
 /// Settings screen with data transfer, notifications, export, account management.
@@ -24,6 +29,79 @@ class _SettingsScreenState extends State<SettingsScreen> {
   void initState() {
     super.initState();
     _loadPrefs();
+  }
+
+  /// Pick and upload a new profile photo.
+  Future<void> _changeProfilePhoto() async {
+    final picker = ImagePicker();
+    final photo = await picker.pickImage(
+      source: ImageSource.gallery,
+      maxWidth: 4096,
+      maxHeight: 4096,
+      imageQuality: 80,
+    );
+    if (photo == null) return;
+
+    // Read bytes and show crop screen (uses crop_your_image)
+    final bytes = await File(photo.path).readAsBytes();
+    final croppedBytes = await Navigator.push<Uint8List>(
+      context,
+      MaterialPageRoute(
+        builder: (_) => CropScreen(imageBytes: bytes),
+      ),
+    );
+
+    File imageFile;
+    if (croppedBytes != null) {
+      final dir = await getTemporaryDirectory();
+      imageFile = File('${dir.path}/profile_crop.jpg');
+      await imageFile.writeAsBytes(croppedBytes);
+    } else {
+      imageFile = File(photo.path);
+    }
+
+    final url = await AuthService.instance.uploadProfilePhoto(imageFile);
+    if (mounted && url != null) {
+      setState(() {});
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          behavior: SnackBarBehavior.floating,
+          content: Text('Profile photo updated!'),
+          backgroundColor: Colors.green,
+        ),
+      );
+    }
+  }
+
+  /// Remove the current profile photo.
+  Future<void> _removeProfilePhoto() async {
+    final confirm = await showDialog<bool>(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        title: const Text('Remove Profile Photo'),
+        content: const Text('Are you sure you want to remove your profile photo?'),
+        actions: [
+          TextButton(onPressed: () => Navigator.pop(ctx, false), child: const Text('Cancel')),
+          FilledButton(
+            onPressed: () => Navigator.pop(ctx, true),
+            style: FilledButton.styleFrom(backgroundColor: Colors.red),
+            child: const Text('Remove'),
+          ),
+        ],
+      ),
+    );
+    if (confirm == true) {
+      await AuthService.instance.updateProfilePhotoUrl('');
+      if (mounted) {
+        setState(() {});
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            behavior: SnackBarBehavior.floating,
+            content: Text('Profile photo removed.'),
+          ),
+        );
+      }
+    }
   }
 
   Future<void> _loadPrefs() async {
@@ -143,6 +221,84 @@ class _SettingsScreenState extends State<SettingsScreen> {
       body: ListView(
         padding: const EdgeInsets.all(24),
         children: [
+          // ── Profile Section ──
+          Consumer<AuthService>(
+            builder: (ctx, auth, _) {
+              if (!auth.isLoggedIn) return const SizedBox.shrink();
+              return Card(
+                child: Padding(
+                  padding: const EdgeInsets.all(16),
+                  child: Column(
+                    children: [
+                      // Avatar
+                      GestureDetector(
+                        onTap: () => _changeProfilePhoto(),
+                        child: Stack(
+                          children: [
+                            CircleAvatar(
+                              radius: 40,
+                              backgroundColor: theme.colorScheme.primary.withValues(alpha: 0.2),
+                              backgroundImage: AuthService.imageProviderFor(auth.profilePhotoUrl),
+                              child: auth.profilePhotoUrl.isEmpty
+                                  ? Icon(Icons.person, size: 40, color: theme.colorScheme.primary)
+                                  : null,
+                            ),
+                            Positioned(
+                              bottom: 0,
+                              right: 0,
+                              child: Container(
+                                padding: const EdgeInsets.all(4),
+                                decoration: BoxDecoration(
+                                  color: theme.colorScheme.primary,
+                                  shape: BoxShape.circle,
+                                ),
+                                child: const Icon(Icons.camera_alt, size: 16, color: Colors.white),
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                      const SizedBox(height: 12),
+                      Text(
+                        auth.userName,
+                        style: const TextStyle(fontSize: 18, fontWeight: FontWeight.w700),
+                      ),
+                      Text(
+                        auth.email,
+                        style: TextStyle(fontSize: 13, color: Colors.grey.shade500),
+                      ),
+                      const SizedBox(height: 12),
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          TextButton.icon(
+                            onPressed: () => _changeProfilePhoto(),
+                            icon: const Icon(Icons.swap_horiz, size: 18),
+                            label: const Text('Change Photo'),
+                            style: TextButton.styleFrom(
+                              foregroundColor: theme.colorScheme.primary,
+                            ),
+                          ),
+                          if (auth.profilePhotoUrl.isNotEmpty) ...[
+                            const SizedBox(width: 8),
+                            TextButton.icon(
+                              onPressed: () => _removeProfilePhoto(),
+                              icon: const Icon(Icons.delete_outline, size: 18),
+                              label: const Text('Remove'),
+                              style: TextButton.styleFrom(
+                                foregroundColor: Colors.red.shade400,
+                              ),
+                            ),
+                          ],
+                        ],
+                      ),
+                    ],
+                  ),
+                ),
+              );
+            },
+          ),
+          const SizedBox(height: 8),
           // ── Push Notifications ──
           Card(
             child: Padding(

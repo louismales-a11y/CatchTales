@@ -66,6 +66,7 @@ dependencies:
   xml: ^6.6.1
   google_generative_ai: ^0.4.6
   crop_your_image: ^2.0.0
+  image: ^4.8.0
 dev_dependencies:
   flutter_test:
     sdk: flutter

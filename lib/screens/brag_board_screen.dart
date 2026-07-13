@@ -1,11 +1,12 @@
+import 'dart:convert';
 import 'package:flutter/material.dart';
 import '../services/brag_board_service.dart';
 import '../services/auth_service.dart';
 import '../services/translation_service.dart';
-import '../services/help_text.dart';
 import '../widgets/water_background.dart';
 import '../widgets/brag_image.dart';
 import 'brag_post_detail_screen.dart';
+import 'edit_brag_post_screen.dart';
 import 'new_brag_post_screen.dart';
 
 /// Main feed showing all brag posts.
@@ -18,24 +19,17 @@ class BragBoardScreen extends StatefulWidget {
 
 class _BragBoardScreenState extends State<BragBoardScreen> {
   final _service = BragBoardService.instance;
-  late Stream<List<BragPost>> _postsStream;
-  bool _showHot = false;
+  final _listKey = GlobalKey();
+  int _refreshCounter = 0;
 
-  @override
-  void initState() {
-    super.initState();
-    _postsStream = _service.streamPosts();
-  }
-
-  void _toggleFeed() {
-    setState(() {
-      _showHot = !_showHot;
-      _postsStream = _showHot ? _service.streamHotPosts() : _service.streamPosts();
-    });
+  Future<void> _onRefresh() async {
+    setState(() => _refreshCounter++);
   }
 
   void _showPostMenu(BragPost post) {
-    final isOwner = AuthService.instance.user?.uid == post.userId;
+    final auth = AuthService.instance;
+    final isOwner = auth.user?.uid == post.userId ||
+        (auth.userName.isNotEmpty && auth.userName == post.userName);
     showModalBottomSheet(
       context: context,
       shape: const RoundedRectangleBorder(
@@ -45,7 +39,28 @@ class _BragBoardScreenState extends State<BragBoardScreen> {
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            if (isOwner)
+            if (isOwner) ...[
+              ListTile(
+                leading: const Icon(Icons.edit_outlined, color: Color(0xFF76FF03)),
+                title: const Text('Edit Post'),
+                onTap: () async {
+                  Navigator.pop(ctx);
+                  final edited = await Navigator.push<bool>(
+                    context,
+                    MaterialPageRoute(
+                      builder: (_) => EditBragPostScreen(
+                        postId: post.id,
+                        userId: post.userId,
+                        userName: post.userName,
+                        initialSpecies: post.species,
+                        initialDescription: post.description,
+                        initialMoreInfo: post.moreInfo,
+                        initialPhotoData: post.photoData,
+                      ),
+                    ),
+                  );
+                },
+              ),
               ListTile(
                 leading: const Icon(Icons.delete_outline, color: Colors.red),
                 title: const Text('Delete Post'),
@@ -54,6 +69,7 @@ class _BragBoardScreenState extends State<BragBoardScreen> {
                   _confirmDelete(post);
                 },
               ),
+            ],
             if (!isOwner) ...[
               ListTile(
                 leading: const Icon(Icons.flag_outlined, color: Colors.orange),
@@ -102,7 +118,7 @@ class _BragBoardScreenState extends State<BragBoardScreen> {
       ),
     );
     if (ok == true) {
-      await _service.deletePost(post.id, post.userId);
+      await _service.deletePost(post.id, post.userId, postUserName: post.userName);
     }
   }
 
@@ -112,12 +128,6 @@ class _BragBoardScreenState extends State<BragBoardScreen> {
       appBar: AppBar(
         title: const Text('🏆 Brag Board'),
         actions: [
-          // Hot/Latest toggle
-          IconButton(
-            icon: Icon(_showHot ? Icons.whatshot : Icons.access_time),
-            tooltip: _showHot ? 'Trending now' : 'Latest',
-            onPressed: _toggleFeed,
-          ),
           IconButton(
             icon: const Icon(Icons.add_a_photo_outlined),
             tooltip: 'Share your catch',
@@ -126,7 +136,7 @@ class _BragBoardScreenState extends State<BragBoardScreen> {
         ],
       ),
       body: StreamBuilder<List<BragPost>>(
-        stream: _postsStream,
+        stream: _service.streamPosts(),
         builder: (ctx, snap) {
           if (snap.hasError) {
             return Center(child: Text('Something went wrong\n${snap.error}', textAlign: TextAlign.center));
@@ -155,17 +165,17 @@ class _BragBoardScreenState extends State<BragBoardScreen> {
               ),
             );
           }
-          return Column(
-            children: [
-              Expanded(
-                child: ListView.builder(
-                  padding: const EdgeInsets.all(12),
-                  itemCount: posts.length,
-                  itemBuilder: (ctx, i) => _PostCard(post: posts[i], onMenu: () => _showPostMenu(posts[i])),
-                ),
-              ),
-              helpChip(context, 'brag_board'),
-            ],
+          return RefreshIndicator(
+            onRefresh: _onRefresh,
+            displacement: 40,
+            color: const Color(0xFF76FF03),
+            child: ListView.builder(
+              key: ValueKey('brag_list_$_refreshCounter'),
+              padding: const EdgeInsets.all(12),
+              physics: const AlwaysScrollableScrollPhysics(),
+              itemCount: posts.length,
+              itemBuilder: (ctx, i) => _PostCard(post: posts[i], onMenu: () => _showPostMenu(posts[i])),
+            ),
           );
         },
       ),
@@ -199,8 +209,11 @@ class _PostCard extends StatelessWidget {
                   CircleAvatar(
                     radius: 18,
                     backgroundColor: theme.colorScheme.primary.withValues(alpha: 0.2),
-                    child: Text(post.userName.isNotEmpty ? post.userName[0].toUpperCase() : '?',
-                        style: TextStyle(fontWeight: FontWeight.w700, color: theme.colorScheme.primary)),
+                    backgroundImage: AuthService.imageProviderFor(post.profilePhotoUrl),
+                    child: post.profilePhotoUrl.isEmpty
+                        ? Text(post.userName.isNotEmpty ? post.userName[0].toUpperCase() : '?',
+                            style: TextStyle(fontWeight: FontWeight.w700, color: theme.colorScheme.primary))
+                        : null,
                   ),
                   const SizedBox(width: 10),
                   Expanded(
@@ -233,13 +246,7 @@ class _PostCard extends StatelessWidget {
                       color: const Color(0xFF76FF03).withValues(alpha: 0.15),
                       borderRadius: BorderRadius.circular(12),
                     ),
-                    child: Row(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  Text('🐟 ${post.species}', style: const TextStyle(fontSize: 12, fontWeight: FontWeight.w600, color: Color(0xFF76FF03))),
-                  if (_rareBadge(post.species) != null) ...[const SizedBox(width: 4), _rareBadge(post.species)!],
-                ],
-              ),
+                    child: Text('🐟 ${post.species}', style: const TextStyle(fontSize: 12, fontWeight: FontWeight.w600, color: Color(0xFF76FF03))),
                   ),
                   if (post.description.isNotEmpty) ...[
                     const SizedBox(width: 8),
@@ -300,43 +307,5 @@ class _PostCard extends StatelessWidget {
     if (diff.inHours < 24) return '${diff.inHours}h ago';
     if (diff.inDays < 7) return '${diff.inDays}d ago';
     return '${dt.month}/${dt.day}';
-  }
-
-  /// Show a badge for rare/noteworthy species.
-  Widget? _rareBadge(String species) {
-    const rare = <String, Map<String, String>>{
-      'muskellunge': {'emoji': '👑', 'label': 'Trophy'},
-      'muskie': {'emoji': '👑', 'label': 'Trophy'},
-      'lake sturgeon': {'emoji': '🦕', 'label': 'Ancient'},
-      'sturgeon': {'emoji': '🦕', 'label': 'Ancient'},
-      'golden trout': {'emoji': '✨', 'label': 'Rare'},
-      'peacock bass': {'emoji': '🌈', 'label': 'Exotic'},
-      'tarpon': {'emoji': '🏅', 'label': 'Trophy'},
-      'bonefish': {'emoji': '⚡', 'label': 'Speedster'},
-      'permit': {'emoji': '🎯', 'label': 'Prized'},
-      'atlantic salmon': {'emoji': '🌟', 'label': 'Prized'},
-      'steelhead': {'emoji': '💪', 'label': 'Fighter'},
-      'brook trout': {'emoji': '🎨', 'label': 'Native'},
-      'tiger trout': {'emoji': '🐯', 'label': 'Rare'},
-      'arctic char': {'emoji': '❄️', 'label': 'Arctic'},
-    };
-    final key = species.toLowerCase().trim();
-    for (final entry in rare.entries) {
-      if (key.contains(entry.key)) {
-        final info = entry.value;
-        return Container(
-          padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
-          decoration: BoxDecoration(
-            color: Colors.amber.shade800.withValues(alpha: 0.3),
-            borderRadius: BorderRadius.circular(8),
-          ),
-          child: Text(
-            '${info['emoji']} ${info['label']}',
-            style: TextStyle(fontSize: 10, fontWeight: FontWeight.w700, color: Colors.amber.shade200),
-          ),
-        );
-      }
-    }
-    return null;
   }
 }

@@ -1,10 +1,8 @@
 import 'dart:convert';
-import 'dart:typed_data';
 import 'package:flutter/foundation.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:image_picker/image_picker.dart';
-import 'package:image/image.dart' as img_lib;
 import 'auth_service.dart';
 
 /// A brag post from a user.
@@ -12,6 +10,7 @@ class BragPost {
   final String id;
   final String userId;
   final String userName;
+  final String profilePhotoUrl;
   final String species;
   final String description;
   final String? photoUrl;
@@ -26,6 +25,7 @@ class BragPost {
     required this.id,
     required this.userId,
     required this.userName,
+    this.profilePhotoUrl = '',
     required this.species,
     this.description = '',
     this.photoUrl,
@@ -42,6 +42,7 @@ class BragPost {
       id: id,
       userId: data['userId'] as String? ?? '',
       userName: data['userName'] as String? ?? 'Angler',
+      profilePhotoUrl: data['profilePhotoUrl'] as String? ?? '',
       species: data['species'] as String? ?? 'Unknown',
       description: data['description'] as String? ?? '',
       photoUrl: data['photoUrl'] as String?,
@@ -57,6 +58,7 @@ class BragPost {
   Map<String, dynamic> toMap() => {
     'userId': userId,
     'userName': userName,
+    'profilePhotoUrl': profilePhotoUrl,
     'species': species,
     'description': description,
     'photoUrl': photoUrl,
@@ -74,6 +76,7 @@ class BragComment {
   final String postId;
   final String userId;
   final String userName;
+  final String profilePhotoUrl;
   final String text;
   final DateTime timestamp;
   final String? parentId;
@@ -83,6 +86,7 @@ class BragComment {
     required this.postId,
     required this.userId,
     required this.userName,
+    this.profilePhotoUrl = '',
     required this.text,
     required this.timestamp,
     this.parentId,
@@ -96,6 +100,7 @@ class BragComment {
       postId: data['postId'] as String? ?? '',
       userId: data['userId'] as String? ?? '',
       userName: data['userName'] as String? ?? 'Angler',
+      profilePhotoUrl: data['profilePhotoUrl'] as String? ?? '',
       text: data['text'] as String? ?? '',
       timestamp: (data['timestamp'] as Timestamp?)?.toDate() ?? DateTime.now(),
       parentId: data['parentId'] as String?,
@@ -106,6 +111,7 @@ class BragComment {
     'postId': postId,
     'userId': userId,
     'userName': userName,
+    'profilePhotoUrl': profilePhotoUrl,
     'text': text,
     'timestamp': Timestamp.fromDate(timestamp),
     'parentId': parentId,
@@ -130,59 +136,26 @@ class BragBoardService {
 
   /// Stream of all posts ordered by newest first.
   Stream<List<BragPost>> streamPosts({int limit = 50}) {
-    return _streamPosts(_postsRef.orderBy('timestamp', descending: true), limit: limit);
-  }
-
-  /// Stream of posts sorted by hotness (likes + comments, recent first).
-  Stream<List<BragPost>> streamHotPosts({int limit = 50, int hours = 24}) {
-    final cutoff = DateTime.now().subtract(Duration(hours: hours));
-    return _streamPosts(
-      _postsRef
-          .where('timestamp', isGreaterThan: Timestamp.fromDate(cutoff))
-          .orderBy('timestamp', descending: true),
-      limit: limit,
-      sortBy: (a, b) {
-        final scoreA = a.likesCount + a.commentsCount * 2;
-        final scoreB = b.likesCount + b.commentsCount * 2;
-        if (scoreA != scoreB) return scoreB.compareTo(scoreA);
-        return b.timestamp.compareTo(a.timestamp);
-      },
-    );
-  }
-
-  /// Internal stream builder with optional client-side sort.
-  Stream<List<BragPost>> _streamPosts(
-    Query query, {
-    int limit = 50,
-    int Function(BragPost a, BragPost b)? sortBy,
-  }) {
     final userId = _uid;
-    return query
+    return _postsRef
+        .orderBy('timestamp', descending: true)
         .limit(limit)
         .snapshots()
         .asyncMap((snap) async {
       final posts = <BragPost>[];
       for (final doc in snap.docs) {
-        try {
-          final data = doc.data() as Map<String, dynamic>? ?? <String, dynamic>{};
-          bool liked = false;
-          if (userId != null) {
-            final likeDoc = await _likesRef
-                .where('postId', isEqualTo: doc.id)
-                .where('userId', isEqualTo: userId)
-                .get();
-            liked = likeDoc.docs.isNotEmpty;
-          }
-          posts.add(BragPost.fromMap(doc.id, data, likedByMe: liked));
-        } catch (e) {
-          debugPrint('BragBoardService.streamPosts: error processing post ${doc.id}: $e');
+        final data = doc.data();
+        bool liked = false;
+        if (userId != null) {
+          final likeDoc = await _likesRef
+              .where('postId', isEqualTo: doc.id)
+              .where('userId', isEqualTo: userId)
+              .get();
+          liked = likeDoc.docs.isNotEmpty;
         }
+        posts.add(BragPost.fromMap(doc.id, data, likedByMe: liked));
       }
-      if (sortBy != null) posts.sort(sortBy);
       return posts;
-    }).handleError((e) {
-      debugPrint('BragBoardService.streamPosts error: $e');
-      return <BragPost>[];
     });
   }
 
@@ -221,15 +194,13 @@ class BragBoardService {
       return null;
     }
     try {
+      // Read compressed photo bytes (ImagePicker already applied maxWidth/maxHeight/imageQuality)
       debugPrint('BragBoardService: reading photo bytes...');
       final imageBytes = await photo.readAsBytes();
-
-      // Compress: resize to 1024px max, JPEG quality 70
-      final compressed = _compressImage(imageBytes);
-      debugPrint('BragBoardService: compressed ${imageBytes.length} -> ${compressed.length} bytes');
+      debugPrint('BragBoardService: read ${imageBytes.length} bytes');
 
       // Encode to base64
-      final photoData = base64Encode(compressed);
+      final photoData = base64Encode(imageBytes);
       debugPrint('BragBoardService: base64 length ${photoData.length}');
 
       // Use the user's permanent profile name (set at sign-up)
@@ -237,10 +208,20 @@ class BragBoardService {
           ? AuthService.instance.userName
           : (_auth.currentUser?.displayName ?? 'Angler');
 
+      // Fetch the latest profile photo URL from Firestore (more reliable than in-memory)
+      String profilePhotoUrl = AuthService.instance.profilePhotoUrl;
+      if (profilePhotoUrl.isEmpty && _uid != null) {
+        try {
+          final userDoc = await FirebaseFirestore.instance.collection('users').doc(_uid!).get();
+          profilePhotoUrl = (userDoc.data()?['profilePhotoUrl'] as String?) ?? '';
+        } catch (_) {}
+      }
+
       // Build doc (compressed to ~45KB base64, well under 1MB Firestore limit)
       final doc = await _postsRef.add({
         'userId': _uid!,
         'userName': userName,
+        'profilePhotoUrl': profilePhotoUrl,
         'species': species,
         'description': description,
         'photoData': photoData,
@@ -260,34 +241,76 @@ class BragBoardService {
   /// Toggle like on a post.
   Future<void> toggleLike(String postId) async {
     if (_uid == null) return;
-    try {
-      final existing = await _likesRef
-          .where('postId', isEqualTo: postId)
-          .where('userId', isEqualTo: _uid)
-          .get();
-      if (existing.docs.isNotEmpty) {
-        await existing.docs.first.reference.delete();
-        await _postsRef.doc(postId).update({
-          'likesCount': FieldValue.increment(-1),
-        });
+    final existing = await _likesRef
+        .where('postId', isEqualTo: postId)
+        .where('userId', isEqualTo: _uid)
+        .get();
+    if (existing.docs.isNotEmpty) {
+      await existing.docs.first.reference.delete();
+      await _postsRef.doc(postId).update({
+        'likesCount': FieldValue.increment(-1),
+      });
+    } else {
+      await _likesRef.add({
+        'postId': postId,
+        'userId': _uid,
+        'timestamp': FieldValue.serverTimestamp(),
+      });
+      await _postsRef.doc(postId).update({
+        'likesCount': FieldValue.increment(1),
+      });
+    }
+  }
+
+  /// Update a post's editable fields (owner only).
+  Future<bool> updatePost({
+    required String postId,
+    required String userId,
+    String? species,
+    String? description,
+    String? moreInfo,
+    XFile? newPhoto,
+    String? postUserName,
+  }) async {
+    // Allow if uid matches, OR if name matches
+    if (_uid != userId) {
+      if (postUserName != null && postUserName.isNotEmpty) {
+        final currentName = AuthService.instance.userName;
+        if (currentName.isEmpty || currentName != postUserName) return false;
       } else {
-        await _likesRef.add({
-          'postId': postId,
-          'userId': _uid,
-          'timestamp': FieldValue.serverTimestamp(),
-        });
-        await _postsRef.doc(postId).update({
-          'likesCount': FieldValue.increment(1),
-        });
+        return false;
       }
+    }
+    try {
+      final updateData = <String, dynamic>{};
+      if (species != null) updateData['species'] = species;
+      if (description != null) updateData['description'] = description;
+      if (moreInfo != null) updateData['moreInfo'] = moreInfo;
+      if (newPhoto != null) {
+        final imageBytes = await newPhoto.readAsBytes();
+        updateData['photoData'] = base64Encode(imageBytes);
+      }
+      if (updateData.isNotEmpty) {
+        await _postsRef.doc(postId).update(updateData);
+      }
+      return true;
     } catch (e) {
-      debugPrint('BragBoardService.toggleLike: $e');
+      debugPrint('BragBoardService.updatePost: $e');
+      return false;
     }
   }
 
   /// Delete a post (owner only).
-  Future<bool> deletePost(String postId, String userId) async {
-    if (_uid != userId) return false;
+  Future<bool> deletePost(String postId, String userId, {String? postUserName}) async {
+    // Allow if uid matches, OR if the current user's name matches the post owner's name
+    if (_uid != userId) {
+      if (postUserName != null && postUserName.isNotEmpty) {
+        final currentName = AuthService.instance.userName;
+        if (currentName.isEmpty || currentName != postUserName) return false;
+      } else {
+        return false;
+      }
+    }
     try {
       await _postsRef.doc(postId).delete();
       // Delete comments on this post
@@ -332,11 +355,13 @@ class BragBoardService {
       return false;
     }
     try {
+      final profilePhotoUrl = AuthService.instance.profilePhotoUrl;
       final comment = BragComment(
         id: '',
         postId: postId,
         userId: _uid!,
         userName: _auth.currentUser?.displayName ?? 'Angler',
+        profilePhotoUrl: profilePhotoUrl,
         text: text,
         timestamp: DateTime.now(),
         parentId: parentId,
@@ -400,37 +425,11 @@ class BragBoardService {
   /// Check if user has blocked another.
   Future<bool> isBlocked(String userId) async {
     if (_uid == null) return false;
-    try {
-      final result = await _blocksRef
-          .where('blockerId', isEqualTo: _uid)
-          .where('blockedId', isEqualTo: userId)
-          .get();
-      return result.docs.isNotEmpty;
-    } catch (e) {
-      debugPrint('BragBoardService.isBlocked: $e');
-      return false;
-    }
-  }
-
-  /// Compress image bytes: resize to max 1024px, JPEG quality 70.
-  static Uint8List _compressImage(Uint8List bytes) {
-    final decoded = img_lib.decodeImage(bytes);
-    if (decoded == null) return bytes;
-
-    img_lib.Image resized;
-    if (decoded.width > 1024 || decoded.height > 1024) {
-      final scale = 1024.0 /
-          (decoded.width > decoded.height ? decoded.width : decoded.height);
-      resized = img_lib.copyResize(
-        decoded,
-        width: (decoded.width * scale).round(),
-        height: (decoded.height * scale).round(),
-      );
-    } else {
-      resized = decoded;
-    }
-
-    return Uint8List.fromList(img_lib.encodeJpg(resized, quality: 70));
+    final result = await _blocksRef
+        .where('blockerId', isEqualTo: _uid)
+        .where('blockedId', isEqualTo: userId)
+        .get();
+    return result.docs.isNotEmpty;
   }
 
   /// Pick image from gallery with compression to fit Firestore.
