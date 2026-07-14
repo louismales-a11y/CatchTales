@@ -134,6 +134,7 @@ class ProService extends ChangeNotifier {
           autofocus: true,
           decoration: const InputDecoration(
             hintText: 'e.g. PRO-A7X3-K9M2',
+            helperText: 'You can enter with or without dashes',
             border: OutlineInputBorder(),
           ),
           textCapitalization: TextCapitalization.characters,
@@ -153,8 +154,27 @@ class ProService extends ChangeNotifier {
 
     if (result == null || result.isEmpty) return;
 
+    // Normalize: strip dashes/spaces, then reconstruct proper format
+    String normalized = result.replaceAll(RegExp(r'[\s-]'), '').toUpperCase();
+    if (normalized.startsWith('PRO')) {
+      normalized = normalized.substring(3);
+    }
+    // Must have exactly 12 characters (XXXX-XXXX-XXXX without dashes)
+    if (normalized.length != 12) {
+      if (!context.mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(behavior: SnackBarBehavior.floating,
+          content: Text('Invalid code format. Please check and try again.'),
+          backgroundColor: Colors.red,
+        ),
+      );
+      return;
+    }
+    // Reconstruct as PRO-XXXX-XXXX-XXXX
+    final formatted = 'PRO-${normalized.substring(0, 4)}-${normalized.substring(4, 8)}-${normalized.substring(8, 12)}';
+
     // Validate the code against Firestore
-    final validated = await instance._validateCode(result);
+    final validated = await instance._validateCode(formatted);
     if (!context.mounted) return;
 
     if (validated) {
@@ -177,6 +197,7 @@ class ProService extends ChangeNotifier {
 
   /// Validate a Pro code against Firestore.
   /// The code is case-insensitive, stored uppercase.
+  /// Accepts codes with or without dashes (e.g. 'PRO-A7X3-K9M2' or 'PROA7X3K9M2').
   Future<bool> _validateCode(String code) async {
     try {
       final doc = await FirebaseFirestore.instance
