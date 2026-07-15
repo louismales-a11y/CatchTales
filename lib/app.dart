@@ -37,7 +37,9 @@ import 'screens/auth_screen.dart';
 import 'screens/verify_email_screen.dart';
 import 'screens/settings_screen.dart';
 import 'screens/brag_board_screen.dart';
+import 'screens/session_screen.dart';
 import 'services/auth_service.dart';
+import 'services/session_service.dart';
 import 'widgets/water_background.dart';
 
 import 'screens/brag_admin_screen.dart';
@@ -880,6 +882,36 @@ class _HomeScreenState extends State<HomeScreen> {
               );
             },
           ),
+          // Session indicator (when active)
+          Consumer<SessionService>(
+            builder: (ctx, srv, _) {
+              if (!srv.hasActiveSession) return const SizedBox.shrink();
+              return Padding(
+                padding: const EdgeInsets.only(right: 4),
+                child: GestureDetector(
+                  onTap: () {
+                    Navigator.push(context,
+                      MaterialPageRoute(builder: (_) => _withWater(const SessionScreen())));
+                  },
+                  child: Container(
+                    padding: const EdgeInsets.all(6),
+                    decoration: BoxDecoration(
+                      color: Colors.green.shade800.withValues(alpha: 0.3),
+                      borderRadius: BorderRadius.circular(20),
+                    ),
+                    child: const Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        Icon(Icons.groups, size: 16, color: Colors.greenAccent),
+                        SizedBox(width: 4),
+                        Text('Room', style: TextStyle(fontSize: 11, color: Colors.greenAccent, fontWeight: FontWeight.w600)),
+                      ],
+                    ),
+                  ),
+                ),
+              );
+            },
+          ),
           // 3-dot menu
           Theme(
             data: Theme.of(context).copyWith(
@@ -907,11 +939,6 @@ class _HomeScreenState extends State<HomeScreen> {
             onSelected: (value) {
               switch (value) {
                 // ── Planning ──
-                case 'brag_board':
-                  Navigator.push(context,
-                      MaterialPageRoute(
-                          builder: (_) => _withWater(BragBoardScreen())));
-                  break;
                 case 'prepare':
                   Navigator.push(context,
                       MaterialPageRoute(
@@ -1046,16 +1073,6 @@ class _HomeScreenState extends State<HomeScreen> {
                 child: ListTile(
                   leading: Icon(Icons.people),
                   title: const Text('Community Stats'),
-                  dense: true,
-                  contentPadding: EdgeInsets.zero,
-                ),
-              ),
-              // ── Brag Board ──
-              PopupMenuItem(
-                value: 'brag_board',
-                child: ListTile(
-                  leading: Icon(Icons.emoji_events, size: 20),
-                  title: const Text('🏆 Brag Board', style: TextStyle(fontSize: 13)),
                   dense: true,
                   contentPadding: EdgeInsets.zero,
                 ),

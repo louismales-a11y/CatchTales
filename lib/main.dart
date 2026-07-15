@@ -12,6 +12,7 @@ import 'services/connectivity_service.dart';
 import 'services/tts_service.dart';
 import 'services/local_notification_service.dart';
 import 'services/auth_service.dart';
+import 'services/session_service.dart';
 import 'services/skin_service.dart';
 import 'services/ai_service.dart';
 import 'package:firebase_core/firebase_core.dart';
@@ -58,6 +59,7 @@ void main() async {
         ChangeNotifierProvider<ProService>.value(value: ProService.instance),
         ChangeNotifierProvider<ConnectivityService>.value(value: ConnectivityService.instance),
         ChangeNotifierProvider<AuthService>.value(value: AuthService.instance),
+        ChangeNotifierProvider<SessionService>.value(value: SessionService.instance),
       ],
       child: const CatchTalesApp(),
     ),

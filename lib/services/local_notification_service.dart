@@ -142,6 +142,42 @@ class LocalNotificationService {
     await _plugin.cancel(id);
   }
 
+  /// Show a session message notification with sound.
+  Future<void> showSessionNotification({
+    required String title,
+    required String body,
+    String? payload,
+  }) async {
+    if (!_initialized) await init();
+    const androidDetails = AndroidNotificationDetails(
+      'catch_tales_session',
+      'Fish Together',
+      channelDescription: 'Messages and photos from your fishing room',
+      importance: Importance.high,
+      priority: Priority.high,
+      playSound: true,
+      enableVibration: true,
+      showWhen: true,
+      usesChronometer: false,
+    );
+    const iosDetails = DarwinNotificationDetails(
+      presentSound: true,
+      presentAlert: true,
+      presentBadge: true,
+    );
+    const details = NotificationDetails(
+      android: androidDetails,
+      iOS: iosDetails,
+    );
+    await _plugin.show(
+      DateTime.now().millisecondsSinceEpoch.remainder(100000),
+      title,
+      body,
+      details,
+      payload: payload,
+    );
+  }
+
   /// Cancel all notifications.
   Future<void> cancelAll() async {
     await _plugin.cancelAll();
