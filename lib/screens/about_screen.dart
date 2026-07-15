@@ -51,12 +51,13 @@ class _AboutScreenState extends State<AboutScreen> {
   Future<void> _checkUpdate() async {
     setState(() { _checking = true; _upToDate = false; });
     try {
-      final uri = Uri.parse('https://api.github.com/repos/louismales-a11y/CatchTales-Dev/releases/latest');
+      // Check the public version endpoint on catchtales.com
+      final uri = Uri.parse('https://www.catchtales.com/version.json');
       final response = await http.get(uri).timeout(const Duration(seconds: 10));
       if (response.statusCode == 200) {
         final data = json.decode(response.body);
-        final tag = data['tag_name'] as String? ?? '';
-        final url = data['html_url'] as String? ?? '';
+        final tag = data['tag_name'] as String? ?? 'v${data['version'] ?? ''}';
+        final url = data['html_url'] as String? ?? 'https://www.catchtales.com/download/';
         if (mounted && _isNewerVersion(tag, _version)) {
           final download = await showDialog<bool>(
             context: context, builder: (ctx) => AlertDialog(
@@ -73,6 +74,12 @@ class _AboutScreenState extends State<AboutScreen> {
           }
         } else {
           setState(() => _upToDate = true);
+        }
+      } else {
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(content: Text(tr('checkFailed')), behavior: SnackBarBehavior.floating),
+          );
         }
       }
     } catch (_) {
