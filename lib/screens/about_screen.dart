@@ -52,7 +52,7 @@ class _AboutScreenState extends State<AboutScreen> {
     setState(() { _checking = true; _upToDate = false; });
     try {
       // Check the public version endpoint on catchtales.com
-      final uri = Uri.parse('https://www.catchtales.com/version.json');
+      final uri = Uri.parse('https://catchtales.com/version.json');
       final response = await http.get(uri).timeout(const Duration(seconds: 10));
       if (response.statusCode == 200) {
         final data = json.decode(response.body);
@@ -63,8 +63,8 @@ class _AboutScreenState extends State<AboutScreen> {
         final flavor = ApiConfig.appVersion; // 'free', 'pro', or 'dev'
         final apkPath = apks[flavor] as String?;
         final downloadUrl = apkPath != null && apkPath.isNotEmpty
-            ? 'https://www.catchtales.com$apkPath'
-            : (data['html_url'] as String? ?? 'https://www.catchtales.com/download/');
+            ? 'https://catchtales.com$apkPath'
+            : (data['html_url'] as String? ?? 'https://catchtales.com/download/');
 
         if (mounted && _isNewerVersion(tag, _version)) {
           final download = await showDialog<bool>(
