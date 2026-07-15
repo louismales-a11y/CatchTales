@@ -57,7 +57,15 @@ class _AboutScreenState extends State<AboutScreen> {
       if (response.statusCode == 200) {
         final data = json.decode(response.body);
         final tag = data['tag_name'] as String? ?? 'v${data['version'] ?? ''}';
-        final url = data['html_url'] as String? ?? 'https://www.catchtales.com/download/';
+
+        // Get the direct APK download URL for the current app flavor
+        final apks = data['apks'] as Map<String, dynamic>? ?? {};
+        final flavor = ApiConfig.appVersion; // 'free', 'pro', or 'dev'
+        final apkPath = apks[flavor] as String?;
+        final downloadUrl = apkPath != null && apkPath.isNotEmpty
+            ? 'https://www.catchtales.com$apkPath'
+            : (data['html_url'] as String? ?? 'https://www.catchtales.com/download/');
+
         if (mounted && _isNewerVersion(tag, _version)) {
           final download = await showDialog<bool>(
             context: context, builder: (ctx) => AlertDialog(
@@ -69,8 +77,8 @@ class _AboutScreenState extends State<AboutScreen> {
               ],
             ),
           );
-          if (download == true && url.isNotEmpty) {
-            await launchUrl(Uri.parse(url), mode: LaunchMode.externalApplication);
+          if (download == true && downloadUrl.isNotEmpty) {
+            await launchUrl(Uri.parse(downloadUrl), mode: LaunchMode.externalApplication);
           }
         } else {
           setState(() => _upToDate = true);
