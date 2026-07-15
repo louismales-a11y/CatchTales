@@ -44,6 +44,8 @@ import 'widgets/water_background.dart';
 
 import 'screens/brag_admin_screen.dart';
 import 'services/skin_service.dart';
+import 'main.dart' as main_lib;
+import 'screens/session_screen.dart' as session_screen;
 
 Widget _withWater(Widget child) => SkinService.instance.isClassic
     ? child
@@ -495,6 +497,21 @@ class _SplashScreenState extends State<SplashScreen> {
                         );
                       }
                       if (!context.mounted) return;
+
+                      // If launched from ChatActivity (separate window), go directly to the session dashboard
+                      final pendingCode = main_lib.pendingChatSessionCode;
+                      if (pendingCode != null && pendingCode.isNotEmpty) {
+                        main_lib.pendingChatSessionCode = null; // Clear it
+                        final srv = SessionService.instance;
+                        srv.setCurrentSession(pendingCode);
+                        Navigator.of(context).pushReplacement(
+                          MaterialPageRoute(
+                            builder: (_) => session_screen.SessionDashboard(code: pendingCode),
+                          ),
+                        );
+                        return;
+                      }
+
                       Navigator.of(context).pushReplacement(
                         PageRouteBuilder(
                           pageBuilder: (_, _, _) => const HomeScreen(),

@@ -11,6 +11,10 @@ import '../services/local_notification_service.dart';
 import '../services/notification_service.dart';
 import '../services/session_service.dart';
 import '../services/translation_service.dart';
+import '../services/api_config.dart';
+
+// MethodChannel for launching ChatActivity as a separate task/window
+const _chatChannel = MethodChannel('com.catchtales.catchtales/chat');
 
 /// Main entry point for Fish Together.
 /// Shows the list of fishing rooms (personal + joined).
@@ -184,6 +188,17 @@ class _SessionScreenState extends State<SessionScreen> {
     );
     // Refresh rooms when coming back
     _loadRooms();
+  }
+
+  Future<void> _openRoomInSeparateWindow(String code) async {
+    try {
+      // Launch ChatActivity as a separate task via platform channel
+      await _chatChannel.invokeMethod('openChat', {'code': code});
+    } catch (e) {
+      debugPrint('SessionScreen._openRoomInSeparateWindow: $e');
+      // Fallback: open normally
+      _openRoom(code);
+    }
   }
 
   @override
@@ -363,6 +378,11 @@ class _SessionScreenState extends State<SessionScreen> {
                                           );
                                         },
                                       ),
+                                      IconButton(
+                                        icon: Icon(Icons.open_in_new, size: 18, color: Colors.grey.shade400),
+                                        tooltip: 'Open as separate window',
+                                        onPressed: () => _openRoomInSeparateWindow(code),
+                                      ),
                                       const Icon(Icons.chevron_right, size: 20),
                                     ],
                                   ),
@@ -497,6 +517,22 @@ class _SessionDashboardState extends State<SessionDashboard>
             behavior: SnackBarBehavior.floating,
             content: Text('Photo failed: $e'),
             duration: const Duration(seconds: 5),
+          ),
+        );
+      }
+    }
+  }
+
+  Future<void> _openInSeparateWindow() async {
+    try {
+      await _chatChannel.invokeMethod('openChat', {'code': widget.code});
+    } catch (e) {
+      debugPrint('SessionDashboard._openInSeparateWindow: $e');
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            behavior: SnackBarBehavior.floating,
+            content: Text('Could not open separate window: $e'),
           ),
         );
       }
@@ -647,6 +683,30 @@ class _SessionDashboardState extends State<SessionDashboard>
     }
   }
 
+  Future<void> _deleteMessage(String messageId) async {
+    try {
+      await _s.deleteMessage(messageId);
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            behavior: SnackBarBehavior.floating,
+            content: Text('Message deleted'),
+            duration: Duration(seconds: 2),
+          ),
+        );
+      }
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            behavior: SnackBarBehavior.floating,
+            content: Text('Failed to delete: $e'),
+          ),
+        );
+      }
+    }
+  }
+
   /// Called when new messages arrive — play notification sound if not at bottom.
   void _onMessagesUpdated(List<QueryDocumentSnapshot> messages) {
     if (messages.isEmpty) return;
@@ -686,28 +746,35 @@ class _SessionDashboardState extends State<SessionDashboard>
       canPop: false,
       onPopInvokedWithResult: (didPop, _) async {
         if (didPop) return;
-        // Confirm minimize instead of leaving
-        final result = await showDialog<bool>(
+        // Offer choices: stay, open in separate window, or go back
+        final result = await showDialog<String>(
           context: context,
           builder: (ctx) => AlertDialog(
-            title: const Text('Minimize Room?'),
+            title: const Text('Chat Options'),
             content: const Text(
-              'The room stays active in the background. '
-              'You can come back from the Fishing Rooms list.',
+              'You can keep the chat open in a separate window '
+              'to easily switch between apps.',
             ),
             actions: [
               TextButton(
-                onPressed: () => Navigator.pop(ctx, false),
+                onPressed: () => Navigator.pop(ctx, 'stay'),
                 child: const Text('Stay'),
               ),
-              FilledButton(
-                onPressed: () => Navigator.pop(ctx, true),
-                child: const Text('Minimize'),
+              FilledButton.icon(
+                onPressed: () => Navigator.pop(ctx, 'separate'),
+                icon: const Icon(Icons.open_in_new, size: 18),
+                label: const Text('Separate Window'),
+              ),
+              TextButton(
+                onPressed: () => Navigator.pop(ctx, 'close'),
+                child: Text('Close', style: TextStyle(color: Colors.red.shade300)),
               ),
             ],
           ),
         );
-        if (result == true && mounted) {
+        if (result == 'separate' && mounted) {
+          await _openInSeparateWindow();
+        } else if (result == 'close' && mounted) {
           _s.clearCurrentSession();
           Navigator.pop(context);
         }
@@ -761,6 +828,9 @@ class _SessionDashboardState extends State<SessionDashboard>
                           ),
                         );
                         break;
+                      case 'open_in_new':
+                        _openInSeparateWindow();
+                        break;
                       case 'leave':
                         _leave();
                         break;
@@ -781,6 +851,15 @@ class _SessionDashboardState extends State<SessionDashboard>
                       child: ListTile(
                         leading: const Icon(Icons.copy, size: 20),
                         title: const Text('Copy Room Code'),
+                        dense: true,
+                        contentPadding: EdgeInsets.zero,
+                      ),
+                    ),
+                    PopupMenuItem(
+                      value: 'open_in_new',
+                      child: ListTile(
+                        leading: const Icon(Icons.open_in_new, size: 20),
+                        title: const Text('Open as Separate Window'),
                         dense: true,
                         contentPadding: EdgeInsets.zero,
                       ),
@@ -880,20 +959,25 @@ class _SessionDashboardState extends State<SessionDashboard>
                       itemCount: msgs.length,
                       itemBuilder: (ctx, i) {
                         final d = msgs[i].data() as Map<String, dynamic>;
+                        final msgId = msgs[i].id;
                         final text = d['text'] as String? ?? '';
                         final photoUrl = d['photoUrl'] as String? ?? '';
                         final sender = d['sender'] as String? ?? '';
                         final isPhoto = d['isPhoto'] == true;
                         final isCatch = text.contains('🎣');
                         final isEmergency = text.contains('🚨');
+                        final senderUid = d['senderUid'] as String? ?? '';
 
                         return _MessageBubble(
+                          messageId: msgId,
                           text: text,
                           photoUrl: photoUrl,
                           sender: sender,
+                          senderUid: senderUid,
                           isPhoto: isPhoto,
                           isCatch: isCatch,
                           isEmergency: isEmergency,
+                          onDelete: (id) => _deleteMessage(id),
                         );
                       },
                     ),
@@ -1071,20 +1155,26 @@ class _SessionDashboardState extends State<SessionDashboard>
 // ─── Message Bubble ─────────────────────────────────────────────────────────
 
 class _MessageBubble extends StatelessWidget {
+  final String messageId;
   final String text;
   final String photoUrl;
   final String sender;
+  final String senderUid;
   final bool isPhoto;
   final bool isCatch;
   final bool isEmergency;
+  final void Function(String messageId)? onDelete;
 
   const _MessageBubble({
+    required this.messageId,
     required this.text,
     required this.photoUrl,
     required this.sender,
+    required this.senderUid,
     required this.isPhoto,
     required this.isCatch,
     required this.isEmergency,
+    this.onDelete,
   });
 
   Future<void> _openDirections(String lat, String lng) async {
@@ -1142,6 +1232,8 @@ class _MessageBubble extends StatelessWidget {
   Widget build(BuildContext context) {
     final isSystem = sender.isEmpty;
     final theme = Theme.of(context);
+    final currentUid = FirebaseAuth.instance.currentUser?.uid;
+    final canDelete = onDelete != null && senderUid.isNotEmpty && senderUid == currentUid;
 
     Color? bgColor;
     if (isEmergency) {
@@ -1172,7 +1264,33 @@ class _MessageBubble extends StatelessWidget {
                 border: Border.all(color: borderColor!),
               )
             : null,
-        child: Row(
+        child: GestureDetector(
+          onLongPress: canDelete
+              ? () async {
+                  final confirmed = await showDialog<bool>(
+                    context: context,
+                    builder: (ctx) => AlertDialog(
+                      title: const Text('Delete Message?'),
+                      content: const Text('This cannot be undone.'),
+                      actions: [
+                        TextButton(
+                          onPressed: () => Navigator.pop(ctx, false),
+                          child: const Text('Cancel'),
+                        ),
+                        FilledButton(
+                          onPressed: () => Navigator.pop(ctx, true),
+                          style: FilledButton.styleFrom(backgroundColor: Colors.red),
+                          child: const Text('Delete'),
+                        ),
+                      ],
+                    ),
+                  );
+                  if (confirmed == true) {
+                    onDelete?.call(messageId);
+                  }
+                }
+              : null,
+          child: Row(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             if (!isSystem && !isCatch && !isEmergency) ...[
@@ -1274,10 +1392,13 @@ class _MessageBubble extends StatelessWidget {
                         ],
                       ],
                     ),
-            ),
-          ],
+              ),
+            ],
+          ),
         ),
       ),
     );
   }
 }
+
+

@@ -2,6 +2,7 @@ import 'package:flutter/services.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:firebase_core/firebase_core.dart';
 import 'app.dart';
 import 'services/translation_service.dart';
 import 'services/pro_service.dart';
@@ -15,7 +16,14 @@ import 'services/auth_service.dart';
 import 'services/session_service.dart';
 import 'services/skin_service.dart';
 import 'services/ai_service.dart';
-import 'package:firebase_core/firebase_core.dart';
+
+/// Session code passed from ChatActivity (separate window).
+/// Set via MethodChannel before the app runs.
+String? pendingChatSessionCode;
+
+/// MethodChannel for receiving session code from ChatActivity.
+const _chatChannel = MethodChannel('com.catchtales.catchtales/chat');
+
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
 
@@ -49,6 +57,16 @@ void main() async {
 
   // Initialize AI service (non-blocking)
   AIService.instance.init();
+
+  // Check if launched from ChatActivity (separate window)
+  try {
+    pendingChatSessionCode = await _chatChannel
+        .invokeMethod<String>('getSessionCode')
+        .timeout(const Duration(seconds: 2));
+  } catch (_) {
+    // Not launched from chat activity — normal start
+    pendingChatSessionCode = null;
+  }
 
   runApp(
     MultiProvider(

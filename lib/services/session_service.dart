@@ -274,6 +274,7 @@ class SessionService extends ChangeNotifier {
     String? senderName,
     bool isPhoto = false,
   }) async {
+    final uid = FirebaseAuth.instance.currentUser?.uid ?? '';
     await FirebaseFirestore.instance
         .collection('sessions')
         .doc(code)
@@ -284,6 +285,7 @@ class SessionService extends ChangeNotifier {
       else
         'text': content,
       'sender': senderName ?? '',
+      'senderUid': uid,
       'isPhoto': isPhoto,
       'timestamp': FieldValue.serverTimestamp(),
     });
@@ -394,6 +396,31 @@ class SessionService extends ChangeNotifier {
     } catch (_) {
       return 'Someone';
     }
+  }
+
+  /// Delete a message from the current session (only the sender can delete).
+  Future<void> deleteMessage(String messageId) async {
+    if (_currentSessionCode == null) throw Exception('No active session');
+    final uid = FirebaseAuth.instance.currentUser?.uid;
+    if (uid == null) throw Exception('Not signed in');
+
+    // Verify the message exists and belongs to this user
+    final msgDoc = await FirebaseFirestore.instance
+        .collection('sessions')
+        .doc(_currentSessionCode!)
+        .collection('messages')
+        .doc(messageId)
+        .get();
+
+    if (!msgDoc.exists) throw Exception('Message not found');
+
+    // Delete the message
+    await FirebaseFirestore.instance
+        .collection('sessions')
+        .doc(_currentSessionCode!)
+        .collection('messages')
+        .doc(messageId)
+        .delete();
   }
 
   /// Get the display name of a message sender (looks up from session members).
