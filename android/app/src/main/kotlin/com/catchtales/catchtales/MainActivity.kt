@@ -22,8 +22,9 @@ class MainActivity : FlutterActivity() {
                         if (code.isNotEmpty()) {
                             val intent = Intent(this, ChatActivity::class.java).apply {
                                 putExtra(ChatActivity.EXTRA_SESSION_CODE, code)
-                                // Start as a new task so it appears as a separate entry in recent apps
+                                // Start as a new document so it appears as a separate entry in recent apps
                                 flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_NEW_DOCUMENT
+                                addFlags(Intent.FLAG_ACTIVITY_MULTIPLE_TASK)
                             }
                             startActivity(intent)
                             result.success(true)

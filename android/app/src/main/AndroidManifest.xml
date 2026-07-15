@@ -33,8 +33,9 @@
         <activity
             android:name=".ChatActivity"
             android:exported="false"
-            android:launchMode="singleTask"
+            android:launchMode="standard"
             android:taskAffinity="com.catchtales.catchtales.chat"
+            android:documentLaunchMode="intoExisting"
             android:theme="@style/NormalTheme"
             android:configChanges="orientation|keyboardHidden|keyboard|screenSize|smallestScreenSize|locale|layoutDirection|fontScale|screenLayout|density|uiMode"
             android:hardwareAccelerated="true"
