@@ -23,6 +23,7 @@
 | **Trace the user's path** | When investigating a bug, start from where the user actually clicks, not where you assume they click. Read the page they're on. |
 | **Document solutions as rules** | When you solve a tricky problem (ADB, build issues, config, etc.), write the working procedure into this document immediately so it becomes the default method forever. |
 | **Keep the desktop note in sync** | Whenever `CODING_STANDARDS.md` is updated, also update `~/Desktop/CatchTales-Rules.txt` to match. The desktop note is the quick-reference version. |
+| **Follow existing patterns** | Before adding anything new, look at how similar things are done elsewhere on the site or in the code. Match the existing convention — don't invent new styles, formats, or structures unless there's a clear reason to break from the pattern. |
 
 ### 📋 Standards Check Cadence
 
