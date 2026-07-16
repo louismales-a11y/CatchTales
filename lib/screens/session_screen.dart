@@ -746,35 +746,25 @@ class _SessionDashboardState extends State<SessionDashboard>
       canPop: false,
       onPopInvokedWithResult: (didPop, _) async {
         if (didPop) return;
-        // Offer choices: stay, open in separate window, or go back
-        final result = await showDialog<String>(
+        // Confirm leaving the room
+        final result = await showDialog<bool>(
           context: context,
           builder: (ctx) => AlertDialog(
-            title: const Text('Chat Options'),
-            content: const Text(
-              'You can keep the chat open in a separate window '
-              'to easily switch between apps.',
-            ),
+            title: const Text('Leave Room?'),
+            content: const Text('You can rejoin anytime using the room code.'),
             actions: [
               TextButton(
-                onPressed: () => Navigator.pop(ctx, 'stay'),
+                onPressed: () => Navigator.pop(ctx, false),
                 child: const Text('Stay'),
               ),
-              FilledButton.icon(
-                onPressed: () => Navigator.pop(ctx, 'separate'),
-                icon: const Icon(Icons.open_in_new, size: 18),
-                label: const Text('Separate Window'),
-              ),
               TextButton(
-                onPressed: () => Navigator.pop(ctx, 'close'),
-                child: Text('Close', style: TextStyle(color: Colors.red.shade300)),
+                onPressed: () => Navigator.pop(ctx, true),
+                child: Text('Leave', style: TextStyle(color: Colors.red.shade300)),
               ),
             ],
           ),
         );
-        if (result == 'separate' && mounted) {
-          await _openInSeparateWindow();
-        } else if (result == 'close' && mounted) {
+        if (result == true && mounted) {
           _s.clearCurrentSession();
           Navigator.pop(context);
         }
@@ -803,6 +793,11 @@ class _SessionDashboardState extends State<SessionDashboard>
             },
           ),
           actions: [
+            IconButton(
+              icon: const Icon(Icons.open_in_new),
+              tooltip: 'Open as separate window',
+              onPressed: _openInSeparateWindow,
+            ),
             StreamBuilder<DocumentSnapshot>(
               stream: _s.sessionStreamFor(widget.code),
               builder: (ctx, snap) {
@@ -1062,6 +1057,7 @@ class _SessionDashboardState extends State<SessionDashboard>
     final members = _s.getMembersList(data);
     final ownerUid = data?['owner'] as String? ?? '';
     final uid = FirebaseAuth.instance.currentUser?.uid;
+    final amOwner = uid == ownerUid;
 
     showModalBottomSheet(
       context: context,
@@ -1097,6 +1093,7 @@ class _SessionDashboardState extends State<SessionDashboard>
                   final isOwner = entry.key == ownerUid;
                   final isMe = entry.key == uid;
                   final name = entry.value['name'] as String? ?? 'Unknown';
+                  final memberUid = entry.key;
                   return ListTile(
                     leading: CircleAvatar(
                       backgroundColor: isOwner
@@ -1140,7 +1137,42 @@ class _SessionDashboardState extends State<SessionDashboard>
                                   color: Colors.amber.shade800,
                                 )),
                           )
-                        : null,
+                        : amOwner
+                            ? PopupMenuButton<String>(
+                                icon: Icon(Icons.more_vert, size: 18, color: Colors.grey.shade400),
+                                onSelected: (v) async {
+                                  Navigator.pop(ctx); // Close members sheet
+                                  switch (v) {
+                                    case 'remove':
+                                      _confirmRemoveMember(memberUid, name);
+                                      break;
+                                    case 'report':
+                                      _reportUserDialog(memberUid, name);
+                                      break;
+                                  }
+                                },
+                                itemBuilder: (ctx) => [
+                                  const PopupMenuItem(
+                                    value: 'remove',
+                                    child: ListTile(
+                                      leading: Icon(Icons.exit_to_app, size: 20, color: Colors.red),
+                                      title: Text('Remove from Room', style: TextStyle(color: Colors.red, fontSize: 13)),
+                                      dense: true,
+                                      contentPadding: EdgeInsets.zero,
+                                    ),
+                                  ),
+                                  const PopupMenuItem(
+                                    value: 'report',
+                                    child: ListTile(
+                                      leading: Icon(Icons.flag, size: 20, color: Colors.orange),
+                                      title: Text('Report User', style: TextStyle(fontSize: 13)),
+                                      dense: true,
+                                      contentPadding: EdgeInsets.zero,
+                                    ),
+                                  ),
+                                ],
+                              )
+                            : null,
                   );
                 }),
               ],
@@ -1149,6 +1181,117 @@ class _SessionDashboardState extends State<SessionDashboard>
         );
       },
     );
+  }
+
+  Future<void> _confirmRemoveMember(String memberUid, String memberName) async {
+    final confirmed = await showDialog<bool>(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        title: const Text('Remove Member?'),
+        content: Text('Remove $memberName from this room? They can rejoin with the code.'),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(ctx, false),
+            child: const Text('Cancel'),
+          ),
+          FilledButton(
+            onPressed: () => Navigator.pop(ctx, true),
+            style: FilledButton.styleFrom(backgroundColor: Colors.red),
+            child: const Text('Remove'),
+          ),
+        ],
+      ),
+    );
+    if (confirmed == true && mounted) {
+      try {
+        await _s.removeMember(widget.code, memberUid);
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              behavior: SnackBarBehavior.floating,
+              content: Text('$memberName removed from room'),
+            ),
+          );
+        }
+      } catch (e) {
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              behavior: SnackBarBehavior.floating,
+              content: Text('Failed to remove: $e'),
+            ),
+          );
+        }
+      }
+    }
+  }
+
+  Future<void> _reportUserDialog(String memberUid, String memberName) async {
+    final reasonCtrl = TextEditingController();
+    final result = await showDialog<String>(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        title: Row(
+          children: [
+            const Icon(Icons.flag, size: 22, color: Colors.orange),
+            const SizedBox(width: 8),
+            Expanded(child: Text('Report $memberName')),
+          ],
+        ),
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            const Text(
+              'What is the reason for reporting this user?',
+              style: TextStyle(fontSize: 13),
+            ),
+            const SizedBox(height: 12),
+            TextField(
+              controller: reasonCtrl,
+              decoration: const InputDecoration(
+                hintText: 'Describe the issue...',
+                border: OutlineInputBorder(),
+              ),
+              maxLines: 3,
+            ),
+          ],
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(ctx, null),
+            child: const Text('Cancel'),
+          ),
+          FilledButton.icon(
+            onPressed: () => Navigator.pop(ctx, reasonCtrl.text.trim()),
+            icon: const Icon(Icons.send, size: 16),
+            label: const Text('Submit Report'),
+          ),
+        ],
+      ),
+    );
+
+    if (result != null && result.isNotEmpty && mounted) {
+      try {
+        await _s.reportUser(widget.code, memberUid, result);
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(
+              behavior: SnackBarBehavior.floating,
+              content: Text('Report submitted. We\'ll review it shortly.'),
+            ),
+          );
+        }
+      } catch (e) {
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              behavior: SnackBarBehavior.floating,
+              content: Text('Failed to submit report: $e'),
+            ),
+          );
+        }
+      }
+    }
   }
 }
 
@@ -1333,16 +1476,58 @@ class _MessageBubble extends StatelessWidget {
                           ),
                         if (isPhoto && photoUrl.isNotEmpty) ...[
                           const SizedBox(height: 4),
-                          GestureDetector(
-                            onTap: () => _viewPhoto(context, photoUrl),
-                            child: ClipRRect(
-                              borderRadius: BorderRadius.circular(10),
-                              child: SizedBox(
-                                width: 200,
-                                height: 200,
-                                child: _buildPhotoWidget(photoUrl, fit: BoxFit.cover),
+                          Stack(
+                            children: [
+                              GestureDetector(
+                                onTap: () => _viewPhoto(context, photoUrl),
+                                child: ClipRRect(
+                                  borderRadius: BorderRadius.circular(10),
+                                  child: SizedBox(
+                                    width: 200,
+                                    height: 200,
+                                    child: _buildPhotoWidget(photoUrl, fit: BoxFit.cover),
+                                  ),
+                                ),
                               ),
-                            ),
+                              if (canDelete)
+                                Positioned(
+                                  top: 4,
+                                  right: 4,
+                                  child: GestureDetector(
+                                    onTap: () async {
+                                      final confirmed = await showDialog<bool>(
+                                        context: context,
+                                        builder: (ctx) => AlertDialog(
+                                          title: const Text('Delete Photo?'),
+                                          content: const Text('This cannot be undone.'),
+                                          actions: [
+                                            TextButton(
+                                              onPressed: () => Navigator.pop(ctx, false),
+                                              child: const Text('Cancel'),
+                                            ),
+                                            FilledButton(
+                                              onPressed: () => Navigator.pop(ctx, true),
+                                              style: FilledButton.styleFrom(backgroundColor: Colors.red),
+                                              child: const Text('Delete'),
+                                            ),
+                                          ],
+                                        ),
+                                      );
+                                      if (confirmed == true) {
+                                        onDelete?.call(messageId);
+                                      }
+                                    },
+                                    child: Container(
+                                      padding: const EdgeInsets.all(4),
+                                      decoration: const BoxDecoration(
+                                        color: Colors.black54,
+                                        shape: BoxShape.circle,
+                                      ),
+                                      child: const Icon(Icons.close, size: 16, color: Colors.white),
+                                    ),
+                                  ),
+                                ),
+                            ],
                           ),
                           const SizedBox(height: 4),
                           if (text.isNotEmpty)

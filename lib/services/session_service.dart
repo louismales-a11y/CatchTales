@@ -59,7 +59,29 @@ class SessionService extends ChangeNotifier {
       if (roomDoc.exists) {
         _currentSessionCode = code;
         notifyListeners();
-        return roomDoc.data()!;
+
+        // Check if user is still a member — if not, re-add them
+        final roomData = roomDoc.data()!;
+        final members = roomData['members'] as Map<String, dynamic>? ?? {};
+        if (!members.containsKey(uid)) {
+          final displayName = userDoc.data()?['name'] as String? ??
+              FirebaseAuth.instance.currentUser?.displayName ??
+              'Angler ${uid.substring(0, 4)}';
+          await FirebaseFirestore.instance
+              .collection('sessions')
+              .doc(code)
+              .update({
+            'members.$uid': {
+              'name': displayName,
+              'joined_at': FieldValue.serverTimestamp(),
+              'isOwner': uid == roomData['owner'],
+            }
+          });
+          // Re-add to joined rooms list
+          await _addJoinedRoom(code);
+        }
+
+        return roomData;
       }
       // Room was deleted — fall through to create one
     }
@@ -438,5 +460,54 @@ class SessionService extends ChangeNotifier {
     } catch (_) {
       return senderUid;
     }
+  }
+
+  /// Remove a member from a session (owner only).
+  /// Posts a system message that the member was removed.
+  Future<void> removeMember(String code, String memberUid) async {
+    final uid = FirebaseAuth.instance.currentUser?.uid;
+    if (uid == null) throw Exception('Not signed in');
+
+    final doc = await FirebaseFirestore.instance
+        .collection('sessions')
+        .doc(code.toUpperCase())
+        .get();
+
+    if (doc.data()?['owner'] != uid) {
+      throw Exception('Only the room owner can remove members');
+    }
+
+    // Get the member's name for the system message
+    final members = doc.data()?['members'] as Map<String, dynamic>? ?? {};
+    final memberData = members[memberUid] as Map<String, dynamic>?;
+    final memberName = memberData?['name'] as String? ?? 'Someone';
+
+    await FirebaseFirestore.instance
+        .collection('sessions')
+        .doc(code.toUpperCase())
+        .update({
+      'members.$memberUid': FieldValue.delete(),
+    });
+
+    // Post system message
+    await _addMessage(code.toUpperCase(), '$memberName was removed from the room.');
+  }
+
+  /// Report a user in a session for abusive behavior.
+  /// Creates a report document in the reports collection for moderation.
+  Future<void> reportUser(String code, String reportedUid, String reason) async {
+    final uid = FirebaseAuth.instance.currentUser?.uid;
+    if (uid == null) throw Exception('Not signed in');
+
+    await FirebaseFirestore.instance
+        .collection('reports')
+        .add({
+      'sessionCode': code.toUpperCase(),
+      'reportedBy': uid,
+      'reportedUid': reportedUid,
+      'reason': reason,
+      'timestamp': FieldValue.serverTimestamp(),
+      'status': 'pending',
+    });
   }
 }

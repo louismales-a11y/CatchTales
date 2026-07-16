@@ -49,3 +49,20 @@ releases/
 releases/
 *.apk
 .flutter-plugins*
+
+# Build output files that were previously tracked
+classes*.dex
+resources.arsc
+*.so
+kotlin/
+assets/flutter_assets/
+*.bin
+*.Z
+*.prof
+*.profm
+META-INF/
+*.properties
+*.proto
+DebugProbesKt.bin
+AndroidManifest.xml
+kotlin-tooling-metadata.json
