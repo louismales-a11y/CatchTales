@@ -37,21 +37,23 @@
 
 ---
 
-## 1. Workspace & Version Sync
+## 1. Workspace — Single Codebase, Three Flavors
 
 | Rule | Details |
 |------|---------|
-| **Always work in `CatchTales-Dev`** | This is the only workspace. Dev version goes on Louis's phone. |
-| **Dev → Free + Pro** | After dev is complete and tested, derive Free and Pro versions from it. Never work on Free or Pro directly. |
-| **Sync versions across all three** | Dev, Free, and Pro must all be on the same version number. When bumping Dev, immediately bump Free and Pro to match. |
-| **Never commit to main without testing** | Dev build must be installed and verified on the physical phone first. |
+| **One source directory** | `~/CatchTales/` is the ONLY workspace. The old separate repos have been consolidated into one. |
+| **Build flavors** | `--dart-define=APP_VERSION=dev|free|pro` selects the flavor at build time. See §6 for commands. |
+| **Dev flavor** = everything unlocked + debug tools (for Louis's phone) |
+| **Free flavor** = `ProService` gates certain features (catch limit, tackle limit, fish ID limit) |
+| **Pro flavor** = all features unlocked, no dev tools |
+| **Never commit without testing** | Build must be installed and verified on the physical phone first. |
 
 ## 2. Versioning
 
 | Rule | Details |
 |------|---------|
 | **Every change bumps the version** | No exceptions. Even a one-line fix gets a version bump. |
-| **No duplicate version numbers** | Never ship two builds with the same version across dev/free/pro. |
+| **Single version number** | One `pubspec.yaml`, one version across all flavors. |
 | **Version format** | Follow `pubspec.yaml` semver (e.g., `2.14.30`). |
 | **Update `version.json`** | The website's `version.json` must match the app version. |
 
@@ -90,7 +92,7 @@ Every app change that affects users requires a website update:
 | **Direct downloads only** | Links must point directly to APK files (e.g., `/download/CatchTales-v2.14.29-dev.apk`) |
 | **No GitHub releases page** | Users should never see GitHub. The website is the sole distribution point. |
 | **Clean up old builds** | When deploying a new version, delete old APK files from `~/catchtales-site/download/` and any old build artifacts. No stale files to confuse future work. |
-| **Clean local releases/ folders too** | Old APKs in `~/CatchTales/releases/`, `~/CatchTales-Free/releases/`, and `~/CatchTales-Dev/releases/` must be deleted when deploying a new version. |
+| **Clean local releases/ folder** | Old APKs in `~/CatchTales/releases/` must be deleted when deploying a new version. |
 | **Clean build/ directories** | Run `flutter clean` periodically. Build artifacts can exceed 3GB per project and cause confusion. |
 | **Manage backups** | Keep backup APKs in one designated folder (e.g., `~/Desktop/apk backups/`). Name them clearly with version + flavor. Delete backups older than the latest version when new version ships. |
 | **Dev page has no download link** | The `/dev/` page on the website is intentionally internal-only. No download button for dev APKs. Users should never have access to dev builds. |
@@ -98,37 +100,46 @@ Every app change that affects users requires a website update:
 ## 6. Build & Release Workflow
 
 ```
-1. Make changes in CatchTales-Dev
-2. Bump version in pubspec.yaml (Dev, Free, and Pro all match)
+1. Make changes in ~/CatchTales/ (single source)
+2. Bump version in pubspec.yaml
 3. Update UX copy (What's New, Walkthrough, Help, Translations)
 4. Read version.json on website to confirm current live version
-5. Build dev APK (using build.sh or flutter build)
-6. Install on phone, test
+5. Build all three flavors:
+   flutter build apk --release --dart-define=APP_VERSION=dev
+   flutter build apk --release --dart-define=APP_VERSION=free
+   flutter build apk --release --dart-define=APP_VERSION=pro
+6. Install dev APK on phone, test
 7. If good:
    a. Delete old APK files from ~/catchtales-site/download/
-   b. Delete old APKs from local releases/ folders (all three repos)
-   c. Clean old backup APKs from ~/Desktop/apk backups/ (delete everything)
+   b. Delete old APKs from ~/CatchTales/releases/
+   c. Clean old backup APKs from ~/Desktop/apk backups/
    d. Copy latest APKs (dev, free, pro) into ~/Desktop/apk backups/
    e. Update website (version.json, download pages, features)
-   f. Build Free APK from dev (or derive via config)
-   g. Build Pro APK from dev (or derive via config)
-   h. Place new APKs in website download directory
-   i. Place new APKs in local releases/ folders
-   j. Push website changes (git add, commit, push → auto-deploys)
-8. Commit dev changes
+   f. Place new APKs in website download/ directory
+   g. Place new APKs in ~/CatchTales/releases/
+   h. Push website changes (git add, commit, push → auto-deploys)
+8. Commit and push code changes
 ```
 
 ## 6a. Build & ADB Troubleshooting
 
 > **Lesson learned July 16:** `build.sh` re-runs `flutter pub get` every time and timed out at 300s. Direct `flutter build` is faster.
 
-### Working build command (dev)
+### Working build commands
 ```bash
-cd ~/CatchTales-Dev
+cd ~/CatchTales
 export PATH="$HOME/bin:$HOME/flutter/bin:$JAVA_HOME/bin:$ANDROID_HOME/cmdline-tools/latest/bin:$ANDROID_HOME/platform-tools:$PATH"
 export JAVA_HOME="$HOME/jdk-17.0.12+7"
 export ANDROID_HOME="$HOME/android-sdk"
+
+# Build dev flavor (for Louis's phone)
 flutter build apk --release --dart-define=APP_VERSION=dev
+
+# Build free flavor (for website)
+flutter build apk --release --dart-define=APP_VERSION=free
+
+# Build pro flavor (for website)
+flutter build apk --release --dart-define=APP_VERSION=pro
 ```
 
 ### After deploying a new APK version — update ALL download links
@@ -182,7 +193,7 @@ Pushing is fast (~57MB/s via USB), then `pm install` completes in seconds. This 
 | **APK downloads** | `~/catchtales-site/download/` |
 | **APK backups** | `~/Desktop/apk backups/` |
 
-> ✅ **Consolidated July 16:** The old separate Dev, Free, and Pro directories have been merged into a single codebase at `~/CatchTales/`. Use `--dart-define=APP_VERSION=dev|free|pro` to build each flavor. The old `CatchTales-Dev`, `CatchTales-Free`, and `CatchTales` (bestfishbuddy) repos are archived.
+> ✅ **Consolidated July 16:** The old separate Dev, Free, and Pro directories have been merged into a single codebase at `~/CatchTales/`. Use `--dart-define=APP_VERSION=dev|free|pro` to build each flavor. The old `CatchTales-Dev` and `CatchTales-Free` repos have been **deleted** from GitHub. Only `CatchTales` (code) and `catchtales-site` (website) remain.
 
 ---
 
