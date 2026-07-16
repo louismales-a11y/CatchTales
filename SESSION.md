@@ -4,33 +4,41 @@
 
 ---
 
-## 2025-07-16 — Session 3
+## 2025-07-16 — Session 4 — Consolidation
 
 ### What we did
-- Added **boot user** and **report abuser** for room owners (members list ⋮ menu)
-- Fixed **"Create My Fishing Room"** bug after leaving a room (re-adds user as member)
-- Bumped version **2.14.31 → 2.14.32**
-- Built split APKs (armeabi-v7a 40MB, arm64-v8a 42MB, x86_64 43MB)
-- Updated website: new v2.14.32 free APK live on catchtales.com/free/
-- Removed `download` attribute from website APK links (caused issues on some browsers)
-- Documented ADB push+pm-install workaround in §6a
-- Helped troubleshoot Galaxy Tab S2 download issue — root cause was Samsung browser + unknown sources, fixed by using Chrome
+- **Consolidated** three separate repos (Dev, Free, Pro) into a **single codebase** at `~/CatchTales/`
+- Deleted `~/CatchTales-Dev/` and `~/CatchTales-Free/`
+- Branded everything as **CatchTales** — zero remaining "Best Fish Buddy" references
+- Cleaned up all tracked build artifacts (classes.dex, .so, META-INF, kotlin builtins, res/)
+- Updated `build.sh` to output flavor-specific APK names (`CatchTales-v{version}-{flavor}.apk`)
+- Updated `CODING_STANDARDS.md` for single-source workflow
+- Updated git remote to point to `louismales-a11y/CatchTales.git` (canonical repo)
+- Preserved `.env` with GEMINI_API_KEY and `functions/.env` with Stripe/email config
+
+### How to build
+```bash
+cd ~/CatchTales
+./build.sh dev    # dev flavor (unlocked + debug tools)
+./build.sh free   # free flavor (ProService gated)
+./build.sh pro    # pro flavor (all unlocked)
+# Or directly:
+flutter build apk --release --dart-define=APP_VERSION=dev
+flutter build apk --release --dart-define=APP_VERSION=free
+flutter build apk --release --dart-define=APP_VERSION=pro
+```
 
 ### What's in progress
-- None
+- Website pages still reference old v2.14.29 APKs (homepage, /free/, /pro/, /dev/)
+- Website `version.json` has stale pro/dev APK paths
+- Old v2.14.29 APKs in `~/catchtales-site/download/`, `~/CatchTales/releases/`, and `~/Desktop/apk backups/`
 
 ### Rules established this session
-- Added **ADB push workaround** to §6a: `adb push` then `adb shell pm install -r` for large APKs
-- Added ADB tip to desktop note
-- **Rule 0**: Added "Check ALL pages, not just one" — when user says "the website" has a broken link, search every page, not just the obvious one
-- **Rule 0**: Added "Trace the user's path" — start investigating from where the user actually clicks
-- **Section 6a**: Added checklist for deploying new APK version — must update homepage, /free/, /pro/, /dev/, and version.json simultaneously
-- Synced desktop note with new rules
+- **Single codebase rule**: Only one source directory (`~/CatchTales/`). No more syncing between three repos.
+- **Flavor rule**: `--dart-define=APP_VERSION=dev|free|pro` selects the flavor at build time.
+- **Branding resolved**: Pro directory was found to still have "bestfishbuddy" branding. Fixed by consolidation.
 
-### Lesson learned (the hard way)
-- User reported "download free failed" on "the website" — I assumed they meant the `/free/` page and spent hours debugging CDN caching, file sizes, Chrome Safe Browsing, etc.
-- The real issue: the **homepage** (`index.html`) still had the old download link pointing to a deleted APK file. One line fix once I actually checked the right page.
-
-### Cleanup done
-- Deleted old v2.14.29 free APK from website download/
-- Pushed cleanup commit to catchtales-site repo
+### Lessons learned
+- Pro directory (`~/CatchTales/`) was the original `bestfishbuddy` codebase that was never rebranded to CatchTales.
+- Having three separate directories guaranteed they'd diverge. Single source prevents this.
+- The Dev codebase already had the flavor infrastructure built in (`ApiConfig.appVersion`), just needed to be the single source.

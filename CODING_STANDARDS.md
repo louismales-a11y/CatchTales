@@ -176,14 +176,13 @@ Pushing is fast (~57MB/s via USB), then `pm install` completes in seconds. This 
 
 | What | Path |
 |------|------|
-| **Dev workspace** | `~/CatchTales-Dev/` |
-| **Pro version** | `~/CatchTales/` |
-| **Free version** | `~/CatchTales-Free/` |
+| **Single source of truth** | `~/CatchTales/` (remote: `louismales-a11y/CatchTales.git`) |
 | **Website** | `~/catchtales-site/` (remote: `louismales-a11y/catchtales-site.git`) — push to main auto-deploys to catchtales.com |
 | **Cloud dashboard source** | `~/catchtales_cloud/` |
 | **APK downloads** | `~/catchtales-site/download/` |
+| **APK backups** | `~/Desktop/apk backups/` |
 
-> ✅ **Resolved July 16:** The old `gh-pages` branch of `CatchTales` repo was retired. The website is now definitively the `catchtales-site` repo.
+> ✅ **Consolidated July 16:** The old separate Dev, Free, and Pro directories have been merged into a single codebase at `~/CatchTales/`. Use `--dart-define=APP_VERSION=dev|free|pro` to build each flavor. The old `CatchTales-Dev`, `CatchTales-Free`, and `CatchTales` (bestfishbuddy) repos are archived.
 
 ---
 
