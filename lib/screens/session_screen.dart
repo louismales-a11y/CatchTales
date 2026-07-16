@@ -831,7 +831,7 @@ class _SessionDashboardState extends State<SessionDashboard>
                         final confirmed = await showDialog<bool>(
                           context: context,
                           builder: (ctx) => AlertDialog(
-                            title: const Text('Clear All Messages?'),
+                            title: Text(tr('clearAllMessages')),
                             content: const Text('This will delete every message in this room for everyone. This cannot be undone.'),
                             actions: [
                               TextButton(
@@ -841,7 +841,7 @@ class _SessionDashboardState extends State<SessionDashboard>
                               FilledButton(
                                 onPressed: () => Navigator.pop(ctx, true),
                                 style: FilledButton.styleFrom(backgroundColor: Colors.red),
-                                child: const Text('Clear All'),
+                                child: Text(tr('clearAll')),
                               ),
                             ],
                           ),
@@ -851,10 +851,10 @@ class _SessionDashboardState extends State<SessionDashboard>
                             await _s.clearChat();
                             if (context.mounted) {
                               ScaffoldMessenger.of(context).showSnackBar(
-                                const SnackBar(
+                                SnackBar(
                                   behavior: SnackBarBehavior.floating,
-                                  content: Text('Chat cleared'),
-                                  duration: Duration(seconds: 2),
+                                  content: Text(tr('chatCleared')),
+                                  duration: const Duration(seconds: 2),
                                 ),
                               );
                             }
@@ -912,7 +912,7 @@ class _SessionDashboardState extends State<SessionDashboard>
                         value: 'clear_chat',
                         child: ListTile(
                           leading: Icon(Icons.delete_sweep, size: 20, color: Colors.orange.shade300),
-                          title: Text('Clear Chat', style: TextStyle(color: Colors.orange.shade300)),
+                          title: Text(tr('clearChat'), style: TextStyle(color: Colors.orange.shade300)),
                           dense: true,
                           contentPadding: EdgeInsets.zero,
                         ),

@@ -277,6 +277,8 @@ Map<String, _HelpEntry> get _helpEntries => <String, _HelpEntry>{
     body: tr('helpBodyCloudSync'),
     tips: 'Sync before switching devices. For sessions, share your code with a buddy '
         'and you\'re connected instantly — works across any distance! '
+        'Room owners can tap the people icon → Clear Chat to delete all messages. '
+        'Long-press any message (including system messages) to delete — owners can delete anything. '
         'Location sharing requires GPS permission.',
   ),
   'settings': _HelpEntry(

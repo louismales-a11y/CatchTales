@@ -334,6 +334,9 @@ class _SplashScreenState extends State<SplashScreen> {
             crossAxisAlignment: CrossAxisAlignment.start,
             mainAxisSize: MainAxisSize.min,
             children: [
+              _whatsNewItem('🧹 **Clear Chat** button for room owners — delete all messages at once'),
+              _whatsNewItem('👑 Room owners can now delete **any message** (including system messages), just long-press'),
+              _whatsNewItem('📋 System messages (joined/left/removed) now collapsed into compact lines — less clutter'),
               _whatsNewItem('🛡️ **Room owners** can now **remove members** and **report abusive users** from the members list'),
               _whatsNewItem('🔧 Fixed: "Create My Fishing Room" works after leaving a room'),
               _whatsNewItem('🗑️ **Delete photos** in Fishing Together rooms — tap the ✕ on your photos'),
