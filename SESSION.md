@@ -56,12 +56,14 @@ flutter build apk --release --dart-define=APP_VERSION=pro
 - **Added 6 new articles**: Kayak Fishing, Safety Tips, Fishing with Kids, Night Fishing, Fish Behavior, Ice Fishing Gear
 - **Updated standards** — added rules for: follow existing patterns, one tag per card, verify no blog duplicates, always use build.sh for production
 - **Deleted old GitHub repos** — CatchTales-Dev and CatchTales-Free removed from GitHub
+- **Room cleanup features** — Clear Chat button, owner can delete any message, system messages collapsed
+- **Built + installed v2.14.33** on phone (dev) and deployed to website (free + pro)
 
 ### Current state
 | Item | Value |
 |------|-------|
 | Source | `~/CatchTales/` (remote: `louismales-a11y/CatchTales.git`) |
-| Version | 2.14.32 |
+| Version | 2.14.33 |
 | Website | catchtales.com (remote: `louismales-a11y/catchtales-site.git`) |
 | APK downloads | `~/catchtales-site/download/` (3 flavors) |
 | APK backups | `~/Desktop/apk backups/` (3 flavors) |
