@@ -170,7 +170,15 @@ Pushing is fast (~57MB/s via USB), then `pm install` completes in seconds. This 
 - If deps are already resolved and you're testing only (no API keys needed), you can run `flutter build` directly
 - For production builds, always use `build.sh` — it injects API keys from pass. If it times out, increase the timeout or install deps first with `flutter pub get`
 
-## 6b. Cloud Dashboard — HTML Chrome Lives in Source Template
+## 6b. Blog Index — No Duplicates, Consistent Pattern
+
+| Rule | Details |
+|------|---------|
+| **Every blog card gets exactly one category tag** | The existing pattern is one tag per card (Bass Fishing, Fish ID, Game Fish, Gear, Locations, Panfish, Planning, Salmon & Trout, Tips & How-To). Never add multiple tags. |
+| **Verify no duplicates before adding** | When adding a new article to `blog/index.html`, search for its slug first. If it's already listed, don't add it again. |
+| **Check the full listing after any blog edit** | Run `grep -o 'href="/blog/[^"]*/"' blog/index.html \| sort \| uniq -d` to catch duplicates before committing. |
+
+## 6c. Cloud Dashboard — HTML Chrome Lives in Source Template
 
 | Rule | Details |
 |------|---------|
