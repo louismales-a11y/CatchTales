@@ -417,6 +417,7 @@ class _SessionDashboardState extends State<SessionDashboard>
   // Track last seen message timestamp for notification sounds
   Timestamp? _lastSeenTimestamp;
   bool _isAtBottom = true;
+  String _ownerUid = '';
   @override
   void initState() {
     super.initState();
@@ -808,7 +809,7 @@ class _SessionDashboardState extends State<SessionDashboard>
                     label: Text('${members.length}'),
                     child: const Icon(Icons.people),
                   ),
-                  onSelected: (v) {
+                  onSelected: (v) async {
                     switch (v) {
                       case 'members':
                         _showMembers(context, data);
@@ -826,50 +827,108 @@ class _SessionDashboardState extends State<SessionDashboard>
                       case 'open_in_new':
                         _openInSeparateWindow();
                         break;
+                      case 'clear_chat':
+                        final confirmed = await showDialog<bool>(
+                          context: context,
+                          builder: (ctx) => AlertDialog(
+                            title: const Text('Clear All Messages?'),
+                            content: const Text('This will delete every message in this room for everyone. This cannot be undone.'),
+                            actions: [
+                              TextButton(
+                                onPressed: () => Navigator.pop(ctx, false),
+                                child: const Text('Cancel'),
+                              ),
+                              FilledButton(
+                                onPressed: () => Navigator.pop(ctx, true),
+                                style: FilledButton.styleFrom(backgroundColor: Colors.red),
+                                child: const Text('Clear All'),
+                              ),
+                            ],
+                          ),
+                        );
+                        if (confirmed == true) {
+                          try {
+                            await _s.clearChat();
+                            if (context.mounted) {
+                              ScaffoldMessenger.of(context).showSnackBar(
+                                const SnackBar(
+                                  behavior: SnackBarBehavior.floating,
+                                  content: Text('Chat cleared'),
+                                  duration: Duration(seconds: 2),
+                                ),
+                              );
+                            }
+                          } catch (e) {
+                            if (context.mounted) {
+                              ScaffoldMessenger.of(context).showSnackBar(
+                                SnackBar(
+                                  behavior: SnackBarBehavior.floating,
+                                  content: Text('Failed to clear: $e'),
+                                  backgroundColor: Colors.red,
+                                ),
+                              );
+                            }
+                          }
+                        }
+                        break;
                       case 'leave':
                         _leave();
                         break;
                     }
                   },
-                  itemBuilder: (ctx) => [
-                    PopupMenuItem(
-                      value: 'members',
-                      child: ListTile(
-                        leading: const Icon(Icons.people, size: 20),
-                        title: Text('Members (${members.length})'),
-                        dense: true,
-                        contentPadding: EdgeInsets.zero,
+                  itemBuilder: (ctx) {
+                    final uid = FirebaseAuth.instance.currentUser?.uid;
+                    final ownerUid = data?['owner'] as String? ?? '';
+                    final amOwner = uid == ownerUid;
+                    return [
+                      PopupMenuItem(
+                        value: 'members',
+                        child: ListTile(
+                          leading: const Icon(Icons.people, size: 20),
+                          title: Text('Members (${members.length})'),
+                          dense: true,
+                          contentPadding: EdgeInsets.zero,
+                        ),
                       ),
-                    ),
-                    PopupMenuItem(
-                      value: 'copy_code',
-                      child: ListTile(
-                        leading: const Icon(Icons.copy, size: 20),
-                        title: const Text('Copy Room Code'),
-                        dense: true,
-                        contentPadding: EdgeInsets.zero,
+                      PopupMenuItem(
+                        value: 'copy_code',
+                        child: ListTile(
+                          leading: const Icon(Icons.copy, size: 20),
+                          title: const Text('Copy Room Code'),
+                          dense: true,
+                          contentPadding: EdgeInsets.zero,
+                        ),
                       ),
-                    ),
-                    PopupMenuItem(
-                      value: 'open_in_new',
-                      child: ListTile(
-                        leading: const Icon(Icons.open_in_new, size: 20),
-                        title: const Text('Open as Separate Window'),
-                        dense: true,
-                        contentPadding: EdgeInsets.zero,
+                      PopupMenuItem(
+                        value: 'open_in_new',
+                        child: ListTile(
+                          leading: const Icon(Icons.open_in_new, size: 20),
+                          title: const Text('Open as Separate Window'),
+                          dense: true,
+                          contentPadding: EdgeInsets.zero,
+                        ),
                       ),
-                    ),
-                    const PopupMenuDivider(),
-                    PopupMenuItem(
-                      value: 'leave',
-                      child: ListTile(
-                        leading: Icon(Icons.exit_to_app, size: 20, color: Colors.red.shade300),
-                        title: Text('Leave Room', style: TextStyle(color: Colors.red.shade300)),
-                        dense: true,
-                        contentPadding: EdgeInsets.zero,
+                      if (amOwner) PopupMenuItem(
+                        value: 'clear_chat',
+                        child: ListTile(
+                          leading: Icon(Icons.delete_sweep, size: 20, color: Colors.orange.shade300),
+                          title: Text('Clear Chat', style: TextStyle(color: Colors.orange.shade300)),
+                          dense: true,
+                          contentPadding: EdgeInsets.zero,
+                        ),
                       ),
-                    ),
-                  ],
+                      const PopupMenuDivider(),
+                      PopupMenuItem(
+                        value: 'leave',
+                        child: ListTile(
+                          leading: Icon(Icons.exit_to_app, size: 20, color: Colors.red.shade300),
+                          title: Text('Leave Room', style: TextStyle(color: Colors.red.shade300)),
+                          dense: true,
+                          contentPadding: EdgeInsets.zero,
+                        ),
+                      ),
+                    ];
+                  },
                 );
               },
             ),
@@ -883,6 +942,10 @@ class _SessionDashboardState extends State<SessionDashboard>
               builder: (ctx, snap) {
                 final data = snap.data?.data() as Map<String, dynamic>?;
                 final members = _s.getMembers(data);
+                // Keep owner UID in state for message deletion permissions
+                if (data != null && data['owner'] is String) {
+                  _ownerUid = data['owner'] as String;
+                }
                 return Container(
                   padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
                   color: theme.colorScheme.primary.withValues(alpha: 0.08),
@@ -972,6 +1035,7 @@ class _SessionDashboardState extends State<SessionDashboard>
                           isPhoto: isPhoto,
                           isCatch: isCatch,
                           isEmergency: isEmergency,
+                          ownerUid: _ownerUid,
                           onDelete: (id) => _deleteMessage(id),
                         );
                       },
@@ -1306,6 +1370,7 @@ class _MessageBubble extends StatelessWidget {
   final bool isPhoto;
   final bool isCatch;
   final bool isEmergency;
+  final String ownerUid;
   final void Function(String messageId)? onDelete;
 
   const _MessageBubble({
@@ -1317,6 +1382,7 @@ class _MessageBubble extends StatelessWidget {
     required this.isPhoto,
     required this.isCatch,
     required this.isEmergency,
+    required this.ownerUid,
     this.onDelete,
   });
 
@@ -1376,7 +1442,68 @@ class _MessageBubble extends StatelessWidget {
     final isSystem = sender.isEmpty;
     final theme = Theme.of(context);
     final currentUid = FirebaseAuth.instance.currentUser?.uid;
-    final canDelete = onDelete != null && senderUid.isNotEmpty && senderUid == currentUid;
+    final canDelete = onDelete != null && currentUid != null && (senderUid == currentUid || ownerUid == currentUid);
+
+    // System messages (joined/left/removed) are shown as compact, muted lines
+    if (isSystem) {
+      return GestureDetector(
+        onLongPress: canDelete
+            ? () async {
+                final confirmed = await showDialog<bool>(
+                  context: context,
+                  builder: (ctx) => AlertDialog(
+                    title: const Text('Delete System Message?'),
+                    content: const Text('This cannot be undone.'),
+                    actions: [
+                      TextButton(
+                        onPressed: () => Navigator.pop(ctx, false),
+                        child: const Text('Cancel'),
+                      ),
+                      TextButton(
+                        onPressed: () => Navigator.pop(ctx, true),
+                        child: Text('Delete', style: TextStyle(color: Colors.red.shade300)),
+                      ),
+                    ],
+                  ),
+                );
+                if (confirmed == true) {
+                  onDelete!(messageId);
+                }
+              }
+            : null,
+        child: Padding(
+          padding: const EdgeInsets.symmetric(vertical: 2),
+          child: Row(
+            children: [
+              Expanded(
+                child: Divider(
+                  color: Colors.grey.shade700.withValues(alpha: 0.2),
+                  height: 1,
+                ),
+              ),
+              Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 8),
+                child: Text(
+                  text,
+                  style: TextStyle(
+                    fontSize: 11,
+                    color: Colors.grey.shade500,
+                    fontStyle: FontStyle.italic,
+                  ),
+                  textAlign: TextAlign.center,
+                ),
+              ),
+              Expanded(
+                child: Divider(
+                  color: Colors.grey.shade700.withValues(alpha: 0.2),
+                  height: 1,
+                ),
+              ),
+            ],
+          ),
+        ),
+      );
+    }
 
     Color? bgColor;
     if (isEmergency) {

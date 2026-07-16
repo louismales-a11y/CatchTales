@@ -420,13 +420,47 @@ class SessionService extends ChangeNotifier {
     }
   }
 
-  /// Delete a message from the current session (only the sender can delete).
+  /// Clear all messages in the current session (owner only).
+  Future<void> clearChat() async {
+    if (_currentSessionCode == null) throw Exception('No active session');
+    final uid = FirebaseAuth.instance.currentUser?.uid;
+    if (uid == null) throw Exception('Not signed in');
+
+    // Verify the caller is the room owner
+    final roomDoc = await FirebaseFirestore.instance
+        .collection('sessions')
+        .doc(_currentSessionCode!)
+        .get();
+    if (roomDoc.data()?['owner'] != uid) {
+      throw Exception('Only the room owner can clear the chat');
+    }
+
+    // Delete all messages in the messages subcollection
+    final messages = await FirebaseFirestore.instance
+        .collection('sessions')
+        .doc(_currentSessionCode!)
+        .collection('messages')
+        .get();
+
+    final batch = FirebaseFirestore.instance.batch();
+    for (final doc in messages.docs) {
+      batch.delete(doc.reference);
+    }
+    await batch.commit();
+
+    // Post a system message that the chat was cleared
+    final name = await _getMyName();
+    await _addMessage(_currentSessionCode!, 'Chat cleared by $name.');
+  }
+
+  /// Delete a message from the current session.
+  /// Sender can delete their own messages. Room owner can delete any message.
   Future<void> deleteMessage(String messageId) async {
     if (_currentSessionCode == null) throw Exception('No active session');
     final uid = FirebaseAuth.instance.currentUser?.uid;
     if (uid == null) throw Exception('Not signed in');
 
-    // Verify the message exists and belongs to this user
+    // Verify the message exists
     final msgDoc = await FirebaseFirestore.instance
         .collection('sessions')
         .doc(_currentSessionCode!)
@@ -435,6 +469,21 @@ class SessionService extends ChangeNotifier {
         .get();
 
     if (!msgDoc.exists) throw Exception('Message not found');
+
+    // Check permissions: sender can delete own, owner can delete any
+    final msgData = msgDoc.data()!;
+    final msgSenderUid = msgData['senderUid'] as String? ?? '';
+    
+    // Check if current user is the room owner
+    final roomDoc = await FirebaseFirestore.instance
+        .collection('sessions')
+        .doc(_currentSessionCode!)
+        .get();
+    final isOwner = roomDoc.data()?['owner'] == uid;
+    
+    if (msgSenderUid != uid && !isOwner) {
+      throw Exception('You can only delete your own messages');
+    }
 
     // Delete the message
     await FirebaseFirestore.instance
