@@ -42,6 +42,8 @@ flutter build apk --release --dart-define=APP_VERSION=pro
   - Rebuilt Flutter web app and redeployed
 - Deleted old `CatchTales-Dev` and `CatchTales-Free` repos from GitHub
 - Cleaned temp files, old archives, build artifacts (~1.6GB recovered)
+- **Fixed weather forecast** — rebuilt dev APK with OpenWeatherMap API key injected
+- **ADB installed** v2.14.32-dev on Louis's phone (push+pm-install workaround)
 
 ### What's in progress
 - Nothing — session complete

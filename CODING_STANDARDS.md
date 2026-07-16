@@ -125,21 +125,19 @@ Every app change that affects users requires a website update:
 
 > **Lesson learned July 16:** `build.sh` re-runs `flutter pub get` every time and timed out at 300s. Direct `flutter build` is faster.
 
+### Build rules
+
+| Rule | Details |
+|------|---------|
+| **Always build via `build.sh` for production** | It reads API keys from `pass` (password-store) and injects them via `--dart-define`. Direct `flutter build` commands are for testing only and will produce APKs with broken API features (weather, maps, AI). |
+| **After every build: verify on a real device** | Install the APK via ADB (see workaround below if it times out) and confirm the feature you changed actually works before deploying. |
+
 ### Working build commands
 ```bash
 cd ~/CatchTales
-export PATH="$HOME/bin:$HOME/flutter/bin:$JAVA_HOME/bin:$ANDROID_HOME/cmdline-tools/latest/bin:$ANDROID_HOME/platform-tools:$PATH"
-export JAVA_HOME="$HOME/jdk-17.0.12+7"
-export ANDROID_HOME="$HOME/android-sdk"
-
-# Build dev flavor (for Louis's phone)
-flutter build apk --release --dart-define=APP_VERSION=dev
-
-# Build free flavor (for website)
-flutter build apk --release --dart-define=APP_VERSION=free
-
-# Build pro flavor (for website)
-flutter build apk --release --dart-define=APP_VERSION=pro
+./build.sh dev    # builds dev flavor with all API keys
+./build.sh free   # builds free flavor with all API keys
+./build.sh pro    # builds pro flavor with all API keys
 ```
 
 ### After deploying a new APK version — update ALL download links
@@ -169,8 +167,16 @@ Pushing is fast (~57MB/s via USB), then `pm install` completes in seconds. This 
 
 ### Why build.sh can stall
 - It runs `flutter pub get` every time (resolving all 40+ deps)
-- If deps are already resolved, skip the script and run `flutter build` directly
-- The script is still useful for API key injection via pass or .env; if you need keys, run the script with a longer timeout
+- If deps are already resolved and you're testing only (no API keys needed), you can run `flutter build` directly
+- For production builds, always use `build.sh` — it injects API keys from pass. If it times out, increase the timeout or install deps first with `flutter pub get`
+
+## 6b. Cloud Dashboard — HTML Chrome Lives in Source Template
+
+| Rule | Details |
+|------|---------|
+| **HTML chrome (header, nav, underwater background, fish) goes in `~/catchtales_cloud/web/index.html`** | This is the Flutter web app's source template. The built output (`build/web/index.html`) is regenerated from it. Any changes to the header, background, or nav MUST be made in the source template, not in the built output. |
+| **Verify chrome survives rebuild** | After every `flutter build web --base-href=/cloud/`, check that `build/web/index.html` still contains the `.site-header` and `.underwater-bg` elements before copying to `~/catchtales-site/cloud/`. |
+| **The deployed `~/catchtales-site/cloud/` is a copy of `build/web/`** | Never edit `~/catchtales-site/cloud/index.html` directly — it will be overwritten on the next rebuild. Always edit `~/catchtales_cloud/web/index.html` and rebuild. |
 
 ## 7. Code Conventions
 
@@ -194,6 +200,9 @@ Pushing is fast (~57MB/s via USB), then `pm install` completes in seconds. This 
 | **APK backups** | `~/Desktop/apk backups/` |
 
 > ✅ **Consolidated July 16:** The old separate Dev, Free, and Pro directories have been merged into a single codebase at `~/CatchTales/`. Use `--dart-define=APP_VERSION=dev|free|pro` to build each flavor. The old `CatchTales-Dev` and `CatchTales-Free` repos have been **deleted** from GitHub. Only `CatchTales` (code) and `catchtales-site` (website) remain.
+
+> ⚠️ **Lesson July 16:** Direct `flutter build` commands omit API keys → weather, maps, and AI features silently fail. Always use `build.sh` for production builds, and always verify on a real device after deploying.
+> ⚠️ **Lesson July 16:** The cloud dashboard's HTML chrome (header, background) was lost because it only existed in the built output. It now lives in the source template `~/catchtales_cloud/web/index.html` so it survives rebuilds.
 
 ---
 
