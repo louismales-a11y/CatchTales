@@ -66,3 +66,4 @@ META-INF/
 DebugProbesKt.bin
 AndroidManifest.xml
 kotlin-tooling-metadata.json
+res/
