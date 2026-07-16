@@ -32,6 +32,17 @@ flutter build apk --release --dart-define=APP_VERSION=free
 flutter build apk --release --dart-define=APP_VERSION=pro
 ```
 
+### What we also did (Session 4 continued)
+- Thorough audit: checked codebase, website, GitHub, filesystem, APKs, .env — all clean
+- Fixed `CODING_STANDARDS.md` sections 1, 2, 5, 6, 6a that still referenced old structure
+- Restored **fixed site header + underwater background** to cloud dashboard (`/cloud/`)
+  - Added to Flutter source template so it survives rebuilds
+  - Added transparent canvas CSS so HTML background shows through Flutter
+  - Added 56px top padding to login screen for fixed header
+  - Rebuilt Flutter web app and redeployed
+- Deleted old `CatchTales-Dev` and `CatchTales-Free` repos from GitHub
+- Cleaned temp files, old archives, build artifacts (~1.6GB recovered)
+
 ### What's in progress
 - Nothing — session complete
 
