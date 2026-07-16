@@ -48,10 +48,14 @@ flutter build apk --release --dart-define=APP_VERSION=pro
 ### What's in progress
 - Nothing — session complete
 
-### Rules established this session
-- **Single codebase**: `~/CatchTales/` is the ONLY source. Build flavors via `--dart-define=APP_VERSION=dev|free|pro`
-- **No more "Best Fish Buddy"**: Pro directory was fully replaced with branded code
-- **Old GitHub repos** (CatchTales-Dev, CatchTales-Free) should be archived on GitHub to prevent confusion
+### What we did in Session 5 (Website & Blog)
+- **Fixed cloud dashboard** — restored missing header + underwater background to `/cloud/`
+- **Rebuilt APKs with API keys** — weather, maps, and AI now work on all flavors
+- **New article: Fishing Knots Every Angler Should Know** — 12 knots with SVG diagrams + real YouTube videos
+- **Fixed blog index** — removed duplicate entries, fixed broken video embeds
+- **Added 6 new articles**: Kayak Fishing, Safety Tips, Fishing with Kids, Night Fishing, Fish Behavior, Ice Fishing Gear
+- **Updated standards** — added rules for: follow existing patterns, one tag per card, verify no blog duplicates, always use build.sh for production
+- **Deleted old GitHub repos** — CatchTales-Dev and CatchTales-Free removed from GitHub
 
 ### Current state
 | Item | Value |
