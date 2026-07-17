@@ -202,6 +202,18 @@ class ProService extends ChangeNotifier {
     }
     final formatted = 'PRO-${normalized.substring(0, 4)}-${normalized.substring(4, 8)}-${normalized.substring(8, 12)}';
 
+    // Check auth first — user must be signed in to activate
+    if (!AuthService.instance.isLoggedIn) {
+      if (!context.mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(behavior: SnackBarBehavior.floating,
+          content: Text('Please sign in or create an account first, then enter your code.'),
+          backgroundColor: Colors.orange,
+        ),
+      );
+      return;
+    }
+
     // Validate and get the license type
     final resultData = await instance._validateCode(formatted);
     if (!context.mounted) return;
