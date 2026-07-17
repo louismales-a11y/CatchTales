@@ -125,7 +125,7 @@ class _NewBragPostScreenState extends State<NewBragPostScreen> {
       setState(() => _uploading = false);
       if (id != null) {
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(behavior: SnackBarBehavior.floating, content: Text('Posted! 🎉'), backgroundColor: Colors.green),
+          const SnackBar(behavior: SnackBarBehavior.floating, content: Text('Posted!'), backgroundColor: Colors.green),
         );
         Navigator.pop(context);
       } else {
@@ -232,7 +232,7 @@ class _NewBragPostScreenState extends State<NewBragPostScreen> {
               icon: _uploading
                   ? const SizedBox(width: 20, height: 20, child: CircularProgressIndicator(strokeWidth: 2, color: Colors.white))
                   : const Icon(Icons.cloud_upload),
-              label: Text(_uploading ? 'Posting...' : '🐟 Post to Brag Board'),
+              label: Text(_uploading ? 'Posting...' : 'Post to Brag Board'),
               style: FilledButton.styleFrom(
                 shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
               ),

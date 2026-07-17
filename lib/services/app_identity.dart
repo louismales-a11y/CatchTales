@@ -16,5 +16,5 @@ class AppIdentity {
       'CatchTales — your hands-free fishing companion.\n'
       'Track catches by voice, snap selfies with your fish, '
       'and never lose a fishing memory.\n\n'
-      'Designed with ❤️ by Maison Louis Design';
+      'Designed by Maison Louis Design';
 }

@@ -132,7 +132,7 @@ class _AboutScreenState extends State<AboutScreen> {
                         : Icon(Icons.system_update_outlined, size: 18),
                     label: Text(
                       _checking ? 'Checking...' :
-                      _upToDate ? tr('upToDate') + ' ✓' :
+                      _upToDate ? tr('upToDate') :
                       tr('checkUpdate'),
                       style: const TextStyle(fontSize: 12),
                     ),

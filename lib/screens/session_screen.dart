@@ -603,7 +603,7 @@ class _SessionDashboardState extends State<SessionDashboard>
         ),
       );
       await _s.sendMessage(
-        '📍 My location: ${pos.latitude.toStringAsFixed(5)},${pos.longitude.toStringAsFixed(5)}',
+        'My location: ${pos.latitude.toStringAsFixed(5)},${pos.longitude.toStringAsFixed(5)}',
       );
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
@@ -663,12 +663,12 @@ class _SessionDashboardState extends State<SessionDashboard>
       );
       final lat = pos.latitude.toStringAsFixed(5);
       final lng = pos.longitude.toStringAsFixed(5);
-      await _s.sendMessage('🚨 EMERGENCY! I\'m at $lat,$lng — need help!');
+      await _s.sendMessage('EMERGENCY! I\'m at $lat,$lng — need help!');
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(
             behavior: SnackBarBehavior.floating,
-            content: Text('Emergency alert sent! 🚨'),
+            content: Text('Emergency alert sent!'),
           ),
         );
       }
@@ -721,7 +721,7 @@ class _SessionDashboardState extends State<SessionDashboard>
     final text = latest['text'] as String? ?? '';
 
     // Build notification body
-    final body = isPhoto ? '📷 $sender shared a photo' : text;
+    final body = isPhoto ? '$sender shared a photo' : text;
 
     // Play notification sound for new messages from others
     if (_lastSeenTimestamp != null &&
@@ -1022,8 +1022,8 @@ class _SessionDashboardState extends State<SessionDashboard>
                         final photoUrl = d['photoUrl'] as String? ?? '';
                         final sender = d['sender'] as String? ?? '';
                         final isPhoto = d['isPhoto'] == true;
-                        final isCatch = text.contains('🎣');
-                        final isEmergency = text.contains('🚨');
+                        final isCatch = text.contains('fish_icon');
+                        final isEmergency = text.contains('EMERGENCY');
                         final senderUid = d['senderUid'] as String? ?? '';
 
                         return _MessageBubble(

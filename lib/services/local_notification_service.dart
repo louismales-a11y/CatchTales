@@ -91,7 +91,7 @@ class LocalNotificationService {
 
     await _plugin.periodicallyShow(
       _reminderToLogId,
-      '🎣 Time to log your catches!',
+      'Time to log your catches!',
       'You had a fishing session today — tap to record your catches before you forget.',
       RepeatInterval.daily,
       details,
@@ -119,7 +119,7 @@ class LocalNotificationService {
 
     await _plugin.periodicallyShow(
       _solunarAlertId,
-      '🌙 Best Fishing Times Today',
+      'Best Fishing Times Today',
       'Check today\'s solunar periods for the best fishing. Major periods = peak action!',
       RepeatInterval.daily,
       details,

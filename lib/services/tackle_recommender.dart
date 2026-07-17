@@ -90,7 +90,7 @@ class TackleRecommender {
         name: item.name,
         type: item.type,
         photoPath: item.photoPath,
-        icon: typeInfo?.icon ?? '🎣',
+        icon: typeInfo?.icon ?? 'tackle',
         tips: item.tips,
         score: score,
         reasons: reasons,

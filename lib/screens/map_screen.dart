@@ -955,7 +955,7 @@ class MapScreenState extends State<MapScreen> {
     if (_loading) return const Center(child: CircularProgressIndicator());
 
     return Column(children: [
-      Container(height: 3, decoration: const BoxDecoration(gradient: LinearGradient(colors: [Color(0xFF00E5FF), Color(0xFF00B0FF)]))),
+      Container(height: 3, decoration: const BoxDecoration(color: Color(0xFF00BCD4))),
       if (_catchesWithLocation.isEmpty && _searchResults.isEmpty)
         Container(width: double.infinity, padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8), color: t.colorScheme.surface, child: Row(children: [
           Icon(Icons.info_outline, size: 16, color: t.colorScheme.primary), const SizedBox(width: 8),
@@ -1185,7 +1185,7 @@ class MapScreenState extends State<MapScreen> {
           Material(elevation: 4, borderRadius: BorderRadius.circular(28), color: t.colorScheme.surface, child: TextField(
             controller: _searchCtrl, focusNode: _focusNode, onSubmitted: _onSearchSubmit, textInputAction: TextInputAction.search,
             decoration: InputDecoration(
-              hintText: ProService.instance.isPro ? 'Search places...' : '🔒 Search places (Pro)', hintStyle: TextStyle(color: t.colorScheme.onSurface.withValues(alpha: 0.4)),
+              hintText: ProService.instance.isPro ? 'Search places...' : 'Search places (Pro)', hintStyle: TextStyle(color: t.colorScheme.onSurface.withValues(alpha: 0.4)),
               prefixIcon: _searching ? const Padding(padding: EdgeInsets.all(14), child: SizedBox(width: 18, height: 18, child: CircularProgressIndicator(strokeWidth: 2))) : Icon(Icons.search, color: t.colorScheme.primary),
               suffixIcon: _searchCtrl.text.isNotEmpty ? IconButton(icon: const Icon(Icons.clear, size: 20), onPressed: () { _searchCtrl.clear(); setState(() { _searchResults = []; _activeCategory = null; }); }) : null,
               border: OutlineInputBorder(borderRadius: BorderRadius.circular(28), borderSide: BorderSide.none), filled: false,
@@ -1198,7 +1198,7 @@ class MapScreenState extends State<MapScreen> {
             final isPro = ProService.instance.isPro;
             return Padding(padding: const EdgeInsets.only(right: 8), child: FilterChip(
               avatar: Icon(isPro ? cat.icon : Icons.lock, size: 16, color: active ? Colors.white : t.colorScheme.primary),
-              label: Text(isPro ? cat.label : '${cat.label} 🔒', style: TextStyle(fontSize: 13, color: active ? Colors.white : t.colorScheme.onSurface)),
+              label: Text(isPro ? cat.label : '\${cat.label} (Pro)', style: TextStyle(fontSize: 13, color: active ? Colors.white : t.colorScheme.onSurface)),
               selected: active, onSelected: (_) => _onCategoryTap(cat), selectedColor: t.colorScheme.primary, checkmarkColor: Colors.white,
               showCheckmark: false, backgroundColor: t.colorScheme.surface.withValues(alpha: 0.85), side: BorderSide.none,
               elevation: active ? 2 : 1, padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 0), materialTapTargetSize: MaterialTapTargetSize.shrinkWrap, visualDensity: VisualDensity.compact,

@@ -18,10 +18,10 @@ class BadgeService {
     final badges = <Badge>[];
 
     // First Catch
-    if (totalCatches >= 1) badges.add(Badge('🎣', 'First Catch!', 'You caught your first fish', true));
+    if (totalCatches >= 1) badges.add(Badge('first_catch', 'First Catch!', 'You caught your first fish', true));
 
     // Double Digits
-    if (totalCatches >= 10) badges.add(Badge('🔟', 'Double Digits', 'Caught 10 fish total', true));
+    if (totalCatches >= 10) badges.add(Badge('double_digits', 'Double Digits', 'Caught 10 fish total', true));
 
     // One-Trip Wonder
     final trips = <String>{};
@@ -29,29 +29,29 @@ class BadgeService {
       if (c.tripName != null && c.tripName!.isNotEmpty) trips.add(c.tripName!);
     }
     if (catches.length >= 5 && trips.isEmpty) {
-      badges.add(Badge('🏆', 'One-Trip Wonder', 'Caught 5+ fish in a single trip', true));
+      badges.add(Badge('one_trip', 'One-Trip Wonder', 'Caught 5+ fish in a single trip', true));
     }
 
     // Species Collector
-    if (speciesCount >= 3) badges.add(Badge('🐟', 'Species Collector', 'Caught 3 different species', true));
-    if (speciesCount >= 5) badges.add(Badge('🐠', 'Species Hunter', 'Caught 5 different species', true));
-    if (speciesCount >= 10) badges.add(Badge('🏅', 'Species Master', 'Caught 10 different species', true));
+    if (speciesCount >= 3) badges.add(Badge('species_collector', 'Species Collector', 'Caught 3 different species', true));
+    if (speciesCount >= 5) badges.add(Badge('species_hunter', 'Species Hunter', 'Caught 5 different species', true));
+    if (speciesCount >= 10) badges.add(Badge('species_master', 'Species Master', 'Caught 10 different species', true));
 
     // Master Angler
-    if (totalCatches >= 25) badges.add(Badge('⭐', 'Master Angler', 'Caught 25 fish total', true));
-    if (totalCatches >= 100) badges.add(Badge('👑', 'Legendary Angler', 'Caught 100 fish total', true));
+    if (totalCatches >= 25) badges.add(Badge('master_angler', 'Master Angler', 'Caught 25 fish total', true));
+    if (totalCatches >= 100) badges.add(Badge('legendary', 'Legendary Angler', 'Caught 100 fish total', true));
 
     // Big Catch
     if (biggest != null && biggest.weight != null && biggest.weight! >= 5) {
-      badges.add(Badge('📏', 'Big Catch!', 'Caught a 5kg+ fish', true));
+      badges.add(Badge('big_catch', 'Big Catch!', 'Caught a 5kg+ fish', true));
     }
     if (biggest != null && biggest.weight != null && biggest.weight! >= 10) {
-      badges.add(Badge('🐋', 'Monster Catch!', 'Caught a 10kg+ fish', true));
+      badges.add(Badge('monster_catch', 'Monster Catch!', 'Caught a 10kg+ fish', true));
     }
 
     // Top Rod
     if (topAnglers.isNotEmpty) {
-      badges.add(Badge('🎯', 'Top Rod', 'Leading the leaderboard', true));
+      badges.add(Badge('top_rod', 'Top Rod', 'Leading the leaderboard', true));
     }
 
     return badges;

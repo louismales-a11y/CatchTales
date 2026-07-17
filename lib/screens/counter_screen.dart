@@ -98,7 +98,7 @@ class _CounterScreenState extends State<CounterScreen> {
         String status = '';
         bool isWaked = false;
 
-        // 🥇 Check for pending tally FIRST (yes/no response to "Record this fish?")
+        // 1. Check for pending tally FIRST (yes/no response to "Record this fish?")
         // This takes priority over everything else.
         if (_pendingCount > 0) {
           final t = text.trim().toLowerCase();
@@ -106,7 +106,7 @@ class _CounterScreenState extends State<CounterScreen> {
           if (t.contains('caught') && RegExp(r'caught\s+\S{3,}').hasMatch(t)) {
             _pendingCount = 0; // clear pending
             isWaked = true;
-            status = ' (⚙️ processing!)';
+            status = ' (processing!)';
             _lastCommand = text;
             _parseCommand(text);
             setState(() => _liveTranscription = text + status);
@@ -117,7 +117,7 @@ class _CounterScreenState extends State<CounterScreen> {
               t == 'keep going' || t == 'next fish') {
             // Explicit "no" → clear pending, stay on counter
             _pendingCount = 0;
-            status = ' ✅ Just tally';
+            status = ' Just tally';
             isWaked = true;
           } else if (t == 'yes' || t == 'yeah' || t == 'yep' || t == 'yup' ||
                      t == 'sure' || t == 'ok' || t == 'okay' ||
@@ -133,17 +133,17 @@ class _CounterScreenState extends State<CounterScreen> {
           // Anything else → ignore, stay pending
         }
 
-        // 🥈 Check for wake word
+        // 2. Check for wake word
         if (text.contains('fish') && text.contains('buddy')) {
           _wakeAt = DateTime.now();
           isWaked = true;
-          status = ' (🎤 wake!)';
+          status = ' (wake!)';
         }
-        // 🥉 Check if we're within 5s wake window
+        // 3. Check if we're within 5s wake window
         if (!isWaked && _wakeAt != null &&
             DateTime.now().difference(_wakeAt!) < const Duration(seconds: 5)) {
           isWaked = true;
-          status = ' (🎤 +5s)';
+          status = ' (+5s)';
         }
 
         if (isWaked && text.contains('caught')) {
@@ -156,7 +156,7 @@ class _CounterScreenState extends State<CounterScreen> {
           if (!hasSpecies) {
             status = ' (⏳ waiting for species)';
           } else {
-            status = ' (⚙️ processing!)';
+            status = ' (processing!)';
             _lastCommand = text;
             _parseCommand(text);
           }
@@ -203,7 +203,7 @@ class _CounterScreenState extends State<CounterScreen> {
     if (!mounted) return;
     await _load();
     if (voiceName != null) {
-      _showVoiceFeedback('✅ Added angler: $name — now say "fish buddy $name caught a pike"');
+      _showVoiceFeedback('Added angler: $name — now say "fish buddy $name caught a pike"');
     }
   }
 
@@ -421,7 +421,7 @@ class _CounterScreenState extends State<CounterScreen> {
           return;
         }
         // Anything else → just tally
-        setState(() => _liveTranscription = '✅ Just tally — ready for next fish');
+        setState(() => _liveTranscription = 'Just tally — ready for next fish');
         return; // always return — don't reprocess as a fish command
       }
     }
@@ -653,7 +653,7 @@ class _CounterScreenState extends State<CounterScreen> {
     if (_isListening) {
       if (hasAnglers) {
         return Text(
-          '🎤 Mic active — say "fish buddy [name] caught a [species]"',
+          'Mic active — say "fish buddy [name] caught a [species]"',
           style: TextStyle(
             fontSize: 12,
             color: theme.colorScheme.primary,
@@ -663,7 +663,7 @@ class _CounterScreenState extends State<CounterScreen> {
         );
       } else {
         return Text(
-          '🎤 Mic active — add an angler first, then say "fish buddy [name] caught a [species]"',
+          'Mic active — add an angler first, then say "fish buddy [name] caught a [species]"',
           style: TextStyle(
             fontSize: 12,
             color: theme.colorScheme.primary,
@@ -680,7 +680,7 @@ class _CounterScreenState extends State<CounterScreen> {
         children: [
           Flexible(
             child: Text(
-              '🗣️ "$_lastCommand"',
+              '"$_lastCommand"',
               style: TextStyle(
                 fontSize: 12,
                 color: theme.colorScheme.onSurface.withValues(alpha: 0.5),
@@ -704,7 +704,7 @@ class _CounterScreenState extends State<CounterScreen> {
 
     if (hasAnglers) {
       return Text(
-        '🎤 Say "fish buddy [name] caught [species]" — tap mic to start',
+        'Say "fish buddy [name] caught [species]" — tap mic to start',
         style: TextStyle(
           fontSize: 12,
           color: theme.colorScheme.onSurface.withValues(alpha: 0.5),
@@ -715,7 +715,7 @@ class _CounterScreenState extends State<CounterScreen> {
     }
 
     return Text(
-      '🎤 Tap mic, add anglers with "fish buddy add [name]", then record catches!',
+      'Tap mic, add anglers with "fish buddy add [name]", then record catches!',
       style: TextStyle(
         fontSize: 12,
         color: theme.colorScheme.onSurface.withValues(alpha: 0.5),
@@ -752,7 +752,7 @@ class _CounterScreenState extends State<CounterScreen> {
     _pendingSpecies = species;
     _pendingCount = count;
     setState(() {
-      _liveTranscription = '✅ Tally: $angler +$count $species — Record this fish? Say yes or no';
+      _liveTranscription = 'Tally: $angler +$count $species — Record this fish? Say yes or no';
     });
 
     for (int i = 0; i < count; i++) {
@@ -818,9 +818,7 @@ class _CounterScreenState extends State<CounterScreen> {
               Container(
                 height: 3,
                 decoration: const BoxDecoration(
-                  gradient: LinearGradient(
-                    colors: [Colors.cyan, Colors.cyanAccent],
-                  ),
+                  color: Colors.cyan,
                 ),
               ),
               // Header row
@@ -925,7 +923,7 @@ class _CounterScreenState extends State<CounterScreen> {
                       Padding(
                         padding: const EdgeInsets.only(top: 4),
                         child: Text(
-                          '🔊 "$_liveTranscription"',
+                          '"$_liveTranscription"',
                           style: TextStyle(
                             fontSize: 11,
                             color: theme.colorScheme.primary,
@@ -944,12 +942,7 @@ class _CounterScreenState extends State<CounterScreen> {
                   width: double.infinity,
                   padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
                   decoration: BoxDecoration(
-                    gradient: LinearGradient(
-                      colors: [
-                        theme.colorScheme.primary.withValues(alpha: 0.15),
-                        theme.colorScheme.secondary.withValues(alpha: 0.08),
-                      ],
-                    ),
+                    color: theme.colorScheme.primary.withValues(alpha: 0.15),
                     border: Border(
                       top: BorderSide(color: theme.colorScheme.primary.withValues(alpha: 0.3)),
                       bottom: BorderSide(color: theme.colorScheme.primary.withValues(alpha: 0.3)),

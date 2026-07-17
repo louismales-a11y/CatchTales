@@ -107,9 +107,7 @@ class CatchesScreenState extends State<CatchesScreen> {
           Container(
             height: 3,
             decoration: const BoxDecoration(
-              gradient: LinearGradient(
-                colors: [Colors.green, Colors.greenAccent],
-              ),
+              color: Colors.green,
             ),
           ),
           Expanded(
@@ -128,9 +126,7 @@ class CatchesScreenState extends State<CatchesScreen> {
         Container(
           height: 3,
           decoration: const BoxDecoration(
-            gradient: LinearGradient(
-              colors: [Colors.green, Colors.greenAccent],
-            ),
+            color: Colors.green,
           ),
         ),
         // Error banner
@@ -170,7 +166,7 @@ class CatchesScreenState extends State<CatchesScreen> {
                 const SizedBox(width: 8),
                 Expanded(
                   child: Text(
-                    'Enjoying CatchTales? Rate us! ⭐',
+                    'Enjoying CatchTales? Rate us!',
                     style: const TextStyle(fontSize: 13,
                         fontWeight: FontWeight.w500),
                   ),
@@ -337,7 +333,7 @@ class CatchesScreenState extends State<CatchesScreen> {
                                         ],
                                       ),
                                       const SizedBox(height: 2),
-                                      Text('📍 Lake Michigan',
+                                      Text('Lake Michigan',
                                           style: const TextStyle(
                                               color: Colors.white70,
                                               fontSize: 11)),
@@ -476,7 +472,7 @@ class CatchesScreenState extends State<CatchesScreen> {
         final t = result.recognizedWords.toLowerCase().trim();
         if (t == _lastVoiceText) return;
         _lastVoiceText = t;
-        setState(() => _voiceStatus = '🎤 "$t"');
+        setState(() => _voiceStatus = '"$t"');
         if (!t.contains('caught')) return;
         final words = t.split(RegExp(r'\s+'));
         final idx = words.indexWhere((w) => w == 'caught');
@@ -501,7 +497,7 @@ class CatchesScreenState extends State<CatchesScreen> {
             species = w;
           }
         }
-        _voiceStatus = '🎤 Opening form for $name - $species';
+        _voiceStatus = 'Opening form for $name - $species';
         Navigator.of(context).push(
           MaterialPageRoute(
             builder: (_) => AddCatchScreen(
@@ -582,7 +578,7 @@ class CatchesScreenState extends State<CatchesScreen> {
 
       // ignore: deprecated_member_use
       await Share.shareXFiles([XFile(file.path)],
-          text: '${c.species} caught by ${c.angler}! 🎣'
+          text: '${c.species} caught by ${c.angler}!'
               '${c.weight != null ? ' - ${c.weightDisplay}' : ''}'
               '${c.length != null ? ' - ${c.lengthDisplay}' : ''}'
               '${c.location.isNotEmpty ? ' at ${c.location}' : ''}');

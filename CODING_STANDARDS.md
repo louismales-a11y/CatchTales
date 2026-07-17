@@ -79,7 +79,8 @@ Every app change that affects users requires a website update:
 | What on the website | Details |
 |--------------------|---------|
 | **`version.json`** | Update version number and APK download paths |
-| **Download pages** | `/dev/`, `/free/`, `/pro/` — update APK links and feature lists |
+| **All version strings** | Update the version number on EVERY page that mentions it: `/index.html`, `/dev/`, `/free/`, `/pro/`, `/version.json`, and any feature pages. A single missed page means a broken download link. |
+| **Verification** | Before pushing, grep for the OLD version string to catch stale references: `grep -rn 'OLD_VERSION' --include='*.html' --include='*.json' ~/catchtales-site/` — every match must be updated or confirmed intentional. |
 | **Feature descriptions** | `/features/` — if the change adds/removes/modifies a feature |
 | **Blog** | `/blog/` — consider a blog post for major releases |
 | **WhatsApp/auto-update** | The app reads `version.json` to prompt updates — keep it in sync |
@@ -116,9 +117,10 @@ Every app change that affects users requires a website update:
    c. Clean old backup APKs from ~/Desktop/apk backups/
    d. Copy latest APKs (dev, free, pro) into ~/Desktop/apk backups/
    e. Update website (version.json, download pages, features)
-   f. Place new APKs in website download/ directory
-   g. Place new APKs in ~/CatchTales/releases/
-   h. Push website changes (git add, commit, push → auto-deploys)
+   f. **Verify** — `grep -rn 'OLD_VERSION' --include='*.html' --include='*.json' ~/catchtales-site/` — confirm zero stale references remain before proceeding
+   g. Place new APKs in website download/ directory
+   h. Place new APKs in ~/CatchTales/releases/
+   i. Push website changes (git add, commit, push → auto-deploys)
 8. Commit and push code changes
 ```
 

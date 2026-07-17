@@ -181,7 +181,7 @@ class ProService extends ChangeNotifier {
       await instance.unlockPro();
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(behavior: SnackBarBehavior.floating, 
-          content: Text('Pro unlocked! Thank you for your support! 🎉'),
+          content: Text('Pro unlocked! Thank you for your support!'),
           backgroundColor: Colors.green,
         ),
       );

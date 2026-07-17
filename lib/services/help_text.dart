@@ -285,16 +285,16 @@ Map<String, _HelpEntry> get _helpEntries => <String, _HelpEntry>{
     icon: Icons.settings_outlined,
     title: 'Settings',
     body: 'The Settings screen lets you manage your account, notifications, data, and preferences.\n\n'
-        '📢 **Push Notifications** — Enable to receive weather alerts, best fishing time reminders, '
+        ' **Push Notifications** — Enable to receive weather alerts, best fishing time reminders, '
         'and Fish Together activity notifications.\n\n'
         '⏰ **Reminder Settings** — Schedule daily reminders to log your catches at 7 PM, '
         'or get a morning solunar alert at 6 AM with the best fishing times for the day.\n\n'
-        '📤 **Export Data** — Export your catches as CSV (spreadsheets), JSON (backup), '
+        ' **Export Data** — Export your catches as CSV (spreadsheets), JSON (backup), '
         'or KML (Google Earth) to share or back up your data.\n\n'
-        '📶 **WiFi-only Mode** — Toggle this on to only allow data transfers (cloud sync, '
+        ' **WiFi-only Mode** — Toggle this on to only allow data transfers (cloud sync, '
         'weather updates, map downloads) over WiFi, saving your mobile data.\n\n'
-        '🚪 **Log Out** — Sign out of your account. You can log back in anytime.\n\n'
-        '🗑️ **Delete Account** — Permanently delete your account and all your data. '
+        ' **Log Out** — Sign out of your account. You can log back in anytime.\n\n'
+        '️ **Delete Account** — Permanently delete your account and all your data. '
         'For security, you may need to log out and log back in before deleting.',
     tips: 'WiFi-only mode is great for saving mobile data when you\'re out on the water! '
         'Cloud sync will queue until you\'re back on WiFi.',
@@ -303,17 +303,17 @@ Map<String, _HelpEntry> get _helpEntries => <String, _HelpEntry>{
     icon: Icons.phonelink_setup,
     title: 'Hands-Free Setup',
     body: 'Get the most out of voice controls and the selfie camera by setting up your device thoughtfully.\n\n'
-        '📱 **Easy Reach**\n'
+        ' **Easy Reach**\n'
         'Place your phone where you can reach it while holding a catch — within arm\'s length. '
         'You should be able to tap the screen or speak a command without putting down your rod.\n\n'
-        '📸 **Camera Aim**\n'
+        ' **Camera Aim**\n'
         'Point the camera at the spot where you\'ll hold up fish for photos. '
         'Test the angle: when you hold a catch up, the camera should see both you and the fish. '
         'Adjust the phone\'s tilt so it\'s not shooting up your nose or pointing at the sky.\n\n'
-        '🎤 **Voice Pickup**\n'
+        ' **Voice Pickup**\n'
         'Make sure the phone can hear you over wind, waves, engine noise, or auger. '
         'Say \"record\" from your fishing position — if it doesn\'t respond, move the phone closer.\n\n'
-        '🎯 **Test Before You Fish**\n'
+        ' **Test Before You Fish**\n'
         'Try different locations before you start:\n'
         '  • On a boat — dash, console, cupholder, or a RAM mount\n'
         '  • Ice fishing — on the shelter bench, a bucket, or hung from a string\n'
@@ -333,21 +333,21 @@ Map<String, _HelpEntry> get _helpEntries => <String, _HelpEntry>{
     icon: Icons.file_download,
     title: 'Export & Import Data',
     body: 'Export your catches as CSV, JSON, or KML files.\n\n'
-        '📊 **CSV (Excel/Sheets)**\n'
+        ' **CSV (Excel/Sheets)**\n'
         'Opens in any spreadsheet app. All fields included: species, weight, length, '
         'GPS coordinates, weather, notes, and more.\n'
         '• Use when: You want to analyze your data, sort by species, '
         'or create custom reports in Excel or Google Sheets.\n\n'
-        '💾 **JSON (Backup)**\n'
+        ' **JSON (Backup)**\n'
         'Raw structured data — perfect for backups or transferring to another app.\n'
         '• Use when: You want a complete backup of all your catches, '
         'or plan to import them into another system.\n\n'
-        '🌍 **KML (Google Earth)**\n'
+        ' **KML (Google Earth)**\n'
         'GPS coordinates formatted for Google Earth. See all your catch locations on a map.\n'
         '• Only includes catches with GPS coordinates.\n'
         '• Use when: You want to visualize where you\'ve been fishing, '
         'plan trips around productive spots, or share locations with friends.\n\n'
-        '📅 **Date Range Filter**\n'
+        ' **Date Range Filter**\n'
         'Filter by date range to export only specific trips or time periods.\n'
         'Useful for sharing a single trip\'s data or creating end-of-season reports.',
   ),
@@ -366,16 +366,16 @@ Map<String, _HelpEntry> get _helpEntries => <String, _HelpEntry>{
   ),
   'brag_board': _HelpEntry(
     icon: Icons.emoji_events,
-    title: '🏆 Brag Board',
+    title: ' Brag Board',
     body: 'Share your catches with the CatchTales community!\n\n'
-        '📸 **Post a Catch** — Tap the camera icon to add a photo, species, location, '
+        ' **Post a Catch** — Tap the camera icon to add a photo, species, location, '
         'and more info. You can crop the photo to remove unwanted background.\n\n'
-        '❤️ **Like & Comment** — Tap a post to open details, then like or comment. '
+        '️ **Like & Comment** — Tap a post to open details, then like or comment. '
         'Reply to comments by tapping "Reply".\n\n'
-        '🔥 **Trending** — Toggle between Latest and Hot to see the most engaged posts.\n\n'
-        '🏅 **Species Badges** — Rare or trophy fish get special badges like 👑 Trophy or 🦕 Ancient.\n\n'
-        '📤 **Share** — Open a post and tap the share icon to share it outside the app.\n\n'
-        '🚩 **Report** — Long-press a post or use the menu to report inappropriate content.',
+        ' **Trending** — Toggle between Latest and Hot to see the most engaged posts.\n\n'
+        ' **Species Badges** — Rare or trophy fish get special badges like  Trophy or  Ancient.\n\n'
+        ' **Share** — Open a post and tap the share icon to share it outside the app.\n\n'
+        ' **Report** — Long-press a post or use the menu to report inappropriate content.',
     tips: 'Be respectful! The brag board is a community space. '
         'Report any content that violates fishing etiquette or is inappropriate.',
   ),

@@ -324,7 +324,7 @@ class SessionService extends ChangeNotifier {
     final name = await _getMyName();
     await _addMessage(
       _currentSessionCode!,
-      '🎣 $name caught a $species'
+      '$name caught a $species'
           '${weight != null ? " (${weight}kg)" : ""}'
           '${location != null ? " at $location" : ""}',
     );

@@ -173,11 +173,11 @@ class _FishIdScreenState extends State<FishIdScreen> {
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(ctx, ImageSource.camera),
-            child: const Text('📷 Camera'),
+            child: const Text('Camera'),
           ),
           TextButton(
             onPressed: () => Navigator.pop(ctx, ImageSource.gallery),
-            child: const Text('🖼️ Gallery'),
+            child: const Text('Gallery'),
           ),
           TextButton(
             onPressed: () => Navigator.pop(ctx),
@@ -352,8 +352,8 @@ class _FishIdScreenState extends State<FishIdScreen> {
               width: double.infinity,
               child: SegmentedButton<String>(
                 segments: const [
-                  ButtonSegment(value: 'Freshwater', label: Text('🌊 Freshwater'), icon: Icon(Icons.water_drop, size: 16)),
-                  ButtonSegment(value: 'Saltwater', label: Text('🌎 Saltwater'), icon: Icon(Icons.waves, size: 16)),
+                  ButtonSegment(value: 'Freshwater', label: Text('Freshwater'), icon: Icon(Icons.water_drop, size: 16)),
+                  ButtonSegment(value: 'Saltwater', label: Text('Saltwater'), icon: Icon(Icons.waves, size: 16)),
                 ],
                 selected: {_selectedWater},
                 onSelectionChanged: (v) => setState(() => _selectedWater = v.first),
@@ -1066,14 +1066,7 @@ Widget _imageFallback(FishSpecies fish) {
   return Container(
     height: 180,
     decoration: BoxDecoration(
-      gradient: LinearGradient(
-        colors: [
-          fish.color.withValues(alpha: 0.2),
-          fish.color.withValues(alpha: 0.05),
-        ],
-        begin: Alignment.topLeft,
-        end: Alignment.bottomRight,
-      ),
+      color: fish.color.withValues(alpha: 0.2),
       borderRadius: BorderRadius.circular(20),
     ),
     child: Center(

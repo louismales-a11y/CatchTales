@@ -151,11 +151,7 @@ class _PhotoThumbState extends State<_PhotoThumb> {
                 padding:
                     const EdgeInsets.symmetric(horizontal: 6, vertical: 4),
                 decoration: const BoxDecoration(
-                  gradient: LinearGradient(
-                    begin: Alignment.bottomCenter,
-                    end: Alignment.topCenter,
-                    colors: [Colors.black54, Colors.transparent],
-                  ),
+                  color: Colors.black54,
                 ),
                 child: Text(
                   widget.catch_.species,
@@ -311,7 +307,7 @@ class _PhotoPage extends StatelessWidget {
                     '${catch_.angler}  •  ${DateFormat('MMM d, yyyy  h:mm a').format(catch_.caughtAt)}',
                     style: textStyle),
                 if (catch_.location.isNotEmpty)
-                  Text('📍 ${catch_.location}', style: textStyle),
+                  Text('${catch_.location}', style: textStyle),
                 if (catch_.weightDisplay.isNotEmpty ||
                     catch_.lengthDisplay.isNotEmpty)
                   Padding(
@@ -319,13 +315,13 @@ class _PhotoPage extends StatelessWidget {
                     child: Row(
                       children: [
                         if (catch_.weightDisplay.isNotEmpty)
-                          Text('⚖️ ${catch_.weightDisplay}',
+                          Text('${catch_.weightDisplay}',
                               style: textStyle),
                         if (catch_.weightDisplay.isNotEmpty &&
                             catch_.lengthDisplay.isNotEmpty)
                           const SizedBox(width: 16),
                         if (catch_.lengthDisplay.isNotEmpty)
-                          Text('📏 ${catch_.lengthDisplay}',
+                          Text('${catch_.lengthDisplay}',
                               style: textStyle),
                       ],
                     ),
@@ -334,7 +330,7 @@ class _PhotoPage extends StatelessWidget {
                   Padding(
                     padding: const EdgeInsets.only(top: 4),
                     child: Text(
-                        '🌡️ ${catch_.weatherTemp!.round()}°C ${catch_.weatherCondition ?? ''}',
+                        '${catch_.weatherTemp!.round()}°C ${catch_.weatherCondition ?? ''}',
                         style: textStyle),
                   ),
               ],

@@ -217,7 +217,7 @@ class _BragAdminScreenState extends State<BragAdminScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('🛡️ Brag Board Admin'),
+        title: const Text('Brag Board Admin'),
         actions: [
           // Toggle dismissed
           StreamBuilder<QuerySnapshot>(

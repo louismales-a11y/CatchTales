@@ -142,7 +142,7 @@ class _SolunarScreenState extends State<SolunarScreen> {
                           ),
                         ),
                       ),
-                      const SizedBox(height: 12),
+                      const SizedBox(height: 8),
 
                       // Weather right after rating — before moon
                       if (_weather != null) ...[
@@ -183,7 +183,7 @@ class _SolunarScreenState extends State<SolunarScreen> {
                                 const SizedBox(height: 6),
                                 Row(
                                   children: [
-                                    _marineStat(Icons.water_drop, '💧 ${_weather!['humidity']}%', Colors.blue.shade300),
+                                    _marineStat(Icons.water_drop, '${_weather!['humidity']}%', Colors.blue.shade300),
                                     const SizedBox(width: 12),
                                     _marineStat(Icons.compress, '${_weather!['pressure']} hPa', Colors.grey.shade600),
                                   ],
@@ -193,11 +193,11 @@ class _SolunarScreenState extends State<SolunarScreen> {
                           ),
                         ),
                       ],
-                      const SizedBox(height: 8),
+                      const SizedBox(height: 4),
 
                       // Moon Phase card
                       _buildMoonCard(theme),
-                      const SizedBox(height: 16),
+                      const SizedBox(height: 8),
 
                       // Moonrise / Moonset
                       Row(
@@ -223,7 +223,7 @@ class _SolunarScreenState extends State<SolunarScreen> {
                           ),
                         ],
                       ),
-                      const SizedBox(height: 16),
+                      const SizedBox(height: 8),
 
                       // Solar info
                       Row(
@@ -249,17 +249,17 @@ class _SolunarScreenState extends State<SolunarScreen> {
                           ),
                         ],
                       ),
-                      const SizedBox(height: 16),
+                      const SizedBox(height: 8),
 
                       // Best fishing times
                       Text(tr('bestTimesToday'),
                           style: theme.textTheme.titleMedium
                               ?.copyWith(fontWeight: FontWeight.w700)),
-                      const SizedBox(height: 12),
+                      const SizedBox(height: 8),
 
                       // Visual timeline
                       _buildTimeline(theme),
-                      const SizedBox(height: 12),
+                      const SizedBox(height: 8),
 
                       _buildTimeCard(
                         theme,
@@ -504,7 +504,7 @@ class _SolunarScreenState extends State<SolunarScreen> {
             Row(
               children: [
                 Text(_moon!.emoji,
-                    style: const TextStyle(fontSize: 48)),
+                    style: const TextStyle(fontSize: 24, fontWeight: FontWeight.w700)),
                 const SizedBox(width: 16),
                 Expanded(
                   child: Column(

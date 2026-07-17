@@ -81,11 +81,11 @@ class NotificationService {
         ),
         content: const Text(
           'Get notified for:\n\n'
-          '🌤️ **Weather alerts** — severe storms, high winds, '
+          '**Weather alerts** — severe storms, high winds, '
           'temperature drops that affect fishing conditions\n\n'
-          '🎣 **Fish Together** — when a buddy joins your session, '
+          '**Fish Together** — when a buddy joins your session, '
           'sends a chat message, or shares their GPS location\n\n'
-          '🌙 **Best fishing times** — daily solunar peak reminders\n\n'
+          '**Best fishing times** — daily solunar peak reminders\n\n'
           'You can enable this later in the About screen.',
         ),
         actions: [

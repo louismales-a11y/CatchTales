@@ -533,7 +533,7 @@ class _AddCatchScreenState extends State<AddCatchScreen> {
       return;
     }
 
-    setState(() => _voiceStatus = '❓ Unrecognized: \"$text\"');
+    setState(() => _voiceStatus = 'Unrecognized: \"$text\"');
   }
 
   @override
@@ -579,14 +579,7 @@ class _AddCatchScreenState extends State<AddCatchScreen> {
                                 padding: const EdgeInsets.symmetric(
                                     vertical: 6, horizontal: 12),
                                 decoration: BoxDecoration(
-                                  gradient: LinearGradient(
-                                    begin: Alignment.bottomCenter,
-                                    end: Alignment.topCenter,
-                                    colors: [
-                                      Colors.black54,
-                                      Colors.transparent,
-                                    ],
-                                  ),
+                                  color: Colors.black54,
                                 ),
                                 child: Row(
                                   children: [

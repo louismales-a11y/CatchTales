@@ -122,7 +122,7 @@ class _PrepareScreenState extends State<PrepareScreen> {
                 _checkItem(
                   key: 'device',
                   icon: Icons.phonelink_setup,
-                  label: '📱 Device Setup',
+                  label: 'Device Setup',
                   detail: 'Place phone where camera & mic work best',
                   onTapExtra: _showDeviceSetupTip,
                 ),
@@ -242,13 +242,13 @@ class _PrepareScreenState extends State<PrepareScreen> {
             children: [
               Text(
                 'Place your device where it works best for you:\n\n'
-                '🎣 **Easy Reach**\n'
+                '**Easy Reach**\n'
                 'Within arm\'s length while holding a catch\n\n'
-                '📸 **Camera Aim**\n'
+                '**Camera Aim**\n'
                 'Pointed at the spot where you\'ll hold up fish for photos\n\n'
-                '🎤 **Voice Pickup**\n'
+                '**Voice Pickup**\n'
                 'Close enough to hear \"record\", \"save\", etc. over wind or engine\n\n'
-                '🎯 **Test Before Fishing**\n'
+                '**Test Before Fishing**\n'
                 'Try different spots on the boat, in your ice shelter, '
                 'or on shore to find what works best.\n\n'
                 'A minute of setup saves frustration later!',

@@ -113,7 +113,7 @@ class _BragPostDetailScreenState extends State<BragPostDetailScreen> {
                     Container(
                       padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
                       decoration: BoxDecoration(color: const Color(0xFF76FF03).withValues(alpha: 0.15), borderRadius: BorderRadius.circular(14)),
-                      child: Text('🐟 ${post.species}', style: TextStyle(fontWeight: FontWeight.w600, color: Color(0xFF76FF03))),
+                      child: Text('${post.species}', style: TextStyle(fontWeight: FontWeight.w600, color: Color(0xFF76FF03))),
                     ),
                   ],
                 ),

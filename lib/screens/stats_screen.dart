@@ -81,7 +81,7 @@ class _StatsScreenState extends State<StatsScreen> {
       final byteData = await image.toByteData(format: ui.ImageByteFormat.png);
       if (byteData == null) return;
       await file.writeAsBytes(byteData.buffer.asUint8List());
-      await Share.shareXFiles([XFile(file.path)], text: 'My CatchTales stats! 🎣');
+      await Share.shareXFiles([XFile(file.path)], text: 'My CatchTales stats!');
     } catch (_) {}
   }
 
@@ -234,7 +234,7 @@ class _StatsScreenState extends State<StatsScreen> {
                   const SizedBox(height: 8),
 
                   // Personal Records
-                  Text('🏆 Personal Records', style: TextStyle(fontSize: 16, fontWeight: FontWeight.w700, color: Theme.of(context).colorScheme.primary)),
+                  Text('Personal Records', style: TextStyle(fontSize: 16, fontWeight: FontWeight.w700, color: Theme.of(context).colorScheme.primary)),
                   const SizedBox(height: 8),
                   if (_biggestWeight != null)
                     _StatCard(
@@ -253,7 +253,7 @@ class _StatsScreenState extends State<StatsScreen> {
 
                   // Badges
                   if (_badges.isNotEmpty) ...[
-                    Text('⭐ Achievements', style: TextStyle(fontSize: 16, fontWeight: FontWeight.w700, color: Theme.of(context).colorScheme.primary)),
+                    Text('Achievements', style: TextStyle(fontSize: 16, fontWeight: FontWeight.w700, color: Theme.of(context).colorScheme.primary)),
                     const SizedBox(height: 8),
                     Wrap(
                       spacing: 8,
@@ -280,7 +280,7 @@ class _StatsScreenState extends State<StatsScreen> {
                   ],
 
                   // Personal Bests
-                  Text('📈 Insights', style: TextStyle(fontSize: 16, fontWeight: FontWeight.w700, color: Theme.of(context).colorScheme.primary)),
+                  Text('Insights', style: TextStyle(fontSize: 16, fontWeight: FontWeight.w700, color: Theme.of(context).colorScheme.primary)),
                   const SizedBox(height: 8),
                   if (_speciesBreakdown.isNotEmpty) ...[
                     _InsightRow(

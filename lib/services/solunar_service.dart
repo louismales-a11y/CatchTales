@@ -109,16 +109,16 @@ class MoonPhaseInfo {
     required this.name,
   });
 
-  /// Unicode moon emoji based on phase
+  /// Moon phase abbreviation
   String get emoji {
-    if (phase < 0.025) return '🌑';
-    if (phase < 0.25) return '🌒';
-    if (phase < 0.275) return '🌓';
-    if (phase < 0.5) return '🌔';
-    if (phase < 0.525) return '🌕';
-    if (phase < 0.75) return '🌖';
-    if (phase < 0.775) return '🌗';
-    return '🌘';
+    if (phase < 0.025) return 'NM';
+    if (phase < 0.25) return 'WC';
+    if (phase < 0.275) return 'FQ';
+    if (phase < 0.5) return 'WG';
+    if (phase < 0.525) return 'FM';
+    if (phase < 0.75) return 'WGb';
+    if (phase < 0.775) return 'LQ';
+    return 'WCg';
   }
 }
 

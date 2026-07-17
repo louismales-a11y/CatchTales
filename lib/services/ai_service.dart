@@ -10,10 +10,10 @@ import '../models/catch.dart';
 /// AI-powered features using Google Gemini.
 ///
 /// Features:
-/// 1. 🐟 AI Fish ID — identify species from a photo
-/// 2. 🎤 Smart Voice — parse natural language into catch data
-/// 3. 🗺️ Lake Insights — answer questions from your catch data
-/// 4. 🎣 Smart Tackle Picks — recommend lures based on conditions
+/// 1. AI Fish ID — identify species from a photo
+/// 2. Smart Voice — parse natural language into catch data
+/// 3. Lake Insights — answer questions from your catch data
+/// 4. Smart Tackle Picks — recommend lures based on conditions
 class AIService extends ChangeNotifier {
   static final AIService instance = AIService._();
   AIService._();
@@ -57,7 +57,7 @@ class AIService extends ChangeNotifier {
   }
 
   // ─────────────────────────────────────────────────────────
-  //  1. 🐟 AI Fish ID — identify species from a photo
+  //  1. AI Fish ID — identify species from a photo
   // ─────────────────────────────────────────────────────────
 
   /// Identifies the fish species from an image file.
@@ -153,7 +153,7 @@ class AIService extends ChangeNotifier {
   }
 
   // ─────────────────────────────────────────────────────────
-  //  2. 🎤 Smart Voice — parse natural language into catch data
+  //  2. Smart Voice — parse natural language into catch data
   // ─────────────────────────────────────────────────────────
 
   /// Parses a natural language voice command into catch form data.
@@ -210,7 +210,7 @@ Text to parse: "$text"
   }
 
   // ─────────────────────────────────────────────────────────
-  //  3. 🗺️ Lake Insights — answer questions from catch data
+  //  3. Lake Insights — answer questions from catch data
   // ─────────────────────────────────────────────────────────
 
   /// Answers a question based on the user's catch history.
@@ -253,7 +253,7 @@ Provide a helpful, concise answer (2-4 sentences). Be specific to their data. If
   }
 
   // ─────────────────────────────────────────────────────────
-  //  4. 🎣 Smart Tackle Picks — recommend lures based on conditions
+  //  4. Smart Tackle Picks — recommend lures based on conditions
   // ─────────────────────────────────────────────────────────
 
   /// Gets AI-powered tackle recommendations for target species and conditions.

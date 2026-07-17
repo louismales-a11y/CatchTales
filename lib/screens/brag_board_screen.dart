@@ -126,7 +126,7 @@ class _BragBoardScreenState extends State<BragBoardScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('🏆 Brag Board'),
+        title: const Text('Brag Board'),
         actions: [
           IconButton(
             icon: const Icon(Icons.add_a_photo_outlined),
@@ -246,7 +246,7 @@ class _PostCard extends StatelessWidget {
                       color: const Color(0xFF76FF03).withValues(alpha: 0.15),
                       borderRadius: BorderRadius.circular(12),
                     ),
-                    child: Text('🐟 ${post.species}', style: const TextStyle(fontSize: 12, fontWeight: FontWeight.w600, color: Color(0xFF76FF03))),
+                    child: Text('${post.species}', style: const TextStyle(fontSize: 12, fontWeight: FontWeight.w600, color: Color(0xFF76FF03))),
                   ),
                   if (post.description.isNotEmpty) ...[
                     const SizedBox(width: 8),
