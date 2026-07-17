@@ -494,15 +494,16 @@ class AuthService extends ChangeNotifier {
           await ProService.instance.unlockPro();
         }
 
-        // Update last login and session count
+        // Update session count and last login
         final curSessions = (data['totalSessions'] as num?)?.toInt() ?? 0;
         await FirebaseFirestore.instance
             .collection('users')
             .doc(_user!.uid)
-            .update({
-          'lastLogin': FieldValue.serverTimestamp(),
-          'totalSessions': curSessions + 1,
-        });
+            .update({'totalSessions': curSessions + 1});
+        await FirebaseFirestore.instance
+            .collection('users')
+            .doc(_user!.uid)
+            .update({'lastLogin': FieldValue.serverTimestamp()});
       } else {
         // Profile doesn't exist yet — create it
         await _createProfile();
