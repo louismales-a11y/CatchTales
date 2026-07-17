@@ -494,12 +494,19 @@ class AuthService extends ChangeNotifier {
           await ProService.instance.unlockPro();
         }
 
-        // Update session count and last login
+        // Update session count, daily log, and last login
         final curSessions = (data['totalSessions'] as num?)?.toInt() ?? 0;
+        final today = DateTime.now();
+        final dateKey = '${today.year}-${today.month.toString().padLeft(2, '0')}-${today.day.toString().padLeft(2, '0')}';
+        final log = Map<String, dynamic>.from(data['activityLog'] as Map? ?? {});
+        log[dateKey] = ((log[dateKey] as num?)?.toInt() ?? 0) + 1;
         await FirebaseFirestore.instance
             .collection('users')
             .doc(_user!.uid)
-            .update({'totalSessions': curSessions + 1});
+            .update({
+          'totalSessions': curSessions + 1,
+          'activityLog': log,
+        });
         await FirebaseFirestore.instance
             .collection('users')
             .doc(_user!.uid)
@@ -751,14 +758,23 @@ class AuthService extends ChangeNotifier {
           .doc(_user!.uid)
           .get();
       if (doc.exists) {
-        final cur = (doc.data()!['totalSessions'] as num?)?.toInt() ?? 0;
+        final data = doc.data()!;
+        final cur = (data['totalSessions'] as num?)?.toInt() ?? 0;
+        final today = DateTime.now();
+        final dateKey = '${today.year}-${today.month.toString().padLeft(2, '0')}-${today.day.toString().padLeft(2, '0')}';
+        final log = Map<String, dynamic>.from(data['activityLog'] as Map? ?? {});
+        log[dateKey] = ((log[dateKey] as num?)?.toInt() ?? 0) + 1;
         await FirebaseFirestore.instance
             .collection('users')
             .doc(_user!.uid)
             .update({
           'totalSessions': cur + 1,
-          'lastLogin': FieldValue.serverTimestamp(),
+          'activityLog': log,
         });
+        await FirebaseFirestore.instance
+            .collection('users')
+            .doc(_user!.uid)
+            .update({'lastLogin': FieldValue.serverTimestamp()});
       }
     } catch (e) {
       debugPrint('AuthService.recordAppOpen: $e');
