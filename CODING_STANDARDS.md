@@ -209,6 +209,7 @@ May time out at 60s for large APKs (85MB+). Retry if it fails — can take up to
 | **Async context** | Always check `if (!context.mounted) return` after async gaps |
 | **No emojis or gradients** | Zero emojis and zero gradients anywhere — app UI, website, help text, translations, blog posts, notifications. Use solid colors, icons (SVG or Material), and text-only labels. No exceptions. |
 | **Mobile-first responsive design** | Every web element must render correctly on all device sizes (320px phones to widescreen desktop). Use `clamp()` for fluid typography and spacing, `min-height: 44px` for touch targets, `env(safe-area-inset-*)` for notched phones, and animated hamburger menus on mobile. Test on a real phone before deploying. |
+| **Duplicate user profiles** | When testing account creation (delete + recreate), old Firestore profile documents can accumulate under the same email. If the admin panel shows stale data or missing tracking, ask pi to check the `users` collection for duplicates. pi can query Firestore directly and clean up old profiles. |
 
 ## 8. File Locations
 
@@ -227,5 +228,5 @@ May time out at 60s for large APKs (85MB+). Retry if it fails — can take up to
 
 ---
 
-*Last updated: 2025-07-17 (added: no emojis or gradients rule, mobile-first responsive design rule, push ADB as default install method)*
+*Last updated: 2025-07-17 (added: no emojis or gradients rule, mobile-first responsive design rule, push ADB as default install method, duplicate user profiles rule)*
 *If Louis corrects a behavior, add it here immediately.*
