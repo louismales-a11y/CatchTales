@@ -17,12 +17,69 @@ class _ProKeyManagerScreenState extends State<ProKeyManagerScreen> {
   bool _generating = false;
   String _generateType = 'lifetime';
 
+  List<QueryDocumentSnapshot>? _allDocs;
+  bool _loading = true;
+  String? _error;
+
   static const _neon = Color(0xFF76FF03);
 
-  /// Fetch all docs once, then filter in-memory — avoids index requirements.
-  Stream<QuerySnapshot> get _allDocs => FirebaseFirestore.instance
-      .collection('pro_licenses')
-      .snapshots();
+  @override
+  void initState() {
+    super.initState();
+    _subscribe();
+  }
+
+  void _subscribe() {
+    FirebaseFirestore.instance.collection('pro_licenses').snapshots().listen(
+      (snapshot) {
+        if (mounted) {
+          setState(() {
+            _allDocs = snapshot.docs;
+            _loading = false;
+            _error = null;
+          });
+        }
+      },
+      onError: (e) {
+        if (mounted) {
+          setState(() {
+            _error = '$e';
+            _loading = false;
+          });
+        }
+      },
+    );
+  }
+
+  List<QueryDocumentSnapshot> get _filteredDocs {
+    final docs = _allDocs ?? [];
+    if (_filter == 'all' && _search.isEmpty) return docs;
+
+    return docs.where((d) {
+      // Filter
+      if (_filter == 'available') {
+        final used = d['used'] == true;
+        final gv = d['givenTo'] as String? ?? '';
+        if (used || gv.trim().isNotEmpty) return false;
+      } else if (_filter == 'used') {
+        if (d['used'] != true) return false;
+      } else if (_filter == 'given') {
+        final used = d['used'] == true;
+        final gv = d['givenTo'] as String? ?? '';
+        if (used || gv.trim().isEmpty) return false;
+      }
+
+      // Search
+      if (_search.isNotEmpty) {
+        final q = _search.toUpperCase();
+        final key = d.id.toUpperCase();
+        final recipient = (d['givenTo'] as String? ?? '').toUpperCase();
+        if (!key.contains(q) && !recipient.contains(q)) return false;
+      }
+
+      return true;
+    }).toList();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -31,6 +88,13 @@ class _ProKeyManagerScreenState extends State<ProKeyManagerScreen> {
         body: Center(child: Text('Only available in dev builds')),
       );
     }
+
+    final docs = _allDocs ?? [];
+    final filtered = _filteredDocs;
+    final total = docs.length;
+    final used = docs.where((d) => d['used'] == true).length;
+    final assigned = docs.where((d) => d['used'] != true && (d['givenTo'] as String? ?? '').trim().isNotEmpty).length;
+    final available = docs.where((d) => d['used'] != true && (d['givenTo'] as String? ?? '').trim().isEmpty).length;
 
     return Scaffold(
       appBar: AppBar(
@@ -45,12 +109,12 @@ class _ProKeyManagerScreenState extends State<ProKeyManagerScreen> {
                 ? const SizedBox(width: 20, height: 20, child: CircularProgressIndicator(strokeWidth: 2))
                 : const Icon(Icons.add_circle_outline),
             onPressed: _generating ? null : _showGenerateDialog,
-            tooltip: 'Generate new keys',
           ),
         ],
       ),
       body: Column(
         children: [
+          // Search
           Padding(
             padding: const EdgeInsets.fromLTRB(16, 8, 16, 4),
             child: TextField(
@@ -65,53 +129,36 @@ class _ProKeyManagerScreenState extends State<ProKeyManagerScreen> {
               onChanged: (v) => setState(() => _search = v),
             ),
           ),
-          StreamBuilder<QuerySnapshot>(
-            stream: _allDocs,
-            builder: (context, snapshot) {
-              if (snapshot.hasError) {
-                return Padding(
-                  padding: const EdgeInsets.all(16),
-                  child: Text('Error: ${snapshot.error}', style: const TextStyle(color: Colors.red, fontSize: 13)),
-                );
-              }
-              final docs = snapshot.data?.docs ?? [];
-              return _buildSummary(docs);
-            },
-          ),
-          Expanded(
-            child: StreamBuilder<QuerySnapshot>(
-              stream: _allDocs,
-              builder: (context, snapshot) => _buildKeyList(snapshot),
+          // Summary chips
+          Container(
+            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+            child: Row(
+              children: [
+                _chip('$total Total', Colors.grey),
+                const SizedBox(width: 8),
+                _chip('$available Available', _neon),
+                const SizedBox(width: 8),
+                _chip('$assigned Given', Colors.orange),
+                const SizedBox(width: 8),
+                _chip('$used Used', Colors.blueGrey),
+                const Spacer(),
+                if (_filter != 'all')
+                  Text('(${filtered.length} shown)',
+                      style: TextStyle(fontSize: 11, color: Colors.grey.shade600)),
+              ],
             ),
           ),
+          const Divider(height: 1),
+          // Content
+          Expanded(
+            child: _buildContent(filtered),
+          ),
         ],
       ),
     );
   }
 
-  Widget _buildSummary(List<QueryDocumentSnapshot> docs) {
-    final total = docs.length;
-    final used = docs.where((d) => d['used'] == true).length;
-    final assigned = docs.where((d) => d['used'] != true && d['givenTo'] != null && (d['givenTo'] as String).isNotEmpty).length;
-    final available = docs.where((d) => d['used'] != true && (d['givenTo'] == null || (d['givenTo'] as String).isEmpty)).length;
-
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-      child: Row(
-        children: [
-          _summaryChip('$total Total', Colors.grey),
-          const SizedBox(width: 8),
-          _summaryChip('$available Available', _neon),
-          const SizedBox(width: 8),
-          _summaryChip('$assigned Given', Colors.orange),
-          const SizedBox(width: 8),
-          _summaryChip('$used Used', Colors.blueGrey),
-        ],
-      ),
-    );
-  }
-
-  Widget _summaryChip(String label, Color color) {
+  Widget _chip(String label, Color color) {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
       decoration: BoxDecoration(
@@ -123,50 +170,26 @@ class _ProKeyManagerScreenState extends State<ProKeyManagerScreen> {
     );
   }
 
-  Widget _buildKeyList(AsyncSnapshot<QuerySnapshot> snapshot) {
-    if (snapshot.hasError) {
+  Widget _buildContent(List<QueryDocumentSnapshot> docs) {
+    if (_loading) {
+      return const Center(child: CircularProgressIndicator());
+    }
+
+    if (_error != null) {
       return Center(
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
             const Icon(Icons.error_outline, size: 48, color: Colors.red),
             const SizedBox(height: 8),
-            Text('${snapshot.error}', style: const TextStyle(fontSize: 13, color: Colors.red)),
+            Text('$_error', style: const TextStyle(fontSize: 13, color: Colors.red)),
             const SizedBox(height: 16),
-            OutlinedButton(onPressed: () => setState(() {}), child: const Text('Retry')),
+            OutlinedButton(onPressed: () {
+              setState(() { _loading = true; _error = null; _allDocs = null; _subscribe(); });
+            }, child: const Text('Retry')),
           ],
         ),
       );
-    }
-
-    if (!snapshot.hasData) {
-      return const Center(child: CircularProgressIndicator());
-    }
-
-    var docs = snapshot.data!.docs;
-
-    // Apply filter
-    if (_filter == 'available') {
-      docs = docs.where((d) =>
-          d['used'] != true &&
-          (d['givenTo'] == null || (d['givenTo'] as String).trim().isEmpty)).toList();
-    } else if (_filter == 'used') {
-      docs = docs.where((d) => d['used'] == true).toList();
-    } else if (_filter == 'given') {
-      docs = docs.where((d) =>
-          d['used'] != true &&
-          d['givenTo'] != null &&
-          (d['givenTo'] as String).trim().isNotEmpty).toList();
-    }
-
-    // Apply search
-    if (_search.isNotEmpty) {
-      final q = _search.toUpperCase();
-      docs = docs.where((d) {
-        final key = d.id.toUpperCase();
-        final recipient = (d['givenTo'] as String? ?? '').toUpperCase();
-        return key.contains(q) || recipient.contains(q);
-      }).toList();
     }
 
     if (docs.isEmpty) {
@@ -176,7 +199,11 @@ class _ProKeyManagerScreenState extends State<ProKeyManagerScreen> {
           children: [
             Icon(Icons.vpn_key_off, size: 48, color: Colors.grey.shade600),
             const SizedBox(height: 8),
-            Text('No keys found', style: TextStyle(fontSize: 14, color: Colors.grey.shade500)),
+            Text(
+              _allDocs!.isEmpty ? 'No keys yet — tap + to generate' : 'No keys match this filter',
+              style: TextStyle(fontSize: 14, color: Colors.grey.shade500),
+              textAlign: TextAlign.center,
+            ),
           ],
         ),
       );
@@ -190,36 +217,38 @@ class _ProKeyManagerScreenState extends State<ProKeyManagerScreen> {
   }
 
   void _showFilterMenu() {
+    final cur = _filter;
     showModalBottomSheet(
       context: context,
       builder: (ctx) => Column(
         mainAxisSize: MainAxisSize.min,
         children: [
+          ListTile(title: const Text('Filter by'), dense: true, enabled: false),
           ListTile(
             leading: const Icon(Icons.all_inclusive),
             title: const Text('All keys'),
-            trailing: _filter == 'all' ? const Icon(Icons.check, size: 18) : null,
+            trailing: cur == 'all' ? Icon(Icons.check, size: 18, color: _neon) : null,
             onTap: () { setState(() => _filter = 'all'); Navigator.pop(ctx); },
           ),
           ListTile(
             leading: Icon(Icons.check_circle_outline, color: _neon),
             title: const Text('Available'),
             subtitle: const Text('Not used, not assigned'),
-            trailing: _filter == 'available' ? const Icon(Icons.check, size: 18) : null,
+            trailing: cur == 'available' ? Icon(Icons.check, size: 18, color: _neon) : null,
             onTap: () { setState(() => _filter = 'available'); Navigator.pop(ctx); },
           ),
           ListTile(
             leading: const Icon(Icons.person_outline, color: Colors.orange),
             title: const Text('Given out'),
             subtitle: const Text('Assigned to someone, not yet used'),
-            trailing: _filter == 'given' ? const Icon(Icons.check, size: 18) : null,
+            trailing: cur == 'given' ? Icon(Icons.check, size: 18, color: Colors.orange) : null,
             onTap: () { setState(() => _filter = 'given'); Navigator.pop(ctx); },
           ),
           ListTile(
             leading: const Icon(Icons.check_circle, color: Colors.blueGrey),
             title: const Text('Used'),
             subtitle: const Text('Already activated'),
-            trailing: _filter == 'used' ? const Icon(Icons.check, size: 18) : null,
+            trailing: cur == 'used' ? Icon(Icons.check, size: 18, color: Colors.blueGrey) : null,
             onTap: () { setState(() => _filter = 'used'); Navigator.pop(ctx); },
           ),
           const SizedBox(height: 16),
@@ -243,7 +272,7 @@ class _ProKeyManagerScreenState extends State<ProKeyManagerScreen> {
                 controller: ctrl,
                 decoration: const InputDecoration(
                   labelText: 'Number of keys',
-                  helperText: 'Enter how many keys to generate',
+                  helperText: '1-200 at a time',
                   border: OutlineInputBorder(),
                   isDense: true,
                 ),
@@ -327,7 +356,7 @@ class _ProKeyManagerScreenState extends State<ProKeyManagerScreen> {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text('Failed to generate keys: $e'),
+            content: Text('Failed: $e'),
             backgroundColor: Colors.red,
           ),
         );
@@ -339,11 +368,15 @@ class _ProKeyManagerScreenState extends State<ProKeyManagerScreen> {
 
   String _generateCode() {
     final chars = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789';
-    final parts = List.generate(3, (_) {
-      final p = String.fromCharCodes(
-        List.generate(4, (i) => chars.codeUnitAt(DateTime.now().microsecondsSinceEpoch % chars.length + i * 7 % chars.length)),
-      );
-      return p;
+    final len = chars.length;
+    final seed = DateTime.now().microsecondsSinceEpoch & 0x7FFFFFFF;
+    final parts = List.generate(3, (p) {
+      final pSeed = seed + p * 7919;
+      final buf = StringBuffer();
+      for (int i = 0; i < 4; i++) {
+        buf.writeCharCode(chars.codeUnitAt((pSeed + i * 37) % len));
+      }
+      return buf.toString();
     });
     return 'PRO-${parts[0]}-${parts[1]}-${parts[2]}';
   }
@@ -570,32 +603,15 @@ class _KeyDetailContentState extends State<_KeyDetailContent> {
           ),
           const SizedBox(height: 16),
 
-          // Copy key button
           SizedBox(
             width: double.infinity,
             child: OutlinedButton.icon(
               icon: const Icon(Icons.copy, size: 16),
               label: const Text('Copy Key'),
               onPressed: () {
-                showDialog(
-                  context: context,
-                  builder: (ctx) => AlertDialog(
-                    title: const Text('Copy this key'),
-                    content: SelectableText(widget.doc.id, style: const TextStyle(fontSize: 20, fontFamily: 'monospace', letterSpacing: 1)),
-                    actions: [
-                      FilledButton(
-                        onPressed: () {
-                          // Copy to clipboard
-                          Clipboard.setData(ClipboardData(text: widget.doc.id));
-                          Navigator.pop(ctx);
-                          ScaffoldMessenger.of(context).showSnackBar(
-                            const SnackBar(content: Text('Key copied'), backgroundColor: Colors.green),
-                          );
-                        },
-                        child: const Text('Copy'),
-                      ),
-                    ],
-                  ),
+                Clipboard.setData(ClipboardData(text: widget.doc.id));
+                ScaffoldMessenger.of(context).showSnackBar(
+                  const SnackBar(content: Text('Key copied'), backgroundColor: Colors.green),
                 );
               },
             ),
@@ -637,7 +653,7 @@ class _KeyDetailContentState extends State<_KeyDetailContent> {
     } catch (e) {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Failed to save: $e'), backgroundColor: Colors.red),
+          SnackBar(content: Text('Failed: $e'), backgroundColor: Colors.red),
         );
       }
     }
