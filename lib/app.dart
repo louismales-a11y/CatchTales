@@ -24,6 +24,7 @@ import 'services/api_config.dart';
 import 'screens/about_screen.dart';
 import 'screens/cloud_sync_screen.dart';
 import 'screens/contact_screen.dart';
+import 'screens/pro_key_manager_screen.dart';
 import 'screens/tackle_box_screen.dart';
 import 'screens/trip_screen.dart';
 import 'screens/community_stats_screen.dart';
@@ -1052,6 +1053,13 @@ class _HomeScreenState extends State<HomeScreen> {
                           builder: (_) => _withWater(const ContactScreen())));
                   break;
                 // ── Admin Only ──
+                case 'pro_key_manager':
+                  if (ApiConfig.isDev) {
+                    Navigator.push(context,
+                        MaterialPageRoute(
+                            builder: (_) => const ProKeyManagerScreen()));
+                  }
+                  break;
                 // ── Skin Toggle ──
                 case 'skin_dream':
                   SkinService.instance.setSkin('fancy');
@@ -1243,6 +1251,17 @@ class _HomeScreenState extends State<HomeScreen> {
                   contentPadding: EdgeInsets.zero,
                 ),
               ),
+              // ── Admin (dev only) ──
+              if (ApiConfig.isDev)
+                PopupMenuItem(
+                  value: 'pro_key_manager',
+                  child: ListTile(
+                    leading: Icon(Icons.vpn_key_outlined),
+                    title: const Text('Pro Key Manager'),
+                    dense: true,
+                    contentPadding: EdgeInsets.zero,
+                  ),
+                ),
               // ── Appearance (Classic skin only) ──
               if (SkinService.instance.isClassic)
                 PopupMenuItem(

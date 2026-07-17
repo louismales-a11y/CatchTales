@@ -7,16 +7,33 @@ import 'analytics_service.dart';
 import 'auth_service.dart';
 
 /// Manages Pro/Free feature access.
-/// Currently uses SharedPreferences for testing; replace with in-app purchase later.
 class ProService extends ChangeNotifier {
   static final ProService instance = ProService._();
   ProService._();
 
-  bool _isPro = false;
   bool _initialized = false;
+  /// 'lifetime', 'yearly', or null (free)
+  String? _proType;
+  /// Expiry timestamp (only for yearly)
+  DateTime? _proExpiresAt;
 
-  bool get isPro => _isPro;
   bool get isInitialized => _initialized;
+
+  /// Whether the user currently has Pro access.
+  bool get isPro {
+    if (_proType == null) return false;
+    if (_proType == 'lifetime') return true;
+    if (_proType == 'yearly' && _proExpiresAt != null) {
+      return DateTime.now().isBefore(_proExpiresAt!);
+    }
+    return false;
+  }
+
+  /// The type of Pro: 'lifetime', 'yearly', or null.
+  String? get proType => _proType;
+
+  /// When yearly Pro expires.
+  DateTime? get proExpiresAt => _proExpiresAt;
 
   /// Maximum catches allowed in free version
   static const int freeCatchLimit = 10;
@@ -30,17 +47,31 @@ class ProService extends ChangeNotifier {
   /// Load saved Pro status from SharedPreferences.
   Future<void> load() async {
     final prefs = await SharedPreferences.getInstance();
-    _isPro = prefs.getBool('is_pro') ?? false;
+    _proType = prefs.getString('pro_type');
+    final expiresMs = prefs.getInt('pro_expires_at');
+    if (expiresMs != null) {
+      _proExpiresAt = DateTime.fromMillisecondsSinceEpoch(expiresMs);
+    }
     _initialized = true;
     notifyListeners();
   }
 
-  /// Unlock Pro (call this when purchase completes).
-  Future<void> unlockPro() async {
+  /// Unlock Pro with a given type.
+  Future<void> unlockPro({String type = 'lifetime'}) async {
     AnalyticsService.instance.logProUpgraded();
-    _isPro = true;
+    _proType = type;
+    if (type == 'yearly') {
+      _proExpiresAt = DateTime.now().add(const Duration(days: 365));
+    } else {
+      _proExpiresAt = null;
+    }
     final prefs = await SharedPreferences.getInstance();
-    await prefs.setBool('is_pro', true);
+    await prefs.setString('pro_type', type);
+    if (_proExpiresAt != null) {
+      await prefs.setInt('pro_expires_at', _proExpiresAt!.millisecondsSinceEpoch);
+    } else {
+      await prefs.remove('pro_expires_at');
+    }
     // Also update Firestore if user is logged in
     if (AuthService.instance.isLoggedIn) {
       await AuthService.instance.upgradeToPro();
@@ -48,27 +79,29 @@ class ProService extends ChangeNotifier {
     notifyListeners();
   }
 
-  /// Reset to free (for testing).
+  /// Reset to free.
   Future<void> resetToFree() async {
-    _isPro = false;
+    _proType = null;
+    _proExpiresAt = null;
     final prefs = await SharedPreferences.getInstance();
-    await prefs.setBool('is_pro', false);
+    await prefs.remove('pro_type');
+    await prefs.remove('pro_expires_at');
     notifyListeners();
   }
 
   /// Check if user can add more catches.
-  bool canAddCatch(int currentCount) => _isPro || currentCount < freeCatchLimit;
+  bool canAddCatch(int currentCount) => isPro || currentCount < freeCatchLimit;
 
   /// Check if user can add more tackle items.
-  bool canAddTackle(int currentCount) => _isPro || currentCount < freeTackleLimit;
+  bool canAddTackle(int currentCount) => isPro || currentCount < freeTackleLimit;
 
   /// Check if user can view this fish species index (0-based).
-  bool canViewFishSpecies(int index) => _isPro || index < freeFishIdLimit;
+  bool canViewFishSpecies(int index) => isPro || index < freeFishIdLimit;
 
   /// Stripe Payment Link URL — set this after creating your link
   static const String _payLink = 'https://pay.catchtales.com';
 
-  /// Show upgrade dialog with Stripe Pay Link + Pro code option.
+  /// Show upgrade dialog.
   static void showUpgradeDialog(BuildContext context) {
     AnalyticsService.instance.logProUpgradePrompt();
     showDialog(
@@ -105,7 +138,6 @@ class ProService extends ChangeNotifier {
     );
   }
 
-  /// Open the Stripe Payment Link in the device browser.
   static Future<void> _launchPayLink(BuildContext context) async {
     final uri = Uri.parse(_payLink);
     if (await canLaunchUrl(uri)) {
@@ -122,7 +154,7 @@ class ProService extends ChangeNotifier {
     }
   }
 
-  /// Show a dialog to enter a Pro license code.
+  /// Show dialog to enter a Pro license code.
   static Future<void> _showEnterCodeDialog(BuildContext context) async {
     final ctrl = TextEditingController();
     final result = await showDialog<String>(
@@ -134,7 +166,7 @@ class ProService extends ChangeNotifier {
           autofocus: true,
           decoration: const InputDecoration(
             hintText: 'e.g. PRO-A7X3-K9M2',
-            helperText: 'You can enter with or without dashes',
+            helperText: 'Yearly or lifetime code — both work here',
             border: OutlineInputBorder(),
           ),
           textCapitalization: TextCapitalization.characters,
@@ -154,12 +186,10 @@ class ProService extends ChangeNotifier {
 
     if (result == null || result.isEmpty) return;
 
-    // Normalize: strip dashes/spaces, then reconstruct proper format
     String normalized = result.replaceAll(RegExp(r'[\s-]'), '').toUpperCase();
     if (normalized.startsWith('PRO')) {
       normalized = normalized.substring(3);
     }
-    // Must have exactly 12 characters (XXXX-XXXX-XXXX without dashes)
     if (normalized.length != 12) {
       if (!context.mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
@@ -170,15 +200,14 @@ class ProService extends ChangeNotifier {
       );
       return;
     }
-    // Reconstruct as PRO-XXXX-XXXX-XXXX
     final formatted = 'PRO-${normalized.substring(0, 4)}-${normalized.substring(4, 8)}-${normalized.substring(8, 12)}';
 
-    // Validate the code against Firestore
-    final validated = await instance._validateCode(formatted);
+    // Validate and get the license type
+    final resultData = await instance._validateCode(formatted);
     if (!context.mounted) return;
 
-    if (validated) {
-      await instance.unlockPro();
+    if (resultData != null) {
+      await instance.unlockPro(type: resultData['type'] as String? ?? 'lifetime');
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(behavior: SnackBarBehavior.floating, 
           content: Text('Pro unlocked! Thank you for your support!'),
@@ -196,29 +225,28 @@ class ProService extends ChangeNotifier {
   }
 
   /// Validate a Pro code against Firestore.
-  /// The code is case-insensitive, stored uppercase.
-  /// Accepts codes with or without dashes (e.g. 'PRO-A7X3-K9M2' or 'PROA7X3K9M2').
-  Future<bool> _validateCode(String code) async {
+  /// Returns the license data (including 'type') if valid, null otherwise.
+  Future<Map<String, dynamic>?> _validateCode(String code) async {
     try {
       final doc = await FirebaseFirestore.instance
           .collection('pro_licenses')
           .doc(code)
           .get();
 
-      if (!doc.exists) return false;
+      if (!doc.exists) return null;
       final data = doc.data()!;
-      // Code must not be already used
-      if (data['used'] == true) return false;
+      if (data['used'] == true) return null;
 
       // Mark as used
+      final licenseType = data['type'] as String? ?? 'lifetime';
       await doc.reference.update({
         'used': true,
         'usedAt': FieldValue.serverTimestamp(),
       });
 
-      return true;
+      return {'type': licenseType};
     } catch (_) {
-      return false;
+      return null;
     }
   }
 }
