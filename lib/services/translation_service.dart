@@ -249,7 +249,7 @@ class TranslationService extends ChangeNotifier {
       // ── Pro/Free version strings ──
       'upgradeToPro': 'Upgrade to Pro',
       'upgradeDescription': 'Unlock unlimited catches, cloud sync, advanced stats, badges, and more!',
-      'upgradePricing': 'Pro just \$24.99 one-time or \$8.99/year.',
+      'upgradePricing': 'Pro just \$19.99 lifetime or \$8.99/year.',
       'notNow': 'Not now',
       'upgrade': 'Upgrade',
       'proVersion': 'Pro Version',
@@ -641,7 +641,7 @@ class TranslationService extends ChangeNotifier {
       // ── Pro/Free version strings ──
       'upgradeToPro': 'Upgrade to Pro',
       'upgradeDescription': 'Unlock unlimited catches, cloud sync, advanced stats, badges, and more!',
-      'upgradePricing': 'Pro just \$24.99 one-time or \$8.99/year.',
+      'upgradePricing': 'Pro just \$19.99 lifetime or \$8.99/year.',
       'notNow': 'Not now',
       'upgrade': 'Upgrade',
       'proVersion': 'Pro Version',
@@ -906,7 +906,7 @@ class TranslationService extends ChangeNotifier {
       // ── Pro/Free version strings ──
       'upgradeToPro': 'Upgrade to Pro',
       'upgradeDescription': 'Unlock unlimited catches, cloud sync, advanced stats, badges, and more!',
-      'upgradePricing': 'Pro just \$24.99 one-time or \$8.99/year.',
+      'upgradePricing': 'Pro just \$19.99 lifetime or \$8.99/year.',
       'notNow': 'Not now',
       'upgrade': 'Upgrade',
       'proVersion': 'Pro Version',
@@ -1171,7 +1171,7 @@ class TranslationService extends ChangeNotifier {
       // ── Pro/Free version strings ──
       'upgradeToPro': 'Upgrade to Pro',
       'upgradeDescription': 'Unlock unlimited catches, cloud sync, advanced stats, badges, and more!',
-      'upgradePricing': 'Pro just \$24.99 one-time or \$8.99/year.',
+      'upgradePricing': 'Pro just \$19.99 lifetime or \$8.99/year.',
       'notNow': 'Not now',
       'upgrade': 'Upgrade',
       'proVersion': 'Pro Version',
@@ -1435,7 +1435,7 @@ class TranslationService extends ChangeNotifier {
       // ── Pro/Free version strings ──
       'upgradeToPro': 'Upgrade to Pro',
       'upgradeDescription': 'Unlock unlimited catches, cloud sync, advanced stats, badges, and more!',
-      'upgradePricing': 'Pro just \$24.99 one-time or \$8.99/year.',
+      'upgradePricing': 'Pro just \$19.99 lifetime or \$8.99/year.',
       'notNow': 'Not now',
       'upgrade': 'Upgrade',
       'proVersion': 'Pro Version',
