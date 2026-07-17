@@ -88,10 +88,6 @@ class _ProKeyManagerScreenState extends State<ProKeyManagerScreen> {
 
     final docs = _allDocs ?? [];
     final filtered = _filteredDocs;
-    final total = docs.length;
-    final used = docs.where((d) => d['used'] == true).length;
-    final assigned = docs.where((d) => d['used'] != true && (d['givenTo'] as String? ?? '').trim().isNotEmpty).length;
-    final available = docs.where((d) => d['used'] != true && (d['givenTo'] as String? ?? '').trim().isEmpty).length;
 
     return Scaffold(
       appBar: AppBar(
@@ -109,10 +105,28 @@ class _ProKeyManagerScreenState extends State<ProKeyManagerScreen> {
           ),
         ],
       ),
-      body: Column(
-        children: [
-          // Search
-          Padding(
+      backgroundColor: const Color(0xFF0A1628),
+      body: _buildBody(filtered, docs),
+    );
+  }
+
+  Widget _chip(String label, Color color) {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+      decoration: BoxDecoration(
+        color: color.withValues(alpha: 0.15),
+        borderRadius: BorderRadius.circular(6),
+        border: Border.all(color: color.withValues(alpha: 0.3)),
+      ),
+      child: Text(label, style: TextStyle(fontSize: 11, fontWeight: FontWeight.w600, color: color)),
+    );
+  }
+
+  Widget _buildBody(List<QueryDocumentSnapshot> filtered, List<QueryDocumentSnapshot> all) {
+    return CustomScrollView(
+      slivers: [
+        SliverToBoxAdapter(
+          child: Padding(
             padding: const EdgeInsets.fromLTRB(16, 8, 16, 4),
             child: TextField(
               decoration: InputDecoration(
@@ -126,18 +140,19 @@ class _ProKeyManagerScreenState extends State<ProKeyManagerScreen> {
               onChanged: (v) => setState(() => _search = v),
             ),
           ),
-          // Summary chips
-          Container(
+        ),
+        SliverToBoxAdapter(
+          child: Container(
             padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
             child: Row(
               children: [
-                _chip('$total Total', Colors.grey),
+                _chip('${all.length} Total', Colors.grey),
                 const SizedBox(width: 8),
-                _chip('$available Available', _neon),
+                _chip('${all.where((d) => d['used'] != true && (d['givenTo'] as String? ?? '').trim().isEmpty).length} Available', _neon),
                 const SizedBox(width: 8),
-                _chip('$assigned Given', Colors.orange),
+                _chip('${all.where((d) => d['used'] != true && (d['givenTo'] as String? ?? '').trim().isNotEmpty).length} Given', Colors.orange),
                 const SizedBox(width: 8),
-                _chip('$used Used', Colors.blueGrey),
+                _chip('${all.where((d) => d['used'] == true).length} Used', Colors.blueGrey),
                 const Spacer(),
                 if (_filter != 'all')
                   Text('(${filtered.length} shown)',
@@ -145,25 +160,12 @@ class _ProKeyManagerScreenState extends State<ProKeyManagerScreen> {
               ],
             ),
           ),
-          const Divider(height: 1),
-          // Content
-          Expanded(
-            child: _buildContent(filtered),
-          ),
-        ],
-      ),
-    );
-  }
-
-  Widget _chip(String label, Color color) {
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-      decoration: BoxDecoration(
-        color: color.withValues(alpha: 0.15),
-        borderRadius: BorderRadius.circular(6),
-        border: Border.all(color: color.withValues(alpha: 0.3)),
-      ),
-      child: Text(label, style: TextStyle(fontSize: 11, fontWeight: FontWeight.w600, color: color)),
+        ),
+        SliverToBoxAdapter(child: const Divider(height: 1)),
+        SliverFillRemaining(
+          child: _buildContent(filtered),
+        ),
+      ],
     );
   }
 
