@@ -111,8 +111,8 @@ class ProService extends ChangeNotifier {
         content: const Text(
           'Unlock unlimited catches, cloud sync, advanced stats, '
           'badges, and more!\n\n'
-          'Upgrade instantly — pay online and receive your Pro '
-          'code via email.',
+          'Pro is \$8.99/year or \$19.99 lifetime (CAD).\n\n'
+          'Email us to purchase and receive your Pro code.',
         ),
         actions: [
           TextButton(
@@ -124,7 +124,7 @@ class ProService extends ChangeNotifier {
               Navigator.pop(ctx);
               _launchPayLink(context);
             },
-            child: const Text('Buy Pro — \$4.99'),
+            child: const Text('Buy Pro — Email Us'),
           ),
           TextButton(
             onPressed: () {
@@ -139,17 +139,14 @@ class ProService extends ChangeNotifier {
   }
 
   static Future<void> _launchPayLink(BuildContext context) async {
-    final uri = Uri.parse(_payLink);
+    final uri = Uri.parse('mailto:catchtales@yahoo.com?subject=Pro%20Purchase&body=Hi%2C%20I%27d%20like%20to%20purchase%20CatchTales%20Pro.');
     if (await canLaunchUrl(uri)) {
       await launchUrl(uri, mode: LaunchMode.externalApplication);
     } else {
-      if (context.mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            behavior: SnackBarBehavior.floating,
-            content: const Text('Could not open payment page.'),
-          ),
-        );
+      // Fallback to contact page
+      final webUri = Uri.parse('https://catchtales.com/contact');
+      if (await canLaunchUrl(webUri)) {
+        await launchUrl(webUri, mode: LaunchMode.externalApplication);
       }
     }
   }
