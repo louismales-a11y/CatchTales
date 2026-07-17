@@ -8,7 +8,8 @@ service cloud.firestore {
     // - App users cannot list or write
     match /pro_licenses/{code} {
       allow read: if true;  // anyone can check if a code exists & is unused
-      allow create, update, delete: if false;  // only cloud function (admin SDK) can write
+      // Admins (dev app) or cloud function can create/update
+      allow create, update, delete: if request.auth != null && exists(/databases/$(database)/documents/admins/$(request.auth.uid));
     }
 
     // Usernames collection — anyone can check if a name exists (needed before sign-up)

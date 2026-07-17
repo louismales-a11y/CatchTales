@@ -1,5 +1,3 @@
-import 'dart:async';
-
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
@@ -22,42 +20,32 @@ class _ProKeyManagerScreenState extends State<ProKeyManagerScreen> {
   List<QueryDocumentSnapshot>? _allDocs;
   bool _loading = true;
   String? _error;
-  StreamSubscription<QuerySnapshot>? _sub;
 
   static const _neon = Color(0xFF76FF03);
 
   @override
   void initState() {
     super.initState();
-    _subscribe();
+    _load();
   }
 
-  @override
-  void dispose() {
-    _sub?.cancel();
-    super.dispose();
-  }
-
-  void _subscribe() {
-    _sub = FirebaseFirestore.instance.collection('pro_licenses').snapshots().listen(
-      (snapshot) {
-        if (mounted) {
-          setState(() {
-            _allDocs = snapshot.docs;
-            _loading = false;
-            _error = null;
-          });
-        }
-      },
-      onError: (e) {
-        if (mounted) {
-          setState(() {
-            _error = '$e';
-            _loading = false;
-          });
-        }
-      },
-    );
+  Future<void> _load() async {
+    try {
+      final snapshot = await FirebaseFirestore.instance.collection('pro_licenses').get();
+      if (mounted) {
+        setState(() {
+          _allDocs = snapshot.docs;
+          _loading = false;
+        });
+      }
+    } catch (e) {
+      if (mounted) {
+        setState(() {
+          _error = '$e';
+          _loading = false;
+        });
+      }
+    }
   }
 
   List<QueryDocumentSnapshot> get _filteredDocs {
@@ -194,7 +182,7 @@ class _ProKeyManagerScreenState extends State<ProKeyManagerScreen> {
             Text('$_error', style: const TextStyle(fontSize: 13, color: Colors.red)),
             const SizedBox(height: 16),
             OutlinedButton(onPressed: () {
-              setState(() { _loading = true; _error = null; _allDocs = null; _subscribe(); });
+              setState(() { _loading = true; _error = null; _allDocs = null; _load(); });
             }, child: const Text('Retry')),
           ],
         ),
@@ -360,6 +348,7 @@ class _ProKeyManagerScreenState extends State<ProKeyManagerScreen> {
             backgroundColor: Colors.green,
           ),
         );
+        _load(); // refresh list
       }
     } catch (e) {
       if (mounted) {
