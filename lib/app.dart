@@ -26,7 +26,6 @@ import 'services/api_config.dart';
 import 'screens/about_screen.dart';
 import 'screens/cloud_sync_screen.dart';
 import 'screens/contact_screen.dart';
-import 'screens/pro_key_manager_screen.dart';
 import 'screens/tackle_box_screen.dart';
 import 'screens/trip_screen.dart';
 import 'screens/community_stats_screen.dart';
@@ -777,19 +776,7 @@ class _HomeScreenState extends State<HomeScreen> {
                 ),
               ),
               const SizedBox(height: 8),
-              SizedBox(
-                width: double.infinity,
-                child: OutlinedButton.icon(
-                  onPressed: () {
-                    Navigator.pop(ctx);
-                    Navigator.push(context, MaterialPageRoute(builder: (_) => const ProKeyManagerScreen()));
-                  },
-                  icon: const Icon(Icons.vpn_key_outlined, size: 18),
-                  label: const Text('Pro Key Manager'),
-                  style: OutlinedButton.styleFrom(foregroundColor: Colors.amber.shade700, side: BorderSide(color: Colors.amber.shade700)),
-                ),
-              ),
-              const SizedBox(height: 8),
+
               SizedBox(
                 width: double.infinity,
                 child: OutlinedButton.icon(
