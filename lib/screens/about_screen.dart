@@ -8,6 +8,7 @@ import 'package:package_info_plus/package_info_plus.dart';
 import 'package:url_launcher/url_launcher.dart';
 import '../services/translation_service.dart';
 import '../services/api_config.dart';
+import '../services/pro_service.dart';
 
 /// About screen — shows app info, credits, and links.
 class AboutScreen extends StatefulWidget {
@@ -194,6 +195,50 @@ class _AboutScreenState extends State<AboutScreen> {
           ),
           const SizedBox(height: 24),
 
+          // ─── Pro Status ───
+          if (ProService.instance.isInitialized)
+            Card(
+              color: ProService.instance.isPro
+                  ? Colors.amber.withValues(alpha: 0.06)
+                  : Colors.grey.withValues(alpha: 0.03),
+              child: Padding(
+                padding: const EdgeInsets.all(16),
+                child: Row(
+                  children: [
+                    Icon(
+                      ProService.instance.isPro ? Icons.workspace_premium : Icons.lock_open,
+                      size: 20,
+                      color: ProService.instance.isPro ? Colors.amber : Colors.grey,
+                    ),
+                    const SizedBox(width: 12),
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            ProService.instance.isPro ? 'Pro Active' : 'Free Version',
+                            style: TextStyle(
+                              fontSize: 14,
+                              fontWeight: FontWeight.w600,
+                              color: ProService.instance.isPro ? Colors.amber.shade700 : Colors.grey.shade600,
+                            ),
+                          ),
+                          if (ProService.instance.isPro && ProService.instance.proType != null)
+                            Text(
+                              ProService.instance.proType == 'lifetime'
+                                  ? 'Lifetime license'
+                                  : 'Yearly license — expires ${_formatDate(ProService.instance.proExpiresAt)}',
+                              style: TextStyle(fontSize: 12, color: Colors.grey.shade500),
+                            ),
+                        ],
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ),
+          const SizedBox(height: 16),
+
           // ─── Links ───
           Card(
             child: Padding(
@@ -238,6 +283,11 @@ class _AboutScreenState extends State<AboutScreen> {
       contentPadding: EdgeInsets.zero,
       onTap: onTap,
     );
+  }
+
+  String _formatDate(DateTime? dt) {
+    if (dt == null) return 'unknown';
+    return '${dt.year}-${dt.month.toString().padLeft(2, '0')}-${dt.day.toString().padLeft(2, '0')}';
   }
 
   Future<void> _openUrl(String url) async {

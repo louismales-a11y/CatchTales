@@ -1,11 +1,12 @@
 const functions = require('firebase-functions/v2');
 const admin = require('firebase-admin');
+const { Timestamp, getFirestore, FieldValue } = require('firebase-admin/firestore');
 const stripe = require('stripe');
 const nodemailer = require('nodemailer');
 const crypto = require('crypto');
 
 admin.initializeApp();
-const db = admin.firestore();
+const db = getFirestore();
 
 // ---------------------------------------------------------------------------
 // Configuration
@@ -180,7 +181,7 @@ exports.stripeWebhook = functions.https.onRequest({ cors: true }, async (req, re
         // Save to Firestore
         await db.collection('pro_licenses').doc(proCode).set({
           used: false,
-          createdAt: admin.firestore.FieldValue.serverTimestamp(),
+          createdAt: FieldValue.serverTimestamp(),
           stripeSessionId: session.id,
           customerEmail: customerEmail,
           customerName: customerName || '',
@@ -244,7 +245,7 @@ exports.createProCode = functions.https.onCall(async (data, context) => {
   const proCode = await generateUniqueCode();
   await db.collection('pro_licenses').doc(proCode).set({
     used: false,
-    createdAt: admin.firestore.FieldValue.serverTimestamp(),
+    createdAt: FieldValue.serverTimestamp(),
     createdBy: uid,
     customerEmail: email,
     customerName: name || '',
@@ -397,6 +398,87 @@ exports.onBragLike = functions.firestore
       console.log(`Like notification sent to ${ownerId} for post ${postId}`);
     } catch (e) {
       console.error('Failed to send like notification:', e.message);
+    }
+  });
+
+// ---------------------------------------------------------------------------
+// Pro License Expiry Reminder
+// Runs daily at 8:00 AM, checks for yearly licenses expiring in 7 days,
+// and sends a reminder email.
+// ---------------------------------------------------------------------------
+exports.proExpiryReminder = functions.scheduler
+  .onSchedule('0 8 * * *', async () => {
+    const now = new Date();
+    const in7Days = new Date(now.getTime() + 7 * 24 * 60 * 60 * 1000);
+
+    try {
+      // Find used yearly licenses expiring within 7 days that haven't been reminded yet
+      const snapshot = await db.collection('pro_licenses')
+        .where('used', '==', true)
+        .where('type', '==', 'yearly')
+        .where('expiresAt', '>=', now)
+        .where('expiresAt', '<=', in7Days)
+        .get();
+
+      if (snapshot.empty) {
+        console.log('No expiring licenses found today');
+        return;
+      }
+
+      const transporter = nodemailer.createTransport({
+        service: 'gmail',
+        auth: { user: emailUser.value(), pass: emailPass.value() },
+      });
+
+      let sentCount = 0;
+      for (const doc of snapshot.docs) {
+        const data = doc.data();
+        const recipientEmail = data.activatedByEmail;
+        if (!recipientEmail) {
+          console.log(`No email for license ${doc.id}, skipping`);
+          continue;
+        }
+
+        const expiresDate = data.expiresAt?.toDate ? data.expiresAt.toDate() : data.expiresAt;
+        const dateStr = expiresDate ? expiresDate.toLocaleDateString('en-CA', {
+          year: 'numeric', month: 'long', day: 'numeric'
+        }) : 'soon';
+
+        try {
+          await transporter.sendMail({
+            from: `"CatchTales" <${emailUser.value()}>`,
+            to: recipientEmail,
+            subject: 'Your CatchTales Pro license expires soon',
+            html: `
+              <div style="font-family: Arial; max-width: 600px; margin: 0 auto;">
+                <div style="background: #0D47A1; color: white; padding: 20px; text-align: center; border-radius: 8px 8px 0 0;">
+                  <h2>CatchTales Pro</h2>
+                </div>
+                <div style="padding: 30px; background: #f8f9fa; border: 1px solid #ddd;">
+                  <p>Hi there,</p>
+                  <p>Your CatchTales <strong>Pro Yearly</strong> license is expiring on <strong>${dateStr}</strong>.</p>
+                  <p>To renew, reply to this email or visit <a href="https://catchtales.com/contact/">catchtales.com/contact</a>.</p>
+                  <p style="color: #666; font-size: 12px; margin-top: 30px;">
+                    Thank you for being a Pro user!<br>
+                    — The CatchTales Team
+                  </p>
+                </div>
+              </div>
+            `,
+          });
+
+          // Mark as reminded
+          await doc.ref.update({ remindedAt: FieldValue.serverTimestamp() });
+          sentCount++;
+          console.log(`Renewal reminder sent to ${recipientEmail} for license ${doc.id}`);
+        } catch (e) {
+          console.error(`Failed to send reminder for license ${doc.id}:`, e.message);
+        }
+      }
+
+      console.log(`Sent ${sentCount} renewal reminders`);
+    } catch (e) {
+      console.error('Pro expiry reminder function failed:', e);
     }
   });
 

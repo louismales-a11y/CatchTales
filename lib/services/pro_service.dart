@@ -237,12 +237,25 @@ class ProService extends ChangeNotifier {
       final data = doc.data()!;
       if (data['used'] == true) return null;
 
-      // Mark as used
+      // Mark as used and calculate expiry for yearly keys
       final licenseType = data['type'] as String? ?? 'lifetime';
-      await doc.reference.update({
+      final updateData = <String, dynamic>{
         'used': true,
         'usedAt': FieldValue.serverTimestamp(),
-      });
+      };
+
+      if (licenseType == 'yearly') {
+        // Store expiry: 365 days from now
+        final expiresAt = DateTime.now().add(const Duration(days: 365));
+        updateData['expiresAt'] = Timestamp.fromDate(expiresAt);
+      }
+
+      // Store the user's email if logged in (for renewal reminders)
+      if (AuthService.instance.isLoggedIn && AuthService.instance.email.isNotEmpty) {
+        updateData['activatedByEmail'] = AuthService.instance.email;
+      }
+
+      await doc.reference.update(updateData);
 
       return {'type': licenseType};
     } catch (_) {
