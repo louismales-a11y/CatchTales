@@ -773,4 +773,24 @@ class AuthService extends ChangeNotifier {
     _error = null;
     notifyListeners();
   }
+
+  /// Called when app resumes from background — increments today's session count.
+  Future<void> recordAppOpen() async {
+    if (_user == null) return;
+    if (_status != AuthStatus.authenticated) return;
+    try {
+      final today = DateTime.now();
+      final dateKey = '${today.year}-${today.month.toString().padLeft(2, '0')}-${today.day.toString().padLeft(2, '0')}';
+      await FirebaseFirestore.instance
+          .collection('users')
+          .doc(_user!.uid)
+          .update({
+        'totalSessions': FieldValue.increment(1),
+        'activityLog.$dateKey': FieldValue.increment(1),
+        'lastLogin': FieldValue.serverTimestamp(),
+      });
+    } catch (e) {
+      debugPrint('AuthService.recordAppOpen: $e');
+    }
+  }
 }

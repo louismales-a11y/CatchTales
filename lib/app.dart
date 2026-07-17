@@ -571,7 +571,7 @@ class HomeScreen extends StatefulWidget {
   State<HomeScreen> createState() => _HomeScreenState();
 }
 
-class _HomeScreenState extends State<HomeScreen> {
+class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
   int _selectedIndex = 0;
   final _catchesKey = GlobalKey<CatchesScreenState>();
   final _mapKey = GlobalKey<MapScreenState>();
@@ -579,13 +579,23 @@ class _HomeScreenState extends State<HomeScreen> {
   @override
   void initState() {
     super.initState();
+    WidgetsBinding.instance.addObserver(this);
     SkinService.instance.addListener(_onSkinChanged);
   }
 
   @override
   void dispose() {
+    WidgetsBinding.instance.removeObserver(this);
     SkinService.instance.removeListener(_onSkinChanged);
     super.dispose();
+  }
+
+  @override
+  void didChangeAppLifecycleState(AppLifecycleState state) {
+    if (state == AppLifecycleState.resumed) {
+      // App came to foreground — update activity tracking
+      AuthService.instance.recordAppOpen();
+    }
   }
 
   void _onSkinChanged() {
