@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
@@ -20,6 +22,7 @@ class _ProKeyManagerScreenState extends State<ProKeyManagerScreen> {
   List<QueryDocumentSnapshot>? _allDocs;
   bool _loading = true;
   String? _error;
+  StreamSubscription<QuerySnapshot>? _sub;
 
   static const _neon = Color(0xFF76FF03);
 
@@ -29,8 +32,14 @@ class _ProKeyManagerScreenState extends State<ProKeyManagerScreen> {
     _subscribe();
   }
 
+  @override
+  void dispose() {
+    _sub?.cancel();
+    super.dispose();
+  }
+
   void _subscribe() {
-    FirebaseFirestore.instance.collection('pro_licenses').snapshots().listen(
+    _sub = FirebaseFirestore.instance.collection('pro_licenses').snapshots().listen(
       (snapshot) {
         if (mounted) {
           setState(() {
