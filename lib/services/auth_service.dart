@@ -465,6 +465,7 @@ class AuthService extends ChangeNotifier {
         'isPro': false,
         'profilePhotoUrl': _profilePhotoUrl,
         'deviceSessionToken': token,
+        'totalSessions': 1,
         'createdAt': FieldValue.serverTimestamp(),
         'lastLogin': FieldValue.serverTimestamp(),
       });
@@ -493,11 +494,14 @@ class AuthService extends ChangeNotifier {
           await ProService.instance.unlockPro();
         }
 
-        // Update last login
+        // Update last login and activity stats
         await FirebaseFirestore.instance
             .collection('users')
             .doc(_user!.uid)
-            .update({'lastLogin': FieldValue.serverTimestamp()});
+            .update({
+          'lastLogin': FieldValue.serverTimestamp(),
+          'totalSessions': FieldValue.increment(1),
+        });
       } else {
         // Profile doesn't exist yet — create it
         await _createProfile();
