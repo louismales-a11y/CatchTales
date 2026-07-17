@@ -19,7 +19,7 @@ class TackleTypeInfo {
     required this.description,
     required this.targetSpecies,
     required this.tips,
-    this.icon = '🎣',
+    this.icon = 'fishing',
     this.bestSeasons = const ['spring', 'summer', 'fall', 'winter'],
     this.bestTimeOfDay = const ['dawn', 'day', 'dusk', 'night'],
   });
@@ -921,7 +921,7 @@ bestSeasons: ['spring', 'summer', 'fall'],
         'Colors: Plain lead (best), painted chartreuse or glow for dark water.',
     bestSeasons: ['winter'],
     bestTimeOfDay: ['dawn', 'dusk'],
-    icon: '🎣',
+    icon: 'fishing',
   ),
   TackleTypeInfo(
     name: 'Norwegian Hook',

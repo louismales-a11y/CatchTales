@@ -162,19 +162,19 @@ Check every page that has download buttons and update them simultaneously:
 
 Failure to update all pages means some download buttons will point to deleted files.
 
-### Working ADB install
-```bash
-adb install -r build/app/outputs/flutter-apk/app-release.apk
-```
-If it times out at 60s, retry — it can take up to 180s for a large APK (85MB+).
-
-### If `adb install` keeps timing out (APK >80MB)
+### Working ADB install (preferred — fast and reliable)
 ```bash
 adb push build/app/outputs/flutter-apk/app-release.apk /data/local/tmp/ct.apk
 adb shell pm install -r /data/local/tmp/ct.apk
 adb shell rm /data/local/tmp/ct.apk
 ```
-Pushing is fast (~57MB/s via USB), then `pm install` completes in seconds. This bypasses the streaming install timeout entirely.
+Push+install completes in seconds regardless of APK size (~57MB/s via USB bypasses the streaming install timeout entirely). This is the default method — always use it.
+
+### Fallback if push method fails
+```bash
+adb install -r build/app/outputs/flutter-apk/app-release.apk
+```
+May time out at 60s for large APKs (85MB+). Retry if it fails — can take up to 180s.
 
 ### Why build.sh can stall
 - It runs `flutter pub get` every time (resolving all 40+ deps)
@@ -227,5 +227,5 @@ Pushing is fast (~57MB/s via USB), then `pm install` completes in seconds. This 
 
 ---
 
-*Last updated: 2025-07-17 (added: no emojis or gradients rule, mobile-first responsive design rule)*
+*Last updated: 2025-07-17 (added: no emojis or gradients rule, mobile-first responsive design rule, push ADB as default install method)*
 *If Louis corrects a behavior, add it here immediately.*

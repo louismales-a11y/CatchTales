@@ -49,12 +49,15 @@ flutter build apk --release --dart-define=APP_VERSION=pro
 - Nothing — session complete
 
 ### Session 7 final state
-- All 49 website pages have mobile-optimized CSS (clamp() for typography/spacing, touch targets, safe area insets, animated nav)
-- Fish use fixed px sizes (clamp() caused rendering issues on Android tablets)
-- Photo strip aspect-ratio breakpoint at 480px (not 768px) to avoid oversized photos on tablets
-- /free/, /pro/, /dev/ pages have proper HTML structure (footer inside .content)
-- Cloud dashboard rebuilt with OpenWeather API key (weather/forecast now load)
-- Standards updated: no emojis/gradients rule + mobile-first responsive design rule
+- **Version bumped to 2.14.40** — all 3 flavors built and deployed
+- Visit Us Online link added to About and Contact screens
+- Cloud dashboard emoji cleanup (help text, fishing tips)
+- What's New updated with latest changes
+- All 49 website pages have mobile-optimized CSS
+- Fish use fixed px sizes (no clamp on animated elements)
+- /free/, /pro/, /dev/ pages have proper HTML structure
+- Cloud dashboard has OpenWeather API key, mobile-optimized HTML chrome
+- Standards updated: no emojis/gradients + mobile-first responsive design
 
 ### What we did in Session 5 (Website & Blog)
 - **Fixed cloud dashboard** — restored missing header + underwater background to `/cloud/`
