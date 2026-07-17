@@ -215,11 +215,12 @@ class ProService extends ChangeNotifier {
     }
 
     // Validate and get the license type
-    final resultData = await instance._validateCode(formatted);
+    final validateResult = await instance._validateCode(formatted);
     if (!context.mounted) return;
 
-    if (resultData != null) {
-      await instance.unlockPro(type: resultData['type'] as String? ?? 'lifetime');
+    if (validateResult is Map<String, dynamic> && validateResult['success'] == true) {
+      final type = validateResult['type'] as String? ?? 'lifetime';
+      await instance.unlockPro(type: type);
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(behavior: SnackBarBehavior.floating, 
           content: Text('Pro unlocked! Thank you for your support!'),
@@ -227,9 +228,10 @@ class ProService extends ChangeNotifier {
         ),
       );
     } else {
+      final msg = validateResult is String ? validateResult : 'Invalid code. Please check and try again.';
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(behavior: SnackBarBehavior.floating, 
-          content: Text('Invalid or already used code.'),
+          content: Text(msg),
           backgroundColor: Colors.red,
         ),
       );
@@ -238,18 +240,18 @@ class ProService extends ChangeNotifier {
 
   /// Validate a Pro code against Firestore.
   /// Returns the license data (including 'type') if valid, null otherwise.
-  Future<Map<String, dynamic>?> _validateCode(String code) async {
+  /// Returns [result] on success, or error message string on failure.
+  Future<dynamic> _validateCode(String code) async {
     try {
       final doc = await FirebaseFirestore.instance
           .collection('pro_licenses')
           .doc(code)
           .get();
 
-      if (!doc.exists) return null;
+      if (!doc.exists) return 'Key not found. Check the code and try again.';
       final data = doc.data()!;
-      if (data['used'] == true) return null;
+      if (data['used'] == true) return 'This key has already been used.';
 
-      // Mark as used and calculate expiry for yearly keys
       final licenseType = data['type'] as String? ?? 'lifetime';
       final updateData = <String, dynamic>{
         'used': true,
@@ -257,21 +259,18 @@ class ProService extends ChangeNotifier {
       };
 
       if (licenseType == 'yearly') {
-        // Store expiry: 365 days from now
         final expiresAt = DateTime.now().add(const Duration(days: 365));
         updateData['expiresAt'] = Timestamp.fromDate(expiresAt);
       }
 
-      // Store the user's email if logged in (for renewal reminders)
       if (AuthService.instance.isLoggedIn && AuthService.instance.email.isNotEmpty) {
         updateData['activatedByEmail'] = AuthService.instance.email;
       }
 
       await doc.reference.update(updateData);
-
-      return {'type': licenseType};
-    } catch (_) {
-      return null;
+      return {'type': licenseType, 'success': true};
+    } catch (e) {
+      return 'Activation failed: $e. Make sure you are signed in.';
     }
   }
 }
