@@ -780,6 +780,19 @@ class _HomeScreenState extends State<HomeScreen> {
                 child: OutlinedButton.icon(
                   onPressed: () {
                     Navigator.pop(ctx);
+                    Navigator.push(context, MaterialPageRoute(builder: (_) => const ProKeyManagerScreen()));
+                  },
+                  icon: const Icon(Icons.vpn_key_outlined, size: 18),
+                  label: const Text('Pro Key Manager'),
+                  style: OutlinedButton.styleFrom(foregroundColor: Colors.amber.shade700, side: BorderSide(color: Colors.amber.shade700)),
+                ),
+              ),
+              const SizedBox(height: 8),
+              SizedBox(
+                width: double.infinity,
+                child: OutlinedButton.icon(
+                  onPressed: () {
+                    Navigator.pop(ctx);
                     _showWalkthrough(context);
                   },
                   icon: const Icon(Icons.school, size: 18),
@@ -1052,14 +1065,6 @@ class _HomeScreenState extends State<HomeScreen> {
                       MaterialPageRoute(
                           builder: (_) => _withWater(const ContactScreen())));
                   break;
-                // ── Admin Only ──
-                case 'pro_key_manager':
-                  if (ApiConfig.isDev) {
-                    Navigator.push(context,
-                        MaterialPageRoute(
-                            builder: (_) => const ProKeyManagerScreen()));
-                  }
-                  break;
                 // ── Skin Toggle ──
                 case 'skin_dream':
                   SkinService.instance.setSkin('fancy');
@@ -1251,17 +1256,6 @@ class _HomeScreenState extends State<HomeScreen> {
                   contentPadding: EdgeInsets.zero,
                 ),
               ),
-              // ── Admin (dev only) ──
-              if (ApiConfig.isDev)
-                PopupMenuItem(
-                  value: 'pro_key_manager',
-                  child: ListTile(
-                    leading: Icon(Icons.vpn_key_outlined),
-                    title: const Text('Pro Key Manager'),
-                    dense: true,
-                    contentPadding: EdgeInsets.zero,
-                  ),
-                ),
               // ── Appearance (Classic skin only) ──
               if (SkinService.instance.isClassic)
                 PopupMenuItem(

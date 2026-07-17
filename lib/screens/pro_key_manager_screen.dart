@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:intl/intl.dart';
 import '../services/api_config.dart';
@@ -11,12 +12,17 @@ class ProKeyManagerScreen extends StatefulWidget {
 }
 
 class _ProKeyManagerScreenState extends State<ProKeyManagerScreen> {
-  String _filter = 'all'; // all, available, used, unassigned
+  String _filter = 'all';
   String _search = '';
   bool _generating = false;
-  String _generateType = 'lifetime'; // 'lifetime' or 'yearly'
+  String _generateType = 'lifetime';
 
   static const _neon = Color(0xFF76FF03);
+
+  /// Fetch all docs once, then filter in-memory — avoids index requirements.
+  Stream<QuerySnapshot> get _allDocs => FirebaseFirestore.instance
+      .collection('pro_licenses')
+      .snapshots();
 
   @override
   Widget build(BuildContext context) {
@@ -45,7 +51,6 @@ class _ProKeyManagerScreenState extends State<ProKeyManagerScreen> {
       ),
       body: Column(
         children: [
-          // Search bar
           Padding(
             padding: const EdgeInsets.fromLTRB(16, 8, 16, 4),
             child: TextField(
@@ -60,43 +65,49 @@ class _ProKeyManagerScreenState extends State<ProKeyManagerScreen> {
               onChanged: (v) => setState(() => _search = v),
             ),
           ),
-          // Summary bar
-          _buildSummary(),
-          // Key list
+          StreamBuilder<QuerySnapshot>(
+            stream: _allDocs,
+            builder: (context, snapshot) {
+              if (snapshot.hasError) {
+                return Padding(
+                  padding: const EdgeInsets.all(16),
+                  child: Text('Error: ${snapshot.error}', style: const TextStyle(color: Colors.red, fontSize: 13)),
+                );
+              }
+              final docs = snapshot.data?.docs ?? [];
+              return _buildSummary(docs);
+            },
+          ),
           Expanded(
-            child: _buildKeyList(),
+            child: StreamBuilder<QuerySnapshot>(
+              stream: _allDocs,
+              builder: (context, snapshot) => _buildKeyList(snapshot),
+            ),
           ),
         ],
       ),
     );
   }
 
-  Widget _buildSummary() {
-    return StreamBuilder<QuerySnapshot>(
-      stream: FirebaseFirestore.instance.collection('pro_licenses').orderBy('createdAt', descending: true).snapshots(),
-      builder: (context, snapshot) {
-        if (!snapshot.hasData) return const SizedBox(height: 40);
-        final docs = snapshot.data!.docs;
-        final total = docs.length;
-        final used = docs.where((d) => d['used'] == true).length;
-        final assigned = docs.where((d) => d['givenTo'] != null && d['used'] != true).length;
-        final available = docs.where((d) => d['used'] != true && d['givenTo'] == null).length;
+  Widget _buildSummary(List<QueryDocumentSnapshot> docs) {
+    final total = docs.length;
+    final used = docs.where((d) => d['used'] == true).length;
+    final assigned = docs.where((d) => d['used'] != true && d['givenTo'] != null && (d['givenTo'] as String).isNotEmpty).length;
+    final available = docs.where((d) => d['used'] != true && (d['givenTo'] == null || (d['givenTo'] as String).isEmpty)).length;
 
-        return Container(
-          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-          child: Row(
-            children: [
-              _summaryChip('$total Total', Colors.grey),
-              const SizedBox(width: 8),
-              _summaryChip('$available Available', _neon),
-              const SizedBox(width: 8),
-              _summaryChip('$assigned Given', Colors.orange),
-              const SizedBox(width: 8),
-              _summaryChip('$used Used', Colors.blueGrey),
-            ],
-          ),
-        );
-      },
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+      child: Row(
+        children: [
+          _summaryChip('$total Total', Colors.grey),
+          const SizedBox(width: 8),
+          _summaryChip('$available Available', _neon),
+          const SizedBox(width: 8),
+          _summaryChip('$assigned Given', Colors.orange),
+          const SizedBox(width: 8),
+          _summaryChip('$used Used', Colors.blueGrey),
+        ],
+      ),
     );
   }
 
@@ -112,68 +123,69 @@ class _ProKeyManagerScreenState extends State<ProKeyManagerScreen> {
     );
   }
 
-  Widget _buildKeyList() {
-    return StreamBuilder<QuerySnapshot>(
-      stream: FirebaseFirestore.instance
-          .collection('pro_licenses')
-          .orderBy('createdAt', descending: true)
-          .snapshots(),
-      builder: (context, snapshot) {
-        if (snapshot.hasError) {
-          return Center(
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                const Icon(Icons.error_outline, size: 48, color: Colors.red),
-                const SizedBox(height: 8),
-                Text('Error: ${snapshot.error}', style: const TextStyle(fontSize: 13, color: Colors.red)),
-              ],
-            ),
-          );
-        }
+  Widget _buildKeyList(AsyncSnapshot<QuerySnapshot> snapshot) {
+    if (snapshot.hasError) {
+      return Center(
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            const Icon(Icons.error_outline, size: 48, color: Colors.red),
+            const SizedBox(height: 8),
+            Text('${snapshot.error}', style: const TextStyle(fontSize: 13, color: Colors.red)),
+            const SizedBox(height: 16),
+            OutlinedButton(onPressed: () => setState(() {}), child: const Text('Retry')),
+          ],
+        ),
+      );
+    }
 
-        if (!snapshot.hasData) {
-          return const Center(child: CircularProgressIndicator());
-        }
+    if (!snapshot.hasData) {
+      return const Center(child: CircularProgressIndicator());
+    }
 
-        var docs = snapshot.data!.docs;
+    var docs = snapshot.data!.docs;
 
-        // Apply filter
-        if (_filter == 'available') {
-          docs = docs.where((d) => d['used'] != true && d['givenTo'] == null).toList();
-        } else if (_filter == 'used') {
-          docs = docs.where((d) => d['used'] == true).toList();
-        } else if (_filter == 'unassigned') {
-          docs = docs.where((d) => d['used'] != true && d['givenTo'] != null).toList();
-        }
+    // Apply filter
+    if (_filter == 'available') {
+      docs = docs.where((d) =>
+          d['used'] != true &&
+          (d['givenTo'] == null || (d['givenTo'] as String).trim().isEmpty)).toList();
+    } else if (_filter == 'used') {
+      docs = docs.where((d) => d['used'] == true).toList();
+    } else if (_filter == 'given') {
+      docs = docs.where((d) =>
+          d['used'] != true &&
+          d['givenTo'] != null &&
+          (d['givenTo'] as String).trim().isNotEmpty).toList();
+    }
 
-        // Apply search
-        if (_search.isNotEmpty) {
-          final q = _search.toUpperCase();
-          docs = docs.where((d) =>
-              d.id.contains(q) ||
-              (d['givenTo']?.toString().toUpperCase().contains(q) ?? false)).toList();
-        }
+    // Apply search
+    if (_search.isNotEmpty) {
+      final q = _search.toUpperCase();
+      docs = docs.where((d) {
+        final key = d.id.toUpperCase();
+        final recipient = (d['givenTo'] as String? ?? '').toUpperCase();
+        return key.contains(q) || recipient.contains(q);
+      }).toList();
+    }
 
-        if (docs.isEmpty) {
-          return Center(
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                Icon(Icons.vpn_key_off, size: 48, color: Colors.grey.shade600),
-                const SizedBox(height: 8),
-                Text('No keys found', style: TextStyle(fontSize: 14, color: Colors.grey.shade500)),
-              ],
-            ),
-          );
-        }
+    if (docs.isEmpty) {
+      return Center(
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Icon(Icons.vpn_key_off, size: 48, color: Colors.grey.shade600),
+            const SizedBox(height: 8),
+            Text('No keys found', style: TextStyle(fontSize: 14, color: Colors.grey.shade500)),
+          ],
+        ),
+      );
+    }
 
-        return ListView.builder(
-          padding: const EdgeInsets.symmetric(horizontal: 12),
-          itemCount: docs.length,
-          itemBuilder: (context, index) => _KeyTile(doc: docs[index]),
-        );
-      },
+    return ListView.builder(
+      padding: const EdgeInsets.symmetric(horizontal: 12),
+      itemCount: docs.length,
+      itemBuilder: (context, index) => _KeyTile(doc: docs[index]),
     );
   }
 
@@ -192,18 +204,21 @@ class _ProKeyManagerScreenState extends State<ProKeyManagerScreen> {
           ListTile(
             leading: Icon(Icons.check_circle_outline, color: _neon),
             title: const Text('Available'),
+            subtitle: const Text('Not used, not assigned'),
             trailing: _filter == 'available' ? const Icon(Icons.check, size: 18) : null,
             onTap: () { setState(() => _filter = 'available'); Navigator.pop(ctx); },
           ),
           ListTile(
             leading: const Icon(Icons.person_outline, color: Colors.orange),
-            title: const Text('Given out (not yet used)'),
-            trailing: _filter == 'unassigned' ? const Icon(Icons.check, size: 18) : null,
-            onTap: () { setState(() => _filter = 'unassigned'); Navigator.pop(ctx); },
+            title: const Text('Given out'),
+            subtitle: const Text('Assigned to someone, not yet used'),
+            trailing: _filter == 'given' ? const Icon(Icons.check, size: 18) : null,
+            onTap: () { setState(() => _filter = 'given'); Navigator.pop(ctx); },
           ),
           ListTile(
             leading: const Icon(Icons.check_circle, color: Colors.blueGrey),
             title: const Text('Used'),
+            subtitle: const Text('Already activated'),
             trailing: _filter == 'used' ? const Icon(Icons.check, size: 18) : null,
             onTap: () { setState(() => _filter = 'used'); Navigator.pop(ctx); },
           ),
@@ -273,11 +288,10 @@ class _ProKeyManagerScreenState extends State<ProKeyManagerScreen> {
       final codes = <String>[];
       int attempts = 0;
 
-      while (codes.length < count && attempts < 100) {
+      while (codes.length < count && attempts < 200) {
         attempts++;
         final code = _generateCode();
         if (!codes.contains(code)) {
-          // Check it doesn't already exist in Firestore
           final existing = await FirebaseFirestore.instance.collection('pro_licenses').doc(code).get();
           if (!existing.exists) {
             codes.add(code);
@@ -297,12 +311,14 @@ class _ProKeyManagerScreenState extends State<ProKeyManagerScreen> {
         }
       }
 
-      await batch.commit();
+      if (codes.isNotEmpty) {
+        await batch.commit();
+      }
 
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text('Generated ${codes.length} new keys'),
+            content: Text('Generated ${codes.length} new keys ($type)'),
             backgroundColor: Colors.green,
           ),
         );
@@ -322,15 +338,13 @@ class _ProKeyManagerScreenState extends State<ProKeyManagerScreen> {
   }
 
   String _generateCode() {
-    final chars = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789'; // No I,O,0,1 to avoid confusion
-    final r = DateTime.now().microsecondsSinceEpoch;
-    final parts = <String>[];
-    for (int p = 0; p < 3; p++) {
-      final part = String.fromCharCodes(
-        List.generate(4, (i) => chars.codeUnitAt((r + p * 4 + i) % chars.length)),
+    final chars = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789';
+    final parts = List.generate(3, (_) {
+      final p = String.fromCharCodes(
+        List.generate(4, (i) => chars.codeUnitAt(DateTime.now().microsecondsSinceEpoch % chars.length + i * 7 % chars.length)),
       );
-      parts.add(part);
-    }
+      return p;
+    });
     return 'PRO-${parts[0]}-${parts[1]}-${parts[2]}';
   }
 }
@@ -342,13 +356,12 @@ class _KeyTile extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final used = doc['used'] == true;
     final type = doc['type'] as String? ?? 'lifetime';
+    final used = doc['used'] == true;
     final givenTo = doc['givenTo'] as String?;
     final usedAt = doc['usedAt'] as Timestamp?;
     final notes = doc['notes'] as String?;
 
-    // Determine status color
     Color statusColor;
     String statusLabel;
     IconData statusIcon;
@@ -357,7 +370,7 @@ class _KeyTile extends StatelessWidget {
       statusColor = Colors.blueGrey;
       statusLabel = 'Used';
       statusIcon = Icons.check_circle;
-    } else if (givenTo != null) {
+    } else if (givenTo != null && givenTo.trim().isNotEmpty) {
       statusColor = Colors.orange;
       statusLabel = 'Given';
       statusIcon = Icons.person_outline;
@@ -367,7 +380,6 @@ class _KeyTile extends StatelessWidget {
       statusIcon = Icons.vpn_key;
     }
 
-    // User info if activated
     final dateFmt = DateFormat('MMM d, yyyy');
 
     return Card(
@@ -423,9 +435,9 @@ class _KeyTile extends StatelessWidget {
                   ),
                 ],
               ),
-              if (givenTo != null || usedAt != null) ...[
+              if (givenTo != null && givenTo.trim().isNotEmpty || usedAt != null) ...[
                 const SizedBox(height: 4),
-                if (givenTo != null)
+                if (givenTo != null && givenTo.trim().isNotEmpty)
                   Text('Given to: $givenTo',
                       style: TextStyle(fontSize: 12, color: Colors.grey.shade400)),
                 if (usedAt != null)
@@ -499,6 +511,7 @@ class _KeyDetailContentState extends State<_KeyDetailContent> {
 
   @override
   Widget build(BuildContext context) {
+    final type = widget.doc['type'] as String? ?? 'lifetime';
     final used = widget.doc['used'] == true;
     final usedAt = widget.doc['usedAt'] as Timestamp?;
     final dateFmt = DateFormat('MMM d, yyyy  h:mm a');
@@ -508,14 +521,19 @@ class _KeyDetailContentState extends State<_KeyDetailContent> {
         mainAxisSize: MainAxisSize.min,
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          // Status
           Row(
             children: [
-              Icon(
-                used ? Icons.check_circle : Icons.vpn_key,
-                size: 16,
-                color: used ? Colors.blueGrey : _KeyTile._neon,
+              Container(
+                padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                decoration: BoxDecoration(
+                  color: type == 'yearly' ? Colors.amber.withValues(alpha: 0.15) : Colors.grey.withValues(alpha: 0.15),
+                  borderRadius: BorderRadius.circular(4),
+                ),
+                child: Text(type == 'yearly' ? 'Yearly' : 'Lifetime',
+                    style: TextStyle(fontSize: 11, fontWeight: FontWeight.w700, color: type == 'yearly' ? Colors.amber : Colors.grey)),
               ),
+              const SizedBox(width: 8),
+              Icon(used ? Icons.check_circle : Icons.vpn_key, size: 16, color: used ? Colors.blueGrey : _KeyTile._neon),
               const SizedBox(width: 6),
               Text(
                 used ? 'Activated ${usedAt != null ? dateFmt.format(usedAt.toDate()) : ''}' : 'Not yet used',
@@ -525,12 +543,11 @@ class _KeyDetailContentState extends State<_KeyDetailContent> {
           ),
           const SizedBox(height: 16),
 
-          // Editable: given to
           TextField(
             controller: _givenToCtrl,
             decoration: const InputDecoration(
               labelText: 'Given to (store name / contact)',
-              hintText: 'e.g. Bob\'s Bait & Tackle',
+              hintText: "e.g. Bob's Bait & Tackle",
               border: OutlineInputBorder(),
               isDense: true,
               contentPadding: EdgeInsets.symmetric(horizontal: 12, vertical: 10),
@@ -539,7 +556,6 @@ class _KeyDetailContentState extends State<_KeyDetailContent> {
           ),
           const SizedBox(height: 12),
 
-          // Editable: notes
           TextField(
             controller: _notesCtrl,
             decoration: const InputDecoration(
@@ -554,21 +570,30 @@ class _KeyDetailContentState extends State<_KeyDetailContent> {
           ),
           const SizedBox(height: 16),
 
-          // Copy key
+          // Copy key button
           SizedBox(
             width: double.infinity,
             child: OutlinedButton.icon(
               icon: const Icon(Icons.copy, size: 16),
               label: const Text('Copy Key'),
               onPressed: () {
-                // Copy to clipboard
-                // Using a simple approach
                 showDialog(
                   context: context,
                   builder: (ctx) => AlertDialog(
-                    content: SelectableText(widget.doc.id, style: const TextStyle(fontSize: 18, fontFamily: 'monospace', letterSpacing: 1)),
+                    title: const Text('Copy this key'),
+                    content: SelectableText(widget.doc.id, style: const TextStyle(fontSize: 20, fontFamily: 'monospace', letterSpacing: 1)),
                     actions: [
-                      TextButton(onPressed: () => Navigator.pop(ctx), child: const Text('Done')),
+                      FilledButton(
+                        onPressed: () {
+                          // Copy to clipboard
+                          Clipboard.setData(ClipboardData(text: widget.doc.id));
+                          Navigator.pop(ctx);
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            const SnackBar(content: Text('Key copied'), backgroundColor: Colors.green),
+                          );
+                        },
+                        child: const Text('Copy'),
+                      ),
                     ],
                   ),
                 );
@@ -577,7 +602,6 @@ class _KeyDetailContentState extends State<_KeyDetailContent> {
           ),
           const SizedBox(height: 8),
 
-          // Save
           SizedBox(
             width: double.infinity,
             child: FilledButton.icon(
@@ -600,7 +624,6 @@ class _KeyDetailContentState extends State<_KeyDetailContent> {
         'givenTo': _givenToCtrl.text.isNotEmpty ? _givenToCtrl.text.trim() : null,
         'notes': _notesCtrl.text.isNotEmpty ? _notesCtrl.text.trim() : null,
       };
-      // If marking as given for the first time, set givenAt
       if (_givenToCtrl.text.isNotEmpty && widget.doc['givenAt'] == null) {
         update['givenAt'] = FieldValue.serverTimestamp();
       }
