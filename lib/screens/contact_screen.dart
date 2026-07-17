@@ -160,6 +160,14 @@ $subject:
                   subtitle: const Text(AppIdentity.email),
                   onTap: () => _sendEmail(context, ''),
                 ),
+                const Divider(height: 1),
+                ListTile(
+                  leading: Icon(Icons.language_outlined,
+                      color: theme.colorScheme.primary),
+                  title: const Text('Website'),
+                  subtitle: const Text('www.catchtales.com'),
+                  onTap: () => launchUrl(Uri.parse('https://www.catchtales.com'), mode: LaunchMode.externalApplication),
+                ),
 
               ],
             ),

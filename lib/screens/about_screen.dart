@@ -204,6 +204,8 @@ class _AboutScreenState extends State<AboutScreen> {
                   const Divider(height: 1),
                   _linkTile(Icons.description_outlined, 'Terms of Service', () => _openUrl('https://catchtales.com/terms')),
                   const Divider(height: 1),
+                  _linkTile(Icons.language_outlined, 'Visit Us Online', () => _openUrl('https://www.catchtales.com')),
+                  const Divider(height: 1),
                   _linkTile(Icons.mail_outline, 'Contact Us', () => _openUrl('mailto:catchtales@yahoo.com')),
                 ],
               ),

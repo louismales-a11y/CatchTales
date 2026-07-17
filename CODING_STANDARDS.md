@@ -24,6 +24,7 @@
 | **Document solutions as rules** | When you solve a tricky problem (ADB, build issues, config, etc.), write the working procedure into this document immediately so it becomes the default method forever. |
 | **Keep the desktop note in sync** | Whenever `CODING_STANDARDS.md` is updated, also update `~/Desktop/CatchTales-Rules.txt` to match. The desktop note is the quick-reference version. |
 | **Follow existing patterns** | Before adding anything new, look at how similar things are done elsewhere on the site or in the code. Match the existing convention — don't invent new styles, formats, or structures unless there's a clear reason to break from the pattern. |
+| **Check callers when changing shared code** | When changing a getter, function, or field used across the app, check every caller first. Use "find references" or grep to see how it's consumed. The context where it's *used* may not match your assumption about the change.
 
 ### 📋 Standards Check Cadence
 
@@ -57,6 +58,13 @@
 | **Single version number** | One `pubspec.yaml`, one version across all flavors. |
 | **Version format** | Follow `pubspec.yaml` semver (e.g., `2.14.30`). |
 | **Update `version.json`** | The website's `version.json` must match the app version. |
+
+### 2a. Version Bump Discipline
+
+| Rule | Details |
+|------|---------|
+| **Set the version once, build all flavors from it** | Before building, manually set `pubspec.yaml` to the target version. Use `build.sh` for the first build (it bumps). Then revert `pubspec.yaml` back to the target version before building the remaining flavors. This keeps all three flavors at the same version. |
+| **Plan the full flavor build before starting** | Don't build dev, then free, then pro sequentially with build.sh — each run bumps the version. Instead, decide the target version upfront, build all three flavors without intermediate bumps. |
 
 ## 3. App Changes — Always Update These Together
 
@@ -199,6 +207,8 @@ Pushing is fast (~57MB/s via USB), then `pm install` completes in seconds. This 
 | **Error handling** | Show user-facing messages. No silent failures. |
 | **State management** | Provider pattern (ChangeNotifierProvider) |
 | **Async context** | Always check `if (!context.mounted) return` after async gaps |
+| **No emojis or gradients** | Zero emojis and zero gradients anywhere — app UI, website, help text, translations, blog posts, notifications. Use solid colors, icons (SVG or Material), and text-only labels. No exceptions. |
+| **Mobile-first responsive design** | Every web element must render correctly on all device sizes (320px phones to widescreen desktop). Use `clamp()` for fluid typography and spacing, `min-height: 44px` for touch targets, `env(safe-area-inset-*)` for notched phones, and animated hamburger menus on mobile. Test on a real phone before deploying. |
 
 ## 8. File Locations
 
@@ -217,5 +227,5 @@ Pushing is fast (~57MB/s via USB), then `pm install` completes in seconds. This 
 
 ---
 
-*Last updated: 2025-07-16 (resolved gh-pages conflict, added: keep desktop note in sync)*
+*Last updated: 2025-07-17 (added: no emojis or gradients rule, mobile-first responsive design rule)*
 *If Louis corrects a behavior, add it here immediately.*
