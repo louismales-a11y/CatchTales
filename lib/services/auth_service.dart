@@ -494,14 +494,49 @@ class AuthService extends ChangeNotifier {
           await ProService.instance.unlockPro();
         }
 
-        // Update last login and activity stats
+        // Update last login, activity stats, and daily log
+        final today = DateTime.now();
+        final dateKey = '${today.year}-${today.month.toString().padLeft(2, '0')}-${today.day.toString().padLeft(2, '0')}';
         await FirebaseFirestore.instance
             .collection('users')
             .doc(_user!.uid)
             .update({
           'lastLogin': FieldValue.serverTimestamp(),
           'totalSessions': FieldValue.increment(1),
+          'activityLog.$dateKey': FieldValue.increment(1),
         });
+
+        // Clean up old log entries (older than 60 days) once per week
+        final weekStart = today.subtract(Duration(days: today.weekday - 1));
+        if (data['lastLogCleanup'] == null ||
+            (weekStart.isAfter((data['lastLogCleanup'] as Timestamp).toDate()))) {
+          final cleanup = <String, dynamic>{};
+          if (data['activityLog'] is Map) {
+            final log = data['activityLog'] as Map<String, dynamic>;
+            final cutoff = today.subtract(const Duration(days: 60));
+            for (final entry in log.entries) {
+              final k = entry.key;
+              if (k is String) {
+                final parts = k.split('-');
+                if (parts.length == 3) {
+                  try {
+                    final date = DateTime(int.parse(parts[0]), int.parse(parts[1]), int.parse(parts[2]));
+                    if (date.isBefore(cutoff)) {
+                      cleanup['activityLog.$k'] = FieldValue.delete();
+                    }
+                  } catch (_) {}
+                }
+              }
+            }
+          }
+          cleanup['lastLogCleanup'] = FieldValue.serverTimestamp();
+          if (cleanup.length > 1) {
+            await FirebaseFirestore.instance
+                .collection('users')
+                .doc(_user!.uid)
+                .update(cleanup);
+          }
+        }
       } else {
         // Profile doesn't exist yet — create it
         await _createProfile();
