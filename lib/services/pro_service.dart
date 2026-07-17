@@ -263,8 +263,13 @@ class ProService extends ChangeNotifier {
         updateData['expiresAt'] = Timestamp.fromDate(expiresAt);
       }
 
-      if (AuthService.instance.isLoggedIn && AuthService.instance.email.isNotEmpty) {
-        updateData['activatedByEmail'] = AuthService.instance.email;
+      if (AuthService.instance.isLoggedIn) {
+        if (AuthService.instance.email.isNotEmpty) {
+          updateData['activatedByEmail'] = AuthService.instance.email;
+        }
+        if (AuthService.instance.userName.isNotEmpty) {
+          updateData['activatedByName'] = AuthService.instance.userName;
+        }
       }
 
       await doc.reference.update(updateData);
