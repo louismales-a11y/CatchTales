@@ -494,21 +494,14 @@ class AuthService extends ChangeNotifier {
           await ProService.instance.unlockPro();
         }
 
-        // Update last login, activity stats, and daily log
-        final today = DateTime.now();
-        final dateKey = '${today.year}-${today.month.toString().padLeft(2, '0')}-${today.day.toString().padLeft(2, '0')}';
-        final currentSessions = (data['totalSessions'] as num?)?.toInt() ?? 0;
-        final log = Map<String, dynamic>.from(data['activityLog'] as Map? ?? {});
-        final todayCount = (log[dateKey] as num?)?.toInt() ?? 0;
-        log[dateKey] = todayCount + 1;
-        
+        // Update last login and session count
+        final curSessions = (data['totalSessions'] as num?)?.toInt() ?? 0;
         await FirebaseFirestore.instance
             .collection('users')
             .doc(_user!.uid)
             .update({
           'lastLogin': FieldValue.serverTimestamp(),
-          'totalSessions': currentSessions + 1,
-          'activityLog': log,
+          'totalSessions': curSessions + 1,
         });
       } else {
         // Profile doesn't exist yet — create it
@@ -747,33 +740,22 @@ class AuthService extends ChangeNotifier {
     notifyListeners();
   }
 
-  /// Called when app resumes from background — increments today's session count.
+  /// Called when app resumes from background — increments session count.
   Future<void> recordAppOpen() async {
     if (_user == null) return;
     if (_status != AuthStatus.authenticated) return;
     try {
-      final today = DateTime.now();
-      final dateKey = '${today.year}-${today.month.toString().padLeft(2, '0')}-${today.day.toString().padLeft(2, '0')}';
-      
-      // Read current data, increment, write back (more reliable than FieldValue.increment)
       final doc = await FirebaseFirestore.instance
           .collection('users')
           .doc(_user!.uid)
           .get();
-      
       if (doc.exists) {
-        final data = doc.data()!;
-        final currentSessions = (data['totalSessions'] as num?)?.toInt() ?? 0;
-        final log = Map<String, dynamic>.from(data['activityLog'] as Map? ?? {});
-        final todayCount = (log[dateKey] as num?)?.toInt() ?? 0;
-        log[dateKey] = todayCount + 1;
-        
+        final cur = (doc.data()!['totalSessions'] as num?)?.toInt() ?? 0;
         await FirebaseFirestore.instance
             .collection('users')
             .doc(_user!.uid)
             .update({
-          'totalSessions': currentSessions + 1,
-          'activityLog': log,
+          'totalSessions': cur + 1,
           'lastLogin': FieldValue.serverTimestamp(),
         });
       }
