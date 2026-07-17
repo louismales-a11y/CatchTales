@@ -59,12 +59,19 @@ flutter build apk --release --dart-define=APP_VERSION=pro
 - **Room cleanup features** — Clear Chat button, owner can delete any message, system messages collapsed
 - **Built + installed v2.14.33** on phone (dev) and deployed to website (free + pro)
 
+### What we did in Session 6 (Emoji & Gradient Cleanup)
+- **Website cleanup**: Removed all 🔒 from nav links (99 instances), removed ❤️🎣 from footers (49 files), replaced all gradients with solid colors, removed heading/button/blog emojis, replaced 6 feature card emojis with inline SVGs, cleaned blog content emojis (checkboxes, ✅❌⚠️, star ratings → 5/5)
+- **App cleanup**: Replaced all LinearGradient with solid colors (10 files), removed emojis from What's New, notifications, badges, screen UI, stripped emojis from help text and translations (447 across 5 languages), moon phases now use abbreviations (NM, WC, FQ, FM)
+- **Fixed layout**: Tightened solunar screen spacers, fixed moon phase text overflow
+- **Built v2.14.39**: All three flavors built with API keys, installed dev on phone
+- **Deployed**: Updated website APK downloads to v2.14.39, pushed all changes
+
 ### Current state
 | Item | Value |
 |------|-------|
 | Source | `~/CatchTales/` (remote: `louismales-a11y/CatchTales.git`) |
-| Version | 2.14.33 |
+| Version | 2.14.39 |
 | Website | catchtales.com (remote: `louismales-a11y/catchtales-site.git`) |
-| APK downloads | `~/catchtales-site/download/` (3 flavors) |
+| APK downloads | `~/catchtales-site/download/` (free + pro) |
 | APK backups | `~/Desktop/apk backups/` (3 flavors) |
 | Cloud functions | `~/CatchTales/functions/` + `~/catchtales_cloud/` |
