@@ -1,7 +1,10 @@
 import 'dart:async';
 import 'dart:convert';
+import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
+import 'package:path_provider/path_provider.dart';
+import 'package:flutter/services.dart';
 import 'package:package_info_plus/package_info_plus.dart';
 import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -267,6 +270,7 @@ class _SplashScreenState extends State<SplashScreen> {
   String _updateUrl = '';
   String _updateTag = '';
   bool _checkingUpdate = false;
+  bool _downloading = false;
 
   @override
   void initState() {
@@ -362,6 +366,63 @@ class _SplashScreenState extends State<SplashScreen> {
       // Silently fail — update check is non-essential
     }
     if (mounted) setState(() => _checkingUpdate = false);
+  }
+
+  Future<void> _downloadAndInstall() async {
+    if (_downloading) return;
+    setState(() => _downloading = true);
+    try {
+      // Show downloading snackbar
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Row(
+              children: [
+                SizedBox(width: 16, height: 16, child: CircularProgressIndicator(strokeWidth: 2, color: Colors.white)),
+                SizedBox(width: 12),
+                Text('Downloading update...'),
+              ],
+            ),
+            behavior: SnackBarBehavior.floating,
+            duration: Duration(seconds: 30),
+          ),
+        );
+      }
+
+      // Download APK to temp directory
+      final dir = await getTemporaryDirectory();
+      final file = File('${dir.path}/update.apk');
+      final response = await http.get(Uri.parse(_updateUrl));
+      if (response.statusCode == 200) {
+        await file.writeAsBytes(response.bodyBytes);
+
+        // Trigger install via platform channel
+        const channel = MethodChannel('com.catchtales.catchtales/install');
+        await channel.invokeMethod('installApk', {'path': file.path});
+      } else {
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(
+              content: Text('Download failed. Please try again.'),
+              behavior: SnackBarBehavior.floating,
+            ),
+          );
+        }
+      }
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Update failed: $e'),
+            behavior: SnackBarBehavior.floating,
+          ),
+        );
+      }
+    }
+    if (mounted) {
+      setState(() => _downloading = false);
+      ScaffoldMessenger.of(context).hideCurrentSnackBar();
+    }
   }
 
   void _showWhatsNew(String version) {
@@ -497,7 +558,7 @@ class _SplashScreenState extends State<SplashScreen> {
                 Padding(
                   padding: const EdgeInsets.only(bottom: 6),
                   child: GestureDetector(
-                    onTap: () => launchUrl(Uri.parse(_updateUrl), mode: LaunchMode.inAppBrowserView),
+                    onTap: () => _downloadAndInstall(),
                     child: Container(
                       padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 6),
                       decoration: BoxDecoration(
