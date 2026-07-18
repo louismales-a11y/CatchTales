@@ -1,5 +1,7 @@
 import 'dart:async';
+import 'dart:convert';
 import 'package:flutter/material.dart';
+import 'package:http/http.dart' as http;
 import 'package:package_info_plus/package_info_plus.dart';
 import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -261,6 +263,10 @@ class SplashScreen extends StatefulWidget {
 
 class _SplashScreenState extends State<SplashScreen> {
   String _version = '';
+  bool _updateAvailable = false;
+  String _updateUrl = '';
+  String _updateTag = '';
+  bool _checkingUpdate = false;
 
   @override
   void initState() {
@@ -308,6 +314,8 @@ class _SplashScreenState extends State<SplashScreen> {
     }
     await CloudSyncService.instance.init();
     await NotificationService.instance.init();
+    // Check for newer version
+    _checkUpdate();
     // What's new check
     final prefs = await SharedPreferences.getInstance();
     final lastSeen = prefs.getString('last_version_seen');
@@ -315,6 +323,45 @@ class _SplashScreenState extends State<SplashScreen> {
       await prefs.setString('last_version_seen', version);
       if (mounted) _showWhatsNew(version);
     }
+  }
+
+  Future<void> _checkUpdate() async {
+    try {
+      setState(() => _checkingUpdate = true);
+      final uri = Uri.parse('https://catchtales.com/version.json');
+      final response = await http.get(uri).timeout(const Duration(seconds: 10));
+      if (response.statusCode == 200) {
+        final data = json.decode(response.body);
+        final tag = data['tag_name'] as String? ?? 'v${data['version'] ?? ''}';
+        final apks = data['apks'] as Map<String, dynamic>? ?? {};
+        final flavor = ApiConfig.appVersion;
+        final apkPath = apks[flavor] as String?;
+        final url = apkPath != null && apkPath.isNotEmpty
+            ? 'https://catchtales.com$apkPath'
+            : 'https://catchtales.com/download/';
+
+        // Compare versions
+        final tagParts = tag.replaceAll('v', '').split('.').map((e) => int.tryParse(e) ?? 0).toList();
+        final curParts = _version.split('.').map((e) => int.tryParse(e) ?? 0).toList();
+        bool newer = false;
+        for (int i = 0; i < 3; i++) {
+          final t = i < tagParts.length ? tagParts[i] : 0;
+          final c = i < curParts.length ? curParts[i] : 0;
+          if (t > c) { newer = true; break; }
+          if (t < c) break;
+        }
+        if (mounted && newer) {
+          setState(() {
+            _updateAvailable = true;
+            _updateUrl = url;
+            _updateTag = tag;
+          });
+        }
+      }
+    } catch (_) {
+      // Silently fail — update check is non-essential
+    }
+    if (mounted) setState(() => _checkingUpdate = false);
   }
 
   void _showWhatsNew(String version) {
@@ -335,6 +382,9 @@ class _SplashScreenState extends State<SplashScreen> {
             crossAxisAlignment: CrossAxisAlignment.start,
             mainAxisSize: MainAxisSize.min,
             children: [
+              _whatsNewItem('New mascot character on splash screen — The One That Got Away'),
+              _whatsNewItem('Update checker on splash screen — tap to download new version'),
+              _whatsNewItem('CatchTales logo on native splash + updated launcher icons'),
               _whatsNewItem('Visit Us Online link in About and Contact screens'),
               _whatsNewItem('**Clear Chat** button for room owners — delete all messages at once'),
               _whatsNewItem('Room owners can now delete **any message** (including system messages), just long-press'),
@@ -395,27 +445,21 @@ class _SplashScreenState extends State<SplashScreen> {
         child: SafeArea(
           child: Column(
             children: [
-              const Spacer(flex: 2),
-              Container(
-                width: 110,
-                height: 110,
-                decoration: BoxDecoration(
-                  borderRadius: BorderRadius.circular(28),
-                  boxShadow: [
-                    BoxShadow(
-                        color: tp.isDark
-                            ? tp.themeInfo.accent.withValues(alpha: 0.4)
-                            : tp.themeInfo.accent.withValues(alpha: 0.4),
-                        blurRadius: 30),
-                  ],
-                ),
+              const Spacer(flex: 1),
+              // Mascot illustration: The One That Got Away
+              Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 32),
                 child: ClipRRect(
-                  borderRadius: BorderRadius.circular(28),
-                  child:
-                      Image.asset('assets/logo.png', fit: BoxFit.cover),
+                  borderRadius: BorderRadius.circular(20),
+                  child: Image.asset(
+                    'assets/ctotga_splash.png',
+                    height: 320,
+                    fit: BoxFit.contain,
+                    errorBuilder: (_, _, _) => const SizedBox.shrink(),
+                  ),
                 ),
               ),
-              const SizedBox(height: 20),
+              const SizedBox(height: 24),
               Text(ApiConfig.appDisplayName,
                   style: const TextStyle(
                     fontSize: 30,
@@ -442,7 +486,7 @@ class _SplashScreenState extends State<SplashScreen> {
                     letterSpacing: 4,
                   )),
               const SizedBox(height: 4),
-              const Text('🇨🇦  🇺🇸',
+              const Text('CA  US',
                   style: TextStyle(fontSize: 20)),
               const Spacer(),
               Text(_version.isNotEmpty ? 'v$_version' : '',
@@ -552,6 +596,35 @@ class _SplashScreenState extends State<SplashScreen> {
                   ),
                 ),
               ),
+              // Update available banner
+              if (_updateAvailable)
+                Padding(
+                  padding: const EdgeInsets.only(top: 8),
+                  child: GestureDetector(
+                    onTap: () => launchUrl(Uri.parse(_updateUrl), mode: LaunchMode.externalApplication),
+                    child: Container(
+                      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                      decoration: BoxDecoration(
+                        color: Colors.amber.shade700.withValues(alpha: 0.2),
+                        borderRadius: BorderRadius.circular(12),
+                        border: Border.all(color: Colors.amber.shade400.withValues(alpha: 0.5)),
+                      ),
+                      child: Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          Icon(Icons.system_update, size: 16, color: Colors.amber.shade300),
+                          const SizedBox(width: 6),
+                          Text(
+                            'Update $_updateTag available',
+                            style: TextStyle(fontSize: 12, color: Colors.amber.shade200),
+                          ),
+                          const SizedBox(width: 4),
+                          Icon(Icons.open_in_new, size: 12, color: Colors.amber.shade300),
+                        ],
+                      ),
+                    ),
+                  ),
+                ),
               const Spacer(flex: 1),
             ],
           ),
