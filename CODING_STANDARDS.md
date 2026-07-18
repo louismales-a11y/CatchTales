@@ -205,6 +205,47 @@ When modifying the in-app update feature, these files must be kept in sync:
 | **Check the full listing after any blog edit** | Run `grep -o 'href="/blog/[^"]*/"' blog/index.html \| sort \| uniq -d` to catch duplicates before committing. |
 | **Blog post footer format** | Every blog post ends with a CTA box (teal border, rounded corners) containing "Track Your Fishing with CatchTales" heading + description + "← Back to Blog" link. No download buttons, no app links, no external URLs in the CTA. |
 
+## 6d. Provincial Fishing Pages — Structure & Content Rules
+
+When building province guides and region pages, follow this structure:
+
+### Directory layout
+```
+/fishing-in-canada/                          ← Canada landing page
+/fishing-in-canada/[province]/               ← Province hub (map + region list)
+/fishing-near/[region]/                      ← Region page (detailed lake/river entries)
+```
+
+### Canada landing page (`/fishing-in-canada/`)
+- Grid of province cards with abbreviation, name, short description
+- Spotlight (green border) province that has region pages built
+- Provinces with region pages link to `/fishing-in-canada/[province]/`
+- Provinces without region pages link to their blog article `/blog/fishing-in-[province]-top-species-and-spots/`
+
+### Province hub page (`/fishing-in-canada/[province]/`)
+- Back link to `/fishing-in-canada/`
+- Stats bar: number of regions, number of spots (e.g., "150+"), number of species
+- Left column: topographic map image (clickable to full size, max-height 420px)
+- Right column: region cards (colored dot + name + species, links to `/fishing-near/[region]/`)
+- Map + region list centered as a group with `justify-content: center`
+- Region card headings 17-20px, descriptions 14-15px
+- Footer links include "Canada Fishing Guide" link
+
+### Region page (`/fishing-near/[region]/`)
+- Full article format with underwater background (same CSS as blog)
+- Title: "Fishing Near [City]" or "Fishing in [Region Name]"
+- Numbered entries (1 through 20-40+ per region)
+- Each entry: `<h2>` heading with name + species in parentheses, `<span class="distance">` for location/distance, `<p>` description
+- Footer CTA: "For a complete overview of fishing across [Province], see our Fishing in [Province] guide" + **"← Back to [Province]"** link (not back to blog)
+- No download buttons in footer CTA
+
+### Content conventions
+- Species listed in parentheses after each lake name: "(Walleye, Northern Pike)"
+- Distance/area tag as `<span class="distance">` before each description
+- Region cards use `--clr` CSS variable for colored dot matching map colors
+- No emojis anywhere
+- Each new page added to `sitemap.xml`
+
 ## 6c. Cloud Dashboard — HTML Chrome Lives in Source Template
 
 | Rule | Details |
