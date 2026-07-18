@@ -126,6 +126,13 @@ When `adb push + pm install -r` fails with "Unable to open file", it's usually b
 | APK backups | `~/Desktop/apk backups/` (3 flavors) |
 | Cloud functions | `~/CatchTales/functions/` + `~/catchtales_cloud/` |
 
+### Where we left off (July 18)
+- Built province hubs + region pages for: Manitoba (194), Saskatchewan (168), Ontario (249), British Columbia (272), Alberta (102), Quebec (195)
+- Nova Scotia hub + region pages built (175 entries) but NOT linked from Canada page or sitemap yet — pending completion
+- **Next to do:** New Brunswick, Prince Edward Island, Newfoundland & Labrador, Yukon, Northwest Territories, Nunavut
+- Canada page needs to link to `/fishing-in-canada/` from homepage/main nav when all provinces are ready
+- Standards updated with region page numbering rules, cross-referencing guidelines, saltwater tagging
+
 ### What's missing (per Rule 3)
 - **Help text** — update checker feature not documented in `help_text.dart`
 - **Translations** — "Update vX.Y.Z available" banner text is hardcoded English
