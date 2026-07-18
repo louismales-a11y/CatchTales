@@ -49,7 +49,7 @@ flutter build apk --release --dart-define=APP_VERSION=pro
 - Nothing — session complete
 
 ### Session 7 final state
-- **Version: 2.14.40** — all 3 flavors built and deployed
+- **Version: 2.14.41** — all 3 flavors built and deployed
 - **Admin panel** at catchtales.com/admin/ (Firebase Auth protected, no public links)
   - Pro Key Manager: generate, filter, search, assign keys
   - Activity tracking: totalSessions + daily activityLog

@@ -785,46 +785,7 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
                   style: OutlinedButton.styleFrom(foregroundColor: Colors.red.shade400, side: BorderSide(color: Colors.red.shade400)),
                 ),
               ),
-              const SizedBox(height: 8),
 
-              SizedBox(
-                width: double.infinity,
-                child: OutlinedButton.icon(
-                  onPressed: () async {
-                    try {
-                      final uid = FirebaseAuth.instance.currentUser?.uid;
-                      if (uid == null) {
-                        if (context.mounted) {
-                          ScaffoldMessenger.of(context).showSnackBar(
-                            const SnackBar(content: Text('Sign in first'), backgroundColor: Colors.orange),
-                          );
-                        }
-                        return;
-                      }
-                      await FirebaseFirestore.instance.collection('admins').doc(uid).set({
-                        'email': AuthService.instance.email,
-                        'addedAt': FieldValue.serverTimestamp(),
-                      });
-                      if (context.mounted) {
-                        Navigator.pop(ctx);
-                        ScaffoldMessenger.of(context).showSnackBar(
-                          const SnackBar(content: Text('Registered as admin'), backgroundColor: Colors.green),
-                        );
-                      }
-                    } catch (e) {
-                      if (context.mounted) {
-                        ScaffoldMessenger.of(context).showSnackBar(
-                          SnackBar(content: Text('Failed: $e'), backgroundColor: Colors.red),
-                        );
-                      }
-                    }
-                  },
-                  icon: const Icon(Icons.admin_panel_settings_outlined, size: 18),
-                  label: const Text('Register as Admin'),
-                  style: OutlinedButton.styleFrom(foregroundColor: Colors.blue.shade400, side: BorderSide(color: Colors.blue.shade400)),
-                ),
-              ),
-              const SizedBox(height: 8),
               SizedBox(
                 width: double.infinity,
                 child: OutlinedButton.icon(
