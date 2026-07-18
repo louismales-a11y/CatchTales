@@ -336,9 +336,7 @@ class _SplashScreenState extends State<SplashScreen> {
         final apks = data['apks'] as Map<String, dynamic>? ?? {};
         final flavor = ApiConfig.appVersion;
         final apkPath = apks[flavor] as String?;
-        final url = apkPath != null && apkPath.isNotEmpty
-            ? 'https://catchtales.com$apkPath'
-            : 'https://catchtales.com/download/';
+        final url = 'https://catchtales.com'; // Opens website with download buttons
 
         // Compare versions
         final tagParts = tag.replaceAll('v', '').split('.').map((e) => int.tryParse(e) ?? 0).toList();
