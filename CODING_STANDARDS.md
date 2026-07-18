@@ -233,6 +233,7 @@ When building province guides and region pages, follow this structure:
 - Region card hover: border-color changes to `--clr`, translateX(4px), darker background
 - Region card headings: `font-size: clamp(17px, 1.6vw, 20px)`, color uses `--clr` variable
 - Region card descriptions: `font-size: clamp(14px, 1.2vw, 15px)`, color #99B0CC
+- **Must include base `.region-item` class** with `display:flex`, `align-items:center`, `gap:12px`, `padding: clamp(10px, 1.5vw, 14px)`, `background: rgba(14,20,34,0.5)`, `border`, `border-radius:12px`, `margin-bottom:8px`. This is easily lost during edits — if the region list appears as plain text without boxes, add the missing base rule back.
 - Footer links include "Canada Fishing Guide" link
 
 ### Region page (`/fishing-near/[region]/`)
