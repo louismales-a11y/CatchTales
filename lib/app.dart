@@ -495,7 +495,7 @@ class _SplashScreenState extends State<SplashScreen> {
                 Padding(
                   padding: const EdgeInsets.only(bottom: 6),
                   child: GestureDetector(
-                    onTap: () => launchUrl(Uri.parse(_updateUrl), mode: LaunchMode.externalApplication),
+                    onTap: () => launchUrl(Uri.parse(_updateUrl), mode: LaunchMode.inAppBrowserView),
                     child: Container(
                       padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 6),
                       decoration: BoxDecoration(
