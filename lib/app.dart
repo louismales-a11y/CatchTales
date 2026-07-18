@@ -446,18 +446,18 @@ class _SplashScreenState extends State<SplashScreen> {
               const Spacer(flex: 1),
               // Mascot illustration: The One That Got Away
               Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 32),
+                padding: const EdgeInsets.symmetric(horizontal: 48),
                 child: ClipRRect(
                   borderRadius: BorderRadius.circular(20),
                   child: Image.asset(
                     'assets/ctotga_splash.png',
-                    height: 320,
+                    height: 240,
                     fit: BoxFit.contain,
                     errorBuilder: (_, _, _) => const SizedBox.shrink(),
                   ),
                 ),
               ),
-              const SizedBox(height: 24),
+              const SizedBox(height: 20),
               Text(ApiConfig.appDisplayName,
                   style: const TextStyle(
                     fontSize: 30,
@@ -490,7 +490,36 @@ class _SplashScreenState extends State<SplashScreen> {
               Text(_version.isNotEmpty ? 'v$_version' : '',
                   style: const TextStyle(
                       fontSize: 13, color: Colors.grey, letterSpacing: 1)),
-              const SizedBox(height: 10),
+              // Update available banner
+              if (_updateAvailable)
+                Padding(
+                  padding: const EdgeInsets.only(bottom: 6),
+                  child: GestureDetector(
+                    onTap: () => launchUrl(Uri.parse(_updateUrl), mode: LaunchMode.externalApplication),
+                    child: Container(
+                      padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 6),
+                      decoration: BoxDecoration(
+                        color: Colors.amber.shade700.withValues(alpha: 0.2),
+                        borderRadius: BorderRadius.circular(10),
+                        border: Border.all(color: Colors.amber.shade400.withValues(alpha: 0.5)),
+                      ),
+                      child: Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          Icon(Icons.system_update, size: 14, color: Colors.amber.shade300),
+                          const SizedBox(width: 6),
+                          Text(
+                            'Update $_updateTag available',
+                            style: TextStyle(fontSize: 11, color: Colors.amber.shade200),
+                          ),
+                          const SizedBox(width: 4),
+                          Icon(Icons.open_in_new, size: 11, color: Colors.amber.shade300),
+                        ],
+                      ),
+                    ),
+                  ),
+                ),
+              const SizedBox(height: 6),
               Padding(
                 padding: const EdgeInsets.symmetric(horizontal: 40),
                 child: SizedBox(
@@ -594,35 +623,6 @@ class _SplashScreenState extends State<SplashScreen> {
                   ),
                 ),
               ),
-              // Update available banner
-              if (_updateAvailable)
-                Padding(
-                  padding: const EdgeInsets.only(top: 8),
-                  child: GestureDetector(
-                    onTap: () => launchUrl(Uri.parse(_updateUrl), mode: LaunchMode.externalApplication),
-                    child: Container(
-                      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-                      decoration: BoxDecoration(
-                        color: Colors.amber.shade700.withValues(alpha: 0.2),
-                        borderRadius: BorderRadius.circular(12),
-                        border: Border.all(color: Colors.amber.shade400.withValues(alpha: 0.5)),
-                      ),
-                      child: Row(
-                        mainAxisSize: MainAxisSize.min,
-                        children: [
-                          Icon(Icons.system_update, size: 16, color: Colors.amber.shade300),
-                          const SizedBox(width: 6),
-                          Text(
-                            'Update $_updateTag available',
-                            style: TextStyle(fontSize: 12, color: Colors.amber.shade200),
-                          ),
-                          const SizedBox(width: 4),
-                          Icon(Icons.open_in_new, size: 12, color: Colors.amber.shade300),
-                        ],
-                      ),
-                    ),
-                  ),
-                ),
               const Spacer(flex: 1),
             ],
           ),
