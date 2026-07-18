@@ -224,11 +224,15 @@ When building province guides and region pages, follow this structure:
 
 ### Province hub page (`/fishing-in-canada/[province]/`)
 - Back link to `/fishing-in-canada/`
-- Stats bar: number of regions, number of spots (e.g., "150+"), number of species
-- Left column: topographic map image (clickable to full size, max-height 420px)
-- Right column: region cards (colored dot + name + species, links to `/fishing-near/[region]/`)
-- Map + region list centered as a group with `justify-content: center`
-- Region card headings 17-20px, descriptions 14-15px
+- Stats bar: number of regions, number of spots (e.g., "150+"), number of species — centered row of stat boxes
+- **Layout:** flex container with `justify-content: center`, `gap: clamp(16px, 2.5vw, 32px)`, wrapped on mobile
+- **Left column (map):** `flex: 0 1 clamp(280px, 40vw, 450px)`, text-align center
+- **Right column (region list):** `flex: 0 1 clamp(260px, 35vw, 400px)`
+- Topographic map image inside left column: clickable to full size, `max-height: 420px`, rounded corners 12px
+- Region cards: `padding: clamp(10px, 1.5vw, 14px)`, border-radius 12px, colored dot 14x14px
+- Region card hover: border-color changes to `--clr`, translateX(4px), darker background
+- Region card headings: `font-size: clamp(17px, 1.6vw, 20px)`, color uses `--clr` variable
+- Region card descriptions: `font-size: clamp(14px, 1.2vw, 15px)`, color #99B0CC
 - Footer links include "Canada Fishing Guide" link
 
 ### Region page (`/fishing-near/[region]/`)
