@@ -254,6 +254,7 @@ When building province guides and region pages, follow this structure:
 - **Target:** 30-40 entries per region for thorough coverage
 
 ### Cross-referencing major lakes
+- **If we don't have the large, well-known lakes, the guide fails.** People search for big-name lakes first. Missing them destroys credibility.
 - Before finalizing a province, check Wikipedia's "List of lakes of [Province]" for major lakes
 - Cross-reference each major lake against what's listed in the region pages
 - Add any missing major lakes — prioritize by size and fishing significance
