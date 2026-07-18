@@ -170,11 +170,26 @@ adb shell rm /data/local/tmp/ct.apk
 ```
 Push+install completes in seconds regardless of APK size (~57MB/s via USB bypasses the streaming install timeout entirely). This is the default method — always use it.
 
+### If push+install fails with "Unable to open file"
+A stale file from a previous timed-out command causes this. Remove it first, then run commands separately:
+```bash
+adb shell rm /data/local/tmp/ct.apk
+adb push build/app/outputs/flutter-apk/app-release.apk /data/local/tmp/ct.apk
+adb shell pm install -r /data/local/tmp/ct.apk
+```
+
 ### Fallback if push method fails
 ```bash
 adb install -r build/app/outputs/flutter-apk/app-release.apk
 ```
 May time out at 60s for large APKs (85MB+). Retry if it fails — can take up to 180s.
+
+### In-app update requirements
+When modifying the in-app update feature, these files must be kept in sync:
+- `android/app/src/main/AndroidManifest.xml` — needs `REQUEST_INSTALL_PACKAGES` permission + `FileProvider` provider block
+- `android/app/src/main/res/xml/file_paths.xml` — FileProvider paths config
+- `android/app/src/main/kotlin/.../MainActivity.kt` — `installApk` MethodChannel using `Intent.ACTION_INSTALL_PACKAGE`
+- `lib/app.dart` — `_downloadAndInstall()` method + `_updateUrl` logic
 
 ### Why build.sh can stall
 - It runs `flutter pub get` every time (resolving all 40+ deps)
@@ -188,6 +203,7 @@ May time out at 60s for large APKs (85MB+). Retry if it fails — can take up to
 | **Every blog card gets exactly one category tag** | The existing pattern is one tag per card (Bass Fishing, Fish ID, Game Fish, Gear, Locations, Panfish, Planning, Salmon & Trout, Tips & How-To). Never add multiple tags. |
 | **Verify no duplicates before adding** | When adding a new article to `blog/index.html`, search for its slug first. If it's already listed, don't add it again. |
 | **Check the full listing after any blog edit** | Run `grep -o 'href="/blog/[^"]*/"' blog/index.html \| sort \| uniq -d` to catch duplicates before committing. |
+| **Blog post footer format** | Every blog post ends with a CTA box (teal border, rounded corners) containing "Track Your Fishing with CatchTales" heading + description + "← Back to Blog" link. No download buttons, no app links, no external URLs in the CTA. |
 
 ## 6c. Cloud Dashboard — HTML Chrome Lives in Source Template
 

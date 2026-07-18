@@ -80,35 +80,52 @@ flutter build apk --release --dart-define=APP_VERSION=pro
 - **Built v2.14.39**: All three flavors built with API keys, installed dev on phone
 - **Deployed**: Updated website APK downloads to v2.14.39, pushed all changes
 
-## 2025-07-17 — Session 7 — Mobile Optimization
+## 2025-07-18 — Session 8 — CTOTGA Mascot, Update Checker & In-App Download
 
 ### What we did
-- Added **no emojis or gradients** rule to `CODING_STANDARDS.md` + desktop note
-- **Full mobile optimization** of all 49 website pages:
-  - Fluid typography with `clamp()` — text scales naturally from 320px to desktop
-  - Touch-friendly nav — `min-height: 44px` targets, smooth hamburger animation
-  - Safe area insets for notched phones
-  - Tap highlight removal + `:active` states for touch feedback
-  - Photo strip: `aspect-ratio` instead of fixed 300px height
-  - Fluid spacing with `clamp()` throughout
-  - Fish animation sizes scale with viewport
-  - Phone frame screenshots use `min(240px, 70vw)` to prevent overflow
-  - Buttons have `min-height: 48px` and `touch-action: manipulation`
-  - Grid columns use `minmax(min(260px, 100%), 1fr)` for overflow prevention
-- **Fixed structural issues**: /free/, /pro/, /dev/ pages had footer outside `.content` and after `</body></html>` — corrected
-- Pushed website to GitHub (auto-deploys to catchtales.com)
-- **Fixed cloud dashboard weather/forecast**: rebuilt Flutter web app with OpenWeather API key injected (was missing `--dart-define`)
-- Removed 🔒 emoji from cloud dashboard nav (per standards)
-- **Fixed photo strip on tablets**: changed `max-width: 768px` breakpoint to `480px` so 4:3 aspect ratio only applies on phones, not tablets (was making photo strip 576px tall on 768px-wide tablets)
-- **Reverted fish to fixed px sizes** — `clamp()` on animated elements causes rendering quirks on some Android tablets (fish appeared to grow as they swam)
-- **Fixed broken `top:` values on fish** — regex from fish revert accidentally wrote `top: auto; 12%` instead of `top: 12%`, killing the animation
+
+**Native splash & icons:**
+- Added CatchTales logo to native Android splash (replaced plain white/black screen)
+- Regenerated launcher icons from `assets/logo.png` (replaced old bestfishbuddy icons)
+- Cleaned all remaining bestfishbuddy references across codebase, website, and assets
+
+**CTOTGA mascot splash:**
+- Added user's catfish illustration ("The One That Got Away") to Flutter splash screen
+- Replaced the old logo + app name at top with the CTOTGA image as hero
+- Adjusted image height from 320px → 240px for better screen fit
+- Removed flag emojis ("CA  US" text per no-emojis standard)
+
+**Update checker:**
+- Added `_checkUpdate()` to SplashScreen — fetches `version.json` on launch
+- Shows amber "Update vX.Y.Z available" banner above CONTINUE button if newer version exists
+- Banner text is hardcoded English (needs translation)
+
+**In-app APK download & install:**
+- Created `FileProvider` config at `res/xml/file_paths.xml`
+- Added `REQUEST_INSTALL_PACKAGES` permission and `FileProvider` to `AndroidManifest.xml`
+- Added `installApk` MethodChannel in `MainActivity.kt` — opens APK via `Intent.ACTION_INSTALL_PACKAGE`
+- Added `_downloadAndInstall()` on Dart side — downloads APK via HTTP to temp dir, triggers install channel
+- Update banner now downloads + installs entirely in-app (no browser redirect)
+- URL logic uses direct APK download path from version.json per app flavor
+
+**Builds & releases:**
+- Built and pushed v2.14.42 through v2.14.55 across all flavors
+- Updated website version.json, download pages, and pushed after each release
+- Verified update flow on phone 2 (v2.14.50 → v2.14.54 via in-app download)
+
+### ADB workaround discovered
+When `adb push + pm install -r` fails with "Unable to open file", it's usually because a previous attempt left a stale file. Workaround: separate the commands — push first, then run `adb shell pm install -r` as a separate step.
 
 ### Current state
 | Item | Value |
 |------|-------|
 | Source | `~/CatchTales/` (remote: `louismales-a11y/CatchTales.git`) |
-| Version | 2.14.39 |
+| Version | 2.14.55 |
 | Website | catchtales.com (remote: `louismales-a11y/catchtales-site.git`) |
 | APK downloads | `~/catchtales-site/download/` (free + pro) |
 | APK backups | `~/Desktop/apk backups/` (3 flavors) |
 | Cloud functions | `~/CatchTales/functions/` + `~/catchtales_cloud/` |
+
+### What's missing (per Rule 3)
+- **Help text** — update checker feature not documented in `help_text.dart`
+- **Translations** — "Update vX.Y.Z available" banner text is hardcoded English
