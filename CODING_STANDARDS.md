@@ -244,6 +244,23 @@ When building province guides and region pages, follow this structure:
 - Footer CTA: "For a complete overview of fishing across [Province], see our Fishing in [Province] guide" + **"← Back to [Province]"** link (not back to blog)
 - No download buttons in footer CTA
 
+### Region page entry numbering rules
+- **Every entry MUST have a number prefix** — `{i}. Name` in the `<h2>` tag. Never add entries without numbers.
+- **First entry:** `<h2 style="margin-top:0;">1. Name</h2>` — no top margin on the first entry
+- **All other entries:** `<h2 style="margin-top:32px;">2. Name</h2>` — 32px top margin on subsequent entries
+- **Fishing Tips heading:** matches the exact format used in each page — either `<h2>Fishing Tips</h2>` or `<h2 style="margin-top:32px;">Fishing Tips for [Region]</h2>`. Always check before inserting new entries.
+- **Python batch insertion:** when adding entries via script, use `re.findall(r'<h2[^>]*>(\d+)\.', content)` to find the last number, then append new numbered entries before the Fishing Tips heading.
+- **After every batch:** run audit — `grep -cP '<h2[^>]*>\d+\.'` vs total `<h2>` count. Only the Fishing Tips heading should remain unnumbered.
+- **Target:** 30-40 entries per region for thorough coverage
+
+### Cross-referencing major lakes
+- Before finalizing a province, check Wikipedia's "List of lakes of [Province]" for major lakes
+- Cross-reference each major lake against what's listed in the region pages
+- Add any missing major lakes — prioritize by size and fishing significance
+- For Ontario: check Great Lakes, Lake Nipigon, Lake of the Woods, Lac Seul, Rainy Lake, Lake Nipissing, Lake Simcoe, Lake Abitibi, Big Trout Lake, Lake St. Joseph
+- For Manitoba: check Lake Winnipeg, Lake Winnipegosis, Lake Manitoba, Southern Indian Lake, Gods Lake, Cross Lake, Clearwater Lake, Athapapuskow
+- For Saskatchewan: check Lake Athabasca, Reindeer Lake, Wollaston Lake, Cree Lake, Lac la Ronge, Peter Pond Lake, Doré Lake, Churchill Lake, Montreal Lake
+
 ### Content conventions
 - Species listed in parentheses after each lake name: "(Walleye, Northern Pike)"
 - Distance/area tag as `<span class="distance">` before each description
