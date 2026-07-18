@@ -49,15 +49,18 @@ flutter build apk --release --dart-define=APP_VERSION=pro
 - Nothing — session complete
 
 ### Session 7 final state
-- **Version bumped to 2.14.40** — all 3 flavors built and deployed
-- Visit Us Online link added to About and Contact screens
-- Cloud dashboard emoji cleanup (help text, fishing tips)
-- What's New updated with latest changes
-- All 49 website pages have mobile-optimized CSS
-- Fish use fixed px sizes (no clamp on animated elements)
-- /free/, /pro/, /dev/ pages have proper HTML structure
-- Cloud dashboard has OpenWeather API key, mobile-optimized HTML chrome
-- Standards updated: no emojis/gradients + mobile-first responsive design
+- **Version: 2.14.40** — all 3 flavors built and deployed
+- **Admin panel** at catchtales.com/admin/ (Firebase Auth protected, no public links)
+  - Pro Key Manager: generate, filter, search, assign keys
+  - Activity tracking: totalSessions + daily activityLog
+  - Mobile-friendly layout with larger fonts
+  - Details popup with 30-day breakdown
+- **Key activation fixed**: Firestore rules updated to allow any authenticated user to mark a key as used
+- **Session tracking**: WidgetsBindingObserver tracks app foreground events, records daily opens
+- **Pro Pricing updated**: $8.99/year or $19.99 lifetime in app and website
+- **50+ website pages**: mobile-optimized CSS with clamp(), touch targets, safe area insets
+- **Cloud dashboard**: rebuilt with weather API key, emoji cleanup, mobile-optimized HTML chrome
+- **Standards updated**: no emojis/gradients, mobile-first responsive, push ADB as default install, duplicate profile cleanup
 
 ### What we did in Session 5 (Website & Blog)
 - **Fixed cloud dashboard** — restored missing header + underwater background to `/cloud/`
