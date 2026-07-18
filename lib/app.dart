@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:package_info_plus/package_info_plus.dart';
 import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:url_launcher/url_launcher.dart';
 import 'screens/add_catch_screen.dart';
 import 'screens/catches_screen.dart';
 import 'screens/counter_screen.dart';
@@ -784,6 +785,19 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
                 ),
               ),
 
+              SizedBox(
+                width: double.infinity,
+                child: OutlinedButton.icon(
+                  onPressed: () {
+                    Navigator.pop(ctx);
+                    launchUrl(Uri.parse('https://catchtales.com/admin'), mode: LaunchMode.externalApplication);
+                  },
+                  icon: const Icon(Icons.vpn_key_outlined, size: 18),
+                  label: const Text('Pro Key Manager (web)'),
+                  style: OutlinedButton.styleFrom(foregroundColor: Colors.amber.shade700, side: BorderSide(color: Colors.amber.shade700)),
+                ),
+              ),
+              const SizedBox(height: 8),
               SizedBox(
                 width: double.infinity,
                 child: OutlinedButton.icon(
