@@ -20,8 +20,6 @@ import 'services/translation_service.dart';
 import 'services/pro_service.dart';
 import 'services/catches_provider.dart';
 import 'services/analytics_service.dart';
-import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:firebase_auth/firebase_auth.dart';
 import 'services/api_config.dart';
 import 'screens/about_screen.dart';
 import 'screens/cloud_sync_screen.dart';
