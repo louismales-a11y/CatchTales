@@ -25,7 +25,8 @@
 | **Keep the desktop note in sync** | Whenever `CODING_STANDARDS.md` is updated, also update `~/Desktop/CatchTales-Rules.txt` to match. The desktop note is the quick-reference version. |
 | **Follow existing patterns** | Before adding anything new, look at how similar things are done elsewhere on the site or in the code. Match the existing convention — don't invent new styles, formats, or structures unless there's a clear reason to break from the pattern. |
 | **Check callers when changing shared code** | When changing a getter, function, or field used across the app, check every caller first. Use "find references" or grep to see how it's consumed. The context where it's *used* may not match your assumption about the change. |
-| **Check file sizes before integrating assets** | Before copying any new asset (image, map, video, etc.), run `ls -lh` on it. If it's over 1 MB for a web image or over 10 MB for anything else, stop and ask if there's a lighter format. Don't assume SVG = small — government topo SVGs can be 80+ MB. Recommend the right format upfront.
+| **Check file sizes before integrating assets** | Before copying any new asset (image, map, video, etc.), run `ls -lh` on it. If it's over 1 MB for a web image or over 10 MB for anything else, stop and ask if there's a lighter format. Don't assume SVG = small — government topo SVGs can be 80+ MB. Recommend the right format upfront. |
+| **Match site UI on every page** | Every new page must match the site's visual identity: underwater background with swimming fish, the full header nav (Home, Features, Blog, Pro Login, About, FAQ, Contact, Privacy, Terms) with hamburger menu on mobile, consistent footer links, and the same dark aquatic color scheme. The Canada landing page and province/region pages must look like they belong to the same site — no orphans without underwater backgrounds or missing nav.
 
 ### 📋 Standards Check Cadence
 
