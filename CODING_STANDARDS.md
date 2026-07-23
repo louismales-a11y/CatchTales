@@ -873,16 +873,24 @@ tts.save('/home/louis/catchtales-site/audio/scene-name.mp3')
 "
 ```
 
-### Step 4b: Download Free Stock Photos/Videos (Pexels API)
-Pexels API key is saved. Use it to search and download free stock images:
+### Step 4b: Download Free Stock Photos/Videos (Pexels + Pixabay APIs)
+Two free stock APIs are available:
+
+**Pexels API** (photos + videos):
 ```bash
-# Search for photos (replace query)
+# Search
 curl -s -H "Authorization: YCW80jSVlXkqDx7XuSxOZVQja6aXSXdgaW9OaafCXEbdhmb7jIHfqpDN" \
   "https://api.pexels.com/v1/search?query=walleye+fish&per_page=5" | python3 -m json.tool
+# Download
+curl -sL "<large_image_url>" -o ~/catchtales-site/images/name.webp
+```
 
-# Download a photo at high resolution
-curl -sL "<large_image_url>" \
-  -o ~/catchtales-site/images/descriptive-name.webp
+**Pixabay API** (photos + videos + vectors):
+```bash
+# Search
+curl -s "https://pixabay.com/api/?key=56823444-e87c08005b791f9749a63f80b&q=walleye+fishing&image_type=photo&per_page=5"
+# Download
+curl -sL "<image_url>" -o ~/catchtales-site/images/name.jpg
 ```
 - Save MP3s to `~/catchtales-site/audio/`
 - Map audio files to scenes by index (01-intro.mp3, 02-scene-name.mp3, etc.)
