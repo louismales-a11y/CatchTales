@@ -122,6 +122,35 @@
 - About page: "Subscribe on YouTube" link in Designed By section
 - Contact page: YouTube listed as contact method
 
+---
+
+## 2026-07-23 — Session 16 — YouTube Video Concept Preview + Voiceover Demo
+
+### What we did
+
+**Created How to Catch Walleye video concept:**
+- Wrote script based on blog post: `~/catchtales-site/blog/how-to-catch-walleye-tips-for-beginners/`
+- Built storyboard page: `how-to-walleye-storyboard.html` (scene-by-scene with image thumbnails)
+- Built interactive video preview: `how-to-walleye-video.html` (playable with scenes, captions, timeline)
+
+**Captured phone screenshots via ADB:**
+- 8 screenshots from the live app (catches, solunar, weather, map, fish ID, tackle, brag board, menu)
+- Saved to `~/catchtales-site/images/walkthrough/`
+
+**Generated AI voiceover narration:**
+- Used gTTS (Google Text-to-Speech) to generate 28 MP3 files
+- Synced audio to scene progression in the interactive preview
+- Voiceovers saved to `~/catchtales-site/audio/`
+
+**Fixed video timing bugs:**
+- First attempt used `requestAnimationFrame` delta incorrectly (interprets absolute timestamp as ms/frame)
+- Second attempt used `setTimeout` chaining (fired erratically)
+- Final working approach: `setInterval` + `performance.now()` for wall-clock-based timing
+
+**Documented process:**
+- Added "Video Concept Preview Workflow" section to CODING_STANDARDS.md (Section 9)
+- Includes: script writing, interactive HTML preview, ADB screenshot capture, voiceover generation, deployment
+
 ### Current state
 | Item | Value |
 |------|-------|
@@ -129,7 +158,11 @@
 | Version | 2.14.68 |
 | Website | catchtales.com (remote: `louismales-a11y/catchtales-site.git`) |
 | YouTube | https://www.youtube.com/@CatchTales-y9c |
+| YouTube Channel ID | UCOa2lPPcIJwbanmW1XX1eBA |
+| YouTube User ID | Oa2lPPcIJwbanmW1XX1eBA |
 | Videos | 2 (Walkthrough + Top 5 Walleye Ontario) |
+| Video concept preview | https://catchtales.com/how-to-walleye-video.html |
+| Storyboard | https://catchtales.com/how-to-walleye-storyboard.html |
 | US States | **COMPLETE — 50/50 with 267 region pages** |
 | Canada | **COMPLETE — 13/13 provinces with ~70 region pages** |
 | Total fishing spots | 10,541 on website, 13,059 in app |
