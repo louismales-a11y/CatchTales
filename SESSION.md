@@ -168,3 +168,35 @@
 | Total fishing spots | 10,541 on website, 13,059 in app |
 | APK downloads | `~/catchtales-site/download/` (free + pro + dev) |
 | APK backups | `~/Desktop/apk backups/` |
+
+---
+
+## 2026-07-23 — Session 16 (continued) — Video Concept to Published
+
+### What we did
+
+**Created and published How to Catch Walleye video:**
+- Wrote script based on blog post, built interactive preview page
+- Captured phone screenshots via ADB
+- Generated AI voiceover with gTTS (28 MP3 files)
+- Fixed timing bugs (setInterval + performance.now() approach)
+- Downloaded 10+ free stock photos from Pexels + Pixabay APIs
+- Updated all 28 slides with real photos (no repetitive illustrations)
+- Removed all emojis, adjusted text positioning per feedback
+- Created dedicated asset folder: `~/catchtales-site/images/how-to-walleye-video/`
+- Exported and published to YouTube
+
+**YouTube channel status:** 3 videos live
+| Item | Value |
+|------|-------|
+| Video 1 | CatchTales App Walkthrough |
+| Video 2 | Top 5 Walleye Fishing Spots in Ontario |
+| Video 3 | How to fish for Walleye |
+| Channel | https://www.youtube.com/@CatchTales-y9c |
+| Channel ID | UCOa2lPPcIJwbanmW1XX1eBA |
+
+**Standards created this session:**
+- Video Concept Preview Workflow (Section 9 in CODING_STANDARDS.md)
+- Video Watermark Standard
+- Video Asset Organization Standard (dedicated folder per project)
+- Pexels + Pixabay API keys saved for stock photo searches
