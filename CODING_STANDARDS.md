@@ -872,6 +872,18 @@ tts = gTTS(text=text, lang='en', slow=False)
 tts.save('/home/louis/catchtales-site/audio/scene-name.mp3')
 "
 ```
+
+### Step 4b: Download Free Stock Photos/Videos (Pexels API)
+Pexels API key is saved. Use it to search and download free stock images:
+```bash
+# Search for photos (replace query)
+curl -s -H "Authorization: YCW80jSVlXkqDx7XuSxOZVQja6aXSXdgaW9OaafCXEbdhmb7jIHfqpDN" \
+  "https://api.pexels.com/v1/search?query=walleye+fish&per_page=5" | python3 -m json.tool
+
+# Download a photo at high resolution
+curl -sL "<large_image_url>" \
+  -o ~/catchtales-site/images/descriptive-name.webp
+```
 - Save MP3s to `~/catchtales-site/audio/`
 - Map audio files to scenes by index (01-intro.mp3, 02-scene-name.mp3, etc.)
 - Add `<audio id="voAudio" preload="auto"></audio>` to the player HTML
