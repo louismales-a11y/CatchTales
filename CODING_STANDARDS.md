@@ -916,5 +916,13 @@ Share URL: `https://catchtales.com/[page-name].html`
 
 ### Video Watermark Standard
 - **Always use** `/images/catchtales-logo-video.png` (source: `~/CatchTales/assets/catchtales.png`) for the top-left watermark
-- **Size: 2x** — CSS height of `clamp(48px, 8vw, 72px)`
+- **Size: 2x** — CSS height of `clamp(72px, 12vw, 108px)`
 - Apply to both the interactive preview page AND the outro/end screen scene
+
+### Video Asset Organization Standard
+- **Every video project gets its own folder** at `~/catchtales-site/images/[video-name]/`
+- Copy ALL assets into that folder: photos, screenshots, audio, logos
+- No mixing with other project files — the folder is self-contained
+- Include an `audio/` subfolder with all narration MP3s
+- This makes importing into CapCut drag-and-drop simple with no hunting for files
+- Example: `~/catchtales-site/images/how-to-walleye-video/`
