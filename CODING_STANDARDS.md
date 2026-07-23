@@ -913,3 +913,8 @@ Share URL: `https://catchtales.com/[page-name].html`
 - `setTimeout` chaining can fire erratically — use `setInterval` + `performance.now()` for reliable timing
 - Always reset `playStartTime` when resuming from pause
 - Keep preview total under 3 minutes for quick iteration
+
+### Video Watermark Standard
+- **Always use** `/images/catchtales-logo-video.png` (source: `~/CatchTales/assets/catchtales.png`) for the top-left watermark
+- **Size: 2x** — CSS height of `clamp(48px, 8vw, 72px)`
+- Apply to both the interactive preview page AND the outro/end screen scene
