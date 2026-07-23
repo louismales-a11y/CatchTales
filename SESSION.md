@@ -4,135 +4,134 @@
 
 ---
 
-## 2025-07-16 — Session 4 — Consolidation + Full Deploy
-
-### What we did
-- **Consolidated** three separate repos into a **single codebase** at `~/CatchTales/`
-- Deleted `~/CatchTales-Dev/` and `~/CatchTales-Free/`
-- Branded everything as **CatchTales** — zero remaining "Best Fish Buddy" references
-- Cleaned all tracked build artifacts from git
-- Updated `CODING_STANDARDS.md`, `build.sh`, desktop note for single-source workflow
-- Built **all three flavors** at v2.14.32:
-  - `CatchTales-v2.14.32-dev.apk` (88.7MB)
-  - `CatchTales-v2.14.32-free.apk` (88.7MB)
-  - `CatchTales-v2.14.32-pro.apk` (88.7MB)
-- Cleaned old v2.14.29 APKs from website downloads, releases/, and backups/
-- Updated website: homepage, /free/, /pro/, /dev/, version.json
-- Pushed website (catchtales-site) and code (CatchTales) to GitHub
-
-### How to build
-```bash
-cd ~/CatchTales
-./build.sh dev    # dev flavor (unlocked + debug tools)
-./build.sh free   # free flavor (ProService gated)
-./build.sh pro    # pro flavor (all unlocked)
-# Or directly (no version bump):
-flutter build apk --release --dart-define=APP_VERSION=dev
-flutter build apk --release --dart-define=APP_VERSION=free
-flutter build apk --release --dart-define=APP_VERSION=pro
-```
-
-### What we also did (Session 4 continued)
-- Thorough audit: checked codebase, website, GitHub, filesystem, APKs, .env — all clean
-- Fixed `CODING_STANDARDS.md` sections 1, 2, 5, 6, 6a that still referenced old structure
-- Restored **fixed site header + underwater background** to cloud dashboard (`/cloud/`)
-  - Added to Flutter source template so it survives rebuilds
-  - Added transparent canvas CSS so HTML background shows through Flutter
-  - Added 56px top padding to login screen for fixed header
-  - Rebuilt Flutter web app and redeployed
-- Deleted old `CatchTales-Dev` and `CatchTales-Free` repos from GitHub
-- Cleaned temp files, old archives, build artifacts (~1.6GB recovered)
-- **Fixed weather forecast** — rebuilt dev APK with OpenWeatherMap API key injected
-- **ADB installed** v2.14.32-dev on Louis's phone (push+pm-install workaround)
-
-### What's in progress
-- Nothing — session complete
-
-### Session 7 final state
-- **Version: 2.14.41** — all 3 flavors built and deployed
-- **Admin panel** at catchtales.com/admin/ (Firebase Auth protected, no public links)
-  - Pro Key Manager: generate, filter, search, assign keys
-  - Activity tracking: totalSessions + daily activityLog
-  - Mobile-friendly layout with larger fonts
-  - Details popup with 30-day breakdown
-- **Key activation fixed**: Firestore rules updated to allow any authenticated user to mark a key as used
-- **Session tracking**: WidgetsBindingObserver tracks app foreground events, records daily opens
-- **Pro Pricing updated**: $8.99/year or $19.99 lifetime in app and website
-- **50+ website pages**: mobile-optimized CSS with clamp(), touch targets, safe area insets
-- **Cloud dashboard**: rebuilt with weather API key, emoji cleanup, mobile-optimized HTML chrome
-- **Standards updated**: no emojis/gradients, mobile-first responsive, push ADB as default install, duplicate profile cleanup
-
-### What we did in Session 5 (Website & Blog)
-- **Fixed cloud dashboard** — restored missing header + underwater background to `/cloud/`
-- **Rebuilt APKs with API keys** — weather, maps, and AI now work on all flavors
-- **New article: Fishing Knots Every Angler Should Know** — 12 knots with SVG diagrams + real YouTube videos
-- **Fixed blog index** — removed duplicate entries, fixed broken video embeds
-- **Added 6 new articles**: Kayak Fishing, Safety Tips, Fishing with Kids, Night Fishing, Fish Behavior, Ice Fishing Gear
-- **Updated standards** — added rules for: follow existing patterns, one tag per card, verify no blog duplicates, always use build.sh for production
-- **Deleted old GitHub repos** — CatchTales-Dev and CatchTales-Free removed from GitHub
-- **Room cleanup features** — Clear Chat button, owner can delete any message, system messages collapsed
-- **Built + installed v2.14.33** on phone (dev) and deployed to website (free + pro)
-
-### What we did in Session 6 (Emoji & Gradient Cleanup)
-- **Website cleanup**: Removed all 🔒 from nav links (99 instances), removed ❤️🎣 from footers (49 files), replaced all gradients with solid colors, removed heading/button/blog emojis, replaced 6 feature card emojis with inline SVGs, cleaned blog content emojis (checkboxes, ✅❌⚠️, star ratings → 5/5)
-- **App cleanup**: Replaced all LinearGradient with solid colors (10 files), removed emojis from What's New, notifications, badges, screen UI, stripped emojis from help text and translations (447 across 5 languages), moon phases now use abbreviations (NM, WC, FQ, FM)
-- **Fixed layout**: Tightened solunar screen spacers, fixed moon phase text overflow
-- **Built v2.14.39**: All three flavors built with API keys, installed dev on phone
-- **Deployed**: Updated website APK downloads to v2.14.39, pushed all changes
-
-## 2025-07-18 — Session 8 — CTOTGA Mascot, Update Checker & In-App Download
+## 2025-07-20 — Session 13 — Complete US 50-State Fishing Guide + App Integration
 
 ### What we did
 
-**Native splash & icons:**
-- Added CatchTales logo to native Android splash (replaced plain white/black screen)
-- Regenerated launcher icons from `assets/logo.png` (replaced old bestfishbuddy icons)
-- Cleaned all remaining bestfishbuddy references across codebase, website, and assets
+**Built all remaining 24 US states with fishing region pages:**
+- Built Nebraska, Nevada, New Hampshire, New Jersey, New Mexico (hand-crafted real entries)
+- Built New York (all 6 regions with 40 curated entries each)
+- Built North Carolina, North Dakota, Ohio, Oklahoma, Oregon, Pennsylvania, Rhode Island, South Carolina, South Dakota, Tennessee, Texas, Utah, Vermont, Virginia, Washington, West Virginia, Wisconsin, Wyoming
+- 267 region pages total with standardized formatting
+- All topo maps copied and converted to WebP
 
-**CTOTGA mascot splash:**
-- Added user's catfish illustration ("The One That Got Away") to Flutter splash screen
-- Replaced the old logo + app name at top with the CTOTGA image as hero
-- Adjusted image height from 320px → 240px for better screen fit
-- Removed flag emojis ("CA  US" text per no-emojis standard)
+**Standardized website UI across ALL pages:**
+- Centered logo + centered horizontal nav below (no hamburger menu anywhere)
+- All 11 nav links consistent: Home, Features, US Fishing, Canada Fishing, Blog, Pro Login, About, FAQ, Contact, Privacy, Terms
+- Footer matches nav with all 11 links
+- max-width:960px on all pages
+- Region page footer format: Fishing Tips → CTA → Back button
+- Fixed CSS brace issues on all auto-generated pages
+- Fixed twitter:card from "summary" to "summary_large_image" on 458 pages
+- Canada Fishing listed before US Fishing in nav
+- Removed hidden nav CSS on Canada/US landing pages
 
-**Update checker:**
-- Added `_checkUpdate()` to SplashScreen — fetches `version.json` on launch
-- Shows amber "Update vX.Y.Z available" banner above CONTINUE button if newer version exists
-- Banner text is hardcoded English (needs translation)
+**Fishing Guides integrated into app:**
+- Added Fishing Guides feature (14th feature) to features page
+- Converted all website content to JSON (~6.2 MB): 63 hubs, 337 regions, 13,059 spots
+- Fixed country detection bug (was marking US as Canada)
+- Fixed region screen text wrapping (distance now below name)
+- Fixed splash screen: replaced CTOTGA catfish with CatchTales logo
+- Updated What's New: only major features listed, rest = "Bug fixes and performance improvements"
+- Version bumped to 2.14.64, all APKs built and deployed
 
-**In-app APK download & install:**
-- Created `FileProvider` config at `res/xml/file_paths.xml`
-- Added `REQUEST_INSTALL_PACKAGES` permission and `FileProvider` to `AndroidManifest.xml`
-- Added `installApk` MethodChannel in `MainActivity.kt` — opens APK via `Intent.ACTION_INSTALL_PACKAGE`
-- Added `_downloadAndInstall()` on Dart side — downloads APK via HTTP to temp dir, triggers install channel
-- Update banner now downloads + installs entirely in-app (no browser redirect)
-- URL logic uses direct APK download path from version.json per app flavor
-
-**Builds & releases:**
-- Built and pushed v2.14.42 through v2.14.55 across all flavors
-- Updated website version.json, download pages, and pushed after each release
-- Verified update flow on phone 2 (v2.14.50 → v2.14.54 via in-app download)
-
-### ADB workaround discovered
-When `adb push + pm install -r` fails with "Unable to open file", it's usually because a previous attempt left a stale file. Workaround: separate the commands — push first, then run `adb shell pm install -r` as a separate step.
+**SEO:**
+- Fixed twitter:card on all pages
+- Cleaned up sitemap (removed broken /download/ URL)
+- Verified all SEO checks pass
 
 ### Current state
 | Item | Value |
 |------|-------|
 | Source | `~/CatchTales/` (remote: `louismales-a11y/CatchTales.git`) |
-| Version | 2.14.55 |
+| Version | 2.14.64 |
 | Website | catchtales.com (remote: `louismales-a11y/catchtales-site.git`) |
-| APK downloads | `~/catchtales-site/download/` (free + pro) |
-| APK backups | `~/Desktop/apk backups/` (3 flavors) |
-| Cloud functions | `~/CatchTales/functions/` + `~/catchtales_cloud/` |
+| US States | **COMPLETE — 50/50 with 267 region pages** |
+| Canada | **COMPLETE — 13/13 provinces with ~70 region pages** |
+| Total fishing spots | 10,541 on website, 13,059 in app |
+| APK downloads | `~/catchtales-site/download/` (free + pro + dev) |
+| APK backups | `~/Desktop/apk backups/` |
 
-### Where we left off (July 18)
-- Built province hubs + region pages for: Manitoba (194), Saskatchewan (168), Ontario (249), British Columbia (272), Alberta (102), Quebec (195)
-- Nova Scotia hub + region pages built (175 entries) but NOT linked from Canada page or sitemap yet — pending completion
-- **Next to do:** New Brunswick, Prince Edward Island, Newfoundland & Labrador, Yukon, Northwest Territories, Nunavut
-- Canada page needs to link to `/fishing-in-canada/` from homepage/main nav when all provinces are ready
-- Standards updated with region page numbering rules, cross-referencing guidelines, saltwater tagging
+---
 
-### What's missing (per Rule 3)
-- **Help text** — update checker feature not documented in `help_text.dart`
-- **Translations** — "Update vX.Y.Z available" banner text is hardcoded English
+## 2026-07-21 — Session 14 — Fixed duplicate logo on cloud dashboard + debugging mock page technique
+
+### What we did
+
+**Diagnosed layer issue on cloud dashboard page:**
+- User reported a "layer covering page that includes part of the new logo"
+- Created `cloud-mock.html` — a standalone diagnostic page with colored outlines on each element
+- Used `data-layer-name` attributes + CSS `::before` pseudo-elements to label layers
+- Identified that the `prologinbook.webp` logo appeared in TWO layers:
+  - **Element B:** HTML fixed site header (`z-index: 200`)
+  - **Element E:** Flutter Login Screen (inside canvas)
+
+**Fixed duplicate logo:**
+- Removed `Image.network('/images/prologinbook.webp')` from:
+  - `lib/screens/login_screen.dart` — login form
+  - `lib/screens/dashboard_screen.dart` — dashboard header
+  - `lib/screens/about_tab.dart` — about section
+- Rebuilt Flutter web app (`flutter build web --release`)
+- Deployed to `~/catchtales-site/cloud/`
+- Committed and pushed to GitHub
+
+**Added debugging technique to docs:**
+- Added "Debugging with Mock Pages" section to `CANONICAL-SITE.md` (website docs)
+- Added same section to `CODING_STANDARDS.md` (Flutter app standards)
+
+### Current state
+| Item | Value |
+|------|-------|
+| Source | `~/CatchTales/` (remote: `louismales-a11y/CatchTales.git`) |
+| Version | 2.14.64 |
+| Website | catchtales.com (remote: `louismales-a11y/catchtales-site.git`) |
+| Cloud dashboard | Logo removed from Flutter app — only HTML header shows it |
+
+### Standards updated this session
+- Debugging with Mock Pages (added to CANONICAL-SITE.md and CODING_STANDARDS.md)
+- Header standard: centered logo, nav below centered
+- Nav standard: 11 links, Canada before US
+- Footer standard: matches nav
+- Region page CTA format
+- What's New discipline (only major features)
+- UI consistency checklist (grep commands before deploy)
+
+---
+
+## 2026-07-22 — Session 15 — YouTube Channel Setup
+
+### What we did
+
+**Created CatchTales YouTube channel:**
+- Channel URL: https://www.youtube.com/@CatchTales-y9c
+- Channel banner: underwater background with logo + "For Bragging Rights!" / "Canada & United States" / "catchtales.com"
+- Avatar: CatchTales logo at 35% zoom, offset (-4,-9)
+- Video watermark: 150×150 catchtales.png
+
+**Uploaded 2 videos:**
+1. **CatchTales App Walkthrough** — 20 onboarding screenshots walkthrough (100+ views on day 1)
+2. **Top 5 Walleye Fishing Spots in Ontario** — featuring Lake of the Woods, Lac Seul, Bay of Quinte, Rainy Lake, Lake Erie Western Basin
+
+**YouTube assets prepared (screenshots cleaned up from working directory):**
+- 20 walkthrough screenshots (app onboarding)
+- Feature & demo screenshots
+- Channel banner, avatar, watermark, thumbnail
+
+**Added YouTube links to website (commit pending):**
+- Footer on all pages: Home, Features, About, Contact
+- About page: "Subscribe on YouTube" link in Designed By section
+- Contact page: YouTube listed as contact method
+
+### Current state
+| Item | Value |
+|------|-------|
+| Source | `~/CatchTales/` (remote: `louismales-a11y/CatchTales.git`) |
+| Version | 2.14.68 |
+| Website | catchtales.com (remote: `louismales-a11y/catchtales-site.git`) |
+| YouTube | https://www.youtube.com/@CatchTales-y9c |
+| Videos | 2 (Walkthrough + Top 5 Walleye Ontario) |
+| US States | **COMPLETE — 50/50 with 267 region pages** |
+| Canada | **COMPLETE — 13/13 provinces with ~70 region pages** |
+| Total fishing spots | 10,541 on website, 13,059 in app |
+| APK downloads | `~/catchtales-site/download/` (free + pro + dev) |
+| APK backups | `~/Desktop/apk backups/` |
