@@ -132,6 +132,8 @@ class TranslationService extends ChangeNotifier {
       'onboardStats': 'Stats, Badges & Achievements',
       'onboardMap': '️ Map Tools',
       'onboardDescMap': 'The map is packed with features!\n\n  ◀ Swipe open the side panel for all tools\n   **Nautical** — buoys, wrecks, depths\n   **Depth** — contour lines from OpenSeaMap\n  ️ **Weather** — tap to cycle: Clouds → Rain → Temp\n   **Offline** — cache an area (tap two corners)\n  ️ **Depth Log** — long-press to log a reading\n   **Spots** — long-press to save favorite spots\n   **Locate** — center on your GPS location',
+      'onboardFishingGuides': 'Fishing Guides',
+      'onboardDescFishingGuides': 'Explore **50 US states** and **13 Canadian provinces**\nwith 13,000+ fishing spots.\n\n  Tap a state or province to see its regions\n  Each region has detailed lake/river entries\n  Species, locations, and descriptions included\n  Canada and US tabs at the top',
       'onboardMoreFeatures': 'More Features (⋮ menu)',
       'onboardFishBg': 'App Skin: Dream or Classic',
       'onboardDescFishBg': 'In the 3-dot menu you can switch between Dream (underwater background with swimming fish, dark mode) and Classic (plain background, light/dark toggle).',

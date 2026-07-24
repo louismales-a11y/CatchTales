@@ -43,6 +43,11 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
       desc: tr('onboardDescPrepare'),
     ),
     _OnboardPage(
+      icon: Icons.explore,
+      title: tr('onboardFishingGuides'),
+      desc: tr('onboardDescFishingGuides'),
+    ),
+    _OnboardPage(
       icon: Icons.directions_boat_filled,
       title: tr('onboardTrips'),
       desc: tr('onboardDescTrips'),

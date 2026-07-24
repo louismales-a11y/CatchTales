@@ -31,6 +31,7 @@ import 'screens/about_screen.dart';
 import 'screens/cloud_sync_screen.dart';
 import 'screens/contact_screen.dart';
 import 'screens/tackle_box_screen.dart';
+import 'screens/fishing_guide_screen.dart';
 import 'screens/trip_screen.dart';
 import 'screens/community_stats_screen.dart';
 import 'screens/language_picker_screen.dart';
@@ -443,18 +444,9 @@ class _SplashScreenState extends State<SplashScreen> {
             crossAxisAlignment: CrossAxisAlignment.start,
             mainAxisSize: MainAxisSize.min,
             children: [
-              _whatsNewItem('New mascot character on splash screen — The One That Got Away'),
-              _whatsNewItem('Update checker on splash screen — tap to download new version'),
-              _whatsNewItem('CatchTales logo on native splash + updated launcher icons'),
-              _whatsNewItem('Visit Us Online link in About and Contact screens'),
-              _whatsNewItem('**Clear Chat** button for room owners — delete all messages at once'),
-              _whatsNewItem('Room owners can now delete **any message** (including system messages), just long-press'),
-              _whatsNewItem('System messages (joined/left/removed) now collapsed into compact lines — less clutter'),
-              _whatsNewItem('**Room owners** can now **remove members** and **report abusive users** from the members list'),
-              _whatsNewItem('Fixed: "Create My Fishing Room" works after leaving a room'),
-              _whatsNewItem('**Delete photos** in Fishing Together rooms — tap the X on your photos'),
-              _whatsNewItem('**Separate Window** button now in the chat toolbar — always visible'),
-              _whatsNewItem('**Fish Together** — permanent fishing rooms, photo sharing & chat'),
+              _whatsNewItem('Fishing Guides — explore 50 US states and 13 Canadian provinces with 13,000+ fishing spots'),
+              _whatsNewItem('Updated website: all 50 US states with region pages, topo maps, and standardized UI'),
+              _whatsNewItem('Bug fixes and performance improvements'),
               _whatsNewItem('Share photos with friends in real-time'),
               _whatsNewItem('Open chat as a **separate window** — switch apps freely'),
               _whatsNewItem('Notification sounds for new messages & photos'),
@@ -507,14 +499,14 @@ class _SplashScreenState extends State<SplashScreen> {
           child: Column(
             children: [
               const Spacer(flex: 1),
-              // Mascot illustration: The One That Got Away
+              // CatchTales logo
               Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 48),
+                padding: const EdgeInsets.symmetric(horizontal: 64),
                 child: ClipRRect(
-                  borderRadius: BorderRadius.circular(20),
+                  borderRadius: BorderRadius.circular(12),
                   child: Image.asset(
-                    'assets/ctotga_splash.png',
-                    height: 240,
+                    'assets/splash_logo.png',
+                    height: 160,
                     fit: BoxFit.contain,
                     errorBuilder: (_, _, _) => const SizedBox.shrink(),
                   ),
@@ -1159,6 +1151,11 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
                       MaterialPageRoute(
                           builder: (_) => _withWater(const TackleBoxScreen())));
                   break;
+                case 'fishing_guide':
+                  Navigator.push(context,
+                      MaterialPageRoute(
+                          builder: (_) => _withWater(const FishingGuideScreen())));
+                  break;
                 // ── History ──
                 case 'calendar':
                   Navigator.push(context,
@@ -1236,6 +1233,16 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
                 child: ListTile(
                   leading: Icon(Icons.checklist),
                   title: Text(tr('prepare')),
+                  dense: true,
+                  contentPadding: EdgeInsets.zero,
+                ),
+              ),
+              // ── Fishing Guides ──
+              PopupMenuItem(
+                value: 'fishing_guide',
+                child: ListTile(
+                  leading: Icon(Icons.map_outlined),
+                  title: const Text('Fishing Guides'),
                   dense: true,
                   contentPadding: EdgeInsets.zero,
                 ),

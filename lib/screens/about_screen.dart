@@ -6,6 +6,7 @@ import 'package:http/http.dart' as http;
 import 'package:provider/provider.dart';
 import 'package:package_info_plus/package_info_plus.dart';
 import 'package:url_launcher/url_launcher.dart';
+import 'package:qr_flutter/qr_flutter.dart';
 import '../services/translation_service.dart';
 import '../services/api_config.dart';
 import '../services/pro_service.dart';
@@ -154,6 +155,42 @@ class _AboutScreenState extends State<AboutScreen> {
             child: Padding(
               padding: const EdgeInsets.all(16),
               child: Text(tr('aboutDescription'), style: TextStyle(height: 1.6, fontSize: 14)),
+            ),
+          ),
+          const SizedBox(height: 16),
+
+          // ─── Share QR Code ───
+          Card(
+            child: Padding(
+              padding: const EdgeInsets.all(16),
+              child: Column(
+                children: [
+                  Text('Share CatchTales', style: theme.textTheme.titleSmall?.copyWith(fontWeight: FontWeight.w600)),
+                  const SizedBox(height: 12),
+                  RepaintBoundary(
+                    child: QrImageView(
+                      data: 'https://catchtales.com/download/CatchTales-v2.14.68-free.apk',
+                      version: QrVersions.auto,
+                      size: 160,
+                      backgroundColor: Colors.white,
+                      eyeStyle: const QrEyeStyle(
+                        eyeShape: QrEyeShape.square,
+                        color: Colors.black,
+                      ),
+                      dataModuleStyle: const QrDataModuleStyle(
+                        dataModuleShape: QrDataModuleShape.square,
+                        color: Colors.black,
+                      ),
+                    ),
+                  ),
+                  const SizedBox(height: 8),
+                  Text(
+                    'Scan to download the free version',
+                    style: TextStyle(fontSize: 12, color: theme.colorScheme.onSurface.withValues(alpha: 0.6)),
+                    textAlign: TextAlign.center,
+                  ),
+                ],
+              ),
             ),
           ),
           const SizedBox(height: 16),

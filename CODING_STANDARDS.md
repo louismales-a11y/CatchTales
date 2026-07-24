@@ -923,6 +923,34 @@ Share URL: `https://catchtales.com/[page-name].html`
 - **Every video project gets its own folder** at `~/catchtales-site/images/[video-name]/`
 - Copy ALL assets into that folder: photos, screenshots, audio, logos
 - No mixing with other project files — the folder is self-contained
-- Include an `audio/` subfolder with all narration MP3s
+- **Audio** goes in an `audio/` subfolder inside the video folder
 - This makes importing into CapCut drag-and-drop simple with no hunting for files
-- Example: `~/catchtales-site/images/how-to-walleye-video/`
+
+**Canonical folder structure:**
+```
+~/catchtales-site/images/[video-name]/
+├── audio/
+│   ├── 01-intro.mp3
+│   ├── 02-scene-name.mp3
+│   └── ...
+├── sunrise-lake.jpg
+├── app-screenshot.png
+├── catchtales-logo-video.png
+└── ... (all photos/graphics)
+```
+
+**Example (from Solunar video):**
+```
+~/catchtales-site/images/solunar-video/
+├── audio/
+│   ├── 01-welcome.mp3
+│   ├── 02-intro.mp3
+│   ├── 03-what-are-solunar.mp3
+│   └── ... (all 17 MP3s)
+├── sunrise-lake.jpg
+├── moon-over-lake.jpg
+├── solunar-app.png
+└── ... (all 16 photos)
+```
+
+**Naming convention:** Audio files use `{NN}-{scene-id}.mp3` where NN is the scene number (01-padded) matching slide order in the video.

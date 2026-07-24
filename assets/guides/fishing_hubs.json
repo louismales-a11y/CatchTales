@@ -1,0 +1,1313 @@
+[
+  {
+    "slug": "alabama",
+    "title": "Alabama",
+    "h1": "Fishing in Alabama",
+    "description": "Explore fishing in Alabama by region. Lake Guntersville, Lewis Smith Lake, Gulf Coast saltwater, and the best fishing spots across Alabama.",
+    "note": "Alabama has over 45 major lakes and 23 state-managed public fishing lakes. From Lake Guntersville's legendary bass fishing to the Gulf Coast's saltwater action, Alabama offers diverse fishing year-round.",
+    "regions": [
+      "northern-alabama-tennessee-valley",
+      "central-alabama",
+      "southern-alabama-gulf-coast",
+      "western-alabama",
+      "southeastern-alabama-chattahoochee"
+    ],
+    "stats": {
+      "Regions": "5",
+      "Spots Listed": "150+",
+      "Species": "40+"
+    },
+    "country": "us"
+  },
+  {
+    "slug": "alaska",
+    "title": "Alaska",
+    "h1": "Fishing in Alaska",
+    "description": "Explore fishing in Alaska by region. World-class salmon, halibut, trout, Arctic char, and the best wilderness fishing in North America.",
+    "note": "Alaska has over 3 million lakes and countless rivers across a vast wilderness larger than Texas, California, and Montana combined. The Kenai River produces world-famous king salmon exceeding 60 pounds, while Bristol Bay offers the largest sockeye salmon runs on Earth. Remote fly-in fisheries in the Brooks Range and Alaska Range provide trophy Arctic char, grayling, lake trout, and northern pike in pristine settings, and the coastal waters of the Inside Passage and Gulf of Alaska offer world-clas",
+    "regions": [
+      "southeast-alaska",
+      "southcentral-kenai-alaska",
+      "interior-alaska",
+      "southwest-alaska",
+      "northwest-arctic-alaska",
+      "gulf-coast-alaska"
+    ],
+    "stats": {
+      "Regions": "6",
+      "Spots Listed": "200+",
+      "Species": "30+"
+    },
+    "country": "us"
+  },
+  {
+    "slug": "alberta",
+    "title": "Alberta",
+    "h1": "Fishing in Alberta",
+    "description": "Explore fishing in Alberta by region. Bow River trout, northern pike, walleye, and lake trout — from the Rockies to the boreal forest.",
+    "note": "Alberta has over 600 lakes and thousands of kilometres of rivers spanning from the Rocky Mountain foothills to the northern boreal forest. The Bow River through Calgary is one of the world's most famous urban trout fisheries, producing trophy brown and rainbow trout. Lake Athabasca in the north offers massive lake trout and northern pike, while the Cold Lake and Lac la Biche regions provide excellent walleye and perch fishing. The foothills rivers - the Crowsnest, Oldman, and Highwood - offer ex",
+    "regions": [
+      "southern-alberta",
+      "calgary-central",
+      "edmonton-north-central",
+      "banff-jasper-rockies",
+      "northern-alberta"
+    ],
+    "stats": {
+      "Regions": "5",
+      "Spots Listed": "200+",
+      "Species": "30+"
+    },
+    "country": "ca"
+  },
+  {
+    "slug": "arizona",
+    "title": "Arizona",
+    "h1": "Fishing in Arizona",
+    "description": "Explore fishing in Arizona by region. Lake Powell, Roosevelt Lake, Colorado River, and the best fishing spots across the state.",
+    "note": "Arizona has over 120 lakes and reservoirs plus the legendary Colorado River. From bass fishing on Roosevelt Lake to trout on the Mogollon Rim and smallmouth in the Colorado, Arizona offers diverse fishing year-round.",
+    "regions": [
+      "central-arizona-phoenix",
+      "northern-arizona-mogollon",
+      "western-arizona-colorado",
+      "southeastern-arizona",
+      "eastern-arizona-white-mountains"
+    ],
+    "stats": {
+      "Regions": "5",
+      "Spots Listed": "130+",
+      "Species": "30+"
+    },
+    "country": "us"
+  },
+  {
+    "slug": "arkansas",
+    "title": "Arkansas",
+    "h1": "Fishing in Arkansas",
+    "description": "Explore fishing in Arkansas by region. Bull Shoals Lake, White River trout, Lake Ouachita, and the best fishing spots across the Natural State.",
+    "note": "Arkansas has over 2,300 named lakes and reservoirs plus world-class trout fisheries on the White River. From Bull Shoals Lake to the Ouachitas and the Mississippi Delta, the Natural State offers incredible fishing diversity.",
+    "regions": [
+      "northern-arkansas-ozarks",
+      "central-arkansas",
+      "western-arkansas-ouachitas",
+      "southern-arkansas",
+      "eastern-arkansas-delta"
+    ],
+    "stats": {
+      "Regions": "5",
+      "Spots Listed": "150+",
+      "Species": "40+"
+    },
+    "country": "us"
+  },
+  {
+    "slug": "british-columbia",
+    "title": "British Columbia",
+    "h1": "Fishing in British Columbia",
+    "description": "Explore fishing in British Columbia by region. Pacific salmon, halibut, steelhead, sturgeon, and trout — from Vancouver Island to the Kootenays.",
+    "note": "British Columbia has over 20,000 lakes and thousands of kilometres of spectacular Pacific coastline. The province offers world-class salmon fishing — chinook, coho, sockeye, pink, and chum — in coastal rivers like the Skeena, Dean, and Fraser Rivers. Interior lakes including Kootenay, Okanagan, and Shuswap provide excellent rainbow trout, kokanee, and burbot fishing, while the remote lakes of northern BC offer trophy lake trout and Arctic grayling in pristine wilderness settings.",
+    "regions": [
+      "lower-mainland-vancouver",
+      "vancouver-island",
+      "haida-gwaii-north-coast",
+      "thompson-okanagan",
+      "kootenays",
+      "skeena-north-central",
+      "cariboo-chilcotin"
+    ],
+    "stats": {
+      "Regions": "7",
+      "Spots Listed": "200+",
+      "Species": "40+"
+    },
+    "country": "ca"
+  },
+  {
+    "slug": "california",
+    "title": "California",
+    "h1": "Fishing in California",
+    "description": "Explore fishing in California by region. Lake Tahoe, Shasta Lake, Mammoth Lakes, Sacramento River, and the best fishing across the Golden State.",
+    "note": "California has over 4,000 natural lakes and 1,500 major reservoirs. From Sierra Nevada trout and Shasta Lake bass to world-class saltwater fishing on the coast, California offers incredible fishing diversity.",
+    "regions": [
+      "northern-california",
+      "sierra-nevada-california",
+      "central-valley-delta-california",
+      "central-coast-california",
+      "southern-california",
+      "eastern-sierra-california"
+    ],
+    "stats": {
+      "Regions": "6",
+      "Spots Listed": "200+",
+      "Species": "50+"
+    },
+    "country": "us"
+  },
+  {
+    "slug": "colorado",
+    "title": "Colorado",
+    "h1": "Fishing in Colorado",
+    "description": "Explore fishing in Colorado by region. Grand Mesa lakes, Dillon Reservoir, Arkansas River, and the best fishing across the Centennial State.",
+    "note": "Colorado has over 4,000 lakes and 393 major reservoirs, including the Grand Mesa network with over 300 alpine lakes. From gold medal trout waters to warm-water bass lakes, Colorado offers incredible fishing diversity.",
+    "regions": [
+      "northern-colorado-front-range",
+      "central-rockies-colorado",
+      "southwestern-colorado-san-juans",
+      "eastern-colorado-plains",
+      "western-colorado-grand-mesa",
+      "northwestern-colorado-steamboat"
+    ],
+    "stats": {
+      "Regions": "6",
+      "Spots Listed": "200+",
+      "Species": "30+"
+    },
+    "country": "us"
+  },
+  {
+    "slug": "connecticut",
+    "title": "Connecticut",
+    "h1": "Fishing in Connecticut",
+    "description": "Explore fishing in Connecticut by region. Candlewood Lake, Connecticut River, Long Island Sound, and the best fishing across the state.",
+    "note": "Connecticut has over 3,000 lakes with 2,200+ larger than 10 acres and 180+ public fishing lakes, plus 618 miles of coastline on Long Island Sound. Candlewood Lake, the largest lake entirely within the state, offers excellent smallmouth and largemouth bass fishing, while the Connecticut River provides outstanding shad, striped bass, and northern pike fishing. Long Island Sound offers world-class fishing for striped bass, bluefish, fluke, and black sea bass, and the numerous trout streams in the L",
+    "regions": [
+      "northwestern-connecticut",
+      "central-connecticut",
+      "southwestern-connecticut",
+      "eastern-connecticut",
+      "long-island-sound-connecticut"
+    ],
+    "stats": {
+      "Regions": "5",
+      "Spots Listed": "100+",
+      "Species": "30+"
+    },
+    "country": "us"
+  },
+  {
+    "slug": "delaware",
+    "title": "Delaware",
+    "h1": "Fishing in Delaware",
+    "description": "Explore fishing in Delaware by region. Brandywine Creek, Delaware Bay, Indian River Inlet, and the best fishing across the First State.",
+    "note": "Delaware has 142 lakes and reservoirs plus 400 miles of tidal coastline along Delaware Bay and the Atlantic Ocean. Lums Pond and Trap Pond provide excellent largemouth bass and crappie fishing, while the Delaware River and Bay offer world-class striped bass, weakfish, and bluefish. Cape Henlopen and Delaware Seashore State Park provide outstanding surf fishing for red drum, kingfish, and flounder, and the inland ponds of Sussex County produce trophy chain pickerel and sunfish in a quiet coastal ",
+    "regions": [
+      "northern-delaware",
+      "central-delaware",
+      "southern-delaware-inland-bays",
+      "delaware-bay-atlantic-coast"
+    ],
+    "stats": {
+      "Regions": "4",
+      "Spots Listed": "60+",
+      "Species": "30+"
+    },
+    "country": "us"
+  },
+  {
+    "slug": "florida",
+    "title": "Florida",
+    "h1": "Fishing in Florida",
+    "description": "Explore fishing in Florida by region. Lake Okeechobee, Florida Keys, Everglades, Gulf Coast, and the best fishing in the Sunshine State.",
+    "note": "Florida has over 30,000 lakes with 7,700 over 10 acres, plus 1,800 miles of coastline and the Florida Keys — offering the most diverse fishing in the continental US. Lake Okeechobee is the legendary bass fishery of the south at 730 square miles, while the St. Johns River system and the Harris Chain provide outstanding trophy largemouth bass. The Everglades offer unique freshwater-saltwater fishing for snook, tarpon, and redfish, and the Gulf Coast and Atlantic provide world-class offshore fishin",
+    "regions": [
+      "panhandle-northwest-florida",
+      "north-florida",
+      "central-florida",
+      "south-florida-everglades",
+      "southwest-florida-gulf",
+      "southeast-florida-keys"
+    ],
+    "stats": {
+      "Regions": "6",
+      "Spots Listed": "200+",
+      "Species": "60+"
+    },
+    "country": "us"
+  },
+  {
+    "slug": "georgia",
+    "title": "Georgia",
+    "h1": "Fishing in Georgia",
+    "description": "Explore fishing in Georgia by region. Lake Lanier, Lake Hartwell, Savannah River, and over 4,500 man-made reservoirs — Georgia has zero natural lakes.",
+    "note": "Georgia has over 4,500 lakes and reservoirs — and zero large natural lakes. Every major lake in Georgia is a man-made reservoir, from massive Lake Lanier to the mountain lakes of the Blue Ridge. The state also offers Atlantic coast fishing and world-class trout waters in the north.",
+    "regions": [
+      "north-georgia-mountains",
+      "metro-atlanta-georgia",
+      "central-georgia",
+      "south-georgia",
+      "georgia-coast"
+    ],
+    "stats": {
+      "Regions": "5",
+      "Spots Listed": "100+",
+      "Species": "40+"
+    },
+    "country": "us"
+  },
+  {
+    "slug": "hawaii",
+    "title": "Hawaii — Island Fishing Guides",
+    "h1": "Fishing in Hawaii",
+    "description": "Explore fishing in Hawaii by island. Hawaii has only 5 natural lakes and 266 man-made reservoirs — the rest is world-class ocean fishing for marlin, tuna, and mahi-mahi.",
+    "note": "Hawaii has only 5 natural lakes and 266 man-made reservoirs — it is defined by the Pacific Ocean. World-class offshore fishing for blue marlin, ahi tuna, mahi-mahi, and ono, plus unique shore fishing for bonefish, papio, and ulua across the islands.",
+    "regions": [
+      "oahu-hawaii",
+      "big-island-hawaii",
+      "maui-lanai-hawaii",
+      "kauai-hawaii",
+      "molokai-offshore-hawaii"
+    ],
+    "stats": {
+      "Regions": "5",
+      "Spots Listed": "100+",
+      "Species": "40+"
+    },
+    "country": "us"
+  },
+  {
+    "slug": "idaho",
+    "title": "Idaho",
+    "h1": "Fishing in Idaho",
+    "description": "Explore fishing in Idaho by region. Idaho has 2,000 lakes plus 3,700 alpine lakes and 42 game fish species. From the Panhandle to the Yellowstone region.",
+    "note": "Idaho has 2,000 lakes, 3,700 alpine lakes, and 42 game fish species — more than any other inland state. From Pend Oreille's giant lake trout to the Salmon River's steelhead and Henrys Fork's legendary trout waters, Idaho is a fishing paradise.",
+    "regions": [
+      "northern-idaho-panhandle",
+      "central-idaho-salmon",
+      "southwestern-idaho-boise",
+      "southeastern-idaho-snake",
+      "eastern-idaho-yellowstone"
+    ],
+    "stats": {
+      "Regions": "5",
+      "Spots Listed": "150+",
+      "Game Fish Species": "42"
+    },
+    "country": "us"
+  },
+  {
+    "slug": "illinois",
+    "title": "Illinois",
+    "h1": "Fishing in Illinois",
+    "description": "Explore fishing in Illinois by region. Lake Michigan salmon, over 2,900 lakes, 84,000 ponds, and world-class fishing across the Prairie State.",
+    "note": "Illinois has over 2,900 lakes (the vast majority man-made) and more than 84,000 ponds. Lake Michigan provides world-class salmon and trout fishing along 63 miles of shoreline. From the Chain O'Lakes to Carlyle Lake, the Prairie State offers incredible fishing diversity.",
+    "regions": [
+      "northern-illinois-chicago",
+      "northwestern-illinois",
+      "central-illinois",
+      "southern-illinois",
+      "eastern-illinois"
+    ],
+    "stats": {
+      "Regions": "5",
+      "Spots Listed": "150+",
+      "Species": "35+"
+    },
+    "country": "us"
+  },
+  {
+    "slug": "indiana",
+    "title": "Indiana",
+    "h1": "Fishing in Indiana",
+    "description": "Explore fishing in Indiana by region. Over 1,000 lakes, Lake Michigan shoreline, Monroe Lake, and diverse fishing across the Hoosier State.",
+    "note": "Indiana has over 1,000 lakes — 1,466 named lakes per official catalogs — plus 45 miles of Lake Michigan shoreline and the Ohio River border. From Monroe Lake's bass to the Kankakee River's pike, the Hoosier State offers diverse fishing year-round.",
+    "regions": [
+      "northern-indiana-michigan",
+      "north-central-indiana",
+      "central-indiana-indianapolis",
+      "south-central-indiana",
+      "southern-indiana-ohio"
+    ],
+    "stats": {
+      "Regions": "5",
+      "Spots Listed": "150+",
+      "Species": "30+"
+    },
+    "country": "us"
+  },
+  {
+    "slug": "iowa",
+    "title": "Iowa",
+    "h1": "Fishing in Iowa",
+    "description": "Explore fishing in Iowa by region. Only 34 natural lakes out of 453 total — the rest are man-made. Spirit Lake, Mississippi River, and the Hawkeye State's best fishing.",
+    "note": "Iowa has 453 lakes — but only 34 are natural. The rest are man-made reservoirs, from the Iowa Great Lakes region to the Mississippi River. The Hawkeye State offers excellent walleye, bass, catfish, and trout fishing across its diverse waters.",
+    "regions": [
+      "northern-iowa-great-lakes",
+      "northeastern-iowa-mississippi",
+      "central-iowa-des-moines",
+      "western-iowa-missouri",
+      "southern-iowa"
+    ],
+    "stats": {
+      "Regions": "5",
+      "Spots Listed": "150+",
+      "Species": "30+"
+    },
+    "country": "us"
+  },
+  {
+    "slug": "kansas",
+    "title": "Kansas",
+    "h1": "Fishing in Kansas",
+    "description": "Explore fishing in Kansas by region. Over 120,000 lakes (mostly farm ponds) and 24 large public reservoirs. Milford Lake, Cheney Reservoir, and the best fishing in the Sunflower State.",
+    "note": "Kansas has over 120,000 lakes — but the vast majority are small private farm ponds. The state offers 24 large public reservoirs including Milford Lake, Wilson Lake, and Cheney Reservoir, plus excellent wiper, crappie, walleye, and catfish fishing.",
+    "regions": [
+      "northeastern-kansas",
+      "central-kansas",
+      "western-kansas",
+      "southeastern-kansas",
+      "south-central-kansas"
+    ],
+    "stats": {
+      "Regions": "5",
+      "Spots Listed": "100+",
+      "Species": "30+"
+    },
+    "country": "us"
+  },
+  {
+    "slug": "kentucky",
+    "title": "Kentucky",
+    "h1": "Fishing in Kentucky",
+    "description": "Explore fishing in Kentucky by region. 45 major lakes, over 100 man-made, only 3 natural. Kentucky Lake, Lake Cumberland, and the best fishing in the Bluegrass State.",
+    "note": "Kentucky has 45 major lakes — over 100 man-made reservoirs and only 3 natural lakes. From massive Kentucky Lake and Lake Cumberland to the mountain lakes of the east, the Bluegrass State offers world-class bass, crappie, and muskie fishing.",
+    "regions": [
+      "western-kentucky-lbl",
+      "south-central-kentucky",
+      "central-kentucky-bluegrass",
+      "eastern-kentucky-mountains",
+      "northern-kentucky-ohio"
+    ],
+    "stats": {
+      "Regions": "5",
+      "Spots Listed": "150+",
+      "Species": "35+"
+    },
+    "country": "us"
+  },
+  {
+    "slug": "louisiana",
+    "title": "Louisiana",
+    "h1": "Fishing in Louisiana",
+    "description": "Explore fishing in Louisiana by region. Over 3,500 named lakes and the Gulf of Mexico. Toledo Bend, Atchafalaya Basin, Grand Isle, and world-class redfish and speckled trout.",
+    "note": "Louisiana has over 3,500 named lakes, reservoirs, and major inland waters, plus the Gulf of Mexico. From Toledo Bend's bass to the Atchafalaya Basin's catfish and Grand Isle's redfish, the Pelican State offers incredible freshwater and saltwater fishing.",
+    "regions": [
+      "north-louisiana",
+      "central-louisiana",
+      "southeastern-louisiana",
+      "southwestern-louisiana-atchafalaya",
+      "coastal-louisiana-gulf"
+    ],
+    "stats": {
+      "Regions": "5",
+      "Spots Listed": "150+",
+      "Species": "50+"
+    },
+    "country": "us"
+  },
+  {
+    "slug": "maine",
+    "title": "Maine",
+    "h1": "Fishing in Maine",
+    "description": "Explore fishing in Maine by region. Over 6,000 lakes, coldwater and warmwater fisheries, and coastal saltwater. From Moosehead Lake landlocked salmon to coastal striped bass.",
+    "note": "Maine has over 6,000 lakes (5,785 over 1 acre), coldwater and warmwater fisheries, plus 3,500 miles of coastline. From Moosehead Lake's landlocked salmon to Rangeley's brook trout and the coast's striped bass, the Pine Tree State is a fishing paradise.",
+    "regions": [
+      "southern-maine-lakes",
+      "mid-coast-maine",
+      "downeast-maine",
+      "western-maine-mountains",
+      "northern-maine",
+      "coastal-maine"
+    ],
+    "stats": {
+      "Regions": "6",
+      "Spots Listed": "200+",
+      "Species": "35+"
+    },
+    "country": "us"
+  },
+  {
+    "slug": "manitoba",
+    "title": "Manitoba",
+    "h1": "Fishing in Manitoba",
+    "description": "Explore fishing in Manitoba by region. Interactive map of Manitoba's 7 fishing regions — Winnipeg, Whiteshell, Interlake, Parklands, Central Plains, Northern Manitoba, and Hudson Bay Coast.",
+    "note": "Manitoba has over 100,000 lakes including Lakes Winnipeg, Winnipegosis, and Manitoba — three of the largest lakes in the world. From world-class walleye and northern pike on Lake Winnipeg and the Saskatchewan River delta to the remote fly-in lake trout fisheries of the Canadian Shield, Manitoba offers outstanding fishing across the prairies, parklands, and boreal north. The Red and Assiniboine Rivers provide excellent urban fishing in Winnipeg for catfish, walleye, and goldeye.",
+    "regions": [
+      "winnipeg",
+      "eastern-manitoba-whiteshell",
+      "interlake-manitoba",
+      "western-manitoba-parklands",
+      "central-plains-manitoba",
+      "northern-manitoba",
+      "hudson-bay-coast-manitoba"
+    ],
+    "stats": {
+      "Regions": "7",
+      "Spots Listed": "150+",
+      "Species": "40+"
+    },
+    "country": "ca"
+  },
+  {
+    "slug": "maryland",
+    "title": "Maryland",
+    "h1": "Fishing in Maryland",
+    "description": "Explore fishing in Maryland by region. Zero natural lakes but over 100 man-made. Chesapeake Bay striped bass, Potomac River blue catfish, and Atlantic coast fishing.",
+    "note": "Maryland has zero natural lakes but over 100 man-made reservoirs, about 50 of which are stocked routinely. The Chesapeake Bay and Potomac River provide world-class striped bass (rockfish) and blue catfish fishing. Maryland also offers free fishing days and free fishing areas where no licence is needed.",
+    "regions": [
+      "western-maryland",
+      "central-maryland-baltimore",
+      "southern-maryland-potomac",
+      "eastern-shore-chesapeake",
+      "atlantic-coast-maryland"
+    ],
+    "stats": {
+      "Regions": "5",
+      "Spots Listed": "100+",
+      "Species": "35+"
+    },
+    "country": "us"
+  },
+  {
+    "slug": "massachusetts",
+    "title": "Massachusetts",
+    "h1": "Fishing in Massachusetts",
+    "description": "Explore fishing in Massachusetts by region. Over 3,000 lakes (533 designated as lakes). Cape Cod striped bass, Quabbin Reservoir trout, and the best fishing in the Bay State.",
+    "note": "Massachusetts has over 3,000 lakes and ponds — though only 533 are designated as \"lakes.\" From the Berkshires' trout streams to Cape Cod's world-class striped bass fishing, the Bay State offers diverse fishing across six distinct regions.",
+    "regions": [
+      "western-massachusetts-berkshires",
+      "central-massachusetts",
+      "eastern-massachusetts-boston",
+      "cape-cod-islands",
+      "north-shore-massachusetts",
+      "south-coast-massachusetts"
+    ],
+    "stats": {
+      "Regions": "6",
+      "Spots Listed": "150+",
+      "Species": "40+"
+    },
+    "country": "us"
+  },
+  {
+    "slug": "michigan",
+    "title": "Michigan",
+    "h1": "Fishing in Michigan",
+    "description": "Explore fishing in Michigan by region. Over 11,000 lakes larger than 5 acres, 1,148 over 100 acres, 10 over 10,000 acres. Great Lakes trout, salmon, bass, walleye, and the best fishing in the Great Lakes State.",
+    "note": "Michigan has over 11,000 lakes larger than 5 acres — including 1,148 over 100 acres and 10 over 10,000 acres. Bordered by four Great Lakes (Michigan, Huron, Superior, and Erie), Michigan offers world-class fishing for trout, salmon, walleye, bass, pike, muskellunge, and panfish across six distinct regions.",
+    "regions": [
+      "upper-peninsula-michigan",
+      "northern-lower-michigan",
+      "western-michigan-lake-michigan",
+      "central-michigan",
+      "saginaw-bay-thumb",
+      "southeast-michigan-detroit"
+    ],
+    "stats": {
+      "Lakes >5 acres": "11,000+",
+      "Regions": "6",
+      "Spots Listed": "200+",
+      "Species": "50+"
+    },
+    "country": "us"
+  },
+  {
+    "slug": "minnesota",
+    "title": "Minnesota",
+    "h1": "Fishing in Minnesota",
+    "description": "Explore fishing in Minnesota by region. The Land of 10,000 Lakes (11,842 over 10 acres). Lake Superior, Boundary Waters, Mille Lacs, Leech Lake, and world-class walleye, bass, pike, and trout fishing.",
+    "note": "Minnesota is the Land of 10,000 Lakes — actually 11,842 lakes over 10 acres. With the headwaters of the Mississippi River, the north shore of Lake Superior, the Boundary Waters Canoe Area, and more lakeshore than California, Florida, and Hawaii combined, Minnesota offers world-class fishing for walleye, northern pike, muskellunge, smallmouth bass, lake trout, and panfish across six distinct regions.",
+    "regions": [
+      "northeast-minnesota-arrowhead",
+      "north-central-minnesota",
+      "northwest-minnesota",
+      "central-minnesota",
+      "twin-cities-metro-minnesota",
+      "southern-minnesota"
+    ],
+    "stats": {
+      "Lakes >10 acres": "11,842",
+      "Regions": "6",
+      "Spots Listed": "200+",
+      "Species": "50+"
+    },
+    "country": "us"
+  },
+  {
+    "slug": "mississippi",
+    "title": "Mississippi",
+    "h1": "Fishing in Mississippi",
+    "description": "Explore fishing in Mississippi by region. Over 1,400 lakes, 6 major reservoirs, 22 managed public lakes, oxbow lakes, ice fishing lakes, trout stocking, and Gulf Coast fishing in the Magnolia State.",
+    "note": "Mississippi has over 1,400 lakes — including 6 major reservoirs, 22 managed public lakes, and unique oxbow lakes along the Mississippi River. From the Delta's big catfish to the Gulf Coast's speckled trout and redfish, the Magnolia State offers diverse fishing across six distinct regions. Some northern lakes are even stocked for ice fishing in winter.",
+    "regions": [
+      "north-mississippi-delta",
+      "north-central-mississippi",
+      "central-mississippi-jackson",
+      "southwest-mississippi",
+      "pine-belt-southeast-mississippi",
+      "mississippi-gulf-coast"
+    ],
+    "stats": {
+      "Lakes": "1,400+",
+      "Regions": "6",
+      "Spots Listed": "180+",
+      "Species": "40+"
+    },
+    "country": "us"
+  },
+  {
+    "slug": "missouri",
+    "title": "Missouri",
+    "h1": "Fishing in Missouri",
+    "description": "Explore fishing in Missouri by region. 2,727 lakes, Lake of the Ozarks, Table Rock Lake, Truman Lake, Mississippi and Missouri Rivers, and the best fishing in the Show-Me State.",
+    "note": "Missouri has 2,727 lakes — mostly man-made reservoirs with excellent fishing access including many managed fishing lakes with fishing docks and shore fishing facilities. From the massive Lake of the Ozarks and Table Rock Lake to the Mississippi and Missouri Rivers, the Show-Me State offers world-class bass, crappie, catfish, and trout fishing across six distinct regions.",
+    "regions": [
+      "northwest-missouri-kansas-city",
+      "north-missouri",
+      "central-missouri-lake-ozarks",
+      "southwest-missouri-ozarks",
+      "southeast-missouri-bootheel",
+      "eastern-missouri-st-louis"
+    ],
+    "stats": {
+      "Lakes": "2,727",
+      "Regions": "6",
+      "Spots Listed": "180+",
+      "Species": "40+"
+    },
+    "country": "us"
+  },
+  {
+    "slug": "montana",
+    "title": "Montana",
+    "h1": "Fishing in Montana",
+    "description": "Explore fishing in Montana by region. Over 3,200 lakes including Glacier National Park, blue-ribbon trout streams, the Missouri and Yellowstone Rivers, Flathead Lake, Fort Peck Reservoir, and the best fishing in Big Sky Country.",
+    "note": "Montana is home to some of the finest trout fishing in North America with over 3,200 lakes, 1,500+ miles of blue-ribbon trout streams, and Glacier National Park — which alone contains over 700 lakes. Massive reservoirs like Fort Peck and Canyon Ferry, the largest natural freshwater lake in the West (Flathead Lake), and world-famous rivers like the Madison, Yellowstone, Bighorn, and Missouri make Big Sky Country a world-class fishing destination across five distinct regions.",
+    "regions": [
+      "western-montana-flathead",
+      "southwestern-montana",
+      "central-montana-missouri-headwaters",
+      "eastern-montana-fort-peck",
+      "southeastern-montana-yellowstone"
+    ],
+    "stats": {
+      "Lakes": "3,200+",
+      "Regions": "5",
+      "Spots Listed": "190+",
+      "Species": "30+"
+    },
+    "country": "us"
+  },
+  {
+    "slug": "nebraska",
+    "title": "Nebraska",
+    "h1": "Fishing in Nebraska",
+    "description": "Explore fishing in Nebraska by region. Lake McConaughy, Calamus Reservoir, the Missouri and North Platte Rivers, and 3,000+ lakes across the Cornhusker State for walleye, catfish, trout, bass, and panfish.",
+    "note": "Nebraska offers outstanding fishing across 3,000+ lakes and 12,000 miles of streams. Lake McConaughy — the Big Mac — is the crown jewel with 30,000 acres of world-class walleye, rainbow trout, and smallmouth bass fishing. The Sandhills region features hundreds of natural lakes, the Missouri River forms the eastern border with giant blue catfish and paddlefish, and the Platte River system provides excellent channel catfish and panfish opportunities across five diverse regions.",
+    "regions": [
+      "nebraska-panhandle-north-platte",
+      "central-nebraska-sandhills",
+      "eastern-nebraska-missouri",
+      "southeastern-nebraska",
+      "southwestern-nebraska-republican"
+    ],
+    "stats": {
+      "Lakes": "3,000+",
+      "Regions": "5",
+      "Spots Listed": "150+",
+      "Species": "25+"
+    },
+    "country": "us"
+  },
+  {
+    "slug": "nevada",
+    "title": "Nevada",
+    "h1": "Fishing in Nevada",
+    "description": "Explore fishing in Nevada by region. Lake Tahoe, Pyramid Lake, the Colorado River, Walker Lake, and 200+ lakes across the Silver State for trout, bass, catfish, and crappie.",
+    "note": "Nevada offers surprising fishing diversity across 200+ lakes, reservoirs, and streams. The crystal-clear waters of Lake Tahoe, the ancient desert oasis of Pyramid Lake -- home to the prehistoric Lahontan cutthroat trout -- the mighty Colorado River forming the southern border, and high-desert reservoirs like Rye Patch and Wild Horse provide exceptional fishing for trout, bass, wipers, catfish, and crappie across five distinct regions.",
+    "regions": [
+      "northern-nevada-pyramid",
+      "western-nevada-tahoe",
+      "central-nevada",
+      "southern-nevada-colorado",
+      "eastern-nevada-great-basin"
+    ],
+    "stats": {
+      "Lakes": "200+",
+      "Regions": "5",
+      "Spots Listed": "120+",
+      "Species": "20+"
+    },
+    "country": "us"
+  },
+  {
+    "slug": "new-brunswick",
+    "title": "New Brunswick",
+    "h1": "Fishing in New Brunswick",
+    "description": "Explore fishing in New Brunswick by region. Atlantic salmon, brook trout, smallmouth bass, and striped bass from the Miramichi to the Bay of Fundy.",
+    "note": "New Brunswick has over 2,500 lakes and countless rivers flowing into the Bay of Fundy and Gulf of St. Lawrence. The Miramichi River system is one of the world's most famous Atlantic salmon destinations, while the Saint John River offers excellent smallmouth bass, striped bass, and muskie fishing. Grand Lake and the Chiputneticook Lakes provide outstanding bass and chain pickerel fishing, and the Bay of Fundy's record tides create unique tidal fishing opportunities for pollock, cod, and haddock.",
+    "regions": [
+      "miramichi-region",
+      "saint-john-river-valley",
+      "bay-of-fundy-southern",
+      "restigouche-chaleur"
+    ],
+    "stats": {
+      "Regions": "4",
+      "Spots Listed": "100+",
+      "Species": "25+"
+    },
+    "country": "ca"
+  },
+  {
+    "slug": "new-hampshire",
+    "title": "New Hampshire",
+    "h1": "Fishing in New Hampshire",
+    "description": "Explore fishing in New Hampshire by region. Lake Winnipesaukee, Squam Lake, the White Mountains, and 1,000+ lakes across the Granite State for lake trout, smallmouth bass, brook trout, and landlocked salmon.",
+    "note": "New Hampshire offers exceptional fishing across the Lakes Region, White Mountains, and 18 miles of Atlantic coastline. Lake Winnipesaukee — the state's largest lake at 44,586 acres — provides world-class lake trout and smallmouth bass fishing, the Connecticut and Merrimack Rivers offer outstanding fly fishing, the White Mountains feature hundreds of alpine trout ponds, and the seacoast provides striped bass and bluefish fishing in the Gulf of Maine.",
+    "regions": [
+      "new-hampshire-lakes-region-winnipesaukee",
+      "new-hampshire-white-mountains-north-country",
+      "new-hampshire-merrimack-valley-seacoast",
+      "new-hampshire-monadnock-southwest",
+      "new-hampshire-dartmouth-upper-valley"
+    ],
+    "stats": {
+      "Lakes": "1,000+",
+      "Regions": "5",
+      "Spots Listed": "180+",
+      "Species": "25+"
+    },
+    "country": "us"
+  },
+  {
+    "slug": "new-jersey",
+    "title": "New Jersey",
+    "h1": "Fishing in New Jersey",
+    "description": "New Jersey offers diverse fishing from the Kittatinny Mountains to the Jersey Shore. The Delaware River provides world-class shad and smallmouth bass...",
+    "note": "New Jersey offers diverse fishing from the Kittatinny Mountains to the Jersey Shore. The Delaware River provides world-class shad and smallmouth bass fishing, the Pine Barrens offer unique waters for chain pickerel and largemouth bass, and the Atlantic coastline provides surf fishing for striped bass, bluefish, and fluke. The Garden State has over 400 publicly accessible lakes and ponds and 1,800 miles of trout streams.",
+    "regions": [
+      "new-jersey-north-jersey-highlands",
+      "new-jersey-central-jersey-shore",
+      "new-jersey-pine-barrens-south-jersey",
+      "new-jersey-delaware-river-region",
+      "new-jersey-jersey-shore-bays-inlets"
+    ],
+    "stats": {
+      "Lakes": "400+",
+      "Regions": "5",
+      "Spots Listed": "150+",
+      "Species": "30+"
+    },
+    "country": "us"
+  },
+  {
+    "slug": "new-mexico",
+    "title": "New Mexico",
+    "h1": "Fishing in New Mexico",
+    "description": "New Mexico offers surprisingly diverse fishing from the Rocky Mountain peaks of the north to the warm reservoirs of the south. The Rio Grande...",
+    "note": "New Mexico offers surprisingly diverse fishing from the Rocky Mountain peaks of the north to the warm reservoirs of the south. The Rio Grande provides excellent brown and rainbow trout fishing, the Gila National Forest offers remote wilderness trout streams, and large reservoirs like Elephant Butte and Navajo Lake provide outstanding bass, walleye, and catfish fishing in a high-desert setting.",
+    "regions": [
+      "new-mexico-northern-mountains-rio-grande",
+      "new-mexico-central-nm-albuquerque",
+      "new-mexico-pecos-river-southeast",
+      "new-mexico-southwestern-nm-gila",
+      "new-mexico-eastern-plains-lakes"
+    ],
+    "stats": {
+      "Lakes": "200+",
+      "Regions": "5",
+      "Spots Listed": "150+",
+      "Species": "20+"
+    },
+    "country": "us"
+  },
+  {
+    "slug": "new-york",
+    "title": "New York",
+    "h1": "Fishing in New York",
+    "description": "New York offers world-class fishing across its diverse landscape. The Adirondacks feature 3,000+ lakes and ponds including Lake Champlain and the...",
+    "note": "New York offers world-class fishing across its diverse landscape. The Adirondacks feature 3,000+ lakes and ponds including Lake Champlain and the Saranac Lakes, the Finger Lakes offer exceptional trout and landlocked salmon fishing, the Catskills are famous for trout streams like the Beaverkill and Esopus, and the Great Lakes and Atlantic coast provide salmon, steelhead, striped bass, and fluke fishing.",
+    "regions": [
+      "new-york-adirondacks-st.-lawrence",
+      "new-york-finger-lakes-central",
+      "new-york-catskills-hudson-valley",
+      "new-york-long-island-nyc",
+      "new-york-western-ny-lake-erie",
+      "new-york-lake-ontario-thousand-islands"
+    ],
+    "stats": {
+      "Lakes": "3,000+",
+      "Regions": "6",
+      "Spots Listed": "200+",
+      "Species": "35+"
+    },
+    "country": "us"
+  },
+  {
+    "slug": "newfoundland-labrador",
+    "title": "Newfoundland and Labrador",
+    "h1": "Fishing in Newfoundland and Labrador",
+    "description": "Explore fishing in Newfoundland and Labrador by region. Atlantic salmon, sea-run brook trout, Arctic char, trophy pike, and world-class wilderness fishing.",
+    "note": "Newfoundland and Labrador offer some of North America's most remote and pristine fishing across a vast subarctic landscape. The island's Atlantic salmon rivers - the Humber, Gander, and Exploits - are world-renowned, while countless ponds and lakes produce trophy brook trout exceeding five pounds. Labrador's remote fly-in rivers like the Eagle, Kanairiktok, and Minipi offer extraordinary brook trout and Arctic char fishing in untouched wilderness, and the Grand Banks offshore provide world-class",
+    "regions": [
+      "western-newfoundland",
+      "central-newfoundland",
+      "eastern-newfoundland-avalon",
+      "southern-newfoundland",
+      "northern-peninsula-newfoundland",
+      "labrador"
+    ],
+    "stats": {
+      "Regions": "6",
+      "Spots Listed": "200+",
+      "Species": "25+"
+    },
+    "country": "ca"
+  },
+  {
+    "slug": "north-carolina",
+    "title": "North Carolina",
+    "h1": "Fishing in North Carolina",
+    "description": "North Carolina offers exceptional fishing from the Blue Ridge Mountains to the Outer Banks. The mountains provide outstanding trout fishing in 3,000...",
+    "note": "North Carolina offers exceptional fishing from the Blue Ridge Mountains to the Outer Banks. The mountains provide outstanding trout fishing in 3,000 miles of coldwater streams, the Piedmont features large impoundments like Jordan Lake and Kerr Lake, and the coast offers some of the best saltwater fishing on the East Coast — from the surf fishing of Cape Hatteras to the offshore Gulf Stream waters.",
+    "regions": [
+      "north-carolina-mountains-asheville",
+      "north-carolina-piedmont-central",
+      "north-carolina-sandhills-southern",
+      "north-carolina-coastal-plain-inner-banks",
+      "north-carolina-outer-banks-coast",
+      "north-carolina-charlotte-metro"
+    ],
+    "stats": {
+      "Lakes": "500+",
+      "Regions": "6",
+      "Spots Listed": "200+",
+      "Species": "35+"
+    },
+    "country": "us"
+  },
+  {
+    "slug": "north-dakota",
+    "title": "North Dakota",
+    "h1": "Fishing in North Dakota",
+    "description": "North Dakota offers outstanding walleye fishing on massive Missouri River reservoirs and natural glacial lakes. Lake Sakakawea — the third-largest...",
+    "note": "North Dakota offers outstanding walleye fishing on massive Missouri River reservoirs and natural glacial lakes. Lake Sakakawea — the third-largest reservoir in the US at 368,000 acres — is famous for trophy walleye and northern pike. Devils Lake is one of the best walleye fisheries in North America, and the Missouri River below Garrison Dam provides excellent rainbow trout fishing in a unique tailwater setting.",
+    "regions": [
+      "north-dakota-missouri-river-lake-sakakawea",
+      "north-dakota-devils-lake-northeast",
+      "north-dakota-lake-oahe-south-central",
+      "north-dakota-northwest-plains",
+      "north-dakota-red-river-valley-east"
+    ],
+    "stats": {
+      "Lakes": "500+",
+      "Regions": "5",
+      "Spots Listed": "150+",
+      "Species": "20+"
+    },
+    "country": "us"
+  },
+  {
+    "slug": "northwest-territories",
+    "title": "Northwest Territories",
+    "h1": "Fishing in Northwest Territories",
+    "description": "Explore fishing in Northwest Territories by region. Great Bear Lake trophy lake trout, Great Slave Lake, Arctic char, Arctic grayling, and northern pike.",
+    "note": "The Northwest Territories are home to Great Bear Lake and Great Slave Lake, two of the greatest lake trout fisheries on Earth, plus world-class Arctic char, Arctic grayling, northern pike, and the mighty Mackenzie River.",
+    "regions": [
+      "great-slave-south-nwt",
+      "great-bear-sahtu",
+      "mackenzie-river-valley",
+      "yellowknife-east-arm",
+      "north-slave-barrenlands",
+      "mackenzie-delta-arctic"
+    ],
+    "stats": {
+      "Regions": "6",
+      "Spots Listed": "200+",
+      "Species": "20+"
+    },
+    "country": "ca"
+  },
+  {
+    "slug": "nova-scotia",
+    "title": "Nova Scotia",
+    "h1": "Fishing in Nova Scotia",
+    "description": "Explore fishing in Nova Scotia by region. Atlantic salmon, brook trout, smallmouth bass, and striped bass from Cape Breton to the South Shore.",
+    "note": "Nova Scotia has over 6,000 lakes and countless rivers on a peninsula surrounded by the Atlantic Ocean. The province offers outstanding sea-run brook trout fishing in coastal rivers, excellent Atlantic salmon fishing on the Margaree and Medway Rivers, and productive smallmouth bass fisheries in inland lakes like Lake Rossignol and Grand Lake. The Bras d'Or Lakes provide unique saltwater fishing for striped bass, mackerel, and flounder, while the Bay of Fundy offers world-record tuna and halibut o",
+    "regions": [
+      "mainland-nova-scotia",
+      "cape-breton"
+    ],
+    "stats": {
+      "Regions": "2",
+      "Spots Listed": "100+",
+      "Species": "30+"
+    },
+    "country": "ca"
+  },
+  {
+    "slug": "nunavut",
+    "title": "Nunavut",
+    "h1": "Fishing in Nunavut",
+    "description": "Explore fishing in Nunavut by region. World-class Arctic char, trophy lake trout, Arctic grayling, and the most remote fishing in North America.",
+    "note": "Nunavut is Canada's last fishing frontier. World-class Arctic char in pristine tundra rivers, trophy lake trout, and some of the most remote angling on Earth across the vast Arctic landscape.",
+    "regions": [
+      "baffin-island",
+      "kivalliq-hudson-bay",
+      "kitikmeot-central-arctic",
+      "high-arctic-islands",
+      "keewatin-interior"
+    ],
+    "stats": {
+      "Regions": "5",
+      "Spots Listed": "150+",
+      "Species": "15+"
+    },
+    "country": "ca"
+  },
+  {
+    "slug": "ohio",
+    "title": "Ohio",
+    "h1": "Fishing in Ohio",
+    "description": "Ohio features world-class Lake Erie walleye and yellow perch fishing, plus excellent river and reservoir fishing across the state. Lake Erie is the...",
+    "note": "Ohio features world-class Lake Erie walleye and yellow perch fishing, plus excellent river and reservoir fishing across the state. Lake Erie is the walleye capital of the world with the Western Basin offering phenomenal spring fishing. The Ohio River provides smallmouth bass and catfish, Grand Lake St. Marys offers saugeye and crappie, and the inland reservoirs provide excellent largemouth bass and panfish fishing.",
+    "regions": [
+      "ohio-lake-erie-islands",
+      "ohio-western-ohio-grand-lake",
+      "ohio-central-ohio-columbus",
+      "ohio-southern-ohio-ohio-river",
+      "ohio-northeast-ohio-portage",
+      "ohio-muskingum-valley"
+    ],
+    "stats": {
+      "Lakes": "2,000+",
+      "Regions": "6",
+      "Spots Listed": "200+",
+      "Species": "30+"
+    },
+    "country": "us"
+  },
+  {
+    "slug": "oklahoma",
+    "title": "Oklahoma",
+    "h1": "Fishing in Oklahoma",
+    "description": "Oklahoma offers outstanding fishing across its diverse landscape of forests, plains, and mountains. Lake Texoma — shared with Texas — is famous for...",
+    "note": "Oklahoma offers outstanding fishing across its diverse landscape of forests, plains, and mountains. Lake Texoma — shared with Texas — is famous for world-class striped bass fishing and blue catfish. Broken Bow Lake and the Mountain Fork River offer excellent trout fishing in the Ouachita Mountains, while Grand Lake O' the Cherokees and Lake Eufaula provide outstanding crappie, bass, and catfish fishing.",
+    "regions": [
+      "oklahoma-green-country-northeast",
+      "oklahoma-lake-texoma-south-central",
+      "oklahoma-great-plains-northwest",
+      "oklahoma-southeast-kiamichi",
+      "oklahoma-central-oklahoma-okc"
+    ],
+    "stats": {
+      "Lakes": "200+",
+      "Regions": "5",
+      "Spots Listed": "150+",
+      "Species": "25+"
+    },
+    "country": "us"
+  },
+  {
+    "slug": "ontario",
+    "title": "Ontario",
+    "h1": "Fishing in Ontario",
+    "description": "Explore fishing in Ontario by region. Four Great Lakes, 250,000 lakes — from Lake Erie walleye to northern brook trout and Kenora muskie.",
+    "note": "Ontario has over 250,000 lakes and four of the five Great Lakes, making it one of the richest freshwater fisheries on Earth. From world-class walleye and northern pike on Lake of the Woods, Lac Seul, and Rainy Lake to the legendary muskie waters of the St. Lawrence River and Georgian Bay, Ontario offers unmatched fishing diversity. Lake Nipigon produces trophy brook trout, the Great Lakes provide salmon and steelhead, and thousands of fly-in lakes in the north offer remote wilderness fishing for",
+    "regions": [
+      "lake-erie-ontario",
+      "georgian-bay-huron",
+      "eastern-ontario-st-lawrence",
+      "kawarthas-haliburton",
+      "lake-of-the-woods-northwest",
+      "northeast-ontario-algoma",
+      "far-north-ontario"
+    ],
+    "stats": {
+      "Regions": "7",
+      "Spots Listed": "200+",
+      "Species": "50+"
+    },
+    "country": "ca"
+  },
+  {
+    "slug": "oregon",
+    "title": "Oregon",
+    "h1": "Fishing in Oregon",
+    "description": "Oregon offers some of the most diverse fishing in America — from Pacific salmon and halibut off the coast to sturgeon in the Columbia River, trout in...",
+    "note": "Oregon offers some of the most diverse fishing in America — from Pacific salmon and halibut off the coast to sturgeon in the Columbia River, trout in Cascade lakes, and bass in eastern Oregon reservoirs. The Deschutes River is famous for redside rainbow trout, Crater Lake offers unique fishing at 6,000 feet elevation, and the Rogue River provides world-class salmon and steelhead fishing.",
+    "regions": [
+      "oregon-columbia-river-portland",
+      "oregon-willamette-valley",
+      "oregon-central-oregon-deschutes",
+      "oregon-southern-oregon-klamath",
+      "oregon-coast-coastal-lakes",
+      "oregon-eastern-oregon-high-desert"
+    ],
+    "stats": {
+      "Lakes": "6,000+",
+      "Regions": "6",
+      "Spots Listed": "200+",
+      "Species": "30+"
+    },
+    "country": "us"
+  },
+  {
+    "slug": "pennsylvania",
+    "title": "Pennsylvania",
+    "h1": "Fishing in Pennsylvania",
+    "description": "Pennsylvania offers exceptional fishing across 85,000 miles of streams and 4,000 lakes. Lake Erie provides world-class walleye and steelhead fishing,...",
+    "note": "Pennsylvania offers exceptional fishing across 85,000 miles of streams and 4,000 lakes. Lake Erie provides world-class walleye and steelhead fishing, the Allegheny National Forest features remote trout streams, the Susquehanna River offers smallmouth bass fishing, and the Poconos provide outstanding trout fishing in classic mountain streams. The state has over 200 species of fish.",
+    "regions": [
+      "pennsylvania-northwest-lake-erie",
+      "pennsylvania-allegheny-southwest",
+      "pennsylvania-central-pa-susquehanna",
+      "pennsylvania-northeast-poconos",
+      "pennsylvania-southeast-philadelphia",
+      "pennsylvania-allegheny-national-forest"
+    ],
+    "stats": {
+      "Lakes": "4,000+",
+      "Regions": "6",
+      "Spots Listed": "200+",
+      "Species": "30+"
+    },
+    "country": "us"
+  },
+  {
+    "slug": "prince-edward-island",
+    "title": "Prince Edward Island",
+    "h1": "Fishing in Prince Edward Island",
+    "description": "Explore fishing in Prince Edward Island by region. Sea-run brook trout, striped bass, bluefin tuna, and mackerel from the Island's coastal waters.",
+    "note": "Prince Edward Island is a saltwater angler's paradise surrounded by the Gulf of St. Lawrence and Northumberland Strait. North Lake is famous as the \"Tuna Capital of the World\" for giant bluefin tuna, while the island's countless streams and estuaries offer outstanding sea-run brook trout fishing each spring and fall. Striped bass have made a remarkable comeback in the Hillsborough and West Rivers, and mackerel fishing from the many wharves and beaches is a beloved island tradition for locals and",
+    "regions": [
+      "eastern-pei",
+      "central-pei",
+      "western-pei"
+    ],
+    "stats": {
+      "Regions": "3",
+      "Spots Listed": "100+",
+      "Species": "20+"
+    },
+    "country": "ca"
+  },
+  {
+    "slug": "quebec",
+    "title": "Quebec",
+    "h1": "Fishing in Quebec",
+    "description": "Explore fishing in Quebec by region. Atlantic salmon, brook trout, walleye, pike — from the St. Lawrence to Nunavik.",
+    "note": "Quebec has over 500,000 lakes and thousands of rivers spanning from the St. Lawrence River to Ungava Bay. The province offers world-class brook trout fishing in the remote rivers of northern Quebec, exceptional walleye and northern pike in the Laurentian lakes, and some of the best Atlantic salmon rivers in the world on the Gaspe Peninsula and North Shore. Lake Mistassini and the vast reservoir lakes like Caniapiscau provide trophy lake trout fishing in the boreal wilderness.",
+    "regions": [
+      "southern-quebec-st-lawrence",
+      "laurentians-lanaudiere",
+      "eastern-quebec-gaspe",
+      "saguenay-cote-nord",
+      "abitibi-northwest",
+      "far-north-quebec-nunavik"
+    ],
+    "stats": {
+      "Regions": "6",
+      "Spots Listed": "200+",
+      "Species": "40+"
+    },
+    "country": "ca"
+  },
+  {
+    "slug": "rhode-island",
+    "title": "Rhode Island",
+    "h1": "Fishing in Rhode Island",
+    "description": "Rhode Island offers excellent saltwater fishing in Narragansett Bay and along the Atlantic coast. Despite being the smallest state, Rhode Island has...",
+    "note": "Rhode Island offers excellent saltwater fishing in Narragansett Bay and along the Atlantic coast. Despite being the smallest state, Rhode Island has 400 miles of coastline and is famous for striped bass, fluke, and tautog fishing. Inland freshwater fishing includes 60+ lakes and ponds offering largemouth bass, trout, and panfish. The Blackstone River provides excellent urban fishing opportunities.",
+    "regions": [
+      "rhode-island-narragansett-bay",
+      "rhode-island-inland-freshwater",
+      "rhode-island-south-county-coast",
+      "rhode-island-providence-blackstone"
+    ],
+    "stats": {
+      "Lakes": "60+",
+      "Regions": "4",
+      "Spots Listed": "100+",
+      "Species": "25+"
+    },
+    "country": "us"
+  },
+  {
+    "slug": "saskatchewan",
+    "title": "Saskatchewan",
+    "h1": "Fishing in Saskatchewan",
+    "description": "Explore fishing in Saskatchewan by region. Over 100,000 lakes — from Tobin Lake walleye to trophy lake trout in the northern shield.",
+    "note": "Saskatchewan has over 100,000 lakes with world-renowned fishing for trophy lake trout, northern pike, and walleye. Lake Athabasca in the north produces massive lake trout exceeding 50 pounds, while the Churchill and Saskatchewan River systems offer excellent pike and walleye fishing. Lac la Ronge and the myriad fly-in lakes of the Canadian Shield provide some of the most remote and productive fishing in North America, with trophy pike over 40 inches common in the northern reaches.",
+    "regions": [
+      "regina-southern-saskatchewan",
+      "saskatoon-central-saskatchewan",
+      "eastern-saskatchewan-tobin",
+      "western-saskatchewan",
+      "northern-saskatchewan-shield",
+      "far-north-saskatchewan-athabasca"
+    ],
+    "stats": {
+      "Regions": "6",
+      "Spots Listed": "150+",
+      "Species": "30+"
+    },
+    "country": "ca"
+  },
+  {
+    "slug": "south-carolina",
+    "title": "South Carolina",
+    "h1": "Fishing in South Carolina",
+    "description": "South Carolina offers outstanding fishing from the Blue Ridge Mountains to the Atlantic coast. The Santee Cooper Lakes (Lake Marion and Lake...",
+    "note": "South Carolina offers outstanding fishing from the Blue Ridge Mountains to the Atlantic coast. The Santee Cooper Lakes (Lake Marion and Lake Moultrie) are famous for giant catfish and crappie, the Lowcountry offers exceptional inshore saltwater fishing for red drum and speckled trout, and the mountain trout streams of the Upstate provide excellent coldwater fishing. Charleston is one of the best fishing destinations on the East Coast.",
+    "regions": [
+      "south-carolina-upstate-mountains",
+      "south-carolina-midlands-santee",
+      "south-carolina-lowcountry-coast",
+      "south-carolina-grand-strand-myrtle-beach",
+      "south-carolina-savannah-river-csra"
+    ],
+    "stats": {
+      "Lakes": "400+",
+      "Regions": "5",
+      "Spots Listed": "150+",
+      "Species": "30+"
+    },
+    "country": "us"
+  },
+  {
+    "slug": "south-dakota",
+    "title": "South Dakota",
+    "h1": "Fishing in South Dakota",
+    "description": "South Dakota features outstanding fishing on the Missouri River reservoirs and natural glacial lakes. Lake Oahe is world-famous for walleye,...",
+    "note": "South Dakota features outstanding fishing on the Missouri River reservoirs and natural glacial lakes. Lake Oahe is world-famous for walleye, smallmouth bass, and Chinook salmon. The Black Hills offer excellent trout fishing in mountain streams and lakes, and the Glacial Lakes region in the northeast is a premier walleye and northern pike destination. The Missouri River below Fort Pierre provides exceptional walleye fishing.",
+    "regions": [
+      "south-dakota-lake-oahe-missouri-river",
+      "south-dakota-glacial-lakes-northeast",
+      "south-dakota-black-hills-west",
+      "south-dakota-lake-francis-case-central",
+      "south-dakota-southeast-missouri-bottoms"
+    ],
+    "stats": {
+      "Lakes": "500+",
+      "Regions": "5",
+      "Spots Listed": "150+",
+      "Species": "25+"
+    },
+    "country": "us"
+  },
+  {
+    "slug": "tennessee",
+    "title": "Tennessee",
+    "h1": "Fishing in Tennessee",
+    "description": "Tennessee offers exceptional fishing from the Great Smoky Mountains to the Mississippi River. The state has more than 20 major reservoirs including...",
+    "note": "Tennessee offers exceptional fishing from the Great Smoky Mountains to the Mississippi River. The state has more than 20 major reservoirs including Kentucky Lake, Lake Barkley, Dale Hollow, and Norris Lake — famous for bass, crappie, catfish, and muskie. The Great Smoky Mountains National Park features 800 miles of wild trout streams, and the Tennessee River provides excellent smallmouth bass and sauger fishing.",
+    "regions": [
+      "tennessee-east-tennessee-smoky-mtns",
+      "tennessee-middle-tn-cumberland",
+      "tennessee-west-tn-mississippi",
+      "tennessee-tennessee-river-valley",
+      "tennessee-plateau-highland-rim"
+    ],
+    "stats": {
+      "Lakes": "500+",
+      "Regions": "5",
+      "Spots Listed": "200+",
+      "Species": "30+"
+    },
+    "country": "us"
+  },
+  {
+    "slug": "texas",
+    "title": "Texas",
+    "h1": "Fishing in Texas",
+    "description": "Texas offers some of the most diverse fishing in America — from the Gulf Coast red snapper and speckled trout to the Hill Country spring-fed trout...",
+    "note": "Texas offers some of the most diverse fishing in America — from the Gulf Coast red snapper and speckled trout to the Hill Country spring-fed trout streams, and from the massive bass-fishing reservoirs of East Texas to the catfish rivers of the Panhandle. Texas has 3,300 miles of tidal shoreline, 7,000+ lakes, and 15 major river systems. Lake Fork is famous for trophy largemouth bass, and the Gulf provides world-class offshore fishing.",
+    "regions": [
+      "texas-east-texas-piney-woods",
+      "texas-gulf-coast-galveston",
+      "texas-south-texas-rio-grande",
+      "texas-hill-country-central",
+      "texas-high-plains-panhandle",
+      "texas-dallas-fort-worth-metro"
+    ],
+    "stats": {
+      "Lakes": "7,000+",
+      "Regions": "6",
+      "Spots Listed": "250+",
+      "Species": "40+"
+    },
+    "country": "us"
+  },
+  {
+    "slug": "utah",
+    "title": "Utah",
+    "h1": "Fishing in Utah",
+    "description": "Utah offers exceptional fishing in dramatic settings from the Wasatch Front to the red rock country of the south. Bear Lake is famous for Bonneville...",
+    "note": "Utah offers exceptional fishing in dramatic settings from the Wasatch Front to the red rock country of the south. Bear Lake is famous for Bonneville cutthroat trout and cisco, Flaming Gorge Reservoir provides trophy lake trout and rainbow trout, Lake Powell offers bass and catfish in a stunning red rock canyon setting, and the Uinta Mountains feature hundreds of high-altitude trout lakes.",
+    "regions": [
+      "utah-northern-utah-bear-lake",
+      "utah-wasatch-front-salt-lake",
+      "utah-central-utah-fish-lake",
+      "utah-southern-utah-lake-powell",
+      "utah-uinta-mountains-high-desert"
+    ],
+    "stats": {
+      "Lakes": "1,000+",
+      "Regions": "5",
+      "Spots Listed": "150+",
+      "Species": "20+"
+    },
+    "country": "us"
+  },
+  {
+    "slug": "vermont",
+    "title": "Vermont",
+    "h1": "Fishing in Vermont",
+    "description": "Vermont offers classic New England fishing with Lake Champlain, hundreds of mountain trout streams, and pristine backcountry ponds. Lake Champlain...",
+    "note": "Vermont offers classic New England fishing with Lake Champlain, hundreds of mountain trout streams, and pristine backcountry ponds. Lake Champlain provides outstanding lake trout, landlocked salmon, and bass fishing. The Green Mountains feature hundreds of wild brook trout streams, and the Connecticut River forms the eastern border offering smallmouth bass and walleye. The Northeast Kingdom is famous for its remote trout ponds.",
+    "regions": [
+      "vermont-lake-champlain-northwest",
+      "vermont-green-mountains-central",
+      "vermont-northeast-kingdom",
+      "vermont-southern-vermont",
+      "vermont-connecticut-river-valley"
+    ],
+    "stats": {
+      "Lakes": "800+",
+      "Regions": "5",
+      "Spots Listed": "150+",
+      "Species": "20+"
+    },
+    "country": "us"
+  },
+  {
+    "slug": "virginia",
+    "title": "Virginia",
+    "h1": "Fishing in Virginia",
+    "description": "Virginia offers extraordinary fishing diversity from the Atlantic coast to the Blue Ridge Mountains. The Chesapeake Bay and Eastern Shore provide...",
+    "note": "Virginia offers extraordinary fishing diversity from the Atlantic coast to the Blue Ridge Mountains. The Chesapeake Bay and Eastern Shore provide world-class striped bass, blue crab, and flounder fishing. The Shenandoah National Park features 100+ miles of brook trout streams, Smith Mountain Lake offers excellent bass and striper fishing, and the James River provides smallmouth bass and muskie fishing.",
+    "regions": [
+      "virginia-coastal-chesapeake-bay",
+      "virginia-piedmont-central",
+      "virginia-shenandoah-mountains",
+      "virginia-southwest-blue-ridge",
+      "virginia-northern-va-potomac",
+      "virginia-hampton-roads-tidewater"
+    ],
+    "stats": {
+      "Lakes": "500+",
+      "Regions": "6",
+      "Spots Listed": "200+",
+      "Species": "35+"
+    },
+    "country": "us"
+  },
+  {
+    "slug": "washington",
+    "title": "Washington",
+    "h1": "Fishing in Washington",
+    "description": "Washington offers some of the best fishing in the Pacific Northwest. The Puget Sound provides salmon, halibut, and rockfish, the Olympic Peninsula...",
+    "note": "Washington offers some of the best fishing in the Pacific Northwest. The Puget Sound provides salmon, halibut, and rockfish, the Olympic Peninsula features wild coastal steelhead streams, the Columbia River is famous for Chinook salmon and sturgeon, and Eastern Washington's lakes offer warmwater fishing for bass and walleye. The state has 8,000+ lakes and 70,000+ miles of rivers and streams.",
+    "regions": [
+      "washington-puget-sound-seattle",
+      "washington-olympic-peninsula-coast",
+      "washington-columbia-river-central",
+      "washington-eastern-wa-spokane",
+      "washington-north-cascades-mountains",
+      "washington-south-central-wa-tri-cities"
+    ],
+    "stats": {
+      "Lakes": "8,000+",
+      "Regions": "6",
+      "Spots Listed": "200+",
+      "Species": "30+"
+    },
+    "country": "us"
+  },
+  {
+    "slug": "west-virginia",
+    "title": "West Virginia",
+    "h1": "Fishing in West Virginia",
+    "description": "West Virginia offers outstanding mountain fishing in the Appalachian highlands. The state has over 20,000 miles of streams including famous trout...",
+    "note": "West Virginia offers outstanding mountain fishing in the Appalachian highlands. The state has over 20,000 miles of streams including famous trout waters like the Elk River, Greenbrier River, and Cranberry River. The New River and Gauley River provide excellent smallmouth bass and muskie fishing, and large impoundments like Summersville Lake and Stonewall Jackson Lake offer walleye, bass, and crappie.",
+    "regions": [
+      "west-virginia-monongahela-north-central",
+      "west-virginia-new-river-southeast",
+      "west-virginia-potomac-eastern-panhandle",
+      "west-virginia-ohio-river-western",
+      "west-virginia-greenbrier-south-central"
+    ],
+    "stats": {
+      "Lakes": "500+",
+      "Regions": "5",
+      "Spots Listed": "150+",
+      "Species": "20+"
+    },
+    "country": "us"
+  },
+  {
+    "slug": "wisconsin",
+    "title": "Wisconsin",
+    "h1": "Fishing in Wisconsin",
+    "description": "Wisconsin offers exceptional fishing across 15,000 lakes and 33,000 miles of streams. Lake Superior provides lake trout, coho salmon, and steelhead,...",
+    "note": "Wisconsin offers exceptional fishing across 15,000 lakes and 33,000 miles of streams. Lake Superior provides lake trout, coho salmon, and steelhead, Lake Michigan offers Chinook salmon and brown trout, and the inland lakes provide outstanding muskie, walleye, and bass fishing. The Mississippi River forms the western border with excellent channel catfish and sauger, and the Northwoods feature classic canoe country fishing.",
+    "regions": [
+      "wisconsin-lake-superior-north-woods",
+      "wisconsin-lake-michigan-door-county",
+      "wisconsin-central-wi-wisconsin-river",
+      "wisconsin-mississippi-river-western",
+      "wisconsin-southeast-milwaukee",
+      "wisconsin-fox-river-green-bay"
+    ],
+    "stats": {
+      "Lakes": "15,000+",
+      "Regions": "6",
+      "Spots Listed": "200+",
+      "Species": "30+"
+    },
+    "country": "us"
+  },
+  {
+    "slug": "wyoming",
+    "title": "Wyoming",
+    "h1": "Fishing in Wyoming",
+    "description": "Wyoming offers world-class trout fishing in spectacular Rocky Mountain settings. Yellowstone and Grand Teton National Parks feature famous waters...",
+    "note": "Wyoming offers world-class trout fishing in spectacular Rocky Mountain settings. Yellowstone and Grand Teton National Parks feature famous waters like the Madison, Snake, and Yellowstone Rivers — home to native cutthroat trout. The North Platte River below Grey Reef is a blue-ribbon trout stream, and the Bighorn Mountains offer hundreds of alpine lakes. Flaming Gorge Reservoir provides trophy lake trout and smallmouth bass.",
+    "regions": [
+      "wyoming-yellowstone-grand-teton",
+      "wyoming-wind-river-central",
+      "wyoming-north-platte-river-southeast",
+      "wyoming-bighorn-mountains-northeast",
+      "wyoming-green-river-southwest"
+    ],
+    "stats": {
+      "Lakes": "4,000+",
+      "Regions": "5",
+      "Spots Listed": "150+",
+      "Species": "20+"
+    },
+    "country": "us"
+  },
+  {
+    "slug": "yukon",
+    "title": "Yukon",
+    "h1": "Fishing in Yukon",
+    "description": "Explore fishing in Yukon by region. World's largest Chinook salmon, Arctic grayling, lake trout, northern pike, and Arctic char in pristine northern wilderness.",
+    "note": "Yukon is a wilderness fishing destination like no other. The Yukon River produces the world's largest Chinook salmon, while countless lakes and rivers offer Arctic grayling, lake trout, and northern pike in pristine northern wilderness.",
+    "regions": [
+      "southern-lakes-yukon",
+      "whitehorse-area",
+      "kluane-southwest-yukon",
+      "central-yukon-stewart-pelly",
+      "dawson-klondike",
+      "northern-yukon"
+    ],
+    "stats": {
+      "Regions": "6",
+      "Spots Listed": "200+",
+      "Species": "20+"
+    },
+    "country": "ca"
+  }
+]
