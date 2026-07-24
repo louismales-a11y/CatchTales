@@ -978,6 +978,15 @@ Share URLs:
 
 **Both images and audio use the same NN prefix so they sort identically.**
 
+### Video B-Roll for Long Scenes
+- For scenes with long narration (12+ sec), consider using a **video clip** instead of a static image to keep viewer engaged
+- Search Pixabay Videos API: `https://pixabay.com/api/videos/?key=56823444-e87c08005b791f9749a63f80b&q=SEARCH_TERM&per_page=10`
+- Download `medium` quality (2560×1440 or 1920×1080) for best quality
+- Name with same NN prefix: `{NN}-{description}.mp4` so it sorts with images
+- Keep the original static image in the folder as fallback
+- In CapCut, place the video clip on the timeline and loop if narration is longer than clip
+- **Note:** GitHub has a 50MB recommended file limit. If the video is larger, consider using smaller resolution (download `small` instead of `medium`) or use Git LFS
+
 ### Key Technical Lessons
 - Use `setInterval` + `performance.now()` for reliable audio timing
 - Always reset `playStartTime` when resuming from pause
