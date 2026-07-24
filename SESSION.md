@@ -200,3 +200,30 @@
 - Video Watermark Standard
 - Video Asset Organization Standard (dedicated folder per project)
 - Pexels + Pixabay API keys saved for stock photo searches
+
+---
+
+## 2026-07-23 — Session 17 — Fishing Safety Tips Video
+
+### What we did
+
+**Created and published Fishing Safety Tips video:**
+- Wrote 15-scene script based on blog post (2:44 target, expanded to ~5:00 for audio sync)
+- Downloaded 12 stock photos from Pexels + Pixabay
+- Downloaded 5 video clips (storm timelapse, lightning, lake drone, boat, angler)
+- Generated 15 voiceover MP3s with gTTS
+- Built interactive preview page: https://catchtales.com/fishing-safety-video.html
+- Built production reference: https://catchtales.com/fishing-safety-production.md
+- Cleaned up old/mismatched audio files
+- Published to YouTube
+
+**YouTube channel status:** 4 videos live
+| Item | Value |
+|------|-------|
+| Video 1 | CatchTales App Walkthrough |
+| Video 2 | Top 5 Walleye Fishing Spots in Ontario |
+| Video 3 | How to fish for Walleye |
+| Video 4 | Fishing Safety Tips |
+| Channel | https://www.youtube.com/@CatchTales-y9c |
+| Channel ID | UCOa2lPPcIJwbanmW1XX1eBA |
+| Total views on walkthrough | 100+ (day 1)
