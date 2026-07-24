@@ -822,126 +822,167 @@ When investigating visual issues (overlapping elements, wrong z-index, duplicate
 
 ---
 
-## 9. Video Concept Preview Workflow
+## 9. Video Production Workflow
 
-When creating a video concept/preview for YouTube, use this repeatable process:
+When creating a YouTube video for CatchTales, use this repeatable process.
 
-### Step 1: Write Script from Existing Content
-- Pull content from the blog (`~/catchtales-site/blog/`) or app features
-- Break into scenes with timecodes, narration text, and visual descriptions
-- Keep each scene 4-8 seconds for preview pacing
+### Step 1: Write Script from Blog Content
+- Pull content from `~/catchtales-site/blog/[topic]/index.html`
+- Break into 12-17 scenes with narration text and visual descriptions
+- Keep scenes 6-14 seconds each (total target: 2-3 min)
+- Include intro/outro scenes (see Step 6 for format)
 
-### Step 2: Create an Interactive HTML Preview Page
-- Build a single self-contained HTML page that acts like a video player
-- Structure: scene array with `{id, start, duration, bg, fg, fgClass, text, caption, ts}`
-- Include: play/pause, progress bar, prev/next scene, speed control, keyboard shortcuts (space=play, arrows=skip)
-- Use `setInterval` with `performance.now()` for accurate wall-clock timing (NOT `setTimeout` chaining or `requestAnimationFrame` delta — those have proven unreliable)
-- Timing formula: `elapsedTotal = (performance.now() - playStartTime) / 1000 * speed`
-- Scene lookup: iterate scenes array accumulating durations to find current scene
+### Step 2: Create Video Folder & Download Stock Photos
 
-### Step 3: Capture Phone Screenshots via ADB
+**Create folder structure:**
 ```bash
-# Check device
-adb devices
-# Get screen size
-adb shell wm size
-# Navigate using taps (adjust coordinates for 1080x2316 screen)
-adb shell input tap X Y
-# Capture screenshot
-adb shell screencap -p /sdcard/screen_name.png
-adb pull /sdcard/screen_name.png ~/catchtales-site/images/walkthrough/screen-name.png
-# Navigate app:
-# - 3-dot menu: tap 1040 40
-# - Bottom nav labels (Catches=1, Counter=2, Brag Board=3, Map=4): tap X 2270 where X ≈ 270*index+135
-# - Menu items: tap 950 Y where Y increases by ~80 per item
-# - Back: adb shell input keyevent KEYCODE_BACK
+mkdir -p ~/catchtales-site/images/[video-name]/audio/
 ```
 
-### Step 4: Add Voiceover Narration
+**Download stock photos via Pixabay API** (primary — reliable, free, no API key issues):
 ```bash
-# Install gTTS in temp venv
-cd /tmp && python3 -m venv tts_env
-source tts_env/bin/activate
-pip install gtts
-
-# Generate audio for each scene
-python3 -c "
-from gtts import gTTS
-text = 'Your narration text'
-tts = gTTS(text=text, lang='en', slow=False)
-tts.save('/home/louis/catchtales-site/audio/scene-name.mp3')
+# Search
+curl -s "https://pixabay.com/api/?key=56823444-e87c08005b791f9749a63f80b&q=SEARCH_TERM&image_type=photo&per_page=5" | python3 -c "
+import json,sys
+d=json.load(sys.stdin)
+for i, h in enumerate(d.get('hits',[])[:5]):
+    print(f'{i+1}: {h.get(\"largeImageURL\",\"\")} - tags: {h.get(\"tags\",\"\")}')
 "
+
+# Download chosen image
+curl -sL "<largeImageURL>" -o ~/catchtales-site/images/[video-name]/filename.jpg
 ```
 
-### Step 4b: Download Free Stock Photos/Videos (Pexels + Pixabay APIs)
-Two free stock APIs are available:
-
-**Pexels API** (photos + videos):
+**Verify all images are distinct!** After downloading, check for duplicates:
 ```bash
-# Search
-curl -s -H "Authorization: YCW80jSVlXkqDx7XuSxOZVQja6aXSXdgaW9OaafCXEbdhmb7jIHfqpDN" \
-  "https://api.pexels.com/v1/search?query=walleye+fish&per_page=5" | python3 -m json.tool
-# Download
-curl -sL "<large_image_url>" -o ~/catchtales-site/images/name.webp
+ls -la ~/catchtales-site/images/[video-name]/
 ```
+Each scene must have a unique image — if two scenes share the same image, replace one.
 
-**Pixabay API** (photos + videos + vectors):
+### Step 3: Create Interactive HTML Preview Page
+- Build a self-contained HTML page at `~/catchtales-site/[video-name]-video.html`
+- Scene array structure: `{id, duration, bg, title, subtitle, text}`
+- Include: play/pause, progress bar, prev/next, speed control (0.5x-2x), keyboard shortcuts (space=play, arrows=skip)
+- Use `setInterval` + `performance.now()` for timing (NOT `setTimeout` chaining or `requestAnimationFrame` delta)
+- Timing formula: `elapsedTotal = (performance.now() - playStartTime) / 1000 * speed`
+- Audio path must point to: `` `/images/[video-name]/audio/${String(index + 1).padStart(2, '0')}-${s.id}.mp3` ``
+- Include CatchTales logo watermark top-left on all scenes (CSS: `height: clamp(72px, 12vw, 108px)`)
+
+### Step 4: Capture Phone Screenshots (ask user first!)
+**IMPORTANT: Always ask the user to navigate to the right screen before capturing.**
 ```bash
-# Search
-curl -s "https://pixabay.com/api/?key=56823444-e87c08005b791f9749a63f80b&q=walleye+fishing&image_type=photo&per_page=5"
-# Download
-curl -sL "<image_url>" -o ~/catchtales-site/images/name.jpg
+adb devices
+adb shell wm size
+adb shell screencap -p /sdcard/screen_name.png
+adb pull /sdcard/screen_name.png ~/catchtales-site/images/[video-name]/screen-name.png
 ```
-- Save MP3s to `~/catchtales-site/audio/`
-- Map audio files to scenes by index (01-intro.mp3, 02-scene-name.mp3, etc.)
-- Add `<audio id="voAudio" preload="auto"></audio>` to the player HTML
-- In `renderScene()`: set `audio.src`, call `audio.play()`
-- In `stopPlayback()`: call `audio.pause()`
 
-### Step 5: Deploy & Share
+### Step 5: Generate Voiceover Audio (edge-tts)
+**Always use edge-tts** (NOT gTTS — edge-tts sounds far more natural). Preferred voice: `en-US-GuyNeural` (passionate, engaging).
+
+```bash
+source /tmp/tts_env/bin/activate  # or: python3 -m venv /tmp/tts_env && source /tmp/tts_env/bin/activate && pip install edge-tts
+
+python3 << 'PYEOF'
+import asyncio
+from edge_tts import Communicate
+
+scenes = [
+    ("01-welcome", "Welcome to CatchTales. Today we explore..."),
+    ("02-intro", "Ever show up at your favorite fishing spot..."),
+    # ... all scenes
+]
+
+async def gen_all():
+    for fname, text in scenes:
+        communicate = Communicate(text, "en-US-GuyNeural")
+        await communicate.save(f"/home/louis/catchtales-site/images/[video-name]/audio/{fname}.mp3")
+
+asyncio.run(gen_all())
+PYEOF
+```
+
+**Naming convention:** Audio files use `{NN}-{scene-id}.mp3` where NN is 01-padded scene number.
+
+### Step 6: Video Intro & Outro Format (MANDATORY)
+Every video MUST start and end with this exact format:
+
+**Intro (Slide 1 — 5-6 sec):**
+- **Image:** `/underwater.webp`
+- **Overlay:** `catchtales-logo-video.png` centered, large
+- **Text:** "catchtales.com" below logo (cyan/white, centered)
+- **Audio:** "Welcome to CatchTales. Today we explore [topic]."
+
+**Outro (Final Slide — 8 sec):**
+- **Image:** `/underwater.webp`
+- **Overlay:** `catchtales-logo-video.png` centered, large
+- **Text:** "catchtales.com — For Bragging Rights!" (cyan, below logo)
+- **Audio:** Must end with "...Tight Lines!"
+
+### Step 7: Create CapCut Production Reference
+Save as `~/catchtales-site/[video-name]-production.html`:
+- Full scene-by-scene table with timestamps, image names, audio files, text overlays
+- Assets folder listing (photos + audio)
+- Color palette: Green `#76FF03` (titles), Cyan `#00BCD4` (subtitles), White `#FFFFFF` (body), Background `#0A1628`
+- CapCut workflow steps
+- Style as standalone HTML with dark theme matching the app
+
+### Step 8: Deploy Preview & Production Ref
 ```bash
 cd ~/catchtales-site
 git add -A
-git commit -m "Add video preview: [video name]"
+git commit -m "Add [video-name] video: [description]"
 git push
 # Wait ~1 min for GitHub Pages deploy
 ```
-Share URL: `https://catchtales.com/[page-name].html`
 
-### Key Lessons (from debugging)
-- `requestAnimationFrame` passes absolute timestamp, NOT delta — using it as delta causes instant playback
-- `setTimeout` chaining can fire erratically — use `setInterval` + `performance.now()` for reliable timing
-- Always reset `playStartTime` when resuming from pause
-- Keep preview total under 3 minutes for quick iteration
+Share URLs:
+- Preview: `https://catchtales.com/[video-name]-video.html`
+- Production ref: `https://catchtales.com/[video-name]-production.html`
 
-### Video Watermark Standard
-- **Always use** `/images/catchtales-logo-video.png` (source: `~/CatchTales/assets/catchtales.png`) for the top-left watermark
-- **Size: 2x** — CSS height of `clamp(72px, 12vw, 108px)`
-- Apply to both the interactive preview page AND the outro/end screen scene
+### Voiceover Voice
+- **Default:** `en-US-GuyNeural` (edge-tts) — passionate, engaging tone for outdoor content
+- Alternative: `en-US-BrianNeural` for more instructional/sincere tone
+- **Never use gTTS** — sounds too robotic
 
 ### Video Asset Organization Standard
-- **Every video project gets its own folder** at `~/catchtales-site/images/[video-name]/`
-- Copy ALL assets into that folder: photos, screenshots, audio, logos
-- No mixing with other project files — the folder is self-contained
-- **Audio** goes in an `audio/` subfolder inside the video folder
-- This makes importing into CapCut drag-and-drop simple with no hunting for files
+**Every video project gets its own self-contained folder.**
 
 **Canonical folder structure:**
 ```
 ~/catchtales-site/images/[video-name]/
 ├── audio/
-│   ├── 01-intro.mp3
-│   ├── 02-scene-name.mp3
-│   └── ...
-├── sunrise-lake.jpg
+│   ├── 01-welcome.mp3
+│   ├── 02-intro.mp3
+│   ├── 03-scene-name.mp3
+│   └── ... (all MP3s numbered in order)
+├── photo-1.jpg
+├── photo-2.jpg
 ├── app-screenshot.png
-├── catchtales-logo-video.png
 └── ... (all photos/graphics)
 ```
 
-**Example (from Solunar video):**
+**Example:**
 ```
 ~/catchtales-site/images/solunar-video/
+├── audio/
+│   ├── 01-welcome.mp3
+│   ├── 02-intro.mp3
+│   ├── ... (17 MP3s total)
+├── sunrise-lake.jpg
+├── moon-over-lake.jpg
+├── solunar-app.png
+└── ... (16 photos total)
+```
+
+### Key Technical Lessons
+- Use `setInterval` + `performance.now()` for reliable audio timing
+- Always reset `playStartTime` when resuming from pause
+- Audio filenames = scene number (01-padded) + scene id: `{NN}-{scene-id}.mp3`
+- Audio path in HTML: `` `/images/[video-name]/audio/${index+1}-{id}.mp3` ``
+- Keep preview under 3 minutes for quick iteration
+- After downloading images, verify no two scenes share the same image
+- Ask user before capturing ADB screenshots — they need to navigate to the right screen
 ├── audio/
 │   ├── 01-welcome.mp3
 │   ├── 02-intro.mp3
