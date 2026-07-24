@@ -952,28 +952,31 @@ Share URLs:
 ```
 ~/catchtales-site/images/[video-name]/
 ├── audio/
-│   ├── 01-welcome.mp3
-│   ├── 02-intro.mp3
-│   ├── 03-scene-name.mp3
+│   ├── 01-intro.mp3
+│   ├── 02-scene-name.mp3
 │   └── ... (all MP3s numbered in order)
-├── photo-1.jpg
-├── photo-2.jpg
-├── app-screenshot.png
-└── ... (all photos/graphics)
+├── 01-photo-name.jpg       ← images also numbered with NN prefix
+├── 02-photo-name.jpg          so they sort alphabetically in the
+├── 03-photo-name.jpg           same order as audio files in CapCut
+└── ...
 ```
 
-**Example:**
+**Example (from Solunar video):**
 ```
 ~/catchtales-site/images/solunar-video/
 ├── audio/
 │   ├── 01-welcome.mp3
 │   ├── 02-intro.mp3
-│   ├── ... (17 MP3s total)
-├── sunrise-lake.jpg
-├── moon-over-lake.jpg
-├── solunar-app.png
-└── ... (16 photos total)
+│   ├── ... (17 MP3s)
+├── 01-underwater.webp
+├── 02-sunrise-lake.jpg
+├── 03-moon-over-lake.jpg
+├── ...
+├── 16-solunar-app.png
+├── 17-underwater.webp
 ```
+
+**Both images and audio use the same NN prefix so they sort identically.**
 
 ### Key Technical Lessons
 - Use `setInterval` + `performance.now()` for reliable audio timing
