@@ -227,3 +227,50 @@
 | Channel | https://www.youtube.com/@CatchTales-y9c |
 | Channel ID | UCOa2lPPcIJwbanmW1XX1eBA |
 | Total views on walkthrough | 100+ (day 1)
+
+---
+
+## 2026-07-24 — Session 18 — Best Fishing Times — Solunar Explained Video
+
+### What we did
+
+**Created full video production for "Best Fishing Times — Solunar Explained":**
+- Wrote 17-scene script based on blog post `~/catchtales-site/blog/best-fishing-times-solunar/`
+- Downloaded 16 stock photos from Pixabay (verified all distinct after feedback)
+- Generated 17 natural-sounding voiceover files using edge-tts (en-US-GuyNeural) — replaced gTTS
+- Built interactive preview page: `solunar-video.html` with play/pause, scene nav, speed control
+- Captured app screenshot via ADB (solunar screen — asked user first)
+- Created production reference: `solunar-production.html` with full scene-by-scene CapCut guide
+
+**Established mandatory intro/outro format:**
+- Intro: underwater background + logo + catchtales.com + "Welcome to CatchTales..." (5-6s)
+- Outro: underwater background + logo + website + "...Tight Lines!" (8s)
+
+**Updated Video Production Workflow standards (CODING_STANDARDS.md §9):**
+- Replaced gTTS → edge-tts (GuyNeural) as default voice
+- Documented exact folder structure: `images/[video-name]/audio/` for MP3s
+- Added image verification step (check for duplicates)
+- Added intro/outro format as mandatory
+- Added production reference creation step
+- Added rule: ask user before ADB screenshot capture
+- Audio naming: `{NN}-{scene-id}.mp3`
+- Audio path in HTML: `` `/images/[video-name]/audio/${index+1}-{id}.mp3` ``
+
+### Current state
+| Item | Value |
+|------|-------|
+| Source | `~/CatchTales/` (remote: `louismales-a11y/CatchTales.git`) |
+| Version | 2.14.68 |
+| Website | catchtales.com (remote: `louismales-a11y/catchtales-site.git`) |
+| YouTube | https://www.youtube.com/@CatchTales-y9c |
+| Videos | 4 published, 1 in production (Solunar) |
+| Video preview | https://catchtales.com/solunar-video.html |
+| Production ref | https://catchtales.com/solunar-production.html |
+| US States | **COMPLETE — 50/50** |
+| Canada | **COMPLETE — 13/13 provinces** |
+| Total fishing spots | 10,541 on website, 13,059 in app |
+
+### Next steps for next session
+- Create the Solunar video in CapCut using the production reference
+- Publish to YouTube
+- Pick next blog post for video #6
